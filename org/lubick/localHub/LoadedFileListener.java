@@ -1,12 +1,10 @@
 package org.lubick.localHub;
 
-public class LoadedFileListener {
+public interface LoadedFileListener {
 
-	protected static final int NO_COMMENT = 0;		//Don't stop
+	public static final int NO_COMMENT = 0;		//Don't stop
+	public static final int DONT_PARSE = 1;
 
-	public int loadFileResponse(LoadedFileEvent e) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	public int loadFileResponse(LoadedFileEvent e);
 
 }

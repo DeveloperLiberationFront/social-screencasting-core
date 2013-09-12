@@ -3,6 +3,8 @@ package org.lubick.unitTests;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -18,6 +20,8 @@ public class TestLocalHub {
 	private static final String LOCAL_HUB_MONITOR_LOCATION = "HF/";
 	private static LocalHubDebugAccess localHub;
 	private static File testPluginDirectory;
+	//This won't work in the year 2100 or later.  
+	private SimpleDateFormat sdf = new SimpleDateFormat("DDDYYkkmm");
 	
 	//testReadingInFile()
 	private boolean readingInFileHasSeenResponse = false;
@@ -59,7 +63,10 @@ public class TestLocalHub {
 				return LoadedFileListener.NO_COMMENT;
 			}
 		});
-		TestUtilities.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),"TestPlugin.log","ThisIsAToolstream");
+		
+		Date currentTime = new Date();
+		
+		TestUtilities.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),"TestPlugin"+sdf.format(currentTime)+".log","ThisIsAToolstream");
 		
 		fail("Not yet implemented");
 		int timeCounter = 0;
@@ -72,6 +79,7 @@ public class TestLocalHub {
 		{
 			assertEquals("TestPlugin.log", readingInFileReturnedEvent.getFileName());
 			assertEquals("ThisIsAToolstream", readingInFileReturnedEvent.getFileContents());
+			assertFalse(readingInFileReturnedEvent.wasInitialReadIn());
 		}
 		else 
 		{

@@ -17,7 +17,10 @@ public class TestUtilities {
 		if (newFile.exists()) 
 		{
 			logger.debug(newFile.toString() + " already exists, deleting first");
-			newFile.delete();
+			if (!newFile.delete())
+			{
+				logger.info("Could not overwrite file "+newFile.toString());
+			}
 		}
 		try 
 		{
