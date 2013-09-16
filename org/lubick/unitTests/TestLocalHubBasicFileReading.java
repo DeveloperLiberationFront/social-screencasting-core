@@ -23,12 +23,21 @@ public class TestLocalHubBasicFileReading {
 	//This won't work in the year 2100 or later.  
 	private SimpleDateFormat sdf = new SimpleDateFormat("DDDYYkkmm");
 	
-	//testReadingInFile()
-	private boolean readingInFileHasSeenResponse = false;
-	private LoadedFileEvent readingInFileReturnedEvent = null;
-	
-	//used with listeners.  It needs to be up here as a field because it gets passed in all sorts of method calls
+	//used with listeners.  These give listeners a place to refer
 	private LoadedFileEvent observedEvent = null;
+	private boolean hasSeenResponseFlag;
+	
+	private LoadedFileListener defaultLoadedFileListener = new LoadedFileListener(){
+		@Override
+		public int loadFileResponse(LoadedFileEvent e) 
+		{
+			observedEvent = e;
+			hasSeenResponseFlag = true;
+			return LoadedFileListener.NO_COMMENT;
+		}
+	};
+	
+	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception 
 	{
@@ -58,71 +67,55 @@ public class TestLocalHubBasicFileReading {
 	{
 		assertTrue(localHub.isRunning());
 		//Waits in the listener for the response
-		readingInFileHasSeenResponse = false;
-		
+		observedEvent = null;
+		hasSeenResponseFlag = false;
 		//Has the event
-		readingInFileReturnedEvent = null;
-		localHub.addLoadedFileListener(new LoadedFileListener(){
-			@Override
-			public int loadFileResponse(LoadedFileEvent e) 
-			{
-				readingInFileReturnedEvent = e;
-				readingInFileHasSeenResponse = true;
-				return LoadedFileListener.NO_COMMENT;
-			}
-		});
 		
-		Date currentTime = new Date();
 		
-		File createdFile = TestUtilities.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),"TestPlugin"+sdf.format(currentTime)+".log","ThisIsAToolstream");
+		createToolStreamFileAndVerifyItHappened("ThisIsAToolStream", defaultLoadedFileListener);
 		
-		assertNotNull(createdFile);
-		assertTrue(createdFile.exists());
 		
-		int timeCounter = 0;
-		while (!readingInFileHasSeenResponse && timeCounter < 5) 
-		{
-			Thread.sleep(1000);
-			timeCounter++;
-		}
-		if (timeCounter <= 5 && readingInFileReturnedEvent != null)
-		{
-			assertEquals(createdFile.getName(), readingInFileReturnedEvent.getFileName());
-			assertEquals("ThisIsAToolstream", readingInFileReturnedEvent.getFileContents());
-			assertFalse(readingInFileReturnedEvent.wasInitialReadIn());
-		}
-		else 
-		{
-			fail("test ReadingInFile has timed out");
-		}
 		//==========================================
 		//Clear out for the adding of the nested directory
-		readingInFileHasSeenResponse = false;
-		
+		hasSeenResponseFlag = false;
 		//Has the event
-		readingInFileReturnedEvent = null;
+		observedEvent = null;
+		
+		//manually add the listener
+		localHub.addLoadedFileListener(defaultLoadedFileListener);
 		
 		File nestedDirectory = new File(testPluginDirectory, "DeepNested");
 		assertTrue(nestedDirectory.mkdir());
 		
+		Date currentTime = new Date();
 		File createdNestedFile = TestUtilities.createAbsoluteFileWithContent(nestedDirectory.getAbsolutePath(),"TestPlugin"+sdf.format(currentTime)+".log","ThisIsAToolstream");
 		
 		assertNotNull(createdNestedFile);
 		assertTrue(createdNestedFile.exists());
 		
-		timeCounter = 0;
-		while (!readingInFileHasSeenResponse && timeCounter < 3) 
+		int timeCounter = 0;
+		while (!hasSeenResponseFlag && timeCounter < 3) 
 		{
 			Thread.sleep(1000);
 			timeCounter++;
 		}
 		//This is a deeply nested folder, should not be read
-		assertFalse(readingInFileHasSeenResponse);
-		assertNull(readingInFileReturnedEvent);
+		assertFalse(hasSeenResponseFlag);
+		assertNull(observedEvent);
+		
+		localHub.removeLoadedFileListener(defaultLoadedFileListener);
 	}
 	
 	
-	private void createToolStreamFileAndVerifyItHappened(String fileContents, LoadedFileListener loadedFileListener, Boolean hasSeenResponseFlag) throws InterruptedException
+	/**
+	 * Provides a way to create a file and have a listener respond to it.
+	 * 
+	 * After this subtest passes, the listener is removed
+	 * @param fileContents
+	 * @param loadedFileListener
+	 * @throws InterruptedException
+	 */
+	private void createToolStreamFileAndVerifyItHappened(String fileContents, LoadedFileListener loadedFileListener) throws InterruptedException
 	{
 		assertTrue(localHub.isRunning());
 		localHub.addLoadedFileListener(loadedFileListener);
@@ -144,13 +137,16 @@ public class TestLocalHubBasicFileReading {
 		if (timeCounter <= 5 && observedEvent != null)
 		{
 			assertEquals(createdFile.getName(), observedEvent.getFileName());
-			assertEquals("ThisIsAToolstream", observedEvent.getFileContents());
+			assertEquals(fileContents, observedEvent.getFileContents());
 			assertFalse(observedEvent.wasInitialReadIn());
 		}
 		else 
 		{
+			localHub.removeLoadedFileListener(loadedFileListener);
 			fail("test ReadingInFile has timed out");
 		}
+		
+		localHub.removeLoadedFileListener(loadedFileListener);
 	}
 	
 

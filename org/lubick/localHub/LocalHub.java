@@ -189,6 +189,11 @@ public class LocalHub implements LoadedFileListener{
 			return hubToDebug.isRunning();
 		}
 
+		@Override
+		public void removeLoadedFileListener(LoadedFileListener lflToRemove) {
+			this.hubToDebug.removeLoadedFileListener(lflToRemove);
+		}
+
 	}
 
 	/**
