@@ -6,4 +6,6 @@ public interface LocalHubDebugAccess {
 
 	void addLoadedFileListener(LoadedFileListener loadedFileListener);
 
+	boolean isRunning();
+
 }

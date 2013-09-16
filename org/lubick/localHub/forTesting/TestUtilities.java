@@ -12,7 +12,17 @@ public class TestUtilities {
 	private static Logger logger = Logger.getLogger(TestUtilities.class.getName());
 
 
-	public static void createAbsoluteFileWithContent(String directory, String fileName, String fileContents) {
+	/**
+	 * Creates a file in the given directory with the given fileName and then writes
+	 * the fileContents to disk.
+	 * 
+	 * If the file already exists, the file will be deleted and overwritten.
+	 * @param directory
+	 * @param fileName
+	 * @param fileContents
+	 * @return
+	 */
+	public static File createAbsoluteFileWithContent(String directory, String fileName, String fileContents) {
 		File newFile = new File(directory, fileName);
 		if (newFile.exists()) 
 		{
@@ -32,7 +42,7 @@ public class TestUtilities {
 		catch (IOException e) 
 		{
 			logger.error("Could not create file", e);
-			return;
+			return null;
 		}
 		
 		//Using try with resources.  This automatically closes up afterwards, ignoring(?) thrown exception
@@ -43,7 +53,7 @@ public class TestUtilities {
 			logger.error("Could not write message to file", e);
 		}
 		
-
+		return newFile;
 	}
 
 }

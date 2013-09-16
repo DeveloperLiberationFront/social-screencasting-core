@@ -48,7 +48,7 @@ public class TestLocalHub {
 	@Test
 	public void testReadingInFile() throws Exception
 	{
-		
+		assertTrue(localHub.isRunning());
 		//Waits in the listener for the response
 		readingInFileHasSeenResponse = false;
 		
@@ -66,18 +66,20 @@ public class TestLocalHub {
 		
 		Date currentTime = new Date();
 		
-		TestUtilities.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),"TestPlugin"+sdf.format(currentTime)+".log","ThisIsAToolstream");
+		File createdFile = TestUtilities.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),"TestPlugin"+sdf.format(currentTime)+".log","ThisIsAToolstream");
 		
-		fail("Not yet implemented");
+		assertNotNull(createdFile);
+		assertTrue(createdFile.exists());
+		
 		int timeCounter = 0;
-		while (!readingInFileHasSeenResponse && timeCounter <30) 
+		while (!readingInFileHasSeenResponse && timeCounter < 5) 
 		{
 			Thread.sleep(1000);
 			timeCounter++;
 		}
-		if (timeCounter <= 30 && readingInFileReturnedEvent != null)
+		if (timeCounter <= 5 && readingInFileReturnedEvent != null)
 		{
-			assertEquals("TestPlugin.log", readingInFileReturnedEvent.getFileName());
+			assertEquals(createdFile.getName(), readingInFileReturnedEvent.getFileName());
 			assertEquals("ThisIsAToolstream", readingInFileReturnedEvent.getFileContents());
 			assertFalse(readingInFileReturnedEvent.wasInitialReadIn());
 		}
