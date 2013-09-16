@@ -44,7 +44,7 @@ public class TestUtilities {
 			logger.error("Could not create file", e);
 			return null;
 		}
-		
+
 		//Using try with resources.  This automatically closes up afterwards, ignoring(?) thrown exception
 		try(FileOutputStream fos = new FileOutputStream(newFile);) 
 		{
@@ -52,8 +52,46 @@ public class TestUtilities {
 		} catch (IOException e) {
 			logger.error("Could not write message to file", e);
 		}
-		
+
 		return newFile;
+	}
+
+	/**
+	 * 
+	 * @param directory
+	 * @return
+	 */
+	public static boolean clearOutDirectory(String directory) 
+	{
+		File rootDirectory = new File(directory);
+		return clearOutDirectory(rootDirectory);
+	}
+	
+	public static boolean clearOutDirectory(File rootDirectory) 
+	{
+		if (!rootDirectory.exists() || (rootDirectory.isDirectory() && rootDirectory.listFiles().length ==0))
+		{
+			return true;
+		}
+		return recursivelyClearDirectory(rootDirectory);
+	}
+
+
+	private static boolean recursivelyClearDirectory(File parentDirectory) 
+	{
+		for(File f: parentDirectory.listFiles())
+		{
+			if (f.isDirectory())
+			{
+				if (!recursivelyClearDirectory(f))
+					return false;
+			}
+			if (!f.delete())
+			{
+				return false;
+			}
+		}
+		return parentDirectory.listFiles().length == 0;
 	}
 
 }

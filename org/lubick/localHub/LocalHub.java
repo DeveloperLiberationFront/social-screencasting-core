@@ -3,10 +3,8 @@ package org.lubick.localHub;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -229,10 +227,8 @@ public class LocalHub implements LoadedFileListener{
 				for (File child : this.monitorDirectory.listFiles()) {
 					if (child.isDirectory())
 					{
-						logger.debug("Found directory: "+child);
-						List<File> recursiveFiles = Arrays.asList(child.listFiles());
-
-						for (File innerChild : recursiveFiles) 
+						logger.debug("Searching Plugin directory: "+child);
+						for (File innerChild : child.listFiles()) 
 						{
 							if (!innerChild.isDirectory() && !filesFromLastTime.contains(innerChild))
 
@@ -254,7 +250,8 @@ public class LocalHub implements LoadedFileListener{
 					}
 				}
 				//All the new files have been found in this iteration
-				for (File newFile : newFiles) {
+				for (File newFile : newFiles) 
+				{
 					conditionallyAddFileAfterContactingListener(newFile, false, filesFromLastTime);
 				}
 
@@ -262,7 +259,7 @@ public class LocalHub implements LoadedFileListener{
 				try {
 					Thread.sleep(1000);		//wake every second
 				} catch (InterruptedException e) {
-					LocalHub.logger.info("There was an interruption on the main thread",e);
+					LocalHub.logger.error("There was an interruption on the main thread",e);
 				}
 			}
 
