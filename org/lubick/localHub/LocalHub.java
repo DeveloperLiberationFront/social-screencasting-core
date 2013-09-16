@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.lubick.localHub.forTesting.LocalHubDebugAccess;
 
-public class LocalHub implements LoadedFileListener{
+public class LocalHub implements LoadedFileListener, ParsedFileListener {
 
 	private static final String LOGGING_FILE_PATH = "./log4j.settings";
 	private static final LocalHub singletonHub;
@@ -31,6 +31,7 @@ public class LocalHub implements LoadedFileListener{
 	//listeners
 	private Set<LoadedFileListener> loadedFileListeners = new HashSet<>();
 	private LocalHubRunnable currentRunnable = null;
+	private Set<ParsedFileListener> parsedFileListeners = new HashSet<>();
 
 
 
@@ -139,7 +140,7 @@ public class LocalHub implements LoadedFileListener{
 		return this.isRunning;
 	}
 
-	//Listener manipulation
+	//Listener manipulation======================================================================================
 	public void addLoadedFileListener(LoadedFileListener loadedFileListener) {
 		loadedFileListeners.add(loadedFileListener);
 	}
@@ -160,7 +161,26 @@ public class LocalHub implements LoadedFileListener{
 		}
 		return retVal;
 	}
+	
+	public void addParsedFileListener(ParsedFileListener parsedFileListener) {
+		parsedFileListeners.add(parsedFileListener);
+		
+	}
+	public void removeParsedFileListener(ParsedFileListener parsedFileListener) {
+		parsedFileListeners.remove(parsedFileListener);
+	}
+	@Override
+	public void parsedFile(ParsedFileEvent e) {
+		//Just pass on the event
+		for(ParsedFileListener parsedFileListener : parsedFileListeners)
+		{
+			parsedFileListener.parsedFile(e);
+		}
+	}
 
+
+	
+	//============End Listeners======================================================================================
 
 
 	/**
@@ -192,6 +212,18 @@ public class LocalHub implements LoadedFileListener{
 		@Override
 		public void removeLoadedFileListener(LoadedFileListener lflToRemove) {
 			this.hubToDebug.removeLoadedFileListener(lflToRemove);
+		}
+
+		@Override
+		public void addParsedFileListener(ParsedFileListener parsedFileListener) {
+			hubToDebug.addParsedFileListener(parsedFileListener);
+			
+		}
+
+		@Override
+		public void removeParsedFileListener(ParsedFileListener parsedFileListener) {
+			hubToDebug.removeParsedFileListener(parsedFileListener);
+			
 		}
 
 	}
@@ -352,5 +384,8 @@ public class LocalHub implements LoadedFileListener{
 		}
 
 	}
+
+	
+	
 
 }

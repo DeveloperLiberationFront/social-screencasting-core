@@ -12,12 +12,16 @@ import org.junit.Test;
 import org.lubick.localHub.LoadedFileEvent;
 import org.lubick.localHub.LoadedFileListener;
 import org.lubick.localHub.LocalHub;
+import org.lubick.localHub.ParsedFileEvent;
+import org.lubick.localHub.ParsedFileListener;
 import org.lubick.localHub.forTesting.LocalHubDebugAccess;
 import org.lubick.localHub.forTesting.TestUtilities;
+import org.lubick.localHub.forTesting.ToolStream;
 
 public class TestLocalHubBasicFileReading {
 
 	private static final String LOCAL_HUB_MONITOR_LOCATION = "HF/";
+	private static final long MILLIS_IN_DAY = 86400000l;
 	private static LocalHubDebugAccess localHub;
 	private static File testPluginDirectory;
 	//This won't work in the year 2100 or later.  
@@ -26,6 +30,8 @@ public class TestLocalHubBasicFileReading {
 	//used with listeners.  These give listeners a place to refer
 	private LoadedFileEvent observedEvent = null;
 	private boolean hasSeenResponseFlag;
+	
+	private static long currentFastForwardTime = MILLIS_IN_DAY;
 	
 	private LoadedFileListener defaultLoadedFileListener = new LoadedFileListener(){
 		@Override
@@ -69,16 +75,12 @@ public class TestLocalHubBasicFileReading {
 		//Waits in the listener for the response
 		observedEvent = null;
 		hasSeenResponseFlag = false;
-		//Has the event
 		
-		
-		createToolStreamFileAndVerifyItHappened("ThisIsAToolStream", defaultLoadedFileListener);
-		
+		createToolStreamFileAndVerifyItHappened("ThisIsAToolStream", new Date(), defaultLoadedFileListener);
 		
 		//==========================================
 		//Clear out for the adding of the nested directory
 		hasSeenResponseFlag = false;
-		//Has the event
 		observedEvent = null;
 		
 		//manually add the listener
@@ -113,17 +115,16 @@ public class TestLocalHubBasicFileReading {
 	 * After this subtest passes, the listener is removed
 	 * @param fileContents
 	 * @param loadedFileListener
+	 * @param timeStamp 
 	 * @throws InterruptedException
 	 */
-	private void createToolStreamFileAndVerifyItHappened(String fileContents, LoadedFileListener loadedFileListener) throws InterruptedException
+	private void createToolStreamFileAndVerifyItHappened(String fileContents, Date timeStamp, LoadedFileListener loadedFileListener) throws Exception
 	{
 		assertTrue(localHub.isRunning());
 		localHub.addLoadedFileListener(loadedFileListener);
 		observedEvent  = null;
-		
-		Date currentTime = new Date();
-		
-		File createdFile = TestUtilities.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),"TestPlugin"+sdf.format(currentTime)+".log",fileContents);
+			
+		File createdFile = TestUtilities.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),"TestPlugin"+sdf.format(timeStamp)+".log",fileContents);
 		
 		assertNotNull(createdFile);
 		assertTrue(createdFile.exists());
@@ -151,9 +152,43 @@ public class TestLocalHubBasicFileReading {
 	
 
 	@Test
-	public void testReadingInToolStreamAndParsing() 
+	public void testReadingInToolStreamAndParsing() throws Exception
 	{
+		assertTrue(localHub.isRunning());
+		//Waits in the listener for the response
+		observedEvent = null;
+		hasSeenResponseFlag = false;
+		//Has the event
+		
+		//This test happens in the future
+		Date currentTime = getFastForwardedDate();
+		
+		ToolStream ts = ToolStream.generateRandomToolStream(2);
+		
+		localHub.addParsedFileListener(new ParsedFileListener(){
+
+			@Override
+			public void parsedFile(ParsedFileEvent e) {
+				// TODO Auto-generated method stub
+			}
+			
+		});
+		
+		createToolStreamFileAndVerifyItHappened(ts.toJSON(), currentTime, defaultLoadedFileListener);
 		
 		fail("Not yet implemented");
+	}
+
+
+	/**
+	 * Creates a date that is in the future.  The first time this is called, the time 
+	 * will be transformed 24 hours into the future, the second time, 48 hours and so on.
+	 * @return future time as java.util.Date
+	 */
+	private static Date getFastForwardedDate() {
+		Date rightNow = new Date();
+		Date retVal = new Date(rightNow.getTime() + currentFastForwardTime);
+		currentFastForwardTime += MILLIS_IN_DAY;
+		return retVal;
 	}
 }
