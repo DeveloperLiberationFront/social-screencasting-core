@@ -14,9 +14,9 @@ import org.lubick.localHub.LoadedFileListener;
 import org.lubick.localHub.LocalHub;
 import org.lubick.localHub.ParsedFileEvent;
 import org.lubick.localHub.ParsedFileListener;
+import org.lubick.localHub.forTesting.IdealizedToolStream;
 import org.lubick.localHub.forTesting.LocalHubDebugAccess;
 import org.lubick.localHub.forTesting.TestUtilities;
-import org.lubick.localHub.forTesting.ToolStream;
 
 public class TestLocalHubBasicFileReading {
 
@@ -90,7 +90,7 @@ public class TestLocalHubBasicFileReading {
 		assertTrue(nestedDirectory.mkdir());
 		
 		Date currentTime = new Date();
-		File createdNestedFile = TestUtilities.createAbsoluteFileWithContent(nestedDirectory.getAbsolutePath(),"TestPlugin"+sdf.format(currentTime)+".log","ThisIsAToolstream");
+		File createdNestedFile = TestUtilities.createAbsoluteFileWithContent(nestedDirectory.getAbsolutePath(),"TestPlugin."+sdf.format(currentTime)+".log","ThisIsAToolstream");
 		
 		assertNotNull(createdNestedFile);
 		assertTrue(createdNestedFile.exists());
@@ -151,6 +151,8 @@ public class TestLocalHubBasicFileReading {
 	}
 	
 
+	private boolean hasParsedFlag = false;
+	private ParsedFileEvent parsedEvent = null;
 	@Test
 	public void testReadingInToolStreamAndParsing() throws Exception
 	{
@@ -163,20 +165,52 @@ public class TestLocalHubBasicFileReading {
 		//This test happens in the future
 		Date currentTime = getFastForwardedDate();
 		
-		ToolStream ts = ToolStream.generateRandomToolStream(2);
+		IdealizedToolStream ts = IdealizedToolStream.generateRandomToolStream(2);
 		
 		localHub.addParsedFileListener(new ParsedFileListener(){
 
 			@Override
 			public void parsedFile(ParsedFileEvent e) {
-				// TODO Auto-generated method stub
+				hasParsedFlag = true;
+				parsedEvent = e;
 			}
 			
 		});
 		
 		createToolStreamFileAndVerifyItHappened(ts.toJSON(), currentTime, defaultLoadedFileListener);
 		
-		fail("Not yet implemented");
+		//Our tool stream should not have been parsed yet.
+		assertFalse(hasParsedFlag);
+		assertNull(parsedEvent);
+		
+		//This should be into the next minute, so the date string will be different
+		Date futureTime = new Date(currentTime.getTime() + (1* 60*1000l));
+		IdealizedToolStream newTS = IdealizedToolStream.generateRandomToolStream(5);
+		
+		//reset these to go
+		observedEvent = null;
+		hasSeenResponseFlag = false;
+		
+		createToolStreamFileAndVerifyItHappened(newTS.toJSON(), futureTime, defaultLoadedFileListener);
+		
+		int timeCounter = 0;
+		while (!hasParsedFlag && timeCounter < 5) 
+		{
+			Thread.sleep(1000);
+			timeCounter++;
+		}
+		if (timeCounter <= 5 && parsedEvent != null)
+		{
+			assertEquals(ts.toJSON(), parsedEvent.getInputJSON());
+			assertTrue(ts.isEquivalent(parsedEvent.getToolStream()));
+			assertEquals("TestPlugin",parsedEvent.getPluginName());
+			assertEquals(currentTime, parsedEvent.getFileTimeStamp());
+	
+		}
+		else 
+		{
+			fail("test ParsingFile has timed out");
+		}
 	}
 
 
