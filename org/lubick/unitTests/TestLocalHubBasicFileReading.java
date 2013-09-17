@@ -62,6 +62,10 @@ public class TestLocalHubBasicFileReading {
 		return "TestPlugin" + testIteration;
 	}
 	
+	private static void goToNextTest()
+	{
+		testIteration++;
+	}
 
 	
 
@@ -78,7 +82,7 @@ public class TestLocalHubBasicFileReading {
 	
 	public void tearDown() throws Exception
 	{
-		testIteration++;
+		goToNextTest();
 	}
 
 
