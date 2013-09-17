@@ -13,26 +13,27 @@ import java.util.Date;
 public class ParsedFileEvent 
 {
 
+	private String inputString;
+	private ToolStream generatedToolStream;
+	private String associatedPluginName;
+	private Date fileTimeStamp;
+
 	public String getInputJSON() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.inputString;
 	}
 
 	public ToolStream getToolStream() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.generatedToolStream;
 	}
 
 	public String getPluginName() {
-		// TODO Auto-generated method stub
-		return "blarg";
+		return this.associatedPluginName;
 	}
 
 	public Date getFileTimeStamp() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.fileTimeStamp;
 	}
 
-
+	
 
 }

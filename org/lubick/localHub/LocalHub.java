@@ -179,6 +179,17 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 	
 	//============End Listeners======================================================================================
 
+	@Override
+	public void parseFile(File fileToParse) {
+		ParsedFileEvent event = null;
+		
+		
+		for(ParsedFileListener parsedFileListener : parsedFileListeners)
+		{
+			parsedFileListener.parsedFile(event);
+		}
+	}
+	
 
 	/**
 	 * A class that allows unit tests to have indirect, controlled access to the 
@@ -224,12 +235,5 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		}
 
 	}
-
-
-
-		
-
-	
-	
 
 }

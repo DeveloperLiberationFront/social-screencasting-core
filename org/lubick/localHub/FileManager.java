@@ -33,7 +33,8 @@ public class FileManager implements Runnable {
 	
 	private static Logger logger = Logger.getLogger(FileManager.class.getName());
 
-	public FileManager(LoadedFileListener loadedFileListener, ToolStreamFileParser fileParser) {
+	public FileManager(LoadedFileListener loadedFileListener, ToolStreamFileParser fileParser) 
+	{
 		this.loadedFileListener = loadedFileListener;
 		this.fileParser = fileParser;
 	}
@@ -129,9 +130,9 @@ public class FileManager implements Runnable {
 		{
 			filesToParse.offer(file);
 			//If this is the only file we haven't parsed yet, it may not be fully written yet, so hold off
-			if (filesToParse.size() != 1)
+			if (filesToParse.size() > 1)
 			{
-				
+				fileParser.parseFile(filesToParse.poll());
 			}
 			
 		}
