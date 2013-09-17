@@ -73,7 +73,7 @@ public class FileManager implements Runnable {
 						}
 					}
 				}
-				else if (!filesFromLastTime.contains(child));
+				else if (!filesFromLastTime.contains(child))
 				{
 					logger.debug("Found new file "+child);
 					newFiles.add(child);
