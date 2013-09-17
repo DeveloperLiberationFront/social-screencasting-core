@@ -50,7 +50,7 @@ public class IdealizedToolStream
 		{
 			IdealizedToolStream.ToolUsage thisToolUse = listOfToolUsages.get(i);
 			org.lubick.localHub.ToolStream.ToolUsage otherToolUse = otherList.get(i);
-			if (!thisToolUse.equals(otherToolUse))
+			if (!thisToolUse.isEquivalent(otherToolUse))
 			{
 				return false;
 			}
@@ -90,6 +90,14 @@ public class ToolUsage {
 			this.keyPresses = keyPresses;
 			this.timeStamp = timeStamp;
 			this.duration = duration;
+		}
+
+		public boolean isEquivalent(org.lubick.localHub.ToolStream.ToolUsage otherToolUse) {
+			return 	this.toolName.equals(otherToolUse.getToolName()) &&
+					this.toolClass.equals(otherToolUse.getToolClass()) &&
+					this.keyPresses.equals(otherToolUse.getToolKeyPresses()) &&
+					this.timeStamp.equals(otherToolUse.getTimeStamp()) &&
+					this.duration == otherToolUse.getDuration();
 		}
 
 		public String getToolName() {
