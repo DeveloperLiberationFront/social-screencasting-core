@@ -61,6 +61,7 @@ public class TestLocalHubBasicFileReading {
 	{
 		return "TestPlugin" + testIteration;
 	}
+	
 
 	
 
@@ -77,9 +78,11 @@ public class TestLocalHubBasicFileReading {
 	
 	public void tearDown() throws Exception
 	{
-		//After every test, clear the plugin directory
-		assertTrue(TestUtilities.clearOutDirectory(testPluginDirectory));
+		testIteration++;
 	}
+
+
+
 
 	@Test
 	public void testReadingInFileAndIgnoringNestedFolder() throws Exception
