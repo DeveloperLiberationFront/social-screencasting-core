@@ -29,7 +29,7 @@ public class TestLocalHubBasicFileReading {
 	
 	//used with listeners.  These give listeners a place to refer
 	private LoadedFileEvent observedEvent = null;
-	private boolean hasSeenResponseFlag;
+	private boolean hasSeenResponseFlag = false;
 	
 	private static long currentFastForwardTime = MILLIS_IN_DAY;
 	
