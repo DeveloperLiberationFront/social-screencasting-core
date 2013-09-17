@@ -1,8 +1,6 @@
 package org.lubick.localHub;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -124,14 +122,16 @@ public class FileManager implements Runnable {
 			logger.trace("Created queue for the plugin " + pluginName +" with file "+ file);
 			Queue<File> newQueue = new LinkedList<File>();
 			newQueue.offer(file);
-			unparsedFiles.put(fileName, newQueue);
+			unparsedFiles.put(pluginName, newQueue);
 		}
 		else
 		{
+			logger.debug("Adding file "+file+" to the queue");
 			filesToParse.offer(file);
 			//If this is the only file we haven't parsed yet, it may not be fully written yet, so hold off
 			if (filesToParse.size() > 1)
 			{
+				logger.debug("Parsing file "+filesToParse.peek());
 				fileParser.parseFile(filesToParse.poll());
 			}
 			
@@ -195,14 +195,8 @@ public class FileManager implements Runnable {
 	 */
 	private int conditionallyAddFileAfterContactingListener(File thisFile, boolean isInitialLoading, Collection<File> collectionToAddTo) 
 	{
-		byte[] bytes;
-		try {
-			bytes = Files.readAllBytes(thisFile.toPath());
-		} catch (IOException e) {
-			logger.error("Error reading in file",e);
-			bytes = "There was a problem reading the file".getBytes();
-		}
-		String fileContents = new String(bytes);
+		
+		String fileContents = FileUtilities.readAllFromFile(thisFile);
 		
 		int response = loadedFileListener.loadFileResponse(new LoadedFileEvent(thisFile.getName(),fileContents,isInitialLoading));
 

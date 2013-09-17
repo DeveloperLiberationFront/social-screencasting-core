@@ -1,5 +1,6 @@
 package org.lubick.localHub;
 
+import java.io.File;
 import java.util.Date;
 
 /**
@@ -17,13 +18,16 @@ public class ParsedFileEvent
 	private ToolStream generatedToolStream;
 	private String associatedPluginName;
 	private Date fileTimeStamp;
+	private File parsedFile;
 
-	public ParsedFileEvent(String inputString, ToolStream generatedToolStream, String associatedPluginName, Date fileTimeStamp) 
+
+	public ParsedFileEvent(String inputString, ToolStream generatedToolStream, String associatedPluginName, Date fileTimeStamp, File parsedFile) 
 	{
 		this.inputString = inputString;
 		this.generatedToolStream = generatedToolStream;
 		this.associatedPluginName = associatedPluginName;
 		this.fileTimeStamp = fileTimeStamp;
+		this.parsedFile = parsedFile;
 	}
 	
 	public String getInputJSON() {
@@ -42,7 +46,9 @@ public class ParsedFileEvent
 		return this.fileTimeStamp;
 	}
 
-
+	public File getParsedFile() {
+		return parsedFile;
+	}
 
 	
 

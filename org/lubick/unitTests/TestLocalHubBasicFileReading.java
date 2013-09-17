@@ -51,13 +51,15 @@ public class TestLocalHubBasicFileReading {
 		assertTrue(TestUtilities.clearOutDirectory(LOCAL_HUB_MONITOR_LOCATION));
 		//start the server
 		localHub = LocalHub.startServerAndReturnDebugAccess(LOCAL_HUB_MONITOR_LOCATION);
-		//create the testPlugin directory to simulate a plugin making something
-		testPluginDirectory = new File(LOCAL_HUB_MONITOR_LOCATION+"TestPlugin/");
-		if (!testPluginDirectory.exists() && !testPluginDirectory.mkdir())
-		{
-			fail("Could not create plugin directory");
-		}
+	
 		
+	}
+	
+	
+	private static int testIteration = 1;
+	public static String getCurrentPluginName()
+	{
+		return "TestPlugin" + testIteration;
 	}
 
 	
@@ -65,7 +67,18 @@ public class TestLocalHubBasicFileReading {
 	@Before
 	public void setUp() throws Exception 
 	{
-		
+		//create the testPlugin directory to simulate a plugin making something
+		testPluginDirectory = new File(LOCAL_HUB_MONITOR_LOCATION+getCurrentPluginName()+"/");
+		if (!testPluginDirectory.exists() && !testPluginDirectory.mkdir())
+		{
+			fail("Could not create plugin directory");
+		}
+	}
+	
+	public void tearDown() throws Exception
+	{
+		//After every test, clear the plugin directory
+		assertTrue(TestUtilities.clearOutDirectory(testPluginDirectory));
 	}
 
 	@Test
@@ -124,7 +137,7 @@ public class TestLocalHubBasicFileReading {
 		localHub.addLoadedFileListener(loadedFileListener);
 		observedEvent  = null;
 			
-		File createdFile = TestUtilities.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),"TestPlugin"+sdf.format(timeStamp)+".log",fileContents);
+		File createdFile = TestUtilities.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),"TestPlugin."+sdf.format(timeStamp)+".log",fileContents);
 		
 		assertNotNull(createdFile);
 		assertTrue(createdFile.exists());

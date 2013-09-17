@@ -181,9 +181,14 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 
 	@Override
 	public void parseFile(File fileToParse) {
+		
+		String fileContents = FileUtilities.readAllFromFile(fileToParse);
+		ToolStream ts = ToolStream.generateFromJSON(fileContents);
+		
+		//String fileName = 
+		
+		//ParsedFileEvent event = new ParsedFileEvent(fileContents, ts, associatedPluginName, fileto, fileToParse);
 		ParsedFileEvent event = null;
-		
-		
 		for(ParsedFileListener parsedFileListener : parsedFileListeners)
 		{
 			parsedFileListener.parsedFile(event);
