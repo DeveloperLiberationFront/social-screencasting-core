@@ -23,22 +23,19 @@ public class TestToolStream {
 
 	@Test
 	public void testCreationOfToolStream() {
-		IdealizedToolStream toolStream = new IdealizedToolStream();
+		IdealizedToolStream iToolStream = new IdealizedToolStream();
 		
 		Date firstDate = new Date();
 		Date secondDate = new Date(firstDate.getTime()+1000);
 		
-		toolStream.addToolUsage("ToolString", "ClassString", "Keypresses",firstDate, 2);
-		toolStream.addToolUsage("WhomboTool #5", "Debug", "Ctrl+5",secondDate, 1);
+		iToolStream.addToolUsage("ToolString", "ClassString", "Keypresses",firstDate, 2);
+		iToolStream.addToolUsage("WhomboTool #5", "Debug", "Ctrl+5",secondDate, 1);
 		
-		toolStream.createAndAppendRandomTools(10);
-		
-		assertEquals(12, toolStream.numberOfToolUses());
 		
 		//I'm scoping this out to avoid copy+paste problems with these assertions
 		{
-			List<IdealizedToolStream.ToolUsage> tools = toolStream.getAsList();
-			assertEquals(12, tools.size());
+			List<IdealizedToolStream.ToolUsage> tools = iToolStream.getAsList();
+	
 			assertEquals("ToolString", tools.get(0).getToolName());
 			assertEquals("ClassString", tools.get(0).getToolClass());
 			assertEquals("Keypresses", tools.get(0).getToolKeyPresses());
@@ -52,13 +49,13 @@ public class TestToolStream {
 			assertEquals(1, tools.get(1).getDuration());
 		}
 		
-		ToolStream convertedToolStream = ToolStream.generateFromJSON(toolStream.toJSON());
+		ToolStream convertedToolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
 		
-		assertTrue(toolStream.isEquivalent(convertedToolStream));
+		assertTrue(iToolStream.isEquivalent(convertedToolStream));
 		
 		{
 			List<ToolStream.ToolUsage> tools = convertedToolStream.getAsList();
-			assertEquals(12, tools.size());
+		
 			assertEquals("ToolString", tools.get(0).getToolName());
 			assertEquals("ClassString", tools.get(0).getToolClass());
 			assertEquals("Keypresses", tools.get(0).getToolKeyPresses());

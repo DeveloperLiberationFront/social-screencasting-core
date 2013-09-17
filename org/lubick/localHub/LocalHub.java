@@ -27,7 +27,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 	private Thread currentThread = null;
 	private boolean isRunning = false;
 	private File monitorDirectory = null;
-	private SimpleDateFormat sdf = new SimpleDateFormat("DDDYYkkmm");
+	private SimpleDateFormat sdf = new SimpleDateFormat("DDDyykkmm");
 	private FileManager currentRunnable = null;
 
 	//listeners

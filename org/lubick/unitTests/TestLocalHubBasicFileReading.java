@@ -26,7 +26,7 @@ public class TestLocalHubBasicFileReading {
 	private static LocalHubDebugAccess localHub;
 	private File testPluginDirectory;
 	//This won't work in the year 2100 or later.  
-	private SimpleDateFormat sdf = new SimpleDateFormat("DDDYYkkmm");
+	private SimpleDateFormat sdf = new SimpleDateFormat("DDDyykkmm");
 	
 	//used with listeners.  These give listeners a place to refer
 	private LoadedFileEvent observedEvent = null;
@@ -216,7 +216,7 @@ public class TestLocalHubBasicFileReading {
 		createToolStreamFileAndVerifyItHappened(newTS.toJSON(), futureTime, defaultLoadedFileListener);
 		
 		int timeCounter = 0;
-		while (!hasParsedFlag && timeCounter < 5) 
+		while (!hasParsedFlag && timeCounter < 500) 
 		{
 			Thread.sleep(1000);
 			timeCounter++;
@@ -225,8 +225,8 @@ public class TestLocalHubBasicFileReading {
 		{
 			assertEquals(ts.toJSON(), parsedEvent.getInputJSON());
 			assertTrue(ts.isEquivalent(parsedEvent.getToolStream()));
-			assertEquals("TestPlugin",parsedEvent.getPluginName());
-			assertEquals(currentTime, parsedEvent.getFileTimeStamp());
+			assertEquals(getCurrentPluginName(),parsedEvent.getPluginName());
+			assertEquals(TestUtilities.truncateTimeToMinute(currentTime), parsedEvent.getFileTimeStamp());
 	
 		}
 		else 

@@ -3,6 +3,7 @@ package org.lubick.localHub.forTesting;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
 
 import org.apache.log4j.Logger;
 
@@ -92,6 +93,12 @@ public class TestUtilities {
 			}
 		}
 		return parentDirectory.listFiles().length == 0;
+	}
+
+	public static Date truncateTimeToMinute(Date date) 
+	{
+		//Divide then multiply by 60000 (the number of milliseconds in a minute) to round to nearest minute
+		return new Date((date.getTime() / 60000) * 60000);
 	}
 
 }

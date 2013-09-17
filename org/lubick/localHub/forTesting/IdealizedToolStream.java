@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.lubick.localHub.ToolStream;
 
 /**
@@ -20,6 +24,7 @@ import org.lubick.localHub.ToolStream;
 public class IdealizedToolStream 
 {
 	
+	private static Logger logger = Logger.getLogger(IdealizedToolStream.class.getName());
 	
 	private List<ToolUsage> listOfToolUsages;
 
@@ -32,9 +37,33 @@ public class IdealizedToolStream
 		return new IdealizedToolStream();
 	}
 
+	/**
+	 * This should spit out a jsonArray of json objects.
+	 * 
+	 * Each JsonObject should have a String paired with "Tool_Name", a
+	String paired with "Tool_Class", a String paired with "Tool_Key_Presses",
+	a long paired with "Tool_Timestamp" (number of milliseconds since epoch),
+	and an int paired with "Tool_Duration";
+	 * @return
+	 */
 	public String toJSON() {
-		// TODO Auto-generated method stub
-		return "This was some text.  Aren't you so proud?";
+		JSONArray jarr = new JSONArray();
+		for (ToolUsage tu : this.listOfToolUsages) 
+		{
+			try {
+				jarr.put(tu.toJSONObject());
+			} catch (JSONException e) {
+				logger.error("There was a problem converting to JSON",e);
+				return null;
+			}
+		}
+		String retVal = null;
+		try {
+			retVal = jarr.toString(2);
+		} catch (JSONException e) {
+			logger.error("There was a problem converting to JSON",e);
+		}
+		return retVal;
 	}
 
 	/**
@@ -63,7 +92,8 @@ public class IdealizedToolStream
 		listOfToolUsages.add(tu);
 	}
 
-	public void createAndAppendRandomTools(int numberOfToolsToEmulate) {
+	public void createAndAppendRandomTools(int numberOfToolsToEmulate) 
+	{
 		// TODO Auto-generated method stub
 		
 	}
@@ -84,7 +114,8 @@ public class ToolUsage {
 		private Date timeStamp;
 		private int duration;
 		
-		public ToolUsage(String toolName, String toolClass, String keyPresses, Date timeStamp, int duration) {
+		public ToolUsage(String toolName, String toolClass, String keyPresses, Date timeStamp, int duration) 
+		{
 			this.toolName = toolName;
 			this.toolClass = toolClass;
 			this.keyPresses = keyPresses;
@@ -92,7 +123,21 @@ public class ToolUsage {
 			this.duration = duration;
 		}
 
-		public boolean isEquivalent(org.lubick.localHub.ToolStream.ToolUsage otherToolUse) {
+		public JSONObject toJSONObject() throws JSONException 
+		{
+			JSONObject jobj = new JSONObject();
+			
+			jobj.put(ToolStream.TOOL_NAME, toolName);
+			jobj.put(ToolStream.TOOL_CLASS, toolClass);
+			jobj.put(ToolStream.TOOL_KEY_PRESSES, keyPresses);
+			jobj.put(ToolStream.TOOL_TIMESTAMP, timeStamp.getTime());
+			jobj.put(ToolStream.TOOL_DURATION, duration);
+			
+			return jobj;
+		}
+
+		public boolean isEquivalent(org.lubick.localHub.ToolStream.ToolUsage otherToolUse) 
+		{
 			return 	this.toolName.equals(otherToolUse.getToolName()) &&
 					this.toolClass.equals(otherToolUse.getToolClass()) &&
 					this.keyPresses.equals(otherToolUse.getToolKeyPresses()) &&
