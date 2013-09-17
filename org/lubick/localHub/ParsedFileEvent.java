@@ -18,6 +18,14 @@ public class ParsedFileEvent
 	private String associatedPluginName;
 	private Date fileTimeStamp;
 
+	public ParsedFileEvent(String inputString, ToolStream generatedToolStream, String associatedPluginName, Date fileTimeStamp) 
+	{
+		this.inputString = inputString;
+		this.generatedToolStream = generatedToolStream;
+		this.associatedPluginName = associatedPluginName;
+		this.fileTimeStamp = fileTimeStamp;
+	}
+	
 	public String getInputJSON() {
 		return this.inputString;
 	}
@@ -33,6 +41,8 @@ public class ParsedFileEvent
 	public Date getFileTimeStamp() {
 		return this.fileTimeStamp;
 	}
+
+
 
 	
 
