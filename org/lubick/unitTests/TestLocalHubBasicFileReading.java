@@ -23,7 +23,7 @@ public class TestLocalHubBasicFileReading {
 	private static final String LOCAL_HUB_MONITOR_LOCATION = "HF/";
 	private static final long MILLIS_IN_DAY = 86400000l;
 	private static LocalHubDebugAccess localHub;
-	private static File testPluginDirectory;
+	private File testPluginDirectory;
 	//This won't work in the year 2100 or later.  
 	private SimpleDateFormat sdf = new SimpleDateFormat("DDDYYkkmm");
 	
