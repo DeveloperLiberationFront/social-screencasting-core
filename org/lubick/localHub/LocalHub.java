@@ -1,6 +1,9 @@
 package org.lubick.localHub;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,10 +27,11 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 	private Thread currentThread = null;
 	private boolean isRunning = false;
 	private File monitorDirectory = null;
+	private SimpleDateFormat sdf = new SimpleDateFormat("DDDYYkkmm");
+	private FileManager currentRunnable = null;
 
 	//listeners
-	private Set<LoadedFileListener> loadedFileListeners = new HashSet<>();
-	private FileManager currentRunnable = null;
+	private Set<LoadedFileListener> loadedFileListeners = new HashSet<>();	
 	private Set<ParsedFileListener> parsedFileListeners = new HashSet<>();
 
 
@@ -185,10 +189,19 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		String fileContents = FileUtilities.readAllFromFile(fileToParse);
 		ToolStream ts = ToolStream.generateFromJSON(fileContents);
 		
-		//String fileName = 
+		String fileName = fileToParse.getName();
+		String pluginName = fileName.substring(0, fileName.indexOf('.'));
+		String dateString = fileName.substring(fileName.indexOf('.') + 1,fileName.lastIndexOf('.'));
 		
-		//ParsedFileEvent event = new ParsedFileEvent(fileContents, ts, associatedPluginName, fileto, fileToParse);
-		ParsedFileEvent event = null;
+		Date associatedDate = null;
+		try {
+			associatedDate = sdf.parse(dateString);
+		} catch (ParseException e) {
+			logger.error("Trouble parsing Date "+dateString,e);
+		}
+		
+		ParsedFileEvent event = new ParsedFileEvent(fileContents, ts, pluginName, associatedDate, fileToParse);
+
 		for(ParsedFileListener parsedFileListener : parsedFileListeners)
 		{
 			parsedFileListener.parsedFile(event);

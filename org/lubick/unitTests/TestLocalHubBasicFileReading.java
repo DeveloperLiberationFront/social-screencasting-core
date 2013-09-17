@@ -6,6 +6,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -72,7 +73,7 @@ public class TestLocalHubBasicFileReading {
 	@Before
 	public void setUp() throws Exception 
 	{
-		//create the testPlugin directory to simulate a plugin making something
+		//This allows each test to have a different plugin Directory to do things with
 		testPluginDirectory = new File(LOCAL_HUB_MONITOR_LOCATION+getCurrentPluginName()+"/");
 		if (!testPluginDirectory.exists() && !testPluginDirectory.mkdir())
 		{
@@ -80,6 +81,7 @@ public class TestLocalHubBasicFileReading {
 		}
 	}
 	
+	@After
 	public void tearDown() throws Exception
 	{
 		goToNextTest();
@@ -110,7 +112,7 @@ public class TestLocalHubBasicFileReading {
 		assertTrue(nestedDirectory.mkdir());
 		
 		Date currentTime = new Date();
-		File createdNestedFile = TestUtilities.createAbsoluteFileWithContent(nestedDirectory.getAbsolutePath(),"TestPlugin."+sdf.format(currentTime)+".log","ThisIsAToolstream");
+		File createdNestedFile = TestUtilities.createAbsoluteFileWithContent(nestedDirectory.getAbsolutePath(),getCurrentPluginName()+"."+sdf.format(currentTime)+".log","ThisIsAToolstream");
 		
 		assertNotNull(createdNestedFile);
 		assertTrue(createdNestedFile.exists());
@@ -144,7 +146,7 @@ public class TestLocalHubBasicFileReading {
 		localHub.addLoadedFileListener(loadedFileListener);
 		observedEvent  = null;
 			
-		File createdFile = TestUtilities.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),"TestPlugin."+sdf.format(timeStamp)+".log",fileContents);
+		File createdFile = TestUtilities.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),getCurrentPluginName()+"."+sdf.format(timeStamp)+".log",fileContents);
 		
 		assertNotNull(createdFile);
 		assertTrue(createdFile.exists());
