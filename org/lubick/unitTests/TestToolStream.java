@@ -10,6 +10,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.lubick.localHub.ToolStream;
 import org.lubick.localHub.forTesting.IdealizedToolStream;
+import org.lubick.localHub.forTesting.IdealizedToolStream.ToolUsage;
 
 public class TestToolStream {
 
@@ -22,7 +23,7 @@ public class TestToolStream {
 	}
 
 	@Test
-	public void testCreationOfToolStream() {
+	public void testManualCreationOfToolStream() {
 		IdealizedToolStream iToolStream = new IdealizedToolStream();
 		
 		Date firstDate = new Date();
@@ -71,4 +72,32 @@ public class TestToolStream {
 		
 	}
 
+	
+	@Test
+	public void testAutomaticallyCreatedToolStreams() throws Exception 
+	{
+		IdealizedToolStream iToolStream = IdealizedToolStream.generateRandomToolStream(10);
+		List<ToolUsage> iTools = iToolStream.getAsList();
+		
+		assertEquals(10, iTools.size());
+		assertEquals(10, iToolStream.numberOfToolUses());
+		
+		for(ToolUsage tu : iTools)
+		{
+			assertNotNull(tu.getTimeStamp());
+			assertNotNull(tu.getToolClass());
+			assertNotNull(tu.getToolKeyPresses());
+			assertNotNull(tu.getToolName());
+			assertNotEquals(tu.getDuration(),0);
+		}
+		
+		ToolStream convertedToolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
+		
+		List<org.lubick.localHub.ToolStream.ToolUsage> theRealTools = convertedToolStream.getAsList();
+		
+		assertEquals(iTools.size(), theRealTools.size());
+		assertEquals(iToolStream.numberOfToolUses(), theRealTools.size());
+		
+		assertTrue(iToolStream.isEquivalent(convertedToolStream));
+	}
 }

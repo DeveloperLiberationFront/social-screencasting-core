@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -15,6 +16,7 @@ import org.lubick.localHub.LoadedFileListener;
 import org.lubick.localHub.LocalHub;
 import org.lubick.localHub.ParsedFileEvent;
 import org.lubick.localHub.ParsedFileListener;
+import org.lubick.localHub.ToolStream;
 import org.lubick.localHub.forTesting.IdealizedToolStream;
 import org.lubick.localHub.forTesting.LocalHubDebugAccess;
 import org.lubick.localHub.forTesting.TestUtilities;
@@ -140,7 +142,7 @@ public class TestLocalHubBasicFileReading {
 	 * @param timeStamp 
 	 * @throws InterruptedException
 	 */
-	private void createToolStreamFileAndVerifyItHappened(String fileContents, Date timeStamp, LoadedFileListener loadedFileListener) throws Exception
+	private File createToolStreamFileAndVerifyItHappened(String fileContents, Date timeStamp, LoadedFileListener loadedFileListener) throws Exception
 	{
 		assertTrue(localHub.isRunning());
 		localHub.addLoadedFileListener(loadedFileListener);
@@ -170,6 +172,8 @@ public class TestLocalHubBasicFileReading {
 		}
 		
 		localHub.removeLoadedFileListener(loadedFileListener);
+		
+		return createdFile;
 	}
 	
 
@@ -189,7 +193,7 @@ public class TestLocalHubBasicFileReading {
 		
 		IdealizedToolStream ts = IdealizedToolStream.generateRandomToolStream(2);
 		
-		localHub.addParsedFileListener(new ParsedFileListener(){
+		ParsedFileListener parsedFileListener = new ParsedFileListener(){
 
 			@Override
 			public void parsedFile(ParsedFileEvent e) {
@@ -197,7 +201,9 @@ public class TestLocalHubBasicFileReading {
 				parsedEvent = e;
 			}
 			
-		});
+		};
+		
+		localHub.addParsedFileListener(parsedFileListener);
 		
 		createToolStreamFileAndVerifyItHappened(ts.toJSON(), currentTime, defaultLoadedFileListener);
 		
@@ -233,6 +239,43 @@ public class TestLocalHubBasicFileReading {
 		{
 			fail("test ParsingFile has timed out");
 		}
+		
+		localHub.removeParsedFileListener(parsedFileListener);
+	}
+	
+	@Test
+	public void testSeveralMinutesWorthOfDataAndExit() throws Exception {
+		//We'll be making 3 files to simulate multiple things
+		Date currentTime = getFastForwardedDate();
+		Date teePlusOne = new Date(currentTime.getTime() + 60*1000);
+		Date teePlusTwo = new Date(teePlusOne.getTime() + 60*1000);
+		Date teePlusThree = new Date(teePlusTwo.getTime() + 60*1000);
+		
+		IdealizedToolStream firstToolStream = IdealizedToolStream.generateRandomToolStream(30);
+		IdealizedToolStream secondToolStream = IdealizedToolStream.generateRandomToolStream(40);
+		IdealizedToolStream thirdToolStream = IdealizedToolStream.generateRandomToolStream(50);
+		
+		observedEvent = null;
+		hasSeenResponseFlag = false;
+		createToolStreamFileAndVerifyItHappened(firstToolStream.toJSON(), currentTime, defaultLoadedFileListener);
+		
+		observedEvent = null;
+		hasSeenResponseFlag = false;
+		createToolStreamFileAndVerifyItHappened(secondToolStream.toJSON(), teePlusOne, defaultLoadedFileListener);
+		
+		observedEvent = null;
+		hasSeenResponseFlag = false;
+		createToolStreamFileAndVerifyItHappened(thirdToolStream.toJSON(), teePlusTwo, defaultLoadedFileListener);
+		
+		observedEvent = null;
+		hasSeenResponseFlag = false;
+		createToolStreamFileAndVerifyItHappened("", teePlusThree, defaultLoadedFileListener);
+		
+		Thread.sleep(1000);
+		//After waiting 1 second, the streams should be parsed
+		List<ToolStream.ToolUsage> allHistoriesOfToolUsages = localHub.getAllToolUsageHistoriesForPlugin(getCurrentPluginName());
+		
+		assertEquals(allHistoriesOfToolUsages.size(), 120);
 	}
 
 
