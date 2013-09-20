@@ -1,7 +1,10 @@
 package org.lubick.localHub.forTesting;
 
+import java.util.List;
+
 import org.lubick.localHub.LoadedFileListener;
 import org.lubick.localHub.ParsedFileListener;
+import org.lubick.localHub.ToolStream.ToolUsage;
 
 public interface LocalHubDebugAccess {
 
@@ -14,6 +17,8 @@ public interface LocalHubDebugAccess {
 	
 	void addParsedFileListener(ParsedFileListener parsedFileListener);
 	void removeParsedFileListener(ParsedFileListener parsedFileListener);
+
+	List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName);
 	
 
 }

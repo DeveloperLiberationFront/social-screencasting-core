@@ -24,7 +24,7 @@ import org.lubick.localHub.ToolStream;
 public class IdealizedToolStream 
 {
 	
-	public static final String QUIT_MESSAGE = "!SHUTTING DOWN!";
+	//public static final String QUIT_MESSAGE = "!SHUTTING DOWN!";
 
 	private static Logger logger = Logger.getLogger(IdealizedToolStream.class.getName());
 	

@@ -244,7 +244,8 @@ public class TestLocalHubBasicFileReading {
 	}
 	
 	@Test
-	public void testSeveralMinutesWorthOfDataAndExit() throws Exception {
+	public void testSeveralMinutesWorthOfDataAndExit() throws Exception 
+	{
 		//We'll be making 3 files to simulate multiple things
 		Date currentTime = getFastForwardedDate();
 		Date teePlusOne = new Date(currentTime.getTime() + 60*1000);
@@ -284,7 +285,8 @@ public class TestLocalHubBasicFileReading {
 	 * will be transformed 24 hours into the future, the second time, 48 hours and so on.
 	 * @return future time as java.util.Date
 	 */
-	private static Date getFastForwardedDate() {
+	private static Date getFastForwardedDate() 
+	{
 		Date rightNow = new Date();
 		Date retVal = new Date(rightNow.getTime() + currentFastForwardTime);
 		currentFastForwardTime += MILLIS_IN_DAY;

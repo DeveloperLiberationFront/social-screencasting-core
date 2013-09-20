@@ -5,10 +5,15 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.lubick.localHub.ToolStream.ToolUsage;
+import org.lubick.localHub.database.DBAbstraction;
+import org.lubick.localHub.database.DBAbstractionFactory;
+import org.lubick.localHub.database.SQLDatabaseFactory;
 import org.lubick.localHub.forTesting.LocalHubDebugAccess;
 
 public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
@@ -29,16 +34,12 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 	private File monitorDirectory = null;
 	private SimpleDateFormat sdf = new SimpleDateFormat("DDDyykkmm");
 	private FileManager currentRunnable = null;
+	private DBAbstraction dbAbstraction = null;
 
 	//listeners
 	private Set<LoadedFileListener> loadedFileListeners = new HashSet<>();	
 	private Set<ParsedFileListener> parsedFileListeners = new HashSet<>();
-
-
-
-
-
-
+	
 
 	//You need to call a static method to initiate this class.  It is a singleton with restricted access.
 	private LocalHub() {
@@ -108,12 +109,19 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 			this.monitorDirectory = newMonitorDirectory;
 		}
 	}
+	
+	private void setDatabase(String databaseLocation) {
+		this.dbAbstraction = DBAbstractionFactory.createDatabase(databaseLocation, DBAbstractionFactory.SQL_IMPLEMENTATION);
+		
+	}
 
 
 
-	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation) {
+	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation) 
+	{
 		if (!singletonHub.isRunning())
 		{
+			singletonHub.setDatabase(SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
 			singletonHub.setMonitorLocation(monitorLocation);
 			singletonHub.start();
 		}
@@ -122,6 +130,9 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		return new LocalHubTesting(singletonHub);
 	}
 
+
+
+	
 
 
 	private void start() {
@@ -250,6 +261,12 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		public void removeParsedFileListener(ParsedFileListener parsedFileListener) {
 			hubToDebug.removeParsedFileListener(parsedFileListener);
 			
+		}
+
+		@Override
+		public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName) 
+		{
+			return hubToDebug.dbAbstraction.getAllToolUsageHistoriesForPlugin(currentPluginName);
 		}
 
 	}
