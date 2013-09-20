@@ -97,8 +97,13 @@ public class TestUtilities {
 
 	public static Date truncateTimeToMinute(Date date) 
 	{
+		return truncateTimeToMinute(date.getTime());
+	}
+
+	public static Date truncateTimeToMinute(long milliseconds) 
+	{
 		//Divide then multiply by 60000 (the number of milliseconds in a minute) to round to nearest minute
-		return new Date((date.getTime() / 60000) * 60000);
+		return new Date((milliseconds / 60000) * 60000);
 	}
 
 }

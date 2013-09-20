@@ -191,7 +191,7 @@ public class TestLocalHubBasicFileReading {
 		//This test happens in the future
 		Date currentTime = getFastForwardedDate();
 		
-		IdealizedToolStream ts = IdealizedToolStream.generateRandomToolStream(2);
+		IdealizedToolStream ts = IdealizedToolStream.generateRandomToolStream(2, currentTime);
 		
 		ParsedFileListener parsedFileListener = new ParsedFileListener(){
 
@@ -205,7 +205,7 @@ public class TestLocalHubBasicFileReading {
 		
 		localHub.addParsedFileListener(parsedFileListener);
 		
-		createToolStreamFileAndVerifyItHappened(ts.toJSON(), currentTime, defaultLoadedFileListener);
+		createToolStreamFileAndVerifyItHappened(ts.toJSON(), ts.getTimeStamp(), defaultLoadedFileListener);
 		
 		//Our tool stream should not have been parsed yet.
 		assertFalse(hasParsedFlag);
@@ -252,21 +252,21 @@ public class TestLocalHubBasicFileReading {
 		Date teePlusTwo = new Date(teePlusOne.getTime() + 60*1000);
 		Date teePlusThree = new Date(teePlusTwo.getTime() + 60*1000);
 		
-		IdealizedToolStream firstToolStream = IdealizedToolStream.generateRandomToolStream(30);
-		IdealizedToolStream secondToolStream = IdealizedToolStream.generateRandomToolStream(40);
-		IdealizedToolStream thirdToolStream = IdealizedToolStream.generateRandomToolStream(50);
+		IdealizedToolStream firstToolStream = IdealizedToolStream.generateRandomToolStream(30, currentTime);
+		IdealizedToolStream secondToolStream = IdealizedToolStream.generateRandomToolStream(40, teePlusOne);
+		IdealizedToolStream thirdToolStream = IdealizedToolStream.generateRandomToolStream(50, teePlusTwo);
 		
 		observedEvent = null;
 		hasSeenResponseFlag = false;
-		createToolStreamFileAndVerifyItHappened(firstToolStream.toJSON(), currentTime, defaultLoadedFileListener);
+		createToolStreamFileAndVerifyItHappened(firstToolStream.toJSON(), firstToolStream.getTimeStamp(), defaultLoadedFileListener);
 		
 		observedEvent = null;
 		hasSeenResponseFlag = false;
-		createToolStreamFileAndVerifyItHappened(secondToolStream.toJSON(), teePlusOne, defaultLoadedFileListener);
+		createToolStreamFileAndVerifyItHappened(secondToolStream.toJSON(), secondToolStream.getTimeStamp(), defaultLoadedFileListener);
 		
 		observedEvent = null;
 		hasSeenResponseFlag = false;
-		createToolStreamFileAndVerifyItHappened(thirdToolStream.toJSON(), teePlusTwo, defaultLoadedFileListener);
+		createToolStreamFileAndVerifyItHappened(thirdToolStream.toJSON(), thirdToolStream.getTimeStamp() , defaultLoadedFileListener);
 		
 		observedEvent = null;
 		hasSeenResponseFlag = false;
@@ -276,7 +276,8 @@ public class TestLocalHubBasicFileReading {
 		//After waiting 1 second, the streams should be parsed
 		List<ToolStream.ToolUsage> allHistoriesOfToolUsages = localHub.getAllToolUsageHistoriesForPlugin(getCurrentPluginName());
 		
-		assertEquals(allHistoriesOfToolUsages.size(), 120);
+		assertNotNull(allHistoriesOfToolUsages);
+		assertEquals(120, allHistoriesOfToolUsages.size());
 	}
 
 

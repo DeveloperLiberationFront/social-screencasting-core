@@ -2,7 +2,9 @@ package org.lubick.localHub.forTesting;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -23,20 +25,75 @@ import org.lubick.localHub.ToolStream;
  */
 public class IdealizedToolStream 
 {
-	
-	//public static final String QUIT_MESSAGE = "!SHUTTING DOWN!";
 
 	private static Logger logger = Logger.getLogger(IdealizedToolStream.class.getName());
 	
 	private List<ToolUsage> listOfToolUsages;
 
-	public IdealizedToolStream() {
+	private Date timestamp;
+	private static Random rand = new Random();
+
+	public IdealizedToolStream(Date timeStamp) {
 		listOfToolUsages = new ArrayList<>();
+		setTimeStamp(timeStamp);
 	}
 
+	private static String[] toolNames = {"RefactorVariable", "Depeal", "OpenWith", "Import Resources", "Fix Imports", "FindBugsSearch"};
+	private static String[] toolClasses = {"Refactor", "Debug","StaticAnalysis"};
+	private static String[] keyPressList = {"CTRL+5", "SHIFT+CTRL+R"}; 
+	
 	public static IdealizedToolStream generateRandomToolStream(int numberOfCommands) {
-		// TODO Auto-generated method stub
-		return new IdealizedToolStream();
+		
+		
+		//Create time in the past or future and round it to the nearest minute.  This is the minute
+		//of our timeStream.
+		Date minuteDate = TestUtilities.truncateTimeToMinute((new Date()).getTime() - rand.nextInt());
+		
+
+		return generateRandomToolStream(numberOfCommands, minuteDate);
+	}
+	
+	public static IdealizedToolStream generateRandomToolStream(int numberOfCommands, Date minuteDate) {
+		
+		IdealizedToolStream retVal = new IdealizedToolStream(minuteDate);
+		
+		for(int i = 0;i<numberOfCommands;i++)
+		{
+			
+			String toolName = toolNames[rand.nextInt(toolNames.length)];
+			String toolClass = rand.nextBoolean() ? toolClasses[rand.nextInt(toolClasses.length)] : "";
+			
+			String keyPresses = rand.nextBoolean() ? keyPressList[rand.nextInt(keyPressList.length)] : "";
+			
+			//assume that there was one command every second
+			Date timeStamp = new Date(minuteDate.getTime() + (i<60? i: 59)*1000);
+			
+			//for now, assume everything finishes in less than a second
+			int duration = rand.nextInt(1000);
+			
+			
+			ToolUsage tu = new ToolUsage(toolName, toolClass, keyPresses, timeStamp, duration);
+			retVal.listOfToolUsages.add(tu);
+		}
+		
+		return retVal;
+	}
+
+	private void setTimeStamp(Date minuteDate) 
+	{
+		GregorianCalendar gc = new GregorianCalendar();
+		gc.setTime(minuteDate);
+		if (gc.get(GregorianCalendar.SECOND) != 0)
+		{
+			logger.info("WARNING: timestamp set to toolstream that was not rounded to the nearest minute");
+			minuteDate = TestUtilities.truncateTimeToMinute(minuteDate);
+		}
+		this.timestamp = minuteDate;
+		
+	}
+	
+	public Date getTimeStamp() {
+		return this.timestamp;
 	}
 
 	/**
@@ -45,7 +102,8 @@ public class IdealizedToolStream
 	 * Each JsonObject should have a String paired with "Tool_Name", a
 	String paired with "Tool_Class", a String paired with "Tool_Key_Presses",
 	a long paired with "Tool_Timestamp" (number of milliseconds since epoch),
-	and an int paired with "Tool_Duration";
+	and an int paired with "Tool_Duration"
+	Optionally, there can be a JSONObject with extraInfo
 	 * @return
 	 */
 	public String toJSON() {
@@ -110,7 +168,7 @@ public class IdealizedToolStream
 		return new ArrayList<>(this.listOfToolUsages);
 	}
 
-public class ToolUsage {
+public static class ToolUsage {
 		
 		private String toolName, toolClass, keyPresses;
 		private Date timeStamp;
@@ -168,4 +226,8 @@ public class ToolUsage {
 		}
 
 	}
+
+
+
+
 }
