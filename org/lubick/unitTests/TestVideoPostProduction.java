@@ -11,7 +11,7 @@ public class TestVideoPostProduction {
 	@Test
 	public void test() {
 		
-		File capFile = new File("/src/ForTesting/oneMinuteCap.cap");
+		File capFile = new File("./src/ForTesting/oneMinuteCap.cap");
 		assertTrue(capFile.exists());
 		
 		fail("Not yet implemented");
