@@ -1,6 +1,5 @@
 package org.lubick.localHub.videoPostProduction;
 
-import java.io.InputStream;
 import java.util.Date;
 
 class FramePacket {
@@ -8,9 +7,13 @@ class FramePacket {
 	private int[] previousData;
 	private int result;
 	private Date frameTimeStamp;
-	private byte[] packed;
+	private byte[] encodedData;
 	private int frameSize;
-	private int[] newData;
+	int[] newData;
+
+	public int getFrameSize() {
+		return frameSize;
+	}
 
 	public FramePacket(int expectedSize, FramePacket previousFramePacket) {
 		this.frameSize = expectedSize;
@@ -24,6 +27,7 @@ class FramePacket {
 		}
 	}
 
+	@Deprecated
 	private void nextFrame() {
 		if (newData != null) {
 			previousData = newData;
@@ -48,5 +52,13 @@ class FramePacket {
 
 	public void setResult(int result) {
 		this.result = result;
+	}
+
+	public byte[] getEncodedData() {
+		return encodedData;
+	}
+
+	public void setEncodedData(byte[] packed) {
+		this.encodedData = packed;
 	}
 }
