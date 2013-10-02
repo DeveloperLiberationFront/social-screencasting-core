@@ -47,7 +47,7 @@ public class IdealizedToolStream
 		
 		//Create time in the past or future and round it to the nearest minute.  This is the minute
 		//of our timeStream.
-		Date minuteDate = TestUtilities.truncateTimeToMinute((new Date()).getTime() - rand.nextInt());
+		Date minuteDate = UtilitiesForTesting.truncateTimeToMinute((new Date()).getTime() - rand.nextInt());
 		
 
 		return generateRandomToolStream(numberOfCommands, minuteDate);
@@ -57,25 +57,8 @@ public class IdealizedToolStream
 		
 		IdealizedToolStream retVal = new IdealizedToolStream(minuteDate);
 		
-		for(int i = 0;i<numberOfCommands;i++)
-		{
+		retVal.createAndAppendRandomTools(numberOfCommands);
 			
-			String toolName = toolNames[rand.nextInt(toolNames.length)];
-			String toolClass = rand.nextBoolean() ? toolClasses[rand.nextInt(toolClasses.length)] : "";
-			
-			String keyPresses = rand.nextBoolean() ? keyPressList[rand.nextInt(keyPressList.length)] : "";
-			
-			//assume that there was one command every second
-			Date timeStamp = new Date(minuteDate.getTime() + (i<60? i: 59)*1000);
-			
-			//for now, assume everything finishes in less than a second
-			int duration = rand.nextInt(1000);
-			
-			
-			ToolUsage tu = new ToolUsage(toolName, toolClass, keyPresses, timeStamp, duration);
-			retVal.listOfToolUsages.add(tu);
-		}
-		
 		return retVal;
 	}
 
@@ -86,7 +69,7 @@ public class IdealizedToolStream
 		if (gc.get(GregorianCalendar.SECOND) != 0)
 		{
 			logger.info("WARNING: timestamp set to toolstream that was not rounded to the nearest minute");
-			minuteDate = TestUtilities.truncateTimeToMinute(minuteDate);
+			minuteDate = UtilitiesForTesting.truncateTimeToMinute(minuteDate);
 		}
 		this.timestamp = minuteDate;
 		
@@ -147,15 +130,37 @@ public class IdealizedToolStream
 		return true;
 	}
 
-	public void addToolUsage(String toolString, String classString, String keyPressesString, Date timestamp, int duration) {
-		ToolUsage tu = new ToolUsage(toolString, classString, keyPressesString, timestamp, duration);
+	public void addToolUsage(String toolString, String classString, String keyPressesString, Date toolTimestamp, int duration) {
+		ToolUsage tu = new ToolUsage(toolString, classString, keyPressesString, toolTimestamp, duration);
 		listOfToolUsages.add(tu);
 	}
 
 	public void createAndAppendRandomTools(int numberOfToolsToEmulate) 
 	{
-		// TODO Auto-generated method stub
+		if (getTimeStamp() == null)
+		{
+			logger.info("Need to give a ToolStamp a time before adding tools");
+			return;
+		}
 		
+		for(int i = 0;i<numberOfToolsToEmulate;i++)
+		{
+			
+			String toolName = toolNames[rand.nextInt(toolNames.length)];
+			String toolClass = rand.nextBoolean() ? toolClasses[rand.nextInt(toolClasses.length)] : "";
+			
+			String keyPresses = rand.nextBoolean() ? keyPressList[rand.nextInt(keyPressList.length)] : "";
+			
+			//assume that there was one command every second
+			Date timeStamp = new Date(getTimeStamp().getTime() + (i<60? i: 59)*1000);
+			
+			//for now, assume everything finishes in less than a second
+			int duration = rand.nextInt(1000);
+			
+			
+			ToolUsage tu = new ToolUsage(toolName, toolClass, keyPresses, timeStamp, duration);
+			this.listOfToolUsages.add(tu);
+		}
 	}
 
 	public int numberOfToolUses() {

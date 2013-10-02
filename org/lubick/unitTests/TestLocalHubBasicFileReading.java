@@ -24,7 +24,7 @@ import org.lubick.localHub.ParsedFileListener;
 import org.lubick.localHub.ToolStream;
 import org.lubick.localHub.forTesting.IdealizedToolStream;
 import org.lubick.localHub.forTesting.LocalHubDebugAccess;
-import org.lubick.localHub.forTesting.TestUtilities;
+import org.lubick.localHub.forTesting.UtilitiesForTesting;
 
 public class TestLocalHubBasicFileReading {
 
@@ -56,7 +56,7 @@ public class TestLocalHubBasicFileReading {
 	public static void setUpBeforeClass() throws Exception 
 	{
 		//Clear out the testing monitor location
-		assertTrue(TestUtilities.clearOutDirectory(LOCAL_HUB_MONITOR_LOCATION));
+		assertTrue(UtilitiesForTesting.clearOutDirectory(LOCAL_HUB_MONITOR_LOCATION));
 		//start the server
 		localHub = LocalHub.startServerAndReturnDebugAccess(LOCAL_HUB_MONITOR_LOCATION);
 	
@@ -119,7 +119,7 @@ public class TestLocalHubBasicFileReading {
 		assertTrue(nestedDirectory.mkdir());
 		
 		Date currentTime = new Date();
-		File createdNestedFile = TestUtilities.createAbsoluteFileWithContent(nestedDirectory.getAbsolutePath(),getCurrentPluginName()+"."+sdf.format(currentTime)+".log","ThisIsAToolstream");
+		File createdNestedFile = UtilitiesForTesting.createAbsoluteFileWithContent(nestedDirectory.getAbsolutePath(),getCurrentPluginName()+"."+sdf.format(currentTime)+".log","ThisIsAToolstream");
 		
 		assertNotNull(createdNestedFile);
 		assertTrue(createdNestedFile.exists());
@@ -153,7 +153,7 @@ public class TestLocalHubBasicFileReading {
 		localHub.addLoadedFileListener(loadedFileListener);
 		observedEvent  = null;
 			
-		File createdFile = TestUtilities.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),getCurrentPluginName()+"."+sdf.format(timeStamp)+".log",fileContents);
+		File createdFile = UtilitiesForTesting.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),getCurrentPluginName()+"."+sdf.format(timeStamp)+".log",fileContents);
 		
 		assertNotNull(createdFile);
 		assertTrue(createdFile.exists());
@@ -237,7 +237,7 @@ public class TestLocalHubBasicFileReading {
 			assertEquals(ts.toJSON(), parsedEvent.getInputJSON());
 			assertTrue(ts.isEquivalent(parsedEvent.getToolStream()));
 			assertEquals(getCurrentPluginName(),parsedEvent.getPluginName());
-			assertEquals(TestUtilities.truncateTimeToMinute(currentTime), parsedEvent.getFileTimeStamp());
+			assertEquals(UtilitiesForTesting.truncateTimeToMinute(currentTime), parsedEvent.getFileTimeStamp());
 	
 		}
 		else 

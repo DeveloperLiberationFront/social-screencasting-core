@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.lubick.localHub.ToolStream;
 import org.lubick.localHub.forTesting.IdealizedToolStream;
 import org.lubick.localHub.forTesting.IdealizedToolStream.ToolUsage;
-import org.lubick.localHub.forTesting.TestUtilities;
+import org.lubick.localHub.forTesting.UtilitiesForTesting;
 
 public class TestToolStream {
 
@@ -31,7 +31,7 @@ public class TestToolStream {
 	@Test
 	public void testManualCreationOfToolStream() {
 		
-		Date firstDate = TestUtilities.truncateTimeToMinute(new Date());
+		Date firstDate = UtilitiesForTesting.truncateTimeToMinute(new Date());
 		
 		IdealizedToolStream iToolStream = new IdealizedToolStream(firstDate);
 		

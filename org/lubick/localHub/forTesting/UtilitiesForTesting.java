@@ -7,10 +7,10 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
-public class TestUtilities {
+public class UtilitiesForTesting {
 
-	private TestUtilities() {}
-	private static Logger logger = Logger.getLogger(TestUtilities.class.getName());
+	private UtilitiesForTesting() {}
+	private static Logger logger = Logger.getLogger(UtilitiesForTesting.class.getName());
 
 
 	/**
