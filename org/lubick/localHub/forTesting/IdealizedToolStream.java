@@ -28,7 +28,7 @@ public class IdealizedToolStream
 
 	private static Logger logger = Logger.getLogger(IdealizedToolStream.class.getName());
 	
-	private List<ToolUsage> listOfToolUsages;
+	private List<IdealizedToolUsage> listOfToolUsages;
 
 	private Date timestamp;
 	private static Random rand = new Random();
@@ -91,7 +91,7 @@ public class IdealizedToolStream
 	 */
 	public String toJSON() {
 		JSONArray jarr = new JSONArray();
-		for (ToolUsage tu : this.listOfToolUsages) 
+		for (IdealizedToolUsage tu : this.listOfToolUsages) 
 		{
 			try {
 				jarr.put(tu.toJSONObject());
@@ -120,7 +120,7 @@ public class IdealizedToolStream
 			return false;
 		for(int i = 0;i< numberOfToolUses(); i++)
 		{
-			IdealizedToolStream.ToolUsage thisToolUse = listOfToolUsages.get(i);
+			IdealizedToolStream.IdealizedToolUsage thisToolUse = listOfToolUsages.get(i);
 			org.lubick.localHub.ToolStream.ToolUsage otherToolUse = otherList.get(i);
 			if (!thisToolUse.isEquivalent(otherToolUse))
 			{
@@ -131,7 +131,7 @@ public class IdealizedToolStream
 	}
 
 	public void addToolUsage(String toolString, String classString, String keyPressesString, Date toolTimestamp, int duration) {
-		ToolUsage tu = new ToolUsage(toolString, classString, keyPressesString, toolTimestamp, duration);
+		IdealizedToolUsage tu = new IdealizedToolUsage(toolString, classString, keyPressesString, toolTimestamp, duration);
 		listOfToolUsages.add(tu);
 	}
 
@@ -158,7 +158,7 @@ public class IdealizedToolStream
 			int duration = rand.nextInt(1000);
 			
 			
-			ToolUsage tu = new ToolUsage(toolName, toolClass, keyPresses, timeStamp, duration);
+			IdealizedToolUsage tu = new IdealizedToolUsage(toolName, toolClass, keyPresses, timeStamp, duration);
 			this.listOfToolUsages.add(tu);
 		}
 	}
@@ -169,17 +169,17 @@ public class IdealizedToolStream
 	
 	
 
-	public List<ToolUsage> getAsList() {
+	public List<IdealizedToolUsage> getAsList() {
 		return new ArrayList<>(this.listOfToolUsages);
 	}
 
-public static class ToolUsage {
+public static class IdealizedToolUsage {
 		
 		private String toolName, toolClass, keyPresses;
 		private Date timeStamp;
 		private int duration;
 		
-		public ToolUsage(String toolName, String toolClass, String keyPresses, Date timeStamp, int duration) 
+		public IdealizedToolUsage(String toolName, String toolClass, String keyPresses, Date timeStamp, int duration) 
 		{
 			this.toolName = toolName;
 			this.toolClass = toolClass;

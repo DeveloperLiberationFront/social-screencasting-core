@@ -15,7 +15,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.lubick.localHub.ToolStream;
 import org.lubick.localHub.forTesting.IdealizedToolStream;
-import org.lubick.localHub.forTesting.IdealizedToolStream.ToolUsage;
+import org.lubick.localHub.forTesting.IdealizedToolStream.IdealizedToolUsage;
 import org.lubick.localHub.forTesting.UtilitiesForTesting;
 
 public class TestToolStream {
@@ -44,7 +44,7 @@ public class TestToolStream {
 		
 		//I'm scoping this out to avoid copy+paste problems with these assertions
 		{
-			List<IdealizedToolStream.ToolUsage> tools = iToolStream.getAsList();
+			List<IdealizedToolStream.IdealizedToolUsage> tools = iToolStream.getAsList();
 	
 			assertEquals("ToolString", tools.get(0).getToolName());
 			assertEquals("ClassString", tools.get(0).getToolClass());
@@ -86,7 +86,7 @@ public class TestToolStream {
 	public void testAutomaticallyCreatedToolStreams() throws Exception 
 	{
 		IdealizedToolStream iToolStream = IdealizedToolStream.generateRandomToolStream(10);
-		List<ToolUsage> iTools = iToolStream.getAsList();
+		List<IdealizedToolUsage> iTools = iToolStream.getAsList();
 		
 		assertEquals(10, iTools.size());
 		assertEquals(10, iToolStream.numberOfToolUses());
@@ -100,7 +100,7 @@ public class TestToolStream {
 		boolean areAllSecondsTheSameHuh = true;
 		int allMinutes = -1;
 		
-		for(ToolUsage tu : iTools)
+		for(IdealizedToolUsage tu : iTools)
 		{
 			assertNotNull(tu.getTimeStamp());
 			assertNotNull(tu.getToolClass());
