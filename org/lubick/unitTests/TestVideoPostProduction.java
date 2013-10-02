@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.lubick.localHub.ToolStream;
 import org.lubick.localHub.forTesting.IdealizedToolStream;
 import org.lubick.localHub.forTesting.UtilitiesForTesting;
+import org.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
 
 public class TestVideoPostProduction {
 
