@@ -60,11 +60,8 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 				logger.fatal("Invalid input into setMonitorLocation");
 				throw new RuntimeException("Could not set the monitorLocation to "+monitorLocation);
 			}
-			else
-			{
-				logger.error("Invalid input into setMonitorLocation.  Continuing with old directory");
-				return;
-			}
+			logger.error("Invalid input into setMonitorLocation.  Continuing with old directory");
+			return;
 		}
 		File newMonitorDirectory = new File(monitorLocation);
 		if (!newMonitorDirectory.exists())
@@ -76,18 +73,12 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 					logger.fatal("Could not create the monitor directory");
 					throw new RuntimeException("Could not create the monitor directory "+newMonitorDirectory);
 				}
-				else
-				{
-					logger.error("Could not create the monitor directory "+ monitorLocation+", continuing with old directory" );
-					return;
-				}
+				logger.error("Could not create the monitor directory "+ monitorLocation+", continuing with old directory" );
+				return;
 			}
-			else 
-			{
-				//Monitor Directory has been created and now it can be set
-				logger.debug("Setting Monitor Directory to "+ newMonitorDirectory);
-				this.monitorDirectory = newMonitorDirectory;
-			}
+			//Monitor Directory has been created and now it can be set
+			logger.debug("Setting Monitor Directory to "+ newMonitorDirectory);
+			this.monitorDirectory = newMonitorDirectory;
 		}
 		else if (!newMonitorDirectory.isDirectory()) 
 		{
@@ -96,11 +87,8 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 				logger.fatal("Could not create the monitor directory");
 				throw new RuntimeException("Could not create the monitor directory "+newMonitorDirectory);
 			}
-			else
-			{
-				logger.error("Could not set the monitor directory to be "+ monitorLocation+", because it is not a directory.  Continuing with old directory." );
-				return;
-			}
+			logger.error("Could not set the monitor directory to be "+ monitorLocation+", because it is not a directory.  Continuing with old directory." );
+			return;
 		}
 		else 
 		{
