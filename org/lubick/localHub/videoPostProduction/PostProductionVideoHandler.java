@@ -183,7 +183,7 @@ public class PostProductionVideoHandler
 	 */
 	private int readAndSetFrameTimeStamp(FramePacket frame,InputStream inputStream) throws IOException {
 		int i = inputStream.read();
-		int time = i;
+		long time = i;
 		time = time << 8;
 		i = inputStream.read();
 		time += i;
