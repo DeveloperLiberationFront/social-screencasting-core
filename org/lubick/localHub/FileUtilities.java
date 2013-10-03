@@ -24,4 +24,26 @@ public class FileUtilities
 		return new String(bytes);
 	}
 	
+	public static String padIntTo4Digits(int i)
+	{
+		if (i<0)
+		{
+			logger.error("Who put a negative here? "+i);
+			return "I cant deal with negatives";
+		}
+		if (i<10)
+		{
+			return "000"+i;
+		}
+		if (i<100)
+		{
+			return "00"+i;
+		}
+		if (i<1000)
+		{
+			return "0"+i;
+		}
+		return String.valueOf(i);
+	}
+	
 }

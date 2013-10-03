@@ -1,6 +1,8 @@
 package org.lubick.localHub.videoPostProduction;
 
+import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -10,18 +12,44 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.zip.InflaterInputStream;
 
+import javax.imageio.ImageIO;
+
 import org.apache.log4j.Logger;
+import org.lubick.localHub.FileUtilities;
 import org.lubick.localHub.ToolStream.ToolUsage;
 
-
+/* Some parts of this (the decoding aspect) have the following license:
+ * 
+ * This software is OSI Certified Open Source Software
+ * 
+ * The MIT License (MIT)
+ * Copyright 2000-2001 by Wet-Wired.com Ltd., Portsmouth England
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a 
+ * copy of this software and associated documentation files (the "Software"), 
+ * to deal in the Software without restriction, including without limitation 
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the 
+ * Software is furnished to do so, subject to the following conditions: 
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software. 
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+ * EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
+ * OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ * 
+ */
 public class PostProductionVideoHandler 
 {
 	private static Logger logger = Logger.getLogger(PostProductionVideoHandler.class.getName());
 
 	public static final String EXPECTED_FILE_EXTENSION = ".cap";
-	private static final int NO_CHANGES_THIS_FRAME = 0;
-	private static final int CHANGES_THIS_FRAME = 1;
-	private static final int ALPHA = 0xFF000000;
+	
 	
 	private File currentCapFile;
 
@@ -29,6 +57,14 @@ public class PostProductionVideoHandler
 
 	private Rectangle currentFrameRect;
 
+	FramePacket previousFramePacket = null;
+
+	private int firstFrameTimeStamp;
+
+	private boolean reachedEOF;
+	
+	private int currentTempImageNumber = -1;
+	
 	public void loadFile(File capFile) {
 		if (capFile == null)
 		{
@@ -62,8 +98,10 @@ public class PostProductionVideoHandler
 			return null;
 		}
 		File retVal = null;
-		try(FileInputStream inputStream = new FileInputStream(currentCapFile);) {
+		try(FileInputStream inputStream = new FileInputStream(currentCapFile);) 
+		{
 			retVal = extractVideoHelper(inputStream);
+			
 		} catch (IOException e) {
 			logger.error("There was a problem extracting the video",e);
 		}
@@ -80,12 +118,61 @@ public class PostProductionVideoHandler
 		height += inputStream.read();
 
 		this.currentFrameRect = new Rectangle(width, height);
+		currentTempImageNumber = -1;
+		
+		for(int i = 0;i<20;i++)
+		{
+			writeImageToDisk(readInFrameImage(inputStream));
+		}
+		
 		return null;
 	}
 
-	FramePacket previousFramePacket = null;
+	
+	private void writeImageToDisk(BufferedImage readFrame) throws IOException {
+		File f = new File(getNextFileName());
+		if (!f.createNewFile())
+		{
+			logger.debug("The image file already exists, going to overwrite");
+		}
+		ImageIO.write(readFrame, "png", f);
+	}
 
-	private int firstFrameTimeStamp;
+	
+	
+	private String getNextFileName() 
+	{
+		currentTempImageNumber++;
+		return "./Scratch/temp"+FileUtilities.padIntTo4Digits(currentTempImageNumber)+".png";
+	}
+	
+	BufferedImage previousImage = null;
+	public BufferedImage readInFrameImage(InputStream inputStream) throws IOException 
+	{
+
+		FramePacket framePacket = unpackNextFrame(inputStream);
+		
+		
+		
+		//Date frameTime = frame.getFrameTimeStamp();
+		int result = framePacket.getResult();
+		if (result == FramePacket.NO_CHANGES_THIS_FRAME) {
+			return previousImage;
+		} else if (result == FramePacket.REACHED_END) {
+			reachedEOF = true;
+			return previousImage;
+		}
+		previousFramePacket = framePacket;
+
+		BufferedImage bufferedImage = new BufferedImage(currentFrameRect.width, currentFrameRect.height,
+				BufferedImage.TYPE_INT_RGB);
+		bufferedImage.setRGB(0, 0, currentFrameRect.width, currentFrameRect.height, framePacket.getData(), 0,
+				currentFrameRect.width);
+		
+		previousImage = bufferedImage;
+
+		return bufferedImage;
+	}
 
 
 	public FramePacket unpackNextFrame(InputStream inputStream) throws IOException 
@@ -99,8 +186,9 @@ public class PostProductionVideoHandler
 
 		int type = readFrameType(inputStream);
 
-		if (type == NO_CHANGES_THIS_FRAME) {
-			frame.setResult(NO_CHANGES_THIS_FRAME);
+		if (type == FramePacket.NO_CHANGES_THIS_FRAME || type == FramePacket.REACHED_END) 
+		{
+			frame.setResult(type);
 			return frame;
 		}
 
@@ -115,11 +203,11 @@ public class PostProductionVideoHandler
 		catch (IOException e) 
 		{
 			logger.error("Problem unpacking ",e);
-			frame.setResult(NO_CHANGES_THIS_FRAME);
+			frame.setResult(FramePacket.NO_CHANGES_THIS_FRAME);
 			return frame;
 		}
-
-		runLengthDecode(frame);
+		frame.runLengthDecode();
+		//runLengthDecode(frame);
 
 		return frame;
 	}
@@ -220,84 +308,5 @@ public class PostProductionVideoHandler
 		return new Date(this.capFileStartTime.getTime() + (timeOffset - this.firstFrameTimeStamp));
 	}
 	
-	//XXX Left off here
-	private void runLengthDecode(FramePacket frame) {
-		frame.newData = new int[frame.getFrameSize()];
-
-		int inCursor = 0;
-		int outCursor = 0;
-
-		int blockSize = 0;
-
-		int rgb = 0xFF000000;
-
-		while (inCursor < frame.packed.length - 3 && outCursor < frame.getFrameSize()) {
-			if (frame.packed[inCursor] == -1) {
-				inCursor++;
-
-				int count = (frame.packed[inCursor] & 0xFF);
-				inCursor++;
-
-				int size = count * 126;
-				if (size > frame.newData.length) {
-					size = frame.newData.length;
-				}
-
-				for (int loop = 0; loop < (126 * count); loop++) {
-					frame.newData[outCursor] = frame.previousData[outCursor];
-					outCursor++;
-					if (outCursor >= frame.newData.length) {
-						break;
-					}
-				}
-
-			} 
-			else if (frame.packed[inCursor] < 0) // uncomp
-			{
-				blockSize = frame.packed[inCursor] & 0x7F;
-				inCursor++;
-
-				for (int loop = 0; loop < blockSize; loop++) {
-					rgb = ((frame.packed[inCursor] & 0xFF) << 16)
-							| ((frame.packed[inCursor + 1] & 0xFF) << 8)
-							| (frame.packed[inCursor + 2] & 0xFF) | ALPHA;
-					if (rgb == ALPHA) {
-						rgb = frame.previousData[outCursor];
-					}
-					inCursor += 3;
-					frame.newData[outCursor] = rgb;
-					outCursor++;
-					if (outCursor >= frame.newData.length) {
-						break;
-					}
-				}
-			} 
-			else {
-				blockSize = frame.packed[inCursor];
-				inCursor++;
-				rgb = ((frame.packed[inCursor] & 0xFF) << 16)
-						| ((frame.packed[inCursor + 1] & 0xFF) << 8)
-						| (frame.packed[inCursor + 2] & 0xFF) | ALPHA;
-
-				boolean transparent = false;
-				if (rgb == ALPHA) {
-					transparent = true;
-				}
-				inCursor += 3;
-				for (int loop = 0; loop < blockSize; loop++) {
-					if (transparent) {
-						frame.newData[outCursor] = frame.previousData[outCursor];
-					} else {
-						frame.newData[outCursor] = rgb;
-					}
-					outCursor++;
-					if (outCursor >= frame.newData.length) {
-						break;
-					}
-				}
-			}
-		}
-		frame.result = outCursor;
-	}
 
 }

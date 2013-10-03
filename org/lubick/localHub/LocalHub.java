@@ -18,7 +18,7 @@ import org.lubick.localHub.forTesting.LocalHubDebugAccess;
 
 public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 
-	private static final String LOGGING_FILE_PATH = "./log4j.settings";
+	public static final String LOGGING_FILE_PATH = "./log4j.settings";
 	private static final LocalHub singletonHub;
 	private static Logger logger;
 

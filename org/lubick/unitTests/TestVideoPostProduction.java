@@ -5,13 +5,19 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.util.Date;
 
+import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
+import org.lubick.localHub.LocalHub;
 import org.lubick.localHub.ToolStream;
 import org.lubick.localHub.forTesting.IdealizedToolStream;
 import org.lubick.localHub.forTesting.UtilitiesForTesting;
 import org.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
 
 public class TestVideoPostProduction {
+	
+	static {
+		PropertyConfigurator.configure(LocalHub.LOGGING_FILE_PATH);
+	}
 
 	@Test
 	public void testSingleToolUsageExtraction() {
@@ -38,6 +44,7 @@ public class TestVideoPostProduction {
 		
 		File outputFile = handler.extractVideoForToolUsage(toolStream.getAsList().get(0));
 		
+		assertNotNull(outputFile);
 		assertTrue(outputFile.exists());
 		assertTrue(outputFile.isFile());
 		assertFalse(outputFile.isHidden());
