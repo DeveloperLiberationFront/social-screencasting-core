@@ -19,7 +19,7 @@ public class TestVideoPostProduction {
 		PropertyConfigurator.configure(LocalHub.LOGGING_FILE_PATH);
 	}
 
-	//@Test
+	@Test
 	public void testSingleToolUsageExtraction() {
 		
 		File capFile = new File("./src/ForTesting/oneMinuteCap.cap");
@@ -53,7 +53,7 @@ public class TestVideoPostProduction {
 		assertTrue(outputFile.length() < 2000000);
 	}
 	
-	//@Test
+	@Test
 	public void testSingleToolUsageExtractionReallyEarly() {
 		
 		File capFile = new File("./src/ForTesting/oneMinuteCap.cap");

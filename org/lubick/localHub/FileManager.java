@@ -48,7 +48,7 @@ public class FileManager implements Runnable {
 		unparsedFiles.clear();
 		
 		//All of the currently tracked files should be here already courtesy of the setter
-
+		isRunning = true;
 
 		while (isRunning)
 		{
