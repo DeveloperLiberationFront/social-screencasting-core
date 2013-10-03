@@ -60,7 +60,9 @@ public class PostProductionVideoHandler
 
 	private Rectangle currentFrameRect;
 
-	FramePacket previousFramePacket = null;
+	private FramePacket previousFramePacket = null;
+	
+	private BufferedImage previousImage = null;
 
 	private int firstFrameTimeStamp;
 
@@ -141,8 +143,190 @@ public class PostProductionVideoHandler
 		int height = inputStream.read();
 		height = height << 8;
 		height += inputStream.read();
-
+	
 		return new Rectangle(width, height);
+	}
+
+	private void writeImageToDisk(BufferedImage readFrame) throws IOException {
+		File f = new File(getNextFileName());
+		if (!f.createNewFile())
+		{
+			logger.debug("The image file already exists, going to overwrite");
+		}
+		logger.trace("Starting write to disk");
+		ImageIO.write(readFrame, "png", f);
+		logger.trace("Finished write to disk");
+		if (DELETE_IMAGES_AFTER_USE)
+		{
+			//if we are tracing, we want to see the files at the end of all of this.
+			f.deleteOnExit();
+		}
+	}
+
+	private String getNextFileName() 
+	{
+		currentTempImageNumber++;
+		return "./Scratch/temp"+FileUtilities.padIntTo4Digits(currentTempImageNumber)+".png";
+	}
+
+	private BufferedImage readInFrameImage(InputStream inputStream) throws IOException 
+	{
+		logger.trace("Starting to read in frame");
+		FramePacket framePacket = unpackNextFrame(inputStream);
+	
+		logger.debug("read in frame "+framePacket);
+	
+		//Date frameTime = frame.getFrameTimeStamp();
+	
+		int result = framePacket.getResult();
+		if (result == FramePacket.NO_CHANGES_THIS_FRAME) {
+			return previousImage;
+		} else if (result == FramePacket.REACHED_END) {
+			reachedEOF = true;
+			return previousImage;
+		}
+		previousFramePacket = framePacket;
+	
+		BufferedImage bufferedImage = new BufferedImage(currentFrameRect.width, currentFrameRect.height,
+				BufferedImage.TYPE_INT_RGB);
+		bufferedImage.setRGB(0, 0, currentFrameRect.width, currentFrameRect.height, framePacket.getData(), 0,
+				currentFrameRect.width);
+	
+		previousImage = bufferedImage;
+	
+		return bufferedImage;
+	}
+
+	private FramePacket unpackNextFrame(InputStream inputStream) throws IOException 
+	{
+	
+		FramePacket frame = new FramePacket(currentFrameRect.width * currentFrameRect.height, previousFramePacket);
+	
+		Date timeStamp = readInFrameTimeStamp(inputStream);
+	
+		frame.setFrameTimeStamp(timeStamp);
+	
+		int type = readFrameType(inputStream);
+	
+		if (type == FramePacket.NO_CHANGES_THIS_FRAME || type == FramePacket.REACHED_END) 
+		{
+			frame.setResult(type);
+			return frame;
+		}
+	
+		try (ByteArrayOutputStream bO = new ByteArrayOutputStream();) {
+	
+			byte[] compressedData = readCompressedData(inputStream);
+	
+			decompressData(bO, compressedData);
+	
+			frame.setEncodedData(bO.toByteArray());
+		} 
+		catch (IOException e) 
+		{
+			logger.error("Problem unpacking ",e);
+			frame.setResult(FramePacket.NO_CHANGES_THIS_FRAME);
+			return frame;
+		}
+		frame.runLengthDecode();
+		//runLengthDecode(frame);
+	
+		return frame;
+	}
+
+	private Date readInFrameTimeStamp(InputStream inputStream) throws IOException {
+		int readBuffer = inputStream.read();
+		int timeOffset = readBuffer;
+		timeOffset = timeOffset << 8;
+		readBuffer = inputStream.read();
+		timeOffset += readBuffer;
+		timeOffset = timeOffset << 8;
+		readBuffer = inputStream.read();
+		timeOffset += readBuffer;
+		timeOffset = timeOffset << 8;
+		readBuffer = inputStream.read();
+		timeOffset += readBuffer;
+	
+		return makeNewFrameTimeStamp(timeOffset);
+	}
+
+	private Date makeNewFrameTimeStamp(int timeOffset) 
+	{
+		if (this.firstFrameTimeStamp == -1)
+		{
+			this.firstFrameTimeStamp = timeOffset;
+			return this.capFileStartTime;
+		}
+		return new Date(this.capFileStartTime.getTime() + (timeOffset - this.firstFrameTimeStamp));
+	}
+
+	/*
+	 * The first four bytes from the data stream 
+	 */
+	private int readFrameType(InputStream inputStream) throws IOException 
+	{
+		byte type = (byte) inputStream.read();
+		logger.trace("Packed Code:"+type);
+		//Convert the type to a positive int.  It shouldn't be otherwise, but just in case
+		return (type & 0xFF);
+	}
+
+	private byte[] readCompressedData(InputStream inputStream) throws IOException {
+	
+		int compressedFrameSize = readCompressedFrameSize(inputStream);
+	
+		byte[] compressedData = new byte[compressedFrameSize];
+		int readCursor = 0;
+		int sizeRead = 0;
+	
+		//Read in all the data
+		while (sizeRead > -1) {
+			readCursor += sizeRead;
+			if (readCursor >= compressedFrameSize) {
+				break;
+			}
+	
+			sizeRead = inputStream.read(compressedData, readCursor, compressedFrameSize - readCursor);
+		}
+		return compressedData;
+	}
+
+	private int readCompressedFrameSize(InputStream inputStream) throws IOException 
+	{
+		int readBuffer;
+		readBuffer = inputStream.read();
+	
+		int zSize = readBuffer;
+		zSize = zSize << 8;
+		readBuffer = inputStream.read();
+		zSize += readBuffer;
+		zSize = zSize << 8;
+		readBuffer = inputStream.read();
+		zSize += readBuffer;
+		zSize = zSize << 8;
+		readBuffer = inputStream.read();
+		zSize += readBuffer;
+	
+		logger.trace("Zipped Frame size:"+zSize);
+		return zSize;
+	}
+
+	private void decompressData(ByteArrayOutputStream bO, byte[] compressedData) throws IOException {
+		int sizeRead;
+		ByteArrayInputStream bI = new ByteArrayInputStream(compressedData);
+	
+		InflaterInputStream zI = new InflaterInputStream(bI);
+	
+		byte[] buffer = new byte[1000];
+		sizeRead = zI.read(buffer);
+	
+		while (sizeRead > -1) {
+			bO.write(buffer, 0, sizeRead);
+			bO.flush();
+	
+			sizeRead = zI.read(buffer);
+		}
+		bO.flush();
 	}
 
 	private void executeEncoding(File newVideoFile) throws IOException 
@@ -181,192 +365,7 @@ public class PostProductionVideoHandler
 		}).start();
 	}
 
-	private void writeImageToDisk(BufferedImage readFrame) throws IOException {
-		File f = new File(getNextFileName());
-		if (!f.createNewFile())
-		{
-			logger.debug("The image file already exists, going to overwrite");
-		}
-		logger.trace("Starting write to disk");
-		ImageIO.write(readFrame, "png", f);
-		logger.trace("Finished write to disk");
-		if (DELETE_IMAGES_AFTER_USE)
-		{
-			//if we are tracing, we want to see the files at the end of all of this.
-			f.deleteOnExit();
-		}
-	}
-
-
-
-	private String getNextFileName() 
-	{
-		currentTempImageNumber++;
-		return "./Scratch/temp"+FileUtilities.padIntTo4Digits(currentTempImageNumber)+".png";
-	}
-
-	BufferedImage previousImage = null;
-	public BufferedImage readInFrameImage(InputStream inputStream) throws IOException 
-	{
-		logger.trace("Starting to read in frame");
-		FramePacket framePacket = unpackNextFrame(inputStream);
-
-		logger.debug("read in frame "+framePacket);
-
-		//Date frameTime = frame.getFrameTimeStamp();
-
-		int result = framePacket.getResult();
-		if (result == FramePacket.NO_CHANGES_THIS_FRAME) {
-			return previousImage;
-		} else if (result == FramePacket.REACHED_END) {
-			reachedEOF = true;
-			return previousImage;
-		}
-		previousFramePacket = framePacket;
-
-		BufferedImage bufferedImage = new BufferedImage(currentFrameRect.width, currentFrameRect.height,
-				BufferedImage.TYPE_INT_RGB);
-		bufferedImage.setRGB(0, 0, currentFrameRect.width, currentFrameRect.height, framePacket.getData(), 0,
-				currentFrameRect.width);
-
-		previousImage = bufferedImage;
-
-		return bufferedImage;
-	}
-
-
-	public FramePacket unpackNextFrame(InputStream inputStream) throws IOException 
-	{
-
-		FramePacket frame = new FramePacket(currentFrameRect.width * currentFrameRect.height, previousFramePacket);
-
-		Date timeStamp = readInFrameTimeStamp(inputStream);
-
-		frame.setFrameTimeStamp(timeStamp);
-
-		int type = readFrameType(inputStream);
-
-		if (type == FramePacket.NO_CHANGES_THIS_FRAME || type == FramePacket.REACHED_END) 
-		{
-			frame.setResult(type);
-			return frame;
-		}
-
-		try (ByteArrayOutputStream bO = new ByteArrayOutputStream();) {
-
-			byte[] compressedData = readCompressedData(inputStream);
-
-			decompressData(bO, compressedData);
-
-			frame.setEncodedData(bO.toByteArray());
-		} 
-		catch (IOException e) 
-		{
-			logger.error("Problem unpacking ",e);
-			frame.setResult(FramePacket.NO_CHANGES_THIS_FRAME);
-			return frame;
-		}
-		frame.runLengthDecode();
-		//runLengthDecode(frame);
-
-		return frame;
-	}
-
-
-	private void decompressData(ByteArrayOutputStream bO, byte[] compressedData) throws IOException {
-		int sizeRead;
-		ByteArrayInputStream bI = new ByteArrayInputStream(compressedData);
-
-		InflaterInputStream zI = new InflaterInputStream(bI);
-
-		byte[] buffer = new byte[1000];
-		sizeRead = zI.read(buffer);
-
-		while (sizeRead > -1) {
-			bO.write(buffer, 0, sizeRead);
-			bO.flush();
-
-			sizeRead = zI.read(buffer);
-		}
-		bO.flush();
-	}
-
-	private byte[] readCompressedData(InputStream inputStream) throws IOException {
-
-		int compressedFrameSize = readCompressedFrameSize(inputStream);
-
-		byte[] compressedData = new byte[compressedFrameSize];
-		int readCursor = 0;
-		int sizeRead = 0;
-
-		//Read in all the data
-		while (sizeRead > -1) {
-			readCursor += sizeRead;
-			if (readCursor >= compressedFrameSize) {
-				break;
-			}
-
-			sizeRead = inputStream.read(compressedData, readCursor, compressedFrameSize - readCursor);
-		}
-		return compressedData;
-	}
-
-	private Date readInFrameTimeStamp(InputStream inputStream) throws IOException {
-		int readBuffer = inputStream.read();
-		int timeOffset = readBuffer;
-		timeOffset = timeOffset << 8;
-		readBuffer = inputStream.read();
-		timeOffset += readBuffer;
-		timeOffset = timeOffset << 8;
-		readBuffer = inputStream.read();
-		timeOffset += readBuffer;
-		timeOffset = timeOffset << 8;
-		readBuffer = inputStream.read();
-		timeOffset += readBuffer;
-
-		return makeNewFrameTimeStamp(timeOffset);
-	}
-
-	private int readCompressedFrameSize(InputStream inputStream) throws IOException 
-	{
-		int readBuffer;
-		readBuffer = inputStream.read();
-
-		int zSize = readBuffer;
-		zSize = zSize << 8;
-		readBuffer = inputStream.read();
-		zSize += readBuffer;
-		zSize = zSize << 8;
-		readBuffer = inputStream.read();
-		zSize += readBuffer;
-		zSize = zSize << 8;
-		readBuffer = inputStream.read();
-		zSize += readBuffer;
-
-		logger.trace("Zipped Frame size:"+zSize);
-		return zSize;
-	}
-
-	/*
-	 * The first four bytes from the data stream 
-	 */
-	private int readFrameType(InputStream inputStream) throws IOException 
-	{
-		byte type = (byte) inputStream.read();
-		logger.trace("Packed Code:"+type);
-		//Convert the type to a positive int.  It shouldn't be otherwise, but just in case
-		return (type & 0xFF);
-	}
-
-	private Date makeNewFrameTimeStamp(int timeOffset) 
-	{
-		if (this.firstFrameTimeStamp == -1)
-		{
-			this.firstFrameTimeStamp = timeOffset;
-			return this.capFileStartTime;
-		}
-		return new Date(this.capFileStartTime.getTime() + (timeOffset - this.firstFrameTimeStamp));
-	}
+	
 
 
 }
