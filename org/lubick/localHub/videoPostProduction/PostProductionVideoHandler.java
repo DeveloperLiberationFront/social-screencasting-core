@@ -1,6 +1,5 @@
 package org.lubick.localHub.videoPostProduction;
 
-import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -9,7 +8,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.Date;
+import java.util.Scanner;
 import java.util.zip.InflaterInputStream;
 
 import javax.imageio.ImageIO;
@@ -49,8 +50,8 @@ public class PostProductionVideoHandler
 	private static Logger logger = Logger.getLogger(PostProductionVideoHandler.class.getName());
 
 	public static final String EXPECTED_FILE_EXTENSION = ".cap";
-	
-	
+
+
 	private File currentCapFile;
 
 	private Date capFileStartTime;
@@ -62,9 +63,9 @@ public class PostProductionVideoHandler
 	private int firstFrameTimeStamp;
 
 	private boolean reachedEOF;
-	
+
 	private int currentTempImageNumber = -1;
-	
+
 	public void loadFile(File capFile) {
 		if (capFile == null)
 		{
@@ -101,7 +102,7 @@ public class PostProductionVideoHandler
 		try(FileInputStream inputStream = new FileInputStream(currentCapFile);) 
 		{
 			retVal = extractVideoHelper(inputStream);
-			
+
 		} catch (IOException e) {
 			logger.error("There was a problem extracting the video",e);
 		}
@@ -119,16 +120,48 @@ public class PostProductionVideoHandler
 
 		this.currentFrameRect = new Rectangle(width, height);
 		currentTempImageNumber = -1;
-		
-		for(int i = 0;i<20;i++)
+
+		/*for(int i = 0;i<100;i++)
 		{
 			writeImageToDisk(readInFrameImage(inputStream));
+		}*/
+
+		Process process = Runtime.getRuntime().exec("./src/FFMPEGbin/ffmpeg.exe -r 5 -pix_fmt yuv420p -i ./Scratch/temp%04d.png  -vcodec libx264 ./Scratch/thing.mkv");
+
+		inheritIO(process.getInputStream(), "Normal Output");
+		inheritIO(process.getErrorStream(), "Error Output");
+		System.out.println("Rendering");
+		try {
+			System.out.println("FFMPEG exited with state "+process.waitFor());
+		} catch (InterruptedException e) {
+			logger.error("There was a problem with ffmpeg",e);
 		}
-		
+
 		return null;
 	}
 
-	
+
+	private static void inheritIO(final InputStream src, final String identifer) 
+	{
+		if (!logger.isTraceEnabled())
+		{
+			return;
+		}
+		new Thread(new Runnable() {
+			public void run() {
+				try(Scanner sc = new Scanner(src);) 
+				{
+					while (sc.hasNextLine()) {
+						logger.trace("From "+identifer+":"+ sc.nextLine());
+					}
+				} catch (Exception e) {
+					logger.error("Problem in stream monitoring",e);
+				}
+
+			}
+		}).start();
+	}
+
 	private void writeImageToDisk(BufferedImage readFrame) throws IOException {
 		File f = new File(getNextFileName());
 		if (!f.createNewFile())
@@ -138,24 +171,24 @@ public class PostProductionVideoHandler
 		ImageIO.write(readFrame, "png", f);
 	}
 
-	
-	
+
+
 	private String getNextFileName() 
 	{
 		currentTempImageNumber++;
 		return "./Scratch/temp"+FileUtilities.padIntTo4Digits(currentTempImageNumber)+".png";
 	}
-	
+
 	BufferedImage previousImage = null;
 	public BufferedImage readInFrameImage(InputStream inputStream) throws IOException 
 	{
 
 		FramePacket framePacket = unpackNextFrame(inputStream);
-		
+
 		logger.debug("read in frame "+framePacket);
-		
+
 		//Date frameTime = frame.getFrameTimeStamp();
-		
+
 		int result = framePacket.getResult();
 		if (result == FramePacket.NO_CHANGES_THIS_FRAME) {
 			return previousImage;
@@ -169,7 +202,7 @@ public class PostProductionVideoHandler
 				BufferedImage.TYPE_INT_RGB);
 		bufferedImage.setRGB(0, 0, currentFrameRect.width, currentFrameRect.height, framePacket.getData(), 0,
 				currentFrameRect.width);
-		
+
 		previousImage = bufferedImage;
 
 		return bufferedImage;
@@ -194,11 +227,11 @@ public class PostProductionVideoHandler
 		}
 
 		try (ByteArrayOutputStream bO = new ByteArrayOutputStream();) {
-			
+
 			byte[] compressedData = readCompressedData(inputStream);
-			
+
 			decompressData(bO, compressedData);
-			
+
 			frame.setEncodedData(bO.toByteArray());
 		} 
 		catch (IOException e) 
@@ -233,7 +266,7 @@ public class PostProductionVideoHandler
 	}
 
 	private byte[] readCompressedData(InputStream inputStream) throws IOException {
-		
+
 		int compressedFrameSize = readCompressedFrameSize(inputStream);
 
 		byte[] compressedData = new byte[compressedFrameSize];
@@ -308,6 +341,6 @@ public class PostProductionVideoHandler
 		}
 		return new Date(this.capFileStartTime.getTime() + (timeOffset - this.firstFrameTimeStamp));
 	}
-	
+
 
 }
