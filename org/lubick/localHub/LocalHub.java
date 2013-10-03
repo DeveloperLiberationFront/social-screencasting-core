@@ -207,6 +207,10 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		}
 	}
 	
+	public void shutDown() {
+		currentRunnable.stop();
+		isRunning = false;
+	}
 
 	/**
 	 * A class that allows unit tests to have indirect, controlled access to the 
@@ -257,6 +261,15 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 			return hubToDebug.dbAbstraction.getAllToolUsageHistoriesForPlugin(currentPluginName);
 		}
 
+		@Override
+		public void shutDown() {
+			hubToDebug.shutDown();
+			
+		}
+
 	}
+
+
+
 
 }

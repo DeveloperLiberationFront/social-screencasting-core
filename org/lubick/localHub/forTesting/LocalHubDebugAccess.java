@@ -19,6 +19,8 @@ public interface LocalHubDebugAccess {
 	void removeParsedFileListener(ParsedFileListener parsedFileListener);
 
 	List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName);
+
+	void shutDown();
 	
 
 }

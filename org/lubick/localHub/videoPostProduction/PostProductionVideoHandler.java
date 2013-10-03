@@ -8,8 +8,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Scanner;
 import java.util.zip.InflaterInputStream;
 
@@ -51,7 +52,7 @@ public class PostProductionVideoHandler
 
 	public static final String EXPECTED_FILE_EXTENSION = ".cap";
 
-	private static final boolean DELETE_IMAGES_AFTER_USE = true;
+	private static final boolean DELETE_IMAGES_AFTER_USE = false;
 
 	private static final int FRAME_RATE = 5;
 	
@@ -74,6 +75,8 @@ public class PostProductionVideoHandler
 	private boolean reachedEOF;
 
 	private int currentTempImageNumber = -1;
+
+	private Queue<OverloadFile> queueOfOverloadFiles = new LinkedList<>();
 
 	public void loadFile(File capFile) {
 		if (capFile == null)
@@ -152,7 +155,24 @@ public class PostProductionVideoHandler
 
 		for(int i = 0;i<FRAME_RATE * (RUN_UP_TIME + TOOL_DEMO_TIME);i++)
 		{
-			writeImageToDisk(readInFrameImage(inputStream));
+			BufferedImage tempImage = readInFrameImage(inputStream);
+			if (tempImage == null)
+			{
+				if (!reachedEOF)
+				{
+					throw new IOException("Image processing broke.  Got a null BufferedImage from unpacking the frame.");
+				}
+				if (queueOfOverloadFiles.size() == 0)
+				{
+					logger.error("Ran out of cap files to pull video from.  Truncated with what I've got");
+					break;
+				}
+				inputStream = goToNextFileInQueue(inputStream);
+				//call this image a mulligan and go to the top of the loop.
+				i--;
+				continue;
+			}
+			writeImageToDisk(tempImage);
 		}
 		
 		File newVideoFile = new File("./Scratch/temp.mkv");
@@ -205,6 +225,10 @@ public class PostProductionVideoHandler
 		logger.trace("Starting to read in frame");
 		FramePacket framePacket = unpackNextFrame(inputStream);
 	
+		if (reachedEOF)
+		{
+			return null;
+		}
 		logger.debug("read in frame "+framePacket);
 	
 		//Date frameTime = frame.getFrameTimeStamp();
@@ -213,6 +237,8 @@ public class PostProductionVideoHandler
 		if (result == FramePacket.NO_CHANGES_THIS_FRAME) {
 			return previousImage;
 		} else if (result == FramePacket.REACHED_END) {
+			logger.fatal("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			logger.fatal("I TOTALLY DID NOT EXPECT THIS LINE OF CODE TO BE REACHED");
 			reachedEOF = true;
 			return previousImage;
 		}
@@ -234,6 +260,11 @@ public class PostProductionVideoHandler
 		FramePacket frame = new FramePacket(currentFrameRect.width * currentFrameRect.height, previousFramePacket);
 	
 		Date timeStamp = readInFrameTimeStamp(inputStream);
+		
+		if (timeStamp == null || reachedEOF) //both or none of these should be true
+		{
+			return frame;
+		}
 	
 		frame.setFrameTimeStamp(timeStamp);
 	
@@ -265,8 +296,20 @@ public class PostProductionVideoHandler
 		return frame;
 	}
 
+	/**
+	 * The first part in any frame is the time stamp.  This attempts to read the time stamp, or, if we've reached
+	 * the end of the file, will return null and set reachedEOF to true.
+	 * @param inputStream
+	 * @return
+	 * @throws IOException
+	 */
 	private Date readInFrameTimeStamp(InputStream inputStream) throws IOException {
 		int readBuffer = inputStream.read();
+		if (readBuffer < 0)
+		{
+			this.reachedEOF = true;
+			return null;
+		}
 		int timeOffset = readBuffer;
 		timeOffset = timeOffset << 8;
 		readBuffer = inputStream.read();
@@ -396,11 +439,36 @@ public class PostProductionVideoHandler
 		}).start();
 	}
 
-	public void enqueueOverLoadFile(File secondCapFile) {
-		// TODO Auto-generated method stub
+	public void enqueueOverLoadFile(File extraCapFile, Date extraDate) {
+		this.queueOfOverloadFiles.offer(new OverloadFile(extraCapFile, extraDate));
 		
 	}
 
+	private InputStream goToNextFileInQueue(InputStream oldInputStream) throws IOException 
+	{
+		oldInputStream.close();
+		OverloadFile nextFile = queueOfOverloadFiles.poll();
+		FileInputStream inputStream = new FileInputStream(nextFile.file);
+		readInScreenSizeHeader(inputStream);
+		
+		this.reachedEOF = false;
+		this.firstFrameTimeStamp = -1; //force this to be reset.
+		this.capFileStartTime = nextFile.date;
+		return inputStream;
+	}
+
+	private static class OverloadFile
+	{
+
+		private Date date;
+		private File file;
+
+		public OverloadFile(File extraCapFile, Date extraDate) {
+			this.file = extraCapFile;
+			this.date = extraDate;
+		}
+		
+	}
 	
 
 

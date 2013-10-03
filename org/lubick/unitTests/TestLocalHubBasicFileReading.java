@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -61,6 +62,12 @@ public class TestLocalHubBasicFileReading {
 		localHub = LocalHub.startServerAndReturnDebugAccess(LOCAL_HUB_MONITOR_LOCATION);
 	
 		
+	}
+	
+	@AfterClass
+	public static void shutDownAll() throws Exception
+	{
+		localHub.shutDown();
 	}
 	
 	

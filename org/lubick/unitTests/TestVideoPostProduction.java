@@ -19,7 +19,7 @@ public class TestVideoPostProduction {
 		PropertyConfigurator.configure(LocalHub.LOGGING_FILE_PATH);
 	}
 
-	@Test
+	//@Test
 	public void testSingleToolUsageExtraction() {
 		
 		File capFile = new File("./src/ForTesting/oneMinuteCap.cap");
@@ -53,7 +53,7 @@ public class TestVideoPostProduction {
 		assertTrue(outputFile.length() < 2000000);
 	}
 	
-	@Test
+	//@Test
 	public void testSingleToolUsageExtractionReallyEarly() {
 		
 		File capFile = new File("./src/ForTesting/oneMinuteCap.cap");
@@ -97,10 +97,11 @@ public class TestVideoPostProduction {
 		assertTrue(secondCapFile.exists());
 		
 		Date date = UtilitiesForTesting.truncateTimeToMinute(new Date());
+		Date secondDate = UtilitiesForTesting.truncateTimeToMinute(new Date(date.getTime() + 61*1000));
 		
 		PostProductionVideoHandler handler = new PostProductionVideoHandler();
 		handler.loadFile(firstcapFile);
-		handler.enqueueOverLoadFile(secondCapFile);
+		handler.enqueueOverLoadFile(secondCapFile, secondDate);
 		
 		handler.setCurrentFileStartTime(date);
 		
@@ -122,7 +123,7 @@ public class TestVideoPostProduction {
 		assertTrue(outputFile.length() > 1000000);	//I expect the file size to be at least 1 Mb and no more than 2Mb	
 		assertTrue(outputFile.length() < 2000000);
 		
-		fail("Not implemented yet");
+		
 	}
 	
 

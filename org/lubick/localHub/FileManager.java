@@ -28,6 +28,7 @@ public class FileManager implements Runnable {
 	private File monitorDirectory = null;
 	private LoadedFileListener loadedFileListener = null;
 	private ToolStreamFileParser fileParser = null;
+	private boolean isRunning;
 	
 	private static Logger logger = Logger.getLogger(FileManager.class.getName());
 
@@ -49,7 +50,7 @@ public class FileManager implements Runnable {
 		//All of the currently tracked files should be here already courtesy of the setter
 
 
-		while (true)
+		while (isRunning)
 		{
 			Set<File> newFiles = new HashSet<File>();
 			//This is the monitoring code
@@ -211,6 +212,11 @@ public class FileManager implements Runnable {
 		}
 		return response;
 
+	}
+
+	public void stop() {
+		isRunning = false;
+		
 	}
 
 
