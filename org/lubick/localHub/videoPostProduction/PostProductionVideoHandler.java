@@ -53,6 +53,11 @@ public class PostProductionVideoHandler
 
 	private static final boolean DELETE_IMAGES_AFTER_USE = true;
 
+	private static final int FRAME_RATE = 5;
+	
+	private static final int RUN_UP_TIME = 5;
+	
+	private static final int TOOL_DEMO_TIME = 15;
 
 	private File currentCapFile;
 
@@ -102,10 +107,22 @@ public class PostProductionVideoHandler
 			logger.error("PostProductionVideo object needed to have a file to load and a start time");
 			return null;
 		}
+		
+		Date timeToLookFor = new Date(specificToolUse.getTimeStamp().getTime() - RUN_UP_TIME *1000);
+		if (timeToLookFor.before(capFileStartTime))
+		{
+			timeToLookFor = capFileStartTime;
+		}
+		
+			
 		File retVal = null;
 		try(FileInputStream inputStream = new FileInputStream(currentCapFile);) 
 		{
-			retVal = extractVideoHelper(inputStream);
+			this.currentFrameRect = readInScreenSizeHeader(inputStream);
+			fastFowardStreamToTime(inputStream, timeToLookFor);
+			
+			
+			retVal = extractDemoVideoToFile(inputStream);
 
 		} catch (IOException e) {
 			logger.error("There was a problem extracting the video",e);
@@ -113,13 +130,38 @@ public class PostProductionVideoHandler
 		return retVal;
 	}
 
-	private File extractVideoHelper(InputStream inputStream) throws IOException 
+	private void fastFowardStreamToTime(FileInputStream inputStream, Date timeToLookFor) throws IOException 
 	{
-		this.currentFrameRect = readInScreenSizeHeader(inputStream);
+		if (timeToLookFor.equals(capFileStartTime))	//no fast forwarding required
+		{
+			return;
+		}
 		
+		Date currTimeStamp = capFileStartTime;
+		
+		while (currTimeStamp.before(timeToLookFor))
+		{
+			currTimeStamp = readInFrameTimeStamp(inputStream);
+
+			int type = readFrameType(inputStream);
+
+			if (type == FramePacket.NO_CHANGES_THIS_FRAME || type == FramePacket.REACHED_END) 
+			{
+				//nothing yet to read here.
+				continue;
+			}
+
+			int compressedFrameSize = readCompressedFrameSize(inputStream);
+			
+			inputStream.skip(compressedFrameSize);
+		}
+	}
+
+	private File extractDemoVideoToFile(InputStream inputStream) throws IOException 
+	{
 		currentTempImageNumber = -1;
 
-		for(int i = 0;i<100;i++)
+		for(int i = 0;i<FRAME_RATE * (RUN_UP_TIME + TOOL_DEMO_TIME);i++)
 		{
 			writeImageToDisk(readInFrameImage(inputStream));
 		}
@@ -363,6 +405,11 @@ public class PostProductionVideoHandler
 
 			}
 		}).start();
+	}
+
+	public void enqueueOverLoadFile(File secondCapFile) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	
