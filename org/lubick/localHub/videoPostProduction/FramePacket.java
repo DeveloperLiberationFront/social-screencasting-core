@@ -1,5 +1,6 @@
 package org.lubick.localHub.videoPostProduction;
 
+import java.util.Arrays;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
@@ -34,6 +35,7 @@ import org.apache.log4j.Logger;
  */
 class FramePacket 
 {
+	
 	private static Logger logger = Logger.getLogger(FramePacket.class.getName());
 	
 	public static final int NO_CHANGES_THIS_FRAME = 0;
@@ -46,12 +48,12 @@ class FramePacket
 	private static final byte STREAK_OF_SAME_AS_LAST_TIME_BLOCKS_CONSTANT = (byte) 0xFF;
 	
 	
-	private int[] previousData;
+	private int[] previousData = new int[1];	//to avoid null pointers
 	private int result;
 	private Date frameTimeStamp;
-	private byte[] encodedData;
+	private byte[] encodedData = new byte[1];
 	private int frameSize;
-	int[] decodedData;
+	private int[] decodedData = new int[1];
 
 	public int getFrameSize() {
 		return frameSize;
@@ -175,7 +177,7 @@ class FramePacket
 				}
 			}
 		}
-		this.result = outCursor;
+		
 		logger.debug("Ending outCursor: "+result);
 		
 		//TODO this is a hotfix for the bottom of the screen going dark.  I think there is some 
@@ -184,5 +186,16 @@ class FramePacket
 		{
 			this.decodedData[outCursor] = this.previousData[outCursor];
 		}
+		this.result = FramePacket.CHANGES_THIS_FRAME;
 	}
+	
+	@Override
+	public String toString() {
+		return "FramePacket [frameSize=" + frameSize + ", result=" + result
+				+ ", frameTimeStamp=" + frameTimeStamp + ", previousDataLength="
+				+ previousData.length + ", encodedDataLength="
+				+ encodedData.length + ", decodedDataLength="
+				+ decodedData.length + "]";
+	}
+
 }

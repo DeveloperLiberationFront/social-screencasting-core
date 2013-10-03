@@ -152,9 +152,10 @@ public class PostProductionVideoHandler
 
 		FramePacket framePacket = unpackNextFrame(inputStream);
 		
-		
+		logger.debug("read in frame "+framePacket);
 		
 		//Date frameTime = frame.getFrameTimeStamp();
+		
 		int result = framePacket.getResult();
 		if (result == FramePacket.NO_CHANGES_THIS_FRAME) {
 			return previousImage;
