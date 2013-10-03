@@ -153,7 +153,14 @@ public class PostProductionVideoHandler
 
 			int compressedFrameSize = readCompressedFrameSize(inputStream);
 			
-			inputStream.skip(compressedFrameSize);
+			long actualSkipped = inputStream.skip(compressedFrameSize);
+			if (compressedFrameSize != actualSkipped)
+			{
+				logger.error("Incorrect amount of bytes skipped! Expected "+compressedFrameSize+" when only "+actualSkipped +" were skipped");
+			}
+			else {
+				logger.trace(actualSkipped +" bytes skipped to go to next frame");
+			}
 		}
 	}
 
