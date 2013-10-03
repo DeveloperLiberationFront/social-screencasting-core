@@ -51,6 +51,8 @@ public class PostProductionVideoHandler
 
 	public static final String EXPECTED_FILE_EXTENSION = ".cap";
 
+	private static final boolean DELETE_IMAGES_AFTER_USE = true;
+
 
 	private File currentCapFile;
 
@@ -111,6 +113,28 @@ public class PostProductionVideoHandler
 
 	private File extractVideoHelper(InputStream inputStream) throws IOException 
 	{
+		this.currentFrameRect = readInScreenSizeHeader(inputStream);
+		
+		currentTempImageNumber = -1;
+
+		for(int i = 0;i<100;i++)
+		{
+			writeImageToDisk(readInFrameImage(inputStream));
+		}
+		
+		File newVideoFile = new File("./Scratch/temp.mkv");
+		if (newVideoFile.exists() && !newVideoFile.delete())
+		{
+			logger.error("could not establish a temporary video file");
+			return null;
+		}
+
+		executeEncoding(newVideoFile);
+
+		return newVideoFile;
+	}
+
+	private Rectangle readInScreenSizeHeader(InputStream inputStream) throws IOException {
 		int width = inputStream.read();
 		width = width << 8;
 		width += inputStream.read();
@@ -118,41 +142,36 @@ public class PostProductionVideoHandler
 		height = height << 8;
 		height += inputStream.read();
 
-		this.currentFrameRect = new Rectangle(width, height);
-		currentTempImageNumber = -1;
+		return new Rectangle(width, height);
+	}
 
-		/*for(int i = 0;i<100;i++)
-		{
-			writeImageToDisk(readInFrameImage(inputStream));
-		}*/
-
-		Process process = Runtime.getRuntime().exec("./src/FFMPEGbin/ffmpeg.exe -r 5 -pix_fmt yuv420p -i ./Scratch/temp%04d.png  -vcodec libx264 ./Scratch/thing.mkv");
-
+	private void executeEncoding(File newVideoFile) throws IOException 
+	{
+		String executableString = "./src/FFMPEGbin/ffmpeg.exe -r 5 -pix_fmt yuv420p -i ./Scratch/temp%04d.png  -vcodec libx264 "+newVideoFile.getPath();
+		
+		Process process = Runtime.getRuntime().exec(executableString);
+		
 		inheritIO(process.getInputStream(), "Normal Output");
 		inheritIO(process.getErrorStream(), "Error Output");
-		System.out.println("Rendering");
+		logger.debug("Rendering video");
 		try {
-			System.out.println("FFMPEG exited with state "+process.waitFor());
+			logger.debug("FFMPEG exited with state "+process.waitFor());
 		} catch (InterruptedException e) {
 			logger.error("There was a problem with ffmpeg",e);
 		}
-
-		return null;
 	}
 
 
 	private static void inheritIO(final InputStream src, final String identifer) 
 	{
-		if (!logger.isTraceEnabled())
-		{
-			return;
-		}
+		
 		new Thread(new Runnable() {
 			public void run() {
 				try(Scanner sc = new Scanner(src);) 
 				{
 					while (sc.hasNextLine()) {
-						logger.trace("From "+identifer+":"+ sc.nextLine());
+						String string = sc.nextLine();
+						logger.trace("From "+identifer+":"+ string);
 					}
 				} catch (Exception e) {
 					logger.error("Problem in stream monitoring",e);
@@ -168,7 +187,14 @@ public class PostProductionVideoHandler
 		{
 			logger.debug("The image file already exists, going to overwrite");
 		}
+		logger.trace("Starting write to disk");
 		ImageIO.write(readFrame, "png", f);
+		logger.trace("Finished write to disk");
+		if (DELETE_IMAGES_AFTER_USE)
+		{
+			//if we are tracing, we want to see the files at the end of all of this.
+			f.deleteOnExit();
+		}
 	}
 
 
@@ -182,7 +208,7 @@ public class PostProductionVideoHandler
 	BufferedImage previousImage = null;
 	public BufferedImage readInFrameImage(InputStream inputStream) throws IOException 
 	{
-
+		logger.trace("Starting to read in frame");
 		FramePacket framePacket = unpackNextFrame(inputStream);
 
 		logger.debug("read in frame "+framePacket);
