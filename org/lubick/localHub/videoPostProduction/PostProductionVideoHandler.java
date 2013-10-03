@@ -141,26 +141,8 @@ public class PostProductionVideoHandler
 		
 		while (currTimeStamp.before(timeToLookFor))
 		{
-			currTimeStamp = readInFrameTimeStamp(inputStream);
-
-			int type = readFrameType(inputStream);
-
-			if (type == FramePacket.NO_CHANGES_THIS_FRAME || type == FramePacket.REACHED_END) 
-			{
-				//nothing yet to read here.
-				continue;
-			}
-
-			int compressedFrameSize = readCompressedFrameSize(inputStream);
-			
-			long actualSkipped = inputStream.skip(compressedFrameSize);
-			if (compressedFrameSize != actualSkipped)
-			{
-				logger.error("Incorrect amount of bytes skipped! Expected "+compressedFrameSize+" when only "+actualSkipped +" were skipped");
-			}
-			else {
-				logger.trace(actualSkipped +" bytes skipped to go to next frame");
-			}
+			readInFrameImage(inputStream);
+			currTimeStamp = previousFramePacket.getFrameTimeStamp();
 		}
 	}
 

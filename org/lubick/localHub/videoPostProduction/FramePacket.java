@@ -178,7 +178,7 @@ class FramePacket
 			}
 		}
 		
-		logger.debug("Ending outCursor: "+result);
+		logger.debug("Ending outCursor: "+outCursor);
 		
 		//TODO this is a hotfix for the bottom of the screen going dark.  I think there is some 
 		//deeper problem, but this fixes it for now.
