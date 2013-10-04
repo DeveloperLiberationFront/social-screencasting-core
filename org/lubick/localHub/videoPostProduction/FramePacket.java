@@ -1,6 +1,5 @@
 package org.lubick.localHub.videoPostProduction;
 
-import java.util.Arrays;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
