@@ -10,10 +10,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Scanner;
 
-import javax.imageio.ImageIO;
-
 import org.apache.log4j.Logger;
-import org.lubick.localHub.FileUtilities;
 import org.lubick.localHub.ToolStream.ToolUsage;
 
 /* Some parts of this (the decoding aspect) have the following license:
@@ -60,11 +57,12 @@ public class PostProductionVideoHandler
 
 	private Date capFileStartTime;
 
-	private int currentTempImageNumber = -1;
+	
 
 	private Queue<OverloadFile> queueOfOverloadFiles = new LinkedList<>();
 	
 	private FrameDecompressorCodecStrategy decompressionCodec = new DefaultCodec();
+	private ImageDiskWritingStrategy imageWriter = new BlockingImageDiskWritingStrategy("./Scratch/", DELETE_IMAGES_AFTER_USE);
 
 	public void loadFile(File capFile) {
 		if (capFile == null)
@@ -140,8 +138,7 @@ public class PostProductionVideoHandler
 
 	private File extractDemoVideoToFile(InputStream inputStream) throws IOException 
 	{
-		currentTempImageNumber = -1;
-
+		imageWriter.reset();
 		for(int i = 0;i<FRAME_RATE * (RUN_UP_TIME + TOOL_DEMO_TIME);i++)
 		{
 			BufferedImage tempImage = decompressionCodec.readInFrameImage(inputStream);
@@ -157,8 +154,10 @@ public class PostProductionVideoHandler
 				i--;
 				continue;
 			}
-			writeImageToDisk(tempImage);
+			imageWriter.writeImageToDisk(tempImage);
 		}
+		
+		imageWriter.waitUntilDoneWriting();
 		
 		File newVideoFile = new File("./Scratch/temp.mkv");
 		if (newVideoFile.exists() && !newVideoFile.delete())
@@ -173,36 +172,14 @@ public class PostProductionVideoHandler
 	}
 
  
-
-	private void writeImageToDisk(BufferedImage readFrame) throws IOException {
-		File f = new File(getNextFileName());
-		if (!f.createNewFile())
-		{
-			logger.debug("The image file already exists, going to overwrite");
-		}
-		logger.trace("Starting write to disk");
-		ImageIO.write(readFrame, "png", f);
-		logger.trace("Finished write to disk");
-		if (DELETE_IMAGES_AFTER_USE)
-		{
-			//if we are tracing, we want to see the files at the end of all of this.
-			f.deleteOnExit();
-		}
-	}
-
-	private String getNextFileName() 
-	{
-		currentTempImageNumber++;
-		return "./Scratch/temp"+FileUtilities.padIntTo4Digits(currentTempImageNumber)+".png";
-	}
-
-	
-	
-
 	private void executeEncoding(File newVideoFile) throws IOException 
 	{
+		//TODO make this more flexible, not hardcoded.  i.e. the user should specify where their ffmpeg is
+		
 		String executableString = "./src/FFMPEGbin/ffmpeg.exe -r 5 -pix_fmt yuv420p -i ./Scratch/temp%04d.png  -vcodec libx264 "+newVideoFile.getPath();
 		
+		//Using Runtime.exec() because I couldn't get ProcessBuilder to handle the arguments on 
+		//ffempeg well. 
 		Process process = Runtime.getRuntime().exec(executableString);
 		
 		inheritIO(process.getInputStream(), "Normal Output");
@@ -215,10 +192,10 @@ public class PostProductionVideoHandler
 		}
 	}
 
-
+	
 	private static void inheritIO(final InputStream src, final String identifer) 
 	{
-		
+		//used to spy on a process's output, similar to what ProcessBuilder does
 		new Thread(new Runnable() {
 			public void run() {
 				try(Scanner sc = new Scanner(src);) 
@@ -235,6 +212,12 @@ public class PostProductionVideoHandler
 		}).start();
 	}
 
+	/**
+	 * Adds an extra file to this handler to use if the wanted toolstream's behavior extends over 
+	 * the end of the loaded cap file
+	 * @param extraCapFile
+	 * @param extraDate
+	 */
 	public void enqueueOverLoadFile(File extraCapFile, Date extraDate) {
 		this.queueOfOverloadFiles.offer(new OverloadFile(extraCapFile, extraDate));
 		
