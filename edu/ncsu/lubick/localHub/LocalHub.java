@@ -100,7 +100,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 	}
 	
 	private void setDatabase(String databaseLocation) {
-		this.dbAbstraction = DBAbstractionFactory.createDatabase(databaseLocation, DBAbstractionFactory.SQL_IMPLEMENTATION);
+		this.dbAbstraction = DBAbstractionFactory.createAndInitializeDatabase(databaseLocation, DBAbstractionFactory.SQL_IMPLEMENTATION);
 		
 	}
 
@@ -115,7 +115,8 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 			singletonHub.start();
 		}
 		
-
+		//wraps the localHub instance in a debug wrapper to limit access to some methods and to grant
+		//debugging access to others.
 		return new LocalHubTesting(singletonHub);
 	}
 
@@ -200,14 +201,30 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 			logger.error("Trouble parsing Date "+dateString,e);
 		}
 		
+		ts.setTimeStamp(associatedDate);
+		ts.setAssociatedPlugin(pluginName);
+		
 		ParsedFileEvent event = new ParsedFileEvent(fileContents, ts, pluginName, associatedDate, fileToParse);
 
 		for(ParsedFileListener parsedFileListener : parsedFileListeners)
 		{
 			parsedFileListener.parsedFile(event);
 		}
+		
+		writeToolStreamToDatabase(ts);
+		
 	}
 	
+	private void writeToolStreamToDatabase(ToolStream ts) 
+	{
+		for(ToolUsage tu : ts.getAsList())
+		{
+			dbAbstraction.storeToolUsage(tu,ts.getAssociatedPlugin());
+		}
+		
+	}
+
+
 	public void shutDown() {
 		currentRunnable.stop();
 		isRunning = false;

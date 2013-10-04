@@ -5,7 +5,7 @@ public class DBAbstractionFactory {
 
 	public static final int SQL_IMPLEMENTATION = 1;
 
-	public static DBAbstraction createDatabase(String databaseLocation,	int implementation) 
+	public static DBAbstraction createAndInitializeDatabase(String databaseLocation,	int implementation) 
 	{
 		if (implementation == SQL_IMPLEMENTATION)
 		{

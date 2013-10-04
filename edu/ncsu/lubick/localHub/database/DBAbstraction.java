@@ -8,6 +8,8 @@ public abstract class DBAbstraction
 {
 
 	public abstract List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName);
+
+	public abstract void storeToolUsage(ToolUsage tu, String associatedPlugin); 
 	
 	
 }

@@ -19,6 +19,8 @@ public class ToolStream {
 	
 	
 	private List<ToolUsage> listOfToolUsages;
+	private Date timeStamp;
+	private String pluginName;
 	
 	private static Logger logger = Logger.getLogger(ToolStream.class.getName());
 
@@ -104,4 +106,20 @@ public class ToolStream {
 
 	}
 
+	public void setTimeStamp(Date associatedDate) {
+		this.timeStamp = associatedDate;
+	}
+	public Date getTimeStamp()
+	{
+		return this.timeStamp;
+	}
+
+	public void setAssociatedPlugin(String pluginName) {
+		this.pluginName = pluginName;
+		
+	}
+
+	public String getAssociatedPlugin() {
+		return pluginName;
+	}
 }
