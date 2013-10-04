@@ -62,7 +62,8 @@ public class PostProductionVideoHandler
 	private Queue<OverloadFile> queueOfOverloadFiles = new LinkedList<>();
 	
 	private FrameDecompressorCodecStrategy decompressionCodec = new DefaultCodec();
-	private ImageDiskWritingStrategy imageWriter = new BlockingImageDiskWritingStrategy("./Scratch/", DELETE_IMAGES_AFTER_USE);
+	private ImageDiskWritingStrategy imageWriter = new ThreadedImageDiskWritingStrategy("./Scratch/", DELETE_IMAGES_AFTER_USE);
+	//private ImageDiskWritingStrategy imageWriter = new BlockingImageDiskWritingStrategy("./Scratch/", DELETE_IMAGES_AFTER_USE);
 
 	public void loadFile(File capFile) {
 		if (capFile == null)
