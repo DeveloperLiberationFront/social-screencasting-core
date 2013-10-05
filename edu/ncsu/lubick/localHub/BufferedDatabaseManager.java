@@ -36,7 +36,9 @@ public class BufferedDatabaseManager
 	}
 
 
-	public static BufferedDatabaseManager createBufferedDatabasemanager(String databaseLocation) {
+	//This is synchronized to appease FindBugs.  I doubt this will ever be called from a multi thread environment, but
+	//this is a bit more bullet proof.  It's not time critical, so we should be alright.
+	public static synchronized BufferedDatabaseManager createBufferedDatabasemanager(String databaseLocation) {
 		if (singletonBufferedDatabaseManager != null)
 		{
 			return singletonBufferedDatabaseManager;
