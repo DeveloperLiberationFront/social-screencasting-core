@@ -35,8 +35,10 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 	private File monitorDirectory = null;
 	private SimpleDateFormat sdf = new SimpleDateFormat("DDDyykkmm");
 	private FileManager currentRunnable = null;
-	private DBAbstraction dbAbstraction = null;
 
+	private BufferedDatabaseManager databaseManager = null;
+	
+	
 	//listeners
 	private Set<LoadedFileListener> loadedFileListeners = new HashSet<>();	
 	private Set<ParsedFileListener> parsedFileListeners = new HashSet<>();
@@ -99,9 +101,8 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		}
 	}
 	
-	private void setDatabase(String databaseLocation) {
-		this.dbAbstraction = DBAbstractionFactory.createAndInitializeDatabase(databaseLocation, DBAbstractionFactory.SQL_IMPLEMENTATION);
-		
+	private void setDatabaseManager(String databaseLocation) {
+		this.databaseManager = BufferedDatabaseManager.createBufferedDatabasemanager(databaseLocation);
 	}
 
 
@@ -110,7 +111,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 	{
 		if (!singletonHub.isRunning())
 		{
-			singletonHub.setDatabase(SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
+			singletonHub.setDatabaseManager(SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
 			singletonHub.setMonitorLocation(monitorLocation);
 			singletonHub.start();
 		}
@@ -211,21 +212,15 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 			parsedFileListener.parsedFile(event);
 		}
 		
-		writeToolStreamToDatabase(ts);
+		databaseManager.writeToolStreamToDatabase(ts);
 		
 	}
 	
-	private void writeToolStreamToDatabase(ToolStream ts) 
-	{
-		for(ToolUsage tu : ts.getAsList())
-		{
-			dbAbstraction.storeToolUsage(tu,ts.getAssociatedPlugin());
-		}
-		
-	}
+
 
 
 	public void shutDown() {
+		databaseManager.shutDown();
 		currentRunnable.stop();
 		isRunning = false;
 	}
@@ -276,7 +271,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		@Override
 		public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName) 
 		{
-			return hubToDebug.dbAbstraction.getAllToolUsageHistoriesForPlugin(currentPluginName);
+			return hubToDebug.databaseManager.getAllToolUsageHistoriesForPlugin(currentPluginName);
 		}
 
 		@Override

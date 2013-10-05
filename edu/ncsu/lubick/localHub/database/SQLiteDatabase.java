@@ -23,6 +23,7 @@ public class SQLiteDatabase extends SQLDatabase
 		//check the filename has the right extension
 		if(databaseLocation.endsWith(DB_EXTENSION_NAME))
 		{
+			logger.debug("Creating database at location: "+databaseLocation);
 			//open a connection to a db so that this server can access the db
 			open(databaseLocation);
 		}
@@ -65,6 +66,7 @@ public class SQLiteDatabase extends SQLDatabase
 	@Override
 	protected void executeWithNoResults(String sql)
 	{
+		logger.debug("Executing sql query (no results expected): "+sql);
 		//create a statement
 		try (Statement statement = connection.createStatement();)
 		{
@@ -87,6 +89,7 @@ public class SQLiteDatabase extends SQLDatabase
 	@Override
 	protected ResultSet executeWithResults(String sql)
 	{
+		logger.debug("Executing sql query for results: "+sql);
 		ResultSet results = null;
 
 		//create a statement
