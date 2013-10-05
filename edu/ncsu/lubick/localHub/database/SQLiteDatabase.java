@@ -60,6 +60,21 @@ public class SQLiteDatabase extends SQLDatabase
 			throw new DBAbstractionException(e);
 		}
 	}
+	
+	@Override
+	public void close()
+	{
+		try
+		{
+			//close the JDBC connection
+			connection.close();
+
+		}
+		catch (SQLException ex)
+		{
+			throw new DBAbstractionException(ex);
+		}
+	}
 
 
 	//helpers to perform queries
@@ -93,8 +108,9 @@ public class SQLiteDatabase extends SQLDatabase
 		ResultSet results = null;
 
 		//create a statement
-		try(Statement statement = connection.createStatement();)
+		try
 		{
+			Statement statement = connection.createStatement();
 			// set timeout to 30 sec.
 			statement.setQueryTimeout(30);
 
@@ -110,4 +126,6 @@ public class SQLiteDatabase extends SQLDatabase
 
 		return results;
 	}
+	
+	
 }

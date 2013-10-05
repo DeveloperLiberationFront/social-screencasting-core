@@ -85,7 +85,7 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		builder.append("SELECT * FROM ToolUsages ");
 		builder.append("WHERE plugin_name='");
 		builder.append(currentPluginName);
-		builder.append("')");
+		builder.append("'");
 		
 		try
 		{

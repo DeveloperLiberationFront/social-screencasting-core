@@ -54,6 +54,7 @@ public class BufferedDatabaseManager
 	{
 		for(final ToolUsage tu : ts.getAsList())
 		{
+			logger.debug("Queueing up tool usage store");
 			threadPool.execute(new Runnable() {
 				
 				@Override
@@ -71,6 +72,7 @@ public class BufferedDatabaseManager
 
 	public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName) {
 		threadPool.shutdown();
+		logger.debug("Waiting for the threadpool to finish tabulating");
 		try 
 		{
 			threadPool.awaitTermination(30, TimeUnit.SECONDS);

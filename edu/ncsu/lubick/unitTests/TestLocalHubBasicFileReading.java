@@ -19,6 +19,7 @@ import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ParsedFileEvent;
 import edu.ncsu.lubick.localHub.ParsedFileListener;
 import edu.ncsu.lubick.localHub.ToolStream;
+import edu.ncsu.lubick.localHub.database.SQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
@@ -54,6 +55,11 @@ public class TestLocalHubBasicFileReading {
 	{
 		//Clear out the testing monitor location
 		assertTrue(UtilitiesForTesting.clearOutDirectory(LOCAL_HUB_MONITOR_LOCATION));
+		File databaseFile = new File(SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
+		if (databaseFile.exists())
+		{
+			assertTrue(databaseFile.delete());
+		}
 		//start the server
 		localHub = LocalHub.startServerAndReturnDebugAccess(LOCAL_HUB_MONITOR_LOCATION);
 	

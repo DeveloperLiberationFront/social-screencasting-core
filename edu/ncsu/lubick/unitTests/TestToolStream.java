@@ -12,8 +12,8 @@ import org.junit.Test;
 
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
-import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream.IdealizedToolUsage;
+import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
 
 public class TestToolStream {
 
