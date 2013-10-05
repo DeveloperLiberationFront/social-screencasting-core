@@ -9,7 +9,6 @@ import java.sql.Statement;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.LocalHub;
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 
 public class SQLiteDatabase extends SQLDatabase 
 {
@@ -34,7 +33,7 @@ public class SQLiteDatabase extends SQLDatabase
 	}
 
 
-	public void open(String path)
+	private void open(String path)
 	{
 		try
 		{
@@ -62,55 +61,9 @@ public class SQLiteDatabase extends SQLDatabase
 	}
 
 
-	private void createTables() {
-		createToolUsageTable();
-
-	}
-
-
-	private void createToolUsageTable() throws DBAbstractionException
-	{
-		/*
-		Event Schema
-			CREATE TABLE IF NOT EXISTS ToolUsages (
-				use_id INTEGER PRIMARY KEY AUTOINCREMENT,
-				created_under_node_id TEXT PRIMARY_KEY,
-				created_by_dev_group_id TEXT,
-				node_sequence_num INTEGER PRIMARY_KEY,
-				event_data TEXT,
-				previous_neighbor_event_id TEXT,
-				sequentially_before_event_id TEXT,
-				event_type TEXT,
-				paste_parent_id TEXT,
-				document_id TEXT,
-				deleted_at_timestamp INTEGER,
-				deleted_by_created_by_dev_group_id TEXT,
-				delete_event_id TEXT,
-				directory_id TEXT,
-				new_name TEXT,
-				old_name TEXT,
-				parent_directory_id TEXT,
-				new_parent_directory_id TEXT,
-				sequentially_before_node_id TEXT,
-				first_node_to_merge_id TEXT,
-				second_node_to_merge_id TEXT,
-				base_resolution_id TEXT
-			)
-		 */
-		//build up the sql
-		StringBuilder builder = new StringBuilder();
-		builder.append("CREATE TABLE IF NOT EXISTS ToolUsages ( ");
-		builder.append("use_id INTEGER PRIMARY KEY AUTOINCREMENT ");
-
-		builder.append(") ");
-
-		//execute the query
-		executeWithNoResults(builder.toString());
-	}
-
-
-	//private helpers to perform queries
-	private void executeWithNoResults(String sql)
+	//helpers to perform queries
+	@Override
+	protected void executeWithNoResults(String sql)
 	{
 		//create a statement
 		try (Statement statement = connection.createStatement();)
@@ -131,9 +84,8 @@ public class SQLiteDatabase extends SQLDatabase
 		}
 	}
 
-	
-	@SuppressWarnings("unused")
-	private ResultSet executeWithResults(String sql) throws DBAbstractionException
+	@Override
+	protected ResultSet executeWithResults(String sql)
 	{
 		ResultSet results = null;
 
@@ -154,12 +106,5 @@ public class SQLiteDatabase extends SQLDatabase
 		}
 
 		return results;
-	}
-
-
-	@Override
-	public void storeToolUsage(ToolUsage tu, String associatedPlugin) {
-		// TODO Auto-generated method stub
-		adsf;lkasdfsoiekandkfand
 	}
 }
