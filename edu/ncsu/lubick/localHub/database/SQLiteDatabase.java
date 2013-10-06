@@ -121,6 +121,7 @@ public class SQLiteDatabase extends SQLDatabase
 		catch (SQLException e)
 		{
 			logger.error("Problem with Query Text: \n"+ sql);
+			
 			throw new DBAbstractionException(e);
 		}
 
