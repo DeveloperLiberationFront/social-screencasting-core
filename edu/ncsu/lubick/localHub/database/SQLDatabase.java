@@ -87,11 +87,10 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		builder.append(currentPluginName);
 		builder.append("'");
 		
-		try
+		try (ResultSet results = executeWithResults(builder.toString());)
 		{
 			//perform the query
-			ResultSet results = executeWithResults(builder.toString());
-
+			
 			while(results.next())
 			{
 				String toolName = results.getString("tool_name");
@@ -103,7 +102,8 @@ public abstract class SQLDatabase extends DBAbstraction  {
 
 
 				toolUsages.add(new ToolUsage(toolName, toolClass, keyPresses, timestamp, duration));
-			}
+			}			
+
 		}
 		catch (SQLException ex)
 		{
