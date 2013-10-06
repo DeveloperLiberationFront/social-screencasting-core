@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.localHub.forTesting;
 
+import java.io.File;
 import java.util.List;
 
 import edu.ncsu.lubick.localHub.LoadedFileListener;
@@ -21,6 +22,8 @@ public interface LocalHubDebugAccess {
 	List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName);
 
 	void shutDown();
+
+	File extractVideoForLastUsageOfTool(String pluginName, String toolName);
 	
 
 }

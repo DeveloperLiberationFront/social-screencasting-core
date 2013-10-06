@@ -12,8 +12,10 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.database.DBAbstraction.FileDateStructs;
 import edu.ncsu.lubick.localHub.database.SQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
 
 public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 
@@ -35,6 +37,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 	private FileManager currentRunnable = null;
 
 	private BufferedDatabaseManager databaseManager = null;
+	private PostProductionVideoHandler videoPostProductionHandler;
 	
 	
 	//listeners
@@ -214,7 +217,27 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		
 	}
 	
+	public File extractVideoForLastUsageOfTool(String pluginName, String toolName) 
+	{
+		ToolUsage lastToolUsage = databaseManager.getLastInstanceOfToolUsage(pluginName,toolName);
+		videoPostProductionHandler = new PostProductionVideoHandler();
+		
+		List<FileDateStructs> filesToload = databaseManager.getVideoFilesLinkedToTimePeriod(lastToolUsage.getTimeStamp(),lastToolUsage.getDuration());
 
+		if (filesToload == null || filesToload.size() == 0)
+		{
+			return null;
+		}
+		videoPostProductionHandler.loadFile(filesToload.get(0).file);
+		videoPostProductionHandler.setCurrentFileStartTime(filesToload.get(0).startTime);
+		
+		for(int i = 1;i<filesToload.size();i++)
+		{
+			videoPostProductionHandler.enqueueOverLoadFile(filesToload.get(i).file,filesToload.get(i).startTime);
+		}
+		
+		return videoPostProductionHandler.extractVideoForToolUsage(lastToolUsage);
+	}
 
 
 	public void shutDown() {
@@ -278,9 +301,10 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 			
 		}
 
+		@Override
+		public File extractVideoForLastUsageOfTool(String pluginName, String toolName) {
+			return hubToDebug.extractVideoForLastUsageOfTool(pluginName,toolName);
+		}
+
 	}
-
-
-
-
 }

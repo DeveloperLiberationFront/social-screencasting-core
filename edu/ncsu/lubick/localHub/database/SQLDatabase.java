@@ -47,6 +47,7 @@ public abstract class SQLDatabase extends DBAbstraction  {
 	
 		//execute the query
 		executeWithNoResults(sqlTableQueryBuilder.toString());
+		cleanUpAfterQuery();
 	}
 	
 	
@@ -81,13 +82,13 @@ public abstract class SQLDatabase extends DBAbstraction  {
 	public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName) {
 		
 		List<ToolUsage> toolUsages = new ArrayList<>();
-		StringBuilder builder = new StringBuilder();
-		builder.append("SELECT * FROM ToolUsages ");
-		builder.append("WHERE plugin_name='");
-		builder.append(currentPluginName);
-		builder.append("'");
+		StringBuilder sqlQueryBuilder = new StringBuilder();
+		sqlQueryBuilder.append("SELECT * FROM ToolUsages ");
+		sqlQueryBuilder.append("WHERE plugin_name='");
+		sqlQueryBuilder.append(currentPluginName);
+		sqlQueryBuilder.append("'");
 		
-		try (ResultSet results = executeWithResults(builder.toString());)
+		try (ResultSet results = executeWithResults(sqlQueryBuilder.toString());)
 		{
 			//perform the query
 			
@@ -115,6 +116,45 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		}
 		
 		return toolUsages;
+	}
+	
+	@Override
+	public ToolUsage getLastInstanceOfToolUsage(String pluginName, String toolName) {
+		ToolUsage toolUsage = null;
+		StringBuilder sqlQueryBuilder = new StringBuilder();
+		sqlQueryBuilder.append("SELECT TOP 1 * FROM ToolUsages ");
+		sqlQueryBuilder.append("WHERE plugin_name='");
+		sqlQueryBuilder.append(pluginName);
+		sqlQueryBuilder.append("' AND tool_name='");
+		sqlQueryBuilder.append(toolName);
+		sqlQueryBuilder.append("' ORDER BY usage_timestamp DESC");
+		
+		try (ResultSet results = executeWithResults(sqlQueryBuilder.toString());)
+		{
+			//perform the query
+			if(results.next())
+			{
+				Date timestamp = new Date(results.getLong("usage_timestamp"));
+				String toolClass = results.getString("class_of_tool");
+		
+				String keyPresses = results.getString("tool_key_presses");
+				int duration = results.getInt("tool_use_duration");
+
+
+				toolUsage = new ToolUsage(toolName, toolClass, keyPresses, timestamp, duration);
+			}			
+
+		}
+		catch (SQLException ex)
+		{
+			throw new DBAbstractionException(ex);
+		}
+		finally
+		{
+			cleanUpAfterQuery();
+		}
+		
+		return toolUsage;
 	}
 	
 }

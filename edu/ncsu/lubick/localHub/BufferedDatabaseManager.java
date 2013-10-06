@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.localHub;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -9,6 +10,7 @@ import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.database.DBAbstraction;
+import edu.ncsu.lubick.localHub.database.DBAbstraction.FileDateStructs;
 import edu.ncsu.lubick.localHub.database.DBAbstractionFactory;
 
 /**
@@ -71,6 +73,17 @@ public class BufferedDatabaseManager
 
 
 	public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName) {
+		waitForThreadPool();
+		
+		List<ToolUsage> retval = dbAbstraction.getAllToolUsageHistoriesForPlugin(currentPluginName);
+		
+		resetThreadPool();
+
+		return retval;
+	}
+
+
+	private void waitForThreadPool() {
 		threadPool.shutdown();
 		logger.debug("Waiting for the threadpool to finish tabulating");
 		try 
@@ -80,12 +93,6 @@ public class BufferedDatabaseManager
 		catch (InterruptedException e) {
 			logger.error("was interrupted trying to wait for the threadpool to complete all transactions");
 		}
-		
-		List<ToolUsage> retval = dbAbstraction.getAllToolUsageHistoriesForPlugin(currentPluginName);
-		
-		resetThreadPool();
-
-		return retval;
 	}
 
 
@@ -105,5 +112,28 @@ public class BufferedDatabaseManager
 		
 		dbAbstraction.close();
 	}
+
+	public List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int duration) {
+		waitForThreadPool();
+		
+		List<FileDateStructs> retVal = dbAbstraction.getVideoFilesLinkedToTimePeriod(timeStamp,duration);
+		
+		resetThreadPool();
+		return retVal;
+	}
+
+	public ToolUsage getLastInstanceOfToolUsage(String pluginName, String toolName) {
+		waitForThreadPool();
+		
+		ToolUsage retVal = dbAbstraction.getLastInstanceOfToolUsage(pluginName,toolName);
+		
+		resetThreadPool();
+		return retVal;
+	}
+	
+	
+
+
+
 
 }
