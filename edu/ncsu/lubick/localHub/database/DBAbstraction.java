@@ -17,6 +17,10 @@ public abstract class DBAbstraction
 
 	public abstract ToolUsage getLastInstanceOfToolUsage(String pluginName, String toolName);
 	
+	public abstract void storeVideoFile(File newVideoFile, Date videoStartTime,int durationOfClip);
+	
+	public abstract List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int duration) ;
+	
 	public static class FileDateStructs {
 
 		public File file;
@@ -28,4 +32,8 @@ public abstract class DBAbstraction
 		}
 
 	}
+
+	
+
+	
 }

@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.localHub.database;
 
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.database.DBAbstraction.FileDateStructs;
 
 public abstract class SQLDatabase extends DBAbstraction  {
 
@@ -16,13 +18,37 @@ public abstract class SQLDatabase extends DBAbstraction  {
 
 	protected void createTables() {
 		createToolUsageTable();
-	
+		createRawVideoCapFiles();
 	}
 	
 	
+	private void createRawVideoCapFiles() {
+		/*
+		RawVideoCapFiles Schema
+			CREATE TABLE IF NOT EXISTS RawVideoCapFiles (
+				file_id INTEGER PRIMARY KEY AUTOINCREMENT
+				file_name TEXT,
+				video_start_time INTEGER, //The video's start time is only accurate to the nearest second
+				duration INTEGER //This is in seconds
+				
+			)
+		 */
+		//build up the sql
+		StringBuilder sqlTableQueryBuilder = new StringBuilder();
+		sqlTableQueryBuilder.append("CREATE TABLE IF NOT EXISTS RawVideoCapFiles ( ");
+		sqlTableQueryBuilder.append("file_id INTEGER PRIMARY KEY AUTOINCREMENT, ");
+		sqlTableQueryBuilder.append("file_name TEXT, ");
+		sqlTableQueryBuilder.append("video_start_time INTEGER, ");
+		sqlTableQueryBuilder.append("duration INTEGER");
+		sqlTableQueryBuilder.append(") ");
+	
+		//execute the query
+		executeWithNoResults(sqlTableQueryBuilder.toString());
+		cleanUpAfterQuery();
+	}
 	private void createToolUsageTable() {
 		/*
-		Event Schema
+		ToolUsage Schema
 			CREATE TABLE IF NOT EXISTS ToolUsages (
 				use_id INTEGER PRIMARY KEY AUTOINCREMENT
 				plugin_name TEXT,
@@ -75,6 +101,7 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		sqlQueryBuilder.append(")");
 		
 		executeWithNoResults(sqlQueryBuilder.toString());
+		cleanUpAfterQuery();
 	}
 	
 	
@@ -119,6 +146,25 @@ public abstract class SQLDatabase extends DBAbstraction  {
 	}
 	
 	@Override
+	public void storeVideoFile(File newVideoFile, Date videoStartTime, int durationOfClip) {
+		StringBuilder sqlQueryBuilder = new StringBuilder();
+		sqlQueryBuilder.append("INSERT INTO RawVideoCapFiles ( ");
+		sqlQueryBuilder.append("file_name, ");
+		sqlQueryBuilder.append("video_start_time, ");
+		sqlQueryBuilder.append("duration ) VALUES ('");
+		sqlQueryBuilder.append(newVideoFile);
+		sqlQueryBuilder.append("',");
+		sqlQueryBuilder.append(videoStartTime.getTime() / 1000); //The video's start time is only accurate to the nearest second
+		sqlQueryBuilder.append(",");
+		sqlQueryBuilder.append(durationOfClip); //This is in seconds
+		sqlQueryBuilder.append(")");
+		
+		executeWithNoResults(sqlQueryBuilder.toString());
+		cleanUpAfterQuery();
+		
+	}
+	
+	@Override
 	public ToolUsage getLastInstanceOfToolUsage(String pluginName, String toolName) {
 		ToolUsage toolUsage = null;
 		StringBuilder sqlQueryBuilder = new StringBuilder();
@@ -155,6 +201,59 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		}
 		
 		return toolUsage;
+	}
+	
+	/*
+	RawVideoCapFiles Schema
+		CREATE TABLE IF NOT EXISTS RawVideoCapFiles (
+			file_id INTEGER PRIMARY KEY AUTOINCREMENT
+			file_name TEXT,
+			video_start_time INTEGER, //The video's start time is only accurate to the nearest second
+			duration INTEGER //This is in seconds
+			
+		)
+	 */
+	
+	public List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int duration)
+	{
+		List<FileDateStructs> retVal = new ArrayList<>();
+		
+		StringBuilder sqlQueryBuilder = new StringBuilder();
+		sqlQueryBuilder.append("SELECT file_name, video_start_time FROM RawVideoCapFiles ");
+		sqlQueryBuilder.append("WHERE (video_start_time<");
+		sqlQueryBuilder.append(timeStamp.getTime());
+		sqlQueryBuilder.append(" AND video_start_time+duration>");
+		sqlQueryBuilder.append(timeStamp.getTime());
+		sqlQueryBuilder.append(") OR ( video_start_time<");
+		sqlQueryBuilder.append(timeStamp.getTime()+duration*2);
+		sqlQueryBuilder.append(" AND video_start_time+duration>");
+		sqlQueryBuilder.append(timeStamp.getTime()+duration*2);
+		sqlQueryBuilder.append(")");
+		
+		try (ResultSet results = executeWithResults(sqlQueryBuilder.toString());)
+		{
+			//perform the query
+			while(results.next())
+			{
+				Date videoTimestamp = new Date(results.getLong("video_start_time")*1000);	//multiply by 1000 to convert from seconds to millis
+				File file = new File(results.getString("file_name"));
+
+				FileDateStructs newResult = new FileDateStructs(file, videoTimestamp);
+
+				retVal.add(newResult);
+			}			
+
+		}
+		catch (SQLException ex)
+		{
+			throw new DBAbstractionException(ex);
+		}
+		finally
+		{
+			cleanUpAfterQuery();
+		}
+		
+		return retVal;
 	}
 	
 }

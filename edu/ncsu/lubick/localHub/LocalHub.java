@@ -21,6 +21,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 
 	public static final String LOGGING_FILE_PATH = "./log4j.settings";
 	private static final LocalHub singletonHub;
+	private static final int SCREEN_RECORDING_VIDEO_LENGTH = 60; //60 seconds
 	private static Logger logger;
 
 	//Static initializer to get the logging path set up and create the hub
@@ -48,6 +49,8 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 	//You need to call a static method to initiate this class.  It is a singleton with restricted access.
 	private LocalHub() {
 		logger.debug("Logging started in creation of LocalHub");
+		
+		this.addLoadedFileListener(new VideoFileMonitor());
 	}
 
 
@@ -245,6 +248,22 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		currentRunnable.stop();
 		isRunning = false;
 	}
+	
+	private class VideoFileMonitor implements LoadedFileListener {
+
+		@Override
+		public int loadFileResponse(LoadedFileEvent e) {
+			if (e.getFileName().endsWith(PostProductionVideoHandler.EXPECTED_FILE_EXTENSION))
+			{
+				addVideoFileToDatabase(e.getFileName());
+				return LoadedFileListener.DONT_PARSE;
+			}
+
+			return LoadedFileListener.NO_COMMENT;
+		}
+
+
+	}
 
 	/**
 	 * A class that allows unit tests to have indirect, controlled access to the 
@@ -306,5 +325,18 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 			return hubToDebug.extractVideoForLastUsageOfTool(pluginName,toolName);
 		}
 
+	}
+
+	public void addVideoFileToDatabase(String fileName) {
+		File newVideoFile = new File(fileName);
+		Date videoStartTime = extractStartTime(fileName);
+		this.databaseManager.addVideoFile(newVideoFile, videoStartTime, LocalHub.SCREEN_RECORDING_VIDEO_LENGTH);
+		
+	}
+
+
+	private Date extractStartTime(String fileName) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

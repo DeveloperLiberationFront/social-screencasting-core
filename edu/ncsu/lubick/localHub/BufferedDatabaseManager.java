@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.localHub;
 
+import java.io.File;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -129,6 +130,20 @@ public class BufferedDatabaseManager
 		
 		resetThreadPool();
 		return retVal;
+	}
+
+
+	public void addVideoFile(final File newVideoFile, final Date videoStartTime, final int durationOfClip) {
+		logger.debug("Queueing up tool usage store");
+		threadPool.execute(new Runnable() {
+			
+			@Override
+			public void run() {
+
+					dbAbstraction.storeVideoFile(newVideoFile, videoStartTime, durationOfClip);
+
+			}
+		});
 	}
 	
 	

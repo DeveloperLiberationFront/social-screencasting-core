@@ -99,6 +99,8 @@ public class FileManager implements Runnable {
 	/**
 	 * Takes a file, parses off the name and the time and begins to parse any files older than it
 	 * 
+	 * TODO needs to contact the listener
+	 * 
 	 * @param newFile
 	 */
 	private void parseOrQueueFileAfterNotifyingListener(File file) 
