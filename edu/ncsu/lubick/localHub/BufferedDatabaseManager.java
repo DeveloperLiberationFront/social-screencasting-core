@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.database.DBAbstraction;
+import edu.ncsu.lubick.localHub.database.DBAbstractionException;
 import edu.ncsu.lubick.localHub.database.DBAbstraction.FileDateStructs;
 import edu.ncsu.lubick.localHub.database.DBAbstractionFactory;
 
@@ -116,19 +117,38 @@ public class BufferedDatabaseManager
 
 	public List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int duration) {
 		waitForThreadPool();
-		
-		List<FileDateStructs> retVal = dbAbstraction.getVideoFilesLinkedToTimePeriod(timeStamp,duration);
-		
-		resetThreadPool();
+		List<FileDateStructs> retVal = null;
+		try {
+			retVal = dbAbstraction.getVideoFilesLinkedToTimePeriod(timeStamp,duration);
+		} 
+		catch (DBAbstractionException e) {
+			logger.error("There was a problem in the database query",e);
+		}
+		finally
+		{
+			resetThreadPool();
+		}
+
 		return retVal;
 	}
 
 	public ToolUsage getLastInstanceOfToolUsage(String pluginName, String toolName) {
 		waitForThreadPool();
+		ToolUsage retVal = null;
+		try {
+			retVal = dbAbstraction.getLastInstanceOfToolUsage(pluginName,toolName);
+		} 
+		catch (DBAbstractionException e) {
+			logger.error("There was a problem in the database query",e);
+		}
+		finally
+		{
+			resetThreadPool();
+		}
 		
-		ToolUsage retVal = dbAbstraction.getLastInstanceOfToolUsage(pluginName,toolName);
 		
-		resetThreadPool();
+		
+		
 		return retVal;
 	}
 

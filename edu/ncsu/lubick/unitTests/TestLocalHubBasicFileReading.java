@@ -310,6 +310,8 @@ public class TestLocalHubBasicFileReading {
 		hasSeenResponseFlag = false;
 		createToolStreamFileAndVerifyItHappened(firstToolStream.toJSON(), firstToolStream.getTimeStamp() , defaultLoadedFileListener);
 
+		copyScreenCastCapFileToDirectoryAndVerifyItHappened(new File("./src/ForTesting/oneMinuteCap.cap"));
+		
 		observedEvent = null;
 		hasSeenResponseFlag = false;
 		createToolStreamFileAndVerifyItHappened("", teePlusOne, defaultLoadedFileListener);

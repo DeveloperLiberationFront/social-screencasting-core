@@ -195,16 +195,12 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		String fileContents = FileUtilities.readAllFromFile(fileToParse);
 		ToolStream ts = ToolStream.generateFromJSON(fileContents);
 		
+		//Expecting name convention
+		//PLUGIN_NAME.ENCODEDEDATE.log
 		String fileName = fileToParse.getName();
 		String pluginName = fileName.substring(0, fileName.indexOf('.'));
-		String dateString = fileName.substring(fileName.indexOf('.') + 1,fileName.lastIndexOf('.'));
 		
-		Date associatedDate = null;
-		try {
-			associatedDate = sdf.parse(dateString);
-		} catch (ParseException e) {
-			logger.error("Trouble parsing Date "+dateString,e);
-		}
+		Date associatedDate = extractStartTime(fileName);
 		
 		ts.setTimeStamp(associatedDate);
 		ts.setAssociatedPlugin(pluginName);
@@ -334,9 +330,19 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		
 	}
 
-
+	//Expecting name convention
+	//screencast.ENCODEDDATE.cap
+	//OR
+	//PLUGINNAME.ENCODEDDATE.log
 	private Date extractStartTime(String fileName) {
-		// TODO Auto-generated method stub
-		return null;
+		String dateString = fileName.substring(fileName.indexOf('.') + 1,fileName.lastIndexOf('.'));
+		
+		Date associatedDate = null;
+		try {
+			associatedDate = sdf.parse(dateString);
+		} catch (ParseException e) {
+			logger.error("Trouble parsing Date "+dateString,e);
+		}
+		return associatedDate;
 	}
 }

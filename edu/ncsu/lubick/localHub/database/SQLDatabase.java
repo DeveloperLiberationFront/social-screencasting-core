@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.List;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
-import edu.ncsu.lubick.localHub.database.DBAbstraction.FileDateStructs;
 
 public abstract class SQLDatabase extends DBAbstraction  {
 
@@ -168,7 +167,7 @@ public abstract class SQLDatabase extends DBAbstraction  {
 	public ToolUsage getLastInstanceOfToolUsage(String pluginName, String toolName) {
 		ToolUsage toolUsage = null;
 		StringBuilder sqlQueryBuilder = new StringBuilder();
-		sqlQueryBuilder.append("SELECT TOP 1 * FROM ToolUsages ");
+		sqlQueryBuilder.append("SELECT * FROM ToolUsages ");
 		sqlQueryBuilder.append("WHERE plugin_name='");
 		sqlQueryBuilder.append(pluginName);
 		sqlQueryBuilder.append("' AND tool_name='");

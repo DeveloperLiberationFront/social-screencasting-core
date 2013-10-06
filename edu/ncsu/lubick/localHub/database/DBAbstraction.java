@@ -19,7 +19,7 @@ public abstract class DBAbstraction
 	
 	public abstract void storeVideoFile(File newVideoFile, Date videoStartTime,int durationOfClip);
 	
-	public abstract List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int duration) ;
+	public abstract List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int duration);
 	
 	public static class FileDateStructs {
 
@@ -29,6 +29,12 @@ public abstract class DBAbstraction
 
 			this.file = file;
 			this.startTime = startTime;
+		}
+		
+		@Override
+		public String toString() {
+			return "FileDateStructs [file=" + file + ", startTime=" + startTime
+					+ "]";
 		}
 
 	}
