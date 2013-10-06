@@ -17,6 +17,7 @@ public class SQLiteDatabase extends SQLDatabase
 	private static final String DB_EXTENSION_NAME = ".sqlite";
 	private String pathToFile;
 	private Connection connection;
+	private Statement previouslyExecutedStatement;
 
 	public SQLiteDatabase(String databaseLocation) 
 	{
@@ -110,12 +111,12 @@ public class SQLiteDatabase extends SQLDatabase
 		//create a statement
 		try
 		{
-			Statement statement = connection.createStatement();
+			previouslyExecutedStatement = connection.createStatement();
 			// set timeout to 30 sec.
-			statement.setQueryTimeout(30);
+			previouslyExecutedStatement.setQueryTimeout(30);
 
 			//execute the query and get back a generic set of results
-			results = statement.executeQuery(sql);
+			results = previouslyExecutedStatement.executeQuery(sql);
 
 		}
 		catch (SQLException e)
@@ -125,8 +126,17 @@ public class SQLiteDatabase extends SQLDatabase
 			throw new DBAbstractionException(e);
 		}
 
+		//Warning!  Closing the statement before the results are used invalidates the ResultSet
 		return results;
 	}
 	
-	
+	@Override
+	protected void cleanUpAfterQuery() {
+		if (previouslyExecutedStatement != null)
+			try {
+				previouslyExecutedStatement.close();
+			} catch (SQLException e) {
+				logger.error("Problem closing statement",e);
+			}
+	}
 }

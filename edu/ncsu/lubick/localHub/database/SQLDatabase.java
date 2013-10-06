@@ -12,7 +12,7 @@ public abstract class SQLDatabase extends DBAbstraction  {
 
 	protected abstract void executeWithNoResults(String string); 
 	protected abstract ResultSet executeWithResults(String sql);
-	
+	protected abstract void cleanUpAfterQuery();
 
 	protected void createTables() {
 		createToolUsageTable();
@@ -109,8 +109,12 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		{
 			throw new DBAbstractionException(ex);
 		}
-		
+		finally
+		{
+			cleanUpAfterQuery();
+		}
 		
 		return toolUsages;
 	}
+	
 }
