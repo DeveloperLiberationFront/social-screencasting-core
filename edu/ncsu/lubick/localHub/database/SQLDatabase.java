@@ -225,9 +225,9 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		sqlQueryBuilder.append(" AND video_start_time+duration>");
 		sqlQueryBuilder.append(timeStamp.getTime());
 		sqlQueryBuilder.append(") OR ( video_start_time<");
-		sqlQueryBuilder.append(timeStamp.getTime()+duration*2);
+		sqlQueryBuilder.append(timeStamp.getTime()+duration*2L);
 		sqlQueryBuilder.append(" AND video_start_time+duration>");
-		sqlQueryBuilder.append(timeStamp.getTime()+duration*2);
+		sqlQueryBuilder.append(timeStamp.getTime()+duration*2L);
 		sqlQueryBuilder.append(")");
 		
 		try (ResultSet results = executeWithResults(sqlQueryBuilder.toString());)
