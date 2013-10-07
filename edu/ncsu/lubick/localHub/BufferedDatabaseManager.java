@@ -115,10 +115,13 @@ public class BufferedDatabaseManager
 		dbAbstraction.close();
 	}
 
-	public List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int duration) {
+	public List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int duration) 
+	{
 		waitForThreadPool();
 		List<FileDateStructs> retVal = null;
 		try {
+			logger.debug("Searching for a time frame starting at "+timeStamp+ "and going "+duration + " seconds");
+			
 			retVal = dbAbstraction.getVideoFilesLinkedToTimePeriod(timeStamp,duration);
 		} 
 		catch (DBAbstractionException e) {
@@ -154,7 +157,7 @@ public class BufferedDatabaseManager
 
 
 	public void addVideoFile(final File newVideoFile, final Date videoStartTime, final int durationOfClip) {
-		logger.debug("Queueing up tool usage store");
+		logger.debug("Adding new video file that starts on "+videoStartTime+ "and goes "+durationOfClip +" seconds");
 		threadPool.execute(new Runnable() {
 			
 			@Override

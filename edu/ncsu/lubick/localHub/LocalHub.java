@@ -1,5 +1,7 @@
 package edu.ncsu.lubick.localHub;
 
+import httpserver.HTTPServer;
+
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,9 +17,18 @@ import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.database.DBAbstraction.FileDateStructs;
 import edu.ncsu.lubick.localHub.database.SQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
+import edu.ncsu.lubick.localHub.http.FrontEndHandlerFactory;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
 
 public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
+
+	// Playback proxy's port
+	public static final int PLAYBACK_PROXY_PORT = 4443;
+
+	// information about the HTTP server
+	public static final String SERVER_NAME = "Social Screencasting";
+	public static final String SERVER_VERSION = "0.1";
+	public static final String SERVER_ETC = "now in Glorious No Color, with Handlers!";
 
 	public static final String LOGGING_FILE_PATH = "./log4j.settings";
 	private static final LocalHub singletonHub;
@@ -34,30 +45,33 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 	private Thread currentThread = null;
 	private boolean isRunning = false;
 	private File monitorDirectory = null;
-	private SimpleDateFormat sdf = new SimpleDateFormat("DDDyykkmm");
+	private SimpleDateFormat dateInMinutesToNumber = new SimpleDateFormat("DDDyykkmm");
+	private SimpleDateFormat dateInSecondsToNumber = new SimpleDateFormat("DDDyykkmmss");
 	private FileManager currentRunnable = null;
 
 	private BufferedDatabaseManager databaseManager = null;
 	private PostProductionVideoHandler videoPostProductionHandler;
-	
-	
+
+
 	//listeners
 	private Set<LoadedFileListener> loadedFileListeners = new HashSet<>();	
 	private Set<ParsedFileListener> parsedFileListeners = new HashSet<>();
-	
+
+	private boolean shouldUseHTTPServer;
+
 
 	//You need to call a static method to initiate this class.  It is a singleton with restricted access.
 	private LocalHub() {
 		logger.debug("Logging started in creation of LocalHub");
-		
+
 		this.addLoadedFileListener(new VideoFileMonitor());
 	}
 
 
-/**
- * Takes a file directory and attempts to create
- * @param monitorLocation
- */
+	/**
+	 * Takes a file directory and attempts to create
+	 * @param monitorLocation
+	 */
 	private void setMonitorLocation(String monitorLocation) 
 	{
 		if (monitorLocation == null || monitorLocation.isEmpty())
@@ -104,7 +118,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 			this.monitorDirectory = newMonitorDirectory;
 		}
 	}
-	
+
 	private void setDatabaseManager(String databaseLocation) {
 		this.databaseManager = BufferedDatabaseManager.createBufferedDatabasemanager(databaseLocation);
 	}
@@ -115,19 +129,29 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 	{
 		if (!singletonHub.isRunning())
 		{
+			singletonHub.enableHTTPServer(false);
 			singletonHub.setDatabaseManager(SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
 			singletonHub.setMonitorLocation(monitorLocation);
 			singletonHub.start();
 		}
-		
+
 		//wraps the localHub instance in a debug wrapper to limit access to some methods and to grant
 		//debugging access to others.
 		return new LocalHubTesting(singletonHub);
 	}
 
+	private void enableHTTPServer(boolean b) {
+		this.shouldUseHTTPServer = b;
+
+	}
 
 
-	
+	public static void startServerForUse(String monitorLocation) {
+		startServerAndReturnDebugAccess(monitorLocation);
+
+	}
+
+
 
 
 	private void start() {
@@ -141,6 +165,14 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		currentRunnable.setMonitorFolder(this.monitorDirectory);
 		currentThread = new Thread(currentRunnable);
 		currentThread.start();
+
+		if (!shouldUseHTTPServer)
+		{
+			HTTPServer playbackServer = new HTTPServer(PLAYBACK_PROXY_PORT, SERVER_NAME, SERVER_VERSION, SERVER_ETC);
+			playbackServer.setHandlerFactory(new FrontEndHandlerFactory(this));
+			Thread playbackThread = new Thread(playbackServer);
+			playbackThread.start();
+		}
 
 	}
 	public boolean isRunning() {
@@ -168,10 +200,10 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		}
 		return retVal;
 	}
-	
+
 	public void addParsedFileListener(ParsedFileListener parsedFileListener) {
 		parsedFileListeners.add(parsedFileListener);
-		
+
 	}
 	public void removeParsedFileListener(ParsedFileListener parsedFileListener) {
 		parsedFileListeners.remove(parsedFileListener);
@@ -186,41 +218,41 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 	}*/
 
 
-	
+
 	//============End Listeners======================================================================================
 
 	@Override
 	public void parseFile(File fileToParse) {
-		
+
 		String fileContents = FileUtilities.readAllFromFile(fileToParse);
 		ToolStream ts = ToolStream.generateFromJSON(fileContents);
-		
+
 		//Expecting name convention
 		//PLUGIN_NAME.ENCODEDEDATE.log
 		String fileName = fileToParse.getName();
 		String pluginName = fileName.substring(0, fileName.indexOf('.'));
-		
-		Date associatedDate = extractStartTime(fileName);
-		
+
+		Date associatedDate = extractStartTime(fileName, this.dateInMinutesToNumber);
+
 		ts.setTimeStamp(associatedDate);
 		ts.setAssociatedPlugin(pluginName);
-		
+
 		ParsedFileEvent event = new ParsedFileEvent(fileContents, ts, pluginName, associatedDate, fileToParse);
 
 		for(ParsedFileListener parsedFileListener : parsedFileListeners)
 		{
 			parsedFileListener.parsedFile(event);
 		}
-		
+
 		databaseManager.writeToolStreamToDatabase(ts);
-		
+
 	}
-	
+
 	public File extractVideoForLastUsageOfTool(String pluginName, String toolName) 
 	{
 		ToolUsage lastToolUsage = databaseManager.getLastInstanceOfToolUsage(pluginName,toolName);
 		videoPostProductionHandler = new PostProductionVideoHandler();
-		
+
 		List<FileDateStructs> filesToload = databaseManager.getVideoFilesLinkedToTimePeriod(lastToolUsage.getTimeStamp(),lastToolUsage.getDuration());
 
 		if (filesToload == null || filesToload.size() == 0)
@@ -229,12 +261,12 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		}
 		videoPostProductionHandler.loadFile(filesToload.get(0).file);
 		videoPostProductionHandler.setCurrentFileStartTime(filesToload.get(0).startTime);
-		
+
 		for(int i = 1;i<filesToload.size();i++)
 		{
 			videoPostProductionHandler.enqueueOverLoadFile(filesToload.get(i).file,filesToload.get(i).startTime);
 		}
-		
+
 		return videoPostProductionHandler.extractVideoForToolUsage(lastToolUsage);
 	}
 
@@ -244,14 +276,15 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		currentRunnable.stop();
 		isRunning = false;
 	}
-	
+
 	private class VideoFileMonitor implements LoadedFileListener {
 
 		@Override
 		public int loadFileResponse(LoadedFileEvent e) {
 			if (e.getFileName().endsWith(PostProductionVideoHandler.EXPECTED_FILE_EXTENSION))
 			{
-				addVideoFileToDatabase(e.getFileName());
+				logger.info("Found ScreenCapFile "+e.getFileName());
+				addVideoFileToDatabase(e.getFullFileName());
 				return LoadedFileListener.DONT_PARSE;
 			}
 
@@ -295,13 +328,13 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		@Override
 		public void addParsedFileListener(ParsedFileListener parsedFileListener) {
 			hubToDebug.addParsedFileListener(parsedFileListener);
-			
+
 		}
 
 		@Override
 		public void removeParsedFileListener(ParsedFileListener parsedFileListener) {
 			hubToDebug.removeParsedFileListener(parsedFileListener);
-			
+
 		}
 
 		@Override
@@ -313,7 +346,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		@Override
 		public void shutDown() {
 			hubToDebug.shutDown();
-			
+
 		}
 
 		@Override
@@ -325,24 +358,27 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 
 	public void addVideoFileToDatabase(String fileName) {
 		File newVideoFile = new File(fileName);
-		Date videoStartTime = extractStartTime(fileName);
+		Date videoStartTime = extractStartTime(fileName, dateInSecondsToNumber);
 		this.databaseManager.addVideoFile(newVideoFile, videoStartTime, LocalHub.SCREEN_RECORDING_VIDEO_LENGTH);
-		
+
 	}
 
 	//Expecting name convention
 	//screencast.ENCODEDDATE.cap
 	//OR
 	//PLUGINNAME.ENCODEDDATE.log
-	private Date extractStartTime(String fileName) {
+	private Date extractStartTime(String fileName, SimpleDateFormat formatter) {
 		String dateString = fileName.substring(fileName.indexOf('.') + 1,fileName.lastIndexOf('.'));
-		
+
 		Date associatedDate = null;
 		try {
-			associatedDate = sdf.parse(dateString);
+			associatedDate = formatter.parse(dateString);
 		} catch (ParseException e) {
 			logger.error("Trouble parsing Date "+dateString,e);
 		}
 		return associatedDate;
 	}
+
+
+
 }

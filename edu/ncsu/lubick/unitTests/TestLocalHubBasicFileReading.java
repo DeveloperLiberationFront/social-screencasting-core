@@ -3,6 +3,7 @@ package edu.ncsu.lubick.unitTests;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -27,12 +28,13 @@ import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
 public class TestLocalHubBasicFileReading {
 
 	private static final String LOCAL_HUB_MONITOR_LOCATION = "BasicFileReading/";
-	private static final long MILLIS_IN_DAY = 86400000l;
+	private static final long MILLIS_IN_DAY = 86400000L;
 	private static LocalHubDebugAccess localHub;
 	private File testPluginDirectory;
 	//This won't work in the year 2100 or later.  
-	private SimpleDateFormat sdf = new SimpleDateFormat("DDDyykkmm");
-
+	private SimpleDateFormat dateInMinutesToNumber = new SimpleDateFormat("DDDyykkmm");
+	private SimpleDateFormat dateInSecondsToNumber = new SimpleDateFormat("DDDyykkmmss");
+	
 	//used with listeners.  These give listeners a place to refer
 	private LoadedFileEvent observedEvent = null;
 	private boolean hasSeenResponseFlag = false;
@@ -131,7 +133,7 @@ public class TestLocalHubBasicFileReading {
 		assertTrue(nestedDirectory.mkdir());
 
 		Date currentTime = new Date();
-		File createdNestedFile = UtilitiesForTesting.createAbsoluteFileWithContent(nestedDirectory.getAbsolutePath(),getCurrentPluginName()+"."+sdf.format(currentTime)+".log","ThisIsAToolstream");
+		File createdNestedFile = UtilitiesForTesting.createAbsoluteFileWithContent(nestedDirectory.getAbsolutePath(),getCurrentPluginName()+"."+dateInMinutesToNumber.format(currentTime)+".log","ThisIsAToolstream");
 
 		assertNotNull(createdNestedFile);
 		assertTrue(createdNestedFile.exists());
@@ -165,7 +167,7 @@ public class TestLocalHubBasicFileReading {
 		localHub.addLoadedFileListener(loadedFileListener);
 		observedEvent  = null;
 
-		File createdFile = UtilitiesForTesting.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),getCurrentPluginName()+"."+sdf.format(timeStamp)+".log",fileContents);
+		File createdFile = UtilitiesForTesting.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),getCurrentPluginName()+"."+dateInMinutesToNumber.format(timeStamp)+".log",fileContents);
 
 		assertNotNull(createdFile);
 		assertTrue(createdFile.exists());
@@ -299,8 +301,9 @@ public class TestLocalHubBasicFileReading {
 	@Test
 	public void testDatabasePullAndVideoCreation() throws Exception {
 		Date currentTime = getFastForwardedDate();
+		Date teeMinusFive = new Date(currentTime.getTime() - 5*1000);
 		Date teePlusThirty = new Date(currentTime.getTime() + 30*1000);
-		Date teePlusOne = new Date(currentTime.getTime() + 60*1000);
+		Date teePlusOneM = new Date(currentTime.getTime() + 60*1000);
 		
 		IdealizedToolStream firstToolStream = IdealizedToolStream.generateRandomToolStream(30, currentTime);
 		String uniqueToolString = "My.Unique.Tool.name";
@@ -310,11 +313,12 @@ public class TestLocalHubBasicFileReading {
 		hasSeenResponseFlag = false;
 		createToolStreamFileAndVerifyItHappened(firstToolStream.toJSON(), firstToolStream.getTimeStamp() , defaultLoadedFileListener);
 
-		copyScreenCastCapFileToDirectoryAndVerifyItHappened(new File("./src/ForTesting/oneMinuteCap.cap"));
+		String nameOfSourceFile = "SourceVideo."+dateInSecondsToNumber.format(teeMinusFive)+".cap";
+		copyScreenCastCapFileToDirectoryAndVerifyItHappened(new File("./src/ForTesting/oneMinuteCap.cap"), nameOfSourceFile);
 		
 		observedEvent = null;
 		hasSeenResponseFlag = false;
-		createToolStreamFileAndVerifyItHappened("", teePlusOne, defaultLoadedFileListener);
+		createToolStreamFileAndVerifyItHappened("", teePlusOneM, defaultLoadedFileListener);
 		
 		List<ToolStream.ToolUsage> allHistoriesOfToolUsages = localHub.getAllToolUsageHistoriesForPlugin(getCurrentPluginName());
 
@@ -328,11 +332,45 @@ public class TestLocalHubBasicFileReading {
 		assertTrue(outputFile.isFile());
 		assertFalse(outputFile.isHidden());
 		assertTrue(outputFile.getName().endsWith(".mkv"));
-		assertTrue(outputFile.length() > 1000000);	//I expect the file size to be at least 1 Mb and no more than 2Mb	
-		assertTrue(outputFile.length() < 2000000);
-		fail("not completed yet");
+		assertTrue(outputFile.length() > 100000);	//I expect the file size to be at least 100k and no more than 3Mb	
+		assertTrue(outputFile.length() < 3000000);
+
 	}
 
+
+	private File copyScreenCastCapFileToDirectoryAndVerifyItHappened(File capFile, String newFileName) throws IOException, InterruptedException 
+	{
+		assertTrue(localHub.isRunning());
+		localHub.addLoadedFileListener(defaultLoadedFileListener);
+		observedEvent  = null;
+
+		File createdFile = UtilitiesForTesting.copyFileToFolder(testPluginDirectory.getAbsolutePath(),newFileName,capFile);
+
+		assertNotNull(createdFile);
+		assertTrue(createdFile.exists());
+
+		int timeCounter = 0;
+		while (!hasSeenResponseFlag && timeCounter < 5) 
+		{
+			Thread.sleep(1000);
+			timeCounter++;
+		}
+		if (timeCounter <= 5 && observedEvent != null)
+		{
+			assertEquals(createdFile.getName(), observedEvent.getFileName());
+			assertFalse(observedEvent.wasInitialReadIn());
+		}
+		else 
+		{
+			localHub.removeLoadedFileListener(defaultLoadedFileListener);
+			fail("test ReadingInFile has timed out");
+		}
+
+		localHub.removeLoadedFileListener(defaultLoadedFileListener);
+
+		return createdFile;
+		
+	}
 
 	/**
 	 * Creates a date that is in the future.  The first time this is called, the time 

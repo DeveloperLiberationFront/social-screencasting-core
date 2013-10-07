@@ -151,7 +151,7 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		sqlQueryBuilder.append("file_name, ");
 		sqlQueryBuilder.append("video_start_time, ");
 		sqlQueryBuilder.append("duration ) VALUES ('");
-		sqlQueryBuilder.append(newVideoFile);
+		sqlQueryBuilder.append(newVideoFile.getAbsolutePath());
 		sqlQueryBuilder.append("',");
 		sqlQueryBuilder.append(videoStartTime.getTime() / 1000); //The video's start time is only accurate to the nearest second
 		sqlQueryBuilder.append(",");
@@ -220,13 +220,13 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		StringBuilder sqlQueryBuilder = new StringBuilder();
 		sqlQueryBuilder.append("SELECT file_name, video_start_time FROM RawVideoCapFiles ");
 		sqlQueryBuilder.append("WHERE (video_start_time<");
-		sqlQueryBuilder.append(timeStamp.getTime());
+		sqlQueryBuilder.append(timeStamp.getTime()/1000);
 		sqlQueryBuilder.append(" AND video_start_time+duration>");
-		sqlQueryBuilder.append(timeStamp.getTime());
+		sqlQueryBuilder.append(timeStamp.getTime()/1000);
 		sqlQueryBuilder.append(") OR ( video_start_time<");
-		sqlQueryBuilder.append(timeStamp.getTime()+duration*2L);
+		sqlQueryBuilder.append((timeStamp.getTime()+duration*2L) / 1000);
 		sqlQueryBuilder.append(" AND video_start_time+duration>");
-		sqlQueryBuilder.append(timeStamp.getTime()+duration*2L);
+		sqlQueryBuilder.append((timeStamp.getTime()+duration*2L) / 1000);
 		sqlQueryBuilder.append(")");
 		
 		try (ResultSet results = executeWithResults(sqlQueryBuilder.toString());)

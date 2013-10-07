@@ -11,12 +11,14 @@ package edu.ncsu.lubick.localHub;
 public class LoadedFileEvent {
 	
 	private String fileName = null;
+	private String fullFileName = null;
 	private String fileContents = null;
 	private boolean wasInitialReadIn = false;
 
-	public LoadedFileEvent(String fileName, String fileContents, boolean wasInitialReadIn) {
+	public LoadedFileEvent(String fileName, String fullFileName, String fileContents, boolean wasInitialReadIn) {
 		this.fileName = fileName;
 		this.fileContents = fileContents;
+		this.fullFileName = fullFileName;
 		this.wasInitialReadIn = wasInitialReadIn;
 	}
 
@@ -30,6 +32,10 @@ public class LoadedFileEvent {
 
 	public boolean wasInitialReadIn() {
 		return wasInitialReadIn;
+	}
+
+	public String getFullFileName() {
+		return fullFileName;
 	}
 	
 

@@ -11,6 +11,8 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
+
 /**
  * This is the Runnable that operates on the background thread.
  * 
@@ -22,6 +24,7 @@ import org.apache.log4j.Logger;
 public class FileManager implements Runnable {
 
 	private Set<File> filesFromLastTime = new HashSet<>();
+	private Set<File> filesToIgnore = new HashSet<>();
 	/**Maps a string, the name of a plugin, to the queue of as of yet unparsed files related to that plugin*/
 	private Map<String, Queue<File>> unparsedFiles = new HashMap<>();
 	
@@ -29,6 +32,7 @@ public class FileManager implements Runnable {
 	private LoadedFileListener loadedFileListener = null;
 	private ToolStreamFileParser fileParser = null;
 	private boolean isRunning;
+	
 	
 	private static Logger logger = Logger.getLogger(FileManager.class.getName());
 
@@ -60,7 +64,7 @@ public class FileManager implements Runnable {
 					logger.debug("Searching Plugin directory: "+child);
 					for (File innerChild : child.listFiles()) 
 					{
-						if (!innerChild.isDirectory() && !filesFromLastTime.contains(innerChild))
+						if (!innerChild.isDirectory() && !filesFromLastTime.contains(innerChild) && !filesToIgnore.contains(innerChild))
 
 						{
 							logger.debug("Found new file "+innerChild);
@@ -73,7 +77,7 @@ public class FileManager implements Runnable {
 						}
 					}
 				}
-				else if (!filesFromLastTime.contains(child))
+				else if (!filesFromLastTime.contains(child) && !filesToIgnore.contains(child))
 				{
 					logger.debug("Found new file "+child);
 					newFiles.add(child);
@@ -82,8 +86,11 @@ public class FileManager implements Runnable {
 			//All the new files have been found in this iteration
 			for (File newFile : newFiles) 
 			{
-				conditionallyAddFileAfterContactingListener(newFile, false, filesFromLastTime);
-				parseOrQueueFileAfterNotifyingListener(newFile);
+				int result = conditionallyAddFileAfterContactingListener(newFile, false, filesFromLastTime);
+				if (result == LoadedFileListener.NO_COMMENT)
+				{
+					parseOrQueueFile(newFile);
+				}
 			}
 
 			//Sleep for a second and then do it all again
@@ -99,11 +106,11 @@ public class FileManager implements Runnable {
 	/**
 	 * Takes a file, parses off the name and the time and begins to parse any files older than it
 	 * 
-	 * TODO needs to contact the listener
+	 * TODO needs to contact the parsed file listener
 	 * 
 	 * @param newFile
 	 */
-	private void parseOrQueueFileAfterNotifyingListener(File file) 
+	private void parseOrQueueFile(File file) 
 	{
 		if (file == null)
 		{
@@ -198,10 +205,13 @@ public class FileManager implements Runnable {
 	 */
 	private int conditionallyAddFileAfterContactingListener(File thisFile, boolean isInitialLoading, Collection<File> collectionToAddTo) 
 	{
+		String fileContents = "[BINARYDATA]";
+		if (!thisFile.getName().endsWith(PostProductionVideoHandler.EXPECTED_FILE_EXTENSION))
+		{
+			fileContents = FileUtilities.readAllFromFile(thisFile);
+		}
 		
-		String fileContents = FileUtilities.readAllFromFile(thisFile);
-		
-		int response = loadedFileListener.loadFileResponse(new LoadedFileEvent(thisFile.getName(),fileContents,isInitialLoading));
+		int response = loadedFileListener.loadFileResponse(new LoadedFileEvent(thisFile.getName(),thisFile.getAbsolutePath(),fileContents,isInitialLoading));
 
 		if (response == LoadedFileListener.NO_COMMENT)
 		{
@@ -211,6 +221,7 @@ public class FileManager implements Runnable {
 		else
 		{
 			logger.debug("Was told not to track " + thisFile);
+			filesToIgnore.add(thisFile);
 		}
 		return response;
 

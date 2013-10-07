@@ -3,6 +3,7 @@ package edu.ncsu.lubick.localHub.forTesting;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
@@ -104,6 +105,23 @@ public class UtilitiesForTesting {
 	{
 		//Divide then multiply by 60000 (the number of milliseconds in a minute) to round to nearest minute
 		return new Date((milliseconds / 60000) * 60000);
+	}
+
+	public static File copyFileToFolder(String parentDir, String newFileName, File sourceOfFileToCopy) throws IOException {
+		File destination = new File(parentDir,newFileName);
+		if ((destination.exists() && !destination.delete()) || destination.isDirectory())
+		{
+			logger.error("there was a problem copying the file." + (destination.isDirectory()?"File was a directory":"File already exists and won't be deleted"));
+			return null;
+		}
+		if (!destination.createNewFile())
+		{
+			logger.error("couldn't make the new file to copy to.  Trying to proceed anyway");
+		}
+		FileOutputStream fos = new FileOutputStream(destination);
+		Files.copy(sourceOfFileToCopy.toPath(), fos);
+		
+		return destination;
 	}
 
 }
