@@ -1,7 +1,5 @@
 package edu.ncsu.lubick.localHub;
 
-import httpserver.HTTPServer;
-
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,7 +15,6 @@ import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.database.DBAbstraction.FileDateStructs;
 import edu.ncsu.lubick.localHub.database.SQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
-import edu.ncsu.lubick.localHub.http.FrontEndHandlerFactory;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
 
 public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
@@ -168,10 +165,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 
 		if (!shouldUseHTTPServer)
 		{
-			HTTPServer playbackServer = new HTTPServer(PLAYBACK_PROXY_PORT, SERVER_NAME, SERVER_VERSION, SERVER_ETC);
-			playbackServer.setHandlerFactory(new FrontEndHandlerFactory(this));
-			Thread playbackThread = new Thread(playbackServer);
-			playbackThread.start();
+			
 		}
 
 	}
