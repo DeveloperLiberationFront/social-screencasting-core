@@ -10,22 +10,18 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.eclipse.jetty.server.Server;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.database.DBAbstraction.FileDateStructs;
 import edu.ncsu.lubick.localHub.database.SQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
+import edu.ncsu.lubick.localHub.http.HTTPServer;
+import edu.ncsu.lubick.localHub.http.HelloHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
 
 public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 
-	// Playback proxy's port
-	public static final int PLAYBACK_PROXY_PORT = 4443;
-
-	// information about the HTTP server
-	public static final String SERVER_NAME = "Social Screencasting";
-	public static final String SERVER_VERSION = "0.1";
-	public static final String SERVER_ETC = "now in Glorious No Color, with Handlers!";
 
 	public static final String LOGGING_FILE_PATH = "./log4j.settings";
 	private static final LocalHub singletonHub;
@@ -165,7 +161,8 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 
 		if (!shouldUseHTTPServer)
 		{
-			
+			HTTPServer.startUpAnHTTPServer();
+			logger.debug("Server started up");
 		}
 
 	}
