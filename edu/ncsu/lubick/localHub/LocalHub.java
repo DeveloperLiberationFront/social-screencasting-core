@@ -3,6 +3,7 @@ package edu.ncsu.lubick.localHub;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -23,7 +24,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 
 	public static final String LOGGING_FILE_PATH = "./log4j.settings";
 	private static final LocalHub singletonHub;
-	private static final int SCREEN_RECORDING_VIDEO_LENGTH = 60; //60 seconds
+	private static final int SCREEN_RECORDING_VIDEO_LENGTH = 60; //60 seconds for every minivideo recorded
 	private static Logger logger;
 
 	//Static initializer to get the logging path set up and create the hub
@@ -116,11 +117,11 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 
 
 
-	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation) 
+	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, boolean wantHTTP) 
 	{
 		if (!singletonHub.isRunning())
 		{
-			singletonHub.enableHTTPServer(false);
+			singletonHub.enableHTTPServer(wantHTTP);
 			singletonHub.setDatabaseManager(SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
 			singletonHub.setMonitorLocation(monitorLocation);
 			singletonHub.start();
@@ -138,8 +139,8 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 
 
 	public static void startServerForUse(String monitorLocation) {
-		startServerAndReturnDebugAccess(monitorLocation);
-
+		startServerAndReturnDebugAccess(monitorLocation, true);
+		
 	}
 
 
@@ -157,9 +158,9 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		currentThread = new Thread(currentRunnable);
 		currentThread.start();
 
-		if (!shouldUseHTTPServer)
+		if (shouldUseHTTPServer)
 		{
-			HTTPServer.startUpAnHTTPServer();
+			HTTPServer.startUpAnHTTPServer(this);
 			logger.debug("Server started up");
 		}
 
@@ -366,6 +367,12 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 			logger.error("Trouble parsing Date "+dateString,e);
 		}
 		return associatedDate;
+	}
+
+
+	public List<String> getNamesOfAllPlugins() {
+		// TODO Auto-generated method stub
+		return Arrays.asList("Plugin1","Plugin2", "Plugin3");
 	}
 
 

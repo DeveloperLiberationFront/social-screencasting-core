@@ -2,7 +2,9 @@ package edu.ncsu.lubick.localHub.http;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -13,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import edu.ncsu.lubick.localHub.LocalHub;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
@@ -27,22 +30,28 @@ import freemarker.template.Version;
  */
 public class LookupHandler extends AbstractHandler {
 
-	private static Logger logger = Logger.getLogger(LookupHandler.class.getName());
+	private static final String PLUGIN_VIEWER = "index.html";
+	private static Logger logger;
 	private static Configuration cfg;
 	
-	private String httpRequestPattern;	
+	private String httpRequestPattern;
+	private LocalHub databaseLink;	
 	
-	{
+	//static initializer
+	static {
+		logger = Logger.getLogger(LookupHandler.class.getName());
 		try {
+			logger.trace("Setting up template configuration");
 			setupTemplateConfiguration();
 		} catch (IOException e) {
 			logger.fatal("There was a problem booting up the template configuration");
 		}
 	}
 
-	public LookupHandler(String matchPattern) 
+	public LookupHandler(String matchPattern, LocalHub localHub) 
 	{
 		this.httpRequestPattern = matchPattern;
+		this.databaseLink = localHub;
 	}
 
 	private static void setupTemplateConfiguration() throws IOException {
@@ -75,31 +84,54 @@ public class LookupHandler extends AbstractHandler {
 			logger.debug("LookupHandler passing on target "+target);
 			return;
 		}
+		logger.debug("Request was a "+baseRequest.getMethod());
+		String type = baseRequest.getMethod();
+		if (type.equals("POST"))
+		{
+			respondToPost(target,baseRequest,request,response);
+		}
+		else {
+			respondToGet(target, baseRequest, request, response);
+		}
 		
+	}
+
+	//serve up the webpage with the list of tools 
+	private void respondToGet(String target, Request baseRequest, HttpServletResponse response) throws IOException 
+	{
 		logger.debug(String.format("HTML Request %s, with target %s" , baseRequest.toString(), target));
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_OK);
 		baseRequest.setHandled(true);
 
-		// Create the root hash
-		Map<Object, Object> root = new HashMap<>();
-		// Put string ``user'' into the root
-		root.put("user", "Big Joe");
-		// Create the hash for ``latestProduct''
-		Map<Object, Object> latest = new HashMap<Object, Object>();
-		// and put it into the root
-		root.put("latestProduct", latest);
-		// put ``url'' and ``name'' into latest
-		latest.put("url", "products/greenmouse.html");
-		latest.put("name", "green mouse");  
+		Map<Object, Object> root = getPluginsFollowedDataModelFromDatabase();
 
-		Template temp = cfg.getTemplate("index.html");
+		Template temp = cfg.getTemplate(PLUGIN_VIEWER);
 
 		try {
 			temp.process(root, response.getWriter());
 		} catch (TemplateException e) {
 			logger.error("Problem with the template",e);
 		}
+	}
+
+	private void respondToPost(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) 
+	{
+		// TODO Auto-generated method stub
+		http://www.echoecho.com/htmlforms07.htm
+			
+		
+	}
+
+	private Map<Object, Object> getPluginsFollowedDataModelFromDatabase() {
+		
+		List<String> pluginNames = this.databaseLink.getNamesOfAllPlugins();
+		
+		Map<Object, Object> retVal = new HashMap<>();
+		retVal.put("pluginNames", pluginNames);
+		
+		
+		return retVal;
 	}
 
 }

@@ -6,6 +6,8 @@ import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 
+import edu.ncsu.lubick.localHub.LocalHub;
+
 public class HandlerManager 
 {
 	private static Logger logger = Logger.getLogger(HandlerManager.class.getName());
@@ -13,11 +15,11 @@ public class HandlerManager
 
 	private HandlerManager() {}
 
-	public static Handler makeHandler() {
+	public static Handler makeHandler(LocalHub localHub) {
 		HandlerCollection h = new HandlerList();
 		
-		h.addHandler(new LookupHandler("/"));
-		h.addHandler(new LookupHandler("/index.html"));
+		h.addHandler(new LookupHandler("/", localHub));
+		h.addHandler(new LookupHandler("/index", localHub));
 		
 		//Put this last, else it will try and fail to list the directory on "/" match
 		ResourceHandler resourceHandler = new ResourceHandler();

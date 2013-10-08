@@ -63,7 +63,7 @@ public class TestLocalHubBasicFileReading {
 			assertTrue(databaseFile.delete());
 		}
 		//start the server
-		localHub = LocalHub.startServerAndReturnDebugAccess(LOCAL_HUB_MONITOR_LOCATION);
+		localHub = LocalHub.startServerAndReturnDebugAccess(LOCAL_HUB_MONITOR_LOCATION, false);
 
 
 	}
