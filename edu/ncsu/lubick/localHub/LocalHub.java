@@ -10,14 +10,12 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.eclipse.jetty.server.Server;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.database.DBAbstraction.FileDateStructs;
 import edu.ncsu.lubick.localHub.database.SQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.http.HTTPServer;
-import edu.ncsu.lubick.localHub.http.HelloHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
 
 public class LocalHub implements LoadedFileListener, ToolStreamFileParser {

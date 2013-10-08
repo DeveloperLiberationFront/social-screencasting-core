@@ -11,6 +11,6 @@ public class Runner
 	public static void main(String[] args) throws Exception {
 		LocalHub.startServerForUse("HF/");
 		Thread.sleep(1000);
-		Desktop.getDesktop().browse(new URI("http://localhost:4443/index.html"));
+		Desktop.getDesktop().browse(new URI("http://localhost:4443/"));
 	}
 }
