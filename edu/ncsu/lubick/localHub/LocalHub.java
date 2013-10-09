@@ -11,6 +11,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
+import edu.ncsu.lubick.ScreenRecordingModule;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.database.DBAbstraction.FileDateStructs;
 import edu.ncsu.lubick.localHub.database.SQLDatabaseFactory;
@@ -18,12 +19,13 @@ import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.http.HTTPServer;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
 
-public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQueryInterface {
+public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQueryInterface, ParsedFileListener {
 
 
 	public static final String LOGGING_FILE_PATH = "./log4j.settings";
 	private static final LocalHub singletonHub;
 	private static final int SCREEN_RECORDING_VIDEO_LENGTH = 60; //60 seconds for every minivideo recorded
+	private static final String SCREENCASTING_PATH = "Screencasting";
 	private static Logger logger;
 
 	//Static initializer to get the logging path set up and create the hub
@@ -49,6 +51,42 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	private Set<ParsedFileListener> parsedFileListeners = new HashSet<>();
 
 	private boolean shouldUseHTTPServer;
+	private boolean shouldUseScreenRecording;
+	private ScreenRecordingModule screenRecordingModule;
+
+
+	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, boolean wantHTTP, boolean wantScreenRecording) 
+	{
+		return startServerAndReturnDebugAccess(monitorLocation, SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION, wantHTTP, wantScreenRecording);
+	}
+
+
+	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, String databaseLocation, boolean wantHTTP, boolean wantScreenRecording) 
+	{
+		if (!singletonHub.isRunning())
+		{
+			singletonHub.enableHTTPServer(wantHTTP);
+			singletonHub.enableScreenRecording(wantScreenRecording);
+			singletonHub.setDatabaseManager(databaseLocation);
+			singletonHub.setMonitorLocation(monitorLocation);
+			singletonHub.start();
+		}
+	
+		//wraps the localHub instance in a debug wrapper to limit access to some methods and to grant
+		//debugging access to others.
+		return new LocalHubTesting(singletonHub);
+	}
+
+
+	public static void startServerForUse(String monitorLocation) {
+		//
+		startServerForUse(monitorLocation, SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
+	}
+
+
+	public static void startServerForUse(String monitorLocation, String databaseLocation) {
+		startServerAndReturnDebugAccess(monitorLocation, databaseLocation, true, true);
+	}
 
 
 	//You need to call a static method to initiate this class.  It is a singleton with restricted access.
@@ -56,6 +94,33 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		logger.debug("Logging started in creation of LocalHub");
 
 		this.addLoadedFileListener(new VideoFileMonitor());
+	}
+
+
+	private void start() {
+		if (isRunning() || this.monitorDirectory == null)
+		{
+			logger.debug("Did not start the server because "+ (isRunning() ? "it was already running": " no monitor directory had been set."));
+			return;
+		}
+		isRunning = true;
+		currentRunnable = new FileManager(this, this);
+		currentRunnable.setMonitorFolder(this.monitorDirectory);
+		currentThread = new Thread(currentRunnable);
+		currentThread.start();
+	
+		if (shouldUseHTTPServer)
+		{
+			HTTPServer.startUpAnHTTPServer(this);
+			logger.debug("Server started up");
+		}
+		
+		if (shouldUseScreenRecording)
+		{
+			this.screenRecordingModule = new ScreenRecordingModule(new File(this.monitorDirectory,SCREENCASTING_PATH));
+			screenRecordingModule.startRecording();
+		}
+	
 	}
 
 
@@ -116,61 +181,18 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 
 
 
-	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, boolean wantHTTP) 
-	{
-		return startServerAndReturnDebugAccess(monitorLocation, SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION, wantHTTP);
-	}
-	
-	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, String databaseLocation, boolean wantHTTP) 
-	{
-		if (!singletonHub.isRunning())
-		{
-			singletonHub.enableHTTPServer(wantHTTP);
-			singletonHub.setDatabaseManager(databaseLocation);
-			singletonHub.setMonitorLocation(monitorLocation);
-			singletonHub.start();
-		}
-
-		//wraps the localHub instance in a debug wrapper to limit access to some methods and to grant
-		//debugging access to others.
-		return new LocalHubTesting(singletonHub);
-	}
-
 	private void enableHTTPServer(boolean b) {
 		this.shouldUseHTTPServer = b;
 
 	}
 
 
-	public static void startServerForUse(String monitorLocation) {
-		//
-		startServerForUse(monitorLocation, SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
-	}
-
-	public static void startServerForUse(String monitorLocation, String databaseLocation) {
-		startServerAndReturnDebugAccess(monitorLocation, databaseLocation, true);
+	private void enableScreenRecording(boolean wantScreenRecording) {
+		this.shouldUseScreenRecording = wantScreenRecording;
+		
 	}
 
 
-	private void start() {
-		if (isRunning() || this.monitorDirectory == null)
-		{
-			logger.debug("Did not start the server because "+ (isRunning() ? "it was already running": " no monitor directory had been set."));
-			return;
-		}
-		isRunning = true;
-		currentRunnable = new FileManager(this, this);
-		currentRunnable.setMonitorFolder(this.monitorDirectory);
-		currentThread = new Thread(currentRunnable);
-		currentThread.start();
-
-		if (shouldUseHTTPServer)
-		{
-			HTTPServer.startUpAnHTTPServer(this);
-			logger.debug("Server started up");
-		}
-
-	}
 	public boolean isRunning() {
 		return this.isRunning;
 	}
@@ -204,14 +226,14 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	public void removeParsedFileListener(ParsedFileListener parsedFileListener) {
 		parsedFileListeners.remove(parsedFileListener);
 	}
-	/*@Override
+	@Override
 	public void parsedFile(ParsedFileEvent e) {
 		//Just pass on the event
 		for(ParsedFileListener parsedFileListener : parsedFileListeners)
 		{
 			parsedFileListener.parsedFile(e);
 		}
-	}*/
+	}
 
 
 
@@ -268,12 +290,15 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 
 
 	public void shutDown() {
-		databaseManager.shutDown();
+		this.screenRecordingModule.stopRecording();
 		currentRunnable.stop();
+		databaseManager.shutDown();
+		
 		isRunning = false;
 	}
 
-	private class VideoFileMonitor implements LoadedFileListener {
+	private class VideoFileMonitor implements LoadedFileListener 
+	{
 
 		@Override
 		public int loadFileResponse(LoadedFileEvent e) {
