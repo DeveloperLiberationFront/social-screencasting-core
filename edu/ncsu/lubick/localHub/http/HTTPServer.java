@@ -4,7 +4,7 @@ package edu.ncsu.lubick.localHub.http;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Server;
 
-import edu.ncsu.lubick.localHub.LocalHub;
+import edu.ncsu.lubick.localHub.WebQueryInterface;
 
 public class HTTPServer {
 
@@ -22,16 +22,16 @@ public class HTTPServer {
 
 	private HTTPServer() {}
 
-	//TODO make this not take in a LocalHub, but some sort of interface
-	public static void startUpAnHTTPServer(LocalHub localHub) 
+	public static void startUpAnHTTPServer(WebQueryInterface wqi) 
 	{
 		Server server = new Server(SERVER_PORT);
-		server.setHandler(HandlerManager.makeHandler(localHub));
+		server.setHandler(HandlerManager.makeHandler(wqi));
 
-		try{
+		try
+		{
 			server.start();
-
-		} catch (Exception e)
+		} 
+		catch (Exception e)
 		{
 			logger.error("There was a problem starting the server", e);
 		}

@@ -9,7 +9,7 @@ public class Runner
 {
 
 	public static void main(String[] args) throws Exception {
-		LocalHub.startServerForUse("HF/");
+		LocalHub.startServerForUse("HF/","kevinsDatabase.sqlite");
 		Thread.sleep(1000);
 		Desktop.getDesktop().browse(new URI("http://localhost:4443/"));
 	}

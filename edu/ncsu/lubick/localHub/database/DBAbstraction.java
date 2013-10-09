@@ -21,6 +21,9 @@ public abstract class DBAbstraction
 	
 	public abstract List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int duration);
 	
+	public abstract List<String> getNamesOfAllPlugins();
+	
+	
 	public static class FileDateStructs {
 
 		public File file;
@@ -38,8 +41,5 @@ public abstract class DBAbstraction
 		}
 
 	}
-
-	
-
 	
 }

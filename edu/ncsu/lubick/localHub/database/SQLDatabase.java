@@ -255,4 +255,33 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		return retVal;
 	}
 	
+	@Override
+	public List<String> getNamesOfAllPlugins() 
+	{
+		String sqlQuery = "SELECT DISTINCT plugin_name FROM ToolUsages";
+		
+		List<String> retVal = new ArrayList<String>();
+		
+		try (ResultSet results = executeWithResults(sqlQuery);)
+		{
+			//perform the query
+			while(results.next())
+			{
+				String plugin_name= results.getString("plugin_name");
+
+				retVal.add(plugin_name);
+			}			
+
+		}
+		catch (SQLException ex)
+		{
+			throw new DBAbstractionException(ex);
+		}
+		finally
+		{
+			cleanUpAfterQuery();
+		}
+		return retVal;
+	}
+	
 }

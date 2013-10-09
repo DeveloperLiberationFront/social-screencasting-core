@@ -3,7 +3,6 @@ package edu.ncsu.lubick.localHub;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +18,7 @@ import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.http.HTTPServer;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
 
-public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
+public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQueryInterface {
 
 
 	public static final String LOGGING_FILE_PATH = "./log4j.settings";
@@ -119,10 +118,15 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 
 	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, boolean wantHTTP) 
 	{
+		return startServerAndReturnDebugAccess(monitorLocation, SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION, wantHTTP);
+	}
+	
+	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, String databaseLocation, boolean wantHTTP) 
+	{
 		if (!singletonHub.isRunning())
 		{
 			singletonHub.enableHTTPServer(wantHTTP);
-			singletonHub.setDatabaseManager(SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
+			singletonHub.setDatabaseManager(databaseLocation);
 			singletonHub.setMonitorLocation(monitorLocation);
 			singletonHub.start();
 		}
@@ -139,11 +143,13 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 
 
 	public static void startServerForUse(String monitorLocation) {
-		startServerAndReturnDebugAccess(monitorLocation, true);
-		
+		//
+		startServerForUse(monitorLocation, SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
 	}
 
-
+	public static void startServerForUse(String monitorLocation, String databaseLocation) {
+		startServerAndReturnDebugAccess(monitorLocation, databaseLocation, true);
+	}
 
 
 	private void start() {
@@ -371,14 +377,16 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 
 
 	public List<String> getNamesOfAllPlugins() {
-		// TODO Auto-generated method stub
-		return Arrays.asList("TestPlugin1","TestPlugin2", "TestPlugin3");
+		return databaseManager.getNamesOfAllPlugins();
 	}
 
 
 	public List<ToolUsage> getAllToolUsagesForPlugin(String pluginName) {
 		return databaseManager.getAllToolUsageHistoriesForPlugin(pluginName);
 	}
+
+
+
 
 
 

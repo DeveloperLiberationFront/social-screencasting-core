@@ -16,8 +16,8 @@ import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
-import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.WebQueryInterface;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleNumber;
@@ -45,7 +45,7 @@ public class LookupHandler extends AbstractHandler {
 	private static Configuration cfg;
 	
 	private String httpRequestPattern;
-	private LocalHub databaseLink;	
+	private WebQueryInterface databaseLink;	
 	
 	//static initializer
 	static {
@@ -58,10 +58,10 @@ public class LookupHandler extends AbstractHandler {
 		}
 	}
 
-	public LookupHandler(String matchPattern, LocalHub localHub) 
+	public LookupHandler(String matchPattern, WebQueryInterface databaseLink) 
 	{
 		this.httpRequestPattern = matchPattern;
-		this.databaseLink = localHub;
+		this.databaseLink = databaseLink;
 	}
 
 	private static void setupTemplateConfiguration() throws IOException {

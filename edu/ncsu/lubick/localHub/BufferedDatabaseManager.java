@@ -1,6 +1,7 @@
 package edu.ncsu.lubick.localHub;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -11,8 +12,8 @@ import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.database.DBAbstraction;
-import edu.ncsu.lubick.localHub.database.DBAbstractionException;
 import edu.ncsu.lubick.localHub.database.DBAbstraction.FileDateStructs;
+import edu.ncsu.lubick.localHub.database.DBAbstractionException;
 import edu.ncsu.lubick.localHub.database.DBAbstractionFactory;
 
 /**
@@ -74,14 +75,17 @@ public class BufferedDatabaseManager
 	}
 
 
-	public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName) {
-		waitForThreadPool();
-		
-		List<ToolUsage> retval = dbAbstraction.getAllToolUsageHistoriesForPlugin(currentPluginName);
-		
-		resetThreadPool();
-
-		return retval;
+	public void addVideoFile(final File newVideoFile, final Date videoStartTime, final int durationOfClip) {
+		logger.debug("Adding new video file that starts on "+videoStartTime+ "and goes "+durationOfClip +" seconds");
+		threadPool.execute(new Runnable() {
+			
+			@Override
+			public void run() {
+	
+					dbAbstraction.storeVideoFile(newVideoFile, videoStartTime, durationOfClip);
+	
+			}
+		});
 	}
 
 
@@ -114,6 +118,17 @@ public class BufferedDatabaseManager
 		
 		dbAbstraction.close();
 	}
+
+	public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName) {
+		waitForThreadPool();
+		
+		List<ToolUsage> retval = dbAbstraction.getAllToolUsageHistoriesForPlugin(currentPluginName);
+		
+		resetThreadPool();
+	
+		return retval;
+	}
+
 
 	public List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int duration) 
 	{
@@ -149,24 +164,24 @@ public class BufferedDatabaseManager
 			resetThreadPool();
 		}
 		
-		
-		
-		
 		return retVal;
 	}
 
 
-	public void addVideoFile(final File newVideoFile, final Date videoStartTime, final int durationOfClip) {
-		logger.debug("Adding new video file that starts on "+videoStartTime+ "and goes "+durationOfClip +" seconds");
-		threadPool.execute(new Runnable() {
-			
-			@Override
-			public void run() {
-
-					dbAbstraction.storeVideoFile(newVideoFile, videoStartTime, durationOfClip);
-
-			}
-		});
+	public List<String> getNamesOfAllPlugins() {
+		waitForThreadPool();
+		List<String> retVal = Collections.emptyList();	//avoids the template from crashing if the query runs into trouble
+		try {
+			retVal = dbAbstraction.getNamesOfAllPlugins();
+		} 
+		catch (DBAbstractionException e) {
+			logger.error("There was a problem in the database query",e);
+		}
+		finally
+		{
+			resetThreadPool();
+		}
+		return retVal;
 	}
 	
 	
