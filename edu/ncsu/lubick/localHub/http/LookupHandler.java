@@ -190,8 +190,10 @@ public class LookupHandler extends AbstractHandler {
 		return retVal;
 	}
 	
-	
-	private class ToolNameAndCount implements Comparable<ToolNameAndCount>, TemplateHashModel
+	/*
+	 * implements TemplatehashModel so that in the templates, its fields can be accessed via ${toolNameAndCount.toolCount}
+	 */
+	private class ToolNameAndCount implements Comparable<ToolNameAndCount>, TemplateHashModel	
 	{
 		
 		private Integer toolCount;
