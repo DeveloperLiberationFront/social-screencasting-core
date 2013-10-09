@@ -188,7 +188,25 @@ public class LookupHandler extends AbstractHandler {
 
 		@Override
 		public int compareTo(ToolNameAndCount o) {
-			return this.toolCount.compareTo(o.toolCount);
+			if (this.toolCount.compareTo(o.toolCount) != 0)
+			{
+				return this.toolCount.compareTo(o.toolCount);
+			}
+			return this.toolName.compareTo(o.toolName);
+		}
+		
+		@Override
+		public int hashCode() {
+			return (toolName+toolCount.toString()).hashCode();
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof ToolNameAndCount)
+			{
+				return this.hashCode() == obj.hashCode();
+			}
+			return false;
 		}
 
 	}
