@@ -250,7 +250,14 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		String fileName = fileToParse.getName();
 		String pluginName = fileName.substring(0, fileName.indexOf('.'));
 
-		Date associatedDate = extractStartTime(fileName, this.dateInMinutesToNumber);
+		Date associatedDate;
+		try {
+			associatedDate = extractStartTime(fileName, this.dateInMinutesToNumber);
+		} 
+		catch (ImproperlyEncodedDateException e) {
+			logger.error("Problem parsing time info from file" + fileToParse + "  Skipping...", e);
+			return;
+		}
 
 		ts.setTimeStamp(associatedDate);
 		ts.setAssociatedPlugin(pluginName);
@@ -297,89 +304,15 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		isRunning = false;
 	}
 
-	private class VideoFileMonitor implements LoadedFileListener 
-	{
-
-		@Override
-		public int loadFileResponse(LoadedFileEvent e) {
-			if (e.getFileName().endsWith(PostProductionVideoHandler.EXPECTED_FILE_EXTENSION))
-			{
-				logger.info("Found ScreenCapFile "+e.getFileName());
-				addVideoFileToDatabase(e.getFullFileName());
-				return LoadedFileListener.DONT_PARSE;
-			}
-
-			return LoadedFileListener.NO_COMMENT;
-		}
-
-
-	}
-
-	/**
-	 * A class that allows unit tests to have indirect, controlled access to the 
-	 * inner workings of the LocalHub.  This can only be created with a static method in LocalHub
-	 * 
-	 * @author kjlubick
-	 *
-	 */
-	private static class LocalHubTesting implements LocalHubDebugAccess 
-	{
-
-		private LocalHub hubToDebug;
-
-		public LocalHubTesting(LocalHub thisHub) {
-			hubToDebug = thisHub;
-		}
-
-		@Override
-		public void addLoadedFileListener(LoadedFileListener loadedFileListener) {
-			hubToDebug.addLoadedFileListener(loadedFileListener);
-		}
-
-		@Override
-		public boolean isRunning() {
-			return hubToDebug.isRunning();
-		}
-
-		@Override
-		public void removeLoadedFileListener(LoadedFileListener lflToRemove) {
-			this.hubToDebug.removeLoadedFileListener(lflToRemove);
-		}
-
-		@Override
-		public void addParsedFileListener(ParsedFileListener parsedFileListener) {
-			hubToDebug.addParsedFileListener(parsedFileListener);
-
-		}
-
-		@Override
-		public void removeParsedFileListener(ParsedFileListener parsedFileListener) {
-			hubToDebug.removeParsedFileListener(parsedFileListener);
-
-		}
-
-		@Override
-		public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName) 
-		{
-			return hubToDebug.getAllToolUsagesForPlugin(currentPluginName);
-		}
-
-		@Override
-		public void shutDown() {
-			hubToDebug.shutDown();
-
-		}
-
-		@Override
-		public File extractVideoForLastUsageOfTool(String pluginName, String toolName) {
-			return hubToDebug.extractVideoForLastUsageOfTool(pluginName,toolName);
-		}
-
-	}
-
 	public void addVideoFileToDatabase(String fileName) {
 		File newVideoFile = new File(fileName);
-		Date videoStartTime = extractStartTime(fileName, dateInSecondsToNumber);
+		Date videoStartTime;
+		try {
+			videoStartTime = extractStartTime(newVideoFile.getName(), dateInSecondsToNumber);
+		} catch (ImproperlyEncodedDateException e) {
+			logger.error("Problem with video "+fileName+", Skipping it",e);
+			return;
+		}
 		this.databaseManager.addVideoFile(newVideoFile, videoStartTime, LocalHub.SCREEN_RECORDING_VIDEO_LENGTH);
 
 	}
@@ -388,14 +321,19 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	//screencast.ENCODEDDATE.cap
 	//OR
 	//PLUGINNAME.ENCODEDDATE.log
-	private Date extractStartTime(String fileName, SimpleDateFormat formatter) {
+	private Date extractStartTime(String fileName, SimpleDateFormat formatter) throws ImproperlyEncodedDateException {
+		if (fileName.indexOf('.') < 0 || fileName.lastIndexOf('.') == fileName.indexOf('.'))
+		{
+			throw new ImproperlyEncodedDateException("Improperly formatted file name:  Should be like PLUGINNAME.ENCODEDDATE.log or screencast.ENCODEDDATE.cap, was "+fileName);
+		}
 		String dateString = fileName.substring(fileName.indexOf('.') + 1,fileName.lastIndexOf('.'));
 
 		Date associatedDate = null;
 		try {
 			associatedDate = formatter.parse(dateString);
-		} catch (ParseException e) {
-			logger.error("Trouble parsing Date "+dateString,e);
+		} 
+		catch (ParseException e) {
+			throw new ImproperlyEncodedDateException("Trouble parsing Date "+dateString, e);
 		}
 		return associatedDate;
 	}
@@ -408,6 +346,86 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 
 	public List<ToolUsage> getAllToolUsagesForPlugin(String pluginName) {
 		return databaseManager.getAllToolUsageHistoriesForPlugin(pluginName);
+	}
+
+	private class VideoFileMonitor implements LoadedFileListener 
+	{
+	
+		@Override
+		public int loadFileResponse(LoadedFileEvent e) {
+			if (e.getFileName().endsWith(PostProductionVideoHandler.EXPECTED_FILE_EXTENSION))
+			{
+				logger.info("Found ScreenCapFile "+e.getFileName());
+				addVideoFileToDatabase(e.getFullFileName());
+				return LoadedFileListener.DONT_PARSE;
+			}
+	
+			return LoadedFileListener.NO_COMMENT;
+		}
+	
+	
+	}
+
+	/**
+	 * A class that allows unit tests to have indirect, controlled access to the 
+	 * inner workings of the LocalHub.  This can only be created with a static method in LocalHub
+	 * 
+	 * @author kjlubick
+	 *
+	 */
+	private static class LocalHubTesting implements LocalHubDebugAccess 
+	{
+	
+		private LocalHub hubToDebug;
+	
+		public LocalHubTesting(LocalHub thisHub) {
+			hubToDebug = thisHub;
+		}
+	
+		@Override
+		public void addLoadedFileListener(LoadedFileListener loadedFileListener) {
+			hubToDebug.addLoadedFileListener(loadedFileListener);
+		}
+	
+		@Override
+		public boolean isRunning() {
+			return hubToDebug.isRunning();
+		}
+	
+		@Override
+		public void removeLoadedFileListener(LoadedFileListener lflToRemove) {
+			this.hubToDebug.removeLoadedFileListener(lflToRemove);
+		}
+	
+		@Override
+		public void addParsedFileListener(ParsedFileListener parsedFileListener) {
+			hubToDebug.addParsedFileListener(parsedFileListener);
+	
+		}
+	
+		@Override
+		public void removeParsedFileListener(ParsedFileListener parsedFileListener) {
+			hubToDebug.removeParsedFileListener(parsedFileListener);
+	
+		}
+	
+		@Override
+		public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName) 
+		{
+			return hubToDebug.getAllToolUsagesForPlugin(currentPluginName);
+		}
+	
+		@Override
+		public void shutDown() {
+			hubToDebug.shutDown();
+	
+		}
+	
+		@Override
+		public File extractVideoForLastUsageOfTool(String pluginName, String toolName) {
+			return hubToDebug.extractVideoForLastUsageOfTool(pluginName,toolName);
+		}
+	
 	}
 
 
