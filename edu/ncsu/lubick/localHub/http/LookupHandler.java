@@ -2,7 +2,9 @@ package edu.ncsu.lubick.localHub.http;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,7 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import edu.ncsu.lubick.localHub.LocalHub;
+import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
@@ -30,7 +33,10 @@ import freemarker.template.Version;
  */
 public class LookupHandler extends AbstractHandler {
 
+	private static final String POST_COMMAND_PLUGIN_NAME = "pluginName";
+	private static final String POST_COMMAND_GET_TOOL_USAGE_FOR_PLUGIN = "getToolUsageForPlugin";
 	private static final String PLUGIN_VIEWER = "index.html";
+	private static final String DISPLAY_TOOL_USAGE = "displayToolUsage.html";
 	private static Logger logger;
 	private static Configuration cfg;
 	
@@ -57,8 +63,6 @@ public class LookupHandler extends AbstractHandler {
 	private static void setupTemplateConfiguration() throws IOException {
 		cfg = new Configuration();
 
-		// Specify the data source where the template files come from. Here I set a
-		// plain directory for it, but non-file-system are possible too:
 		cfg.setDirectoryForTemplateLoading(new File("./frontend/templates"));
 
 		// Specify how templates will see the data-model. This is an advanced topic...
@@ -71,9 +75,6 @@ public class LookupHandler extends AbstractHandler {
 		// For production systems TemplateExceptionHandler.RETHROW_HANDLER is better.
 		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
 
-		// At least in new projects, specify that you want the fixes that aren't
-		// 100% backward compatible too (these are very low-risk changes as far as the
-		// 1st and 2nd version number remains):
 		cfg.setIncompatibleImprovements(new Version(2, 3, 20));  // FreeMarker 2.3.20 
 	}
 	
@@ -84,43 +85,82 @@ public class LookupHandler extends AbstractHandler {
 			logger.debug("LookupHandler passing on target "+target);
 			return;
 		}
-		logger.debug("Request was a "+baseRequest.getMethod());
+		logger.debug(String.format("HTML Request %s, with target %s" , baseRequest.toString(), target));
 		String type = baseRequest.getMethod();
 		if (type.equals("POST"))
 		{
-			respondToPost(target,baseRequest,request,response);
+			respondToPost(baseRequest,request,response);
 		}
 		else {
-			respondToGet(target, baseRequest, request, response);
+			respondToGet(baseRequest, response);
 		}
 		
 	}
 
 	//serve up the webpage with the list of tools 
-	private void respondToGet(String target, Request baseRequest, HttpServletResponse response) throws IOException 
+	private void respondToGet(Request baseRequest, HttpServletResponse response) throws IOException 
 	{
-		logger.debug(String.format("HTML Request %s, with target %s" , baseRequest.toString(), target));
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_OK);
 		baseRequest.setHandled(true);
 
 		Map<Object, Object> root = getPluginsFollowedDataModelFromDatabase();
 
-		Template temp = cfg.getTemplate(PLUGIN_VIEWER);
+		processTemplate(response, root, PLUGIN_VIEWER);
+	}
+
+	private void processTemplate(HttpServletResponse response, Map<Object, Object> templateData, String templateName) throws IOException {
+		Template temp = cfg.getTemplate(templateName);
 
 		try {
-			temp.process(root, response.getWriter());
+			temp.process(templateData, response.getWriter());
 		} catch (TemplateException e) {
 			logger.error("Problem with the template",e);
 		}
 	}
 
-	private void respondToPost(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) 
+	private void respondToPost(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException 
 	{
-		// TODO Auto-generated method stub
-		http://www.echoecho.com/htmlforms07.htm
-			
+
+		logger.debug("POST parameters recieved "+request.getParameterMap());
+		//logger.debug("Thing to do: "+request.getParameter("thingToDo"));
+		logger.debug("PluginName: "+request.getParameter(POST_COMMAND_PLUGIN_NAME));
 		
+		if (request.getParameter("thingToDo").equals(POST_COMMAND_GET_TOOL_USAGE_FOR_PLUGIN))	
+		{
+			respondToGetToolUsageForPlugin(baseRequest,request,response);
+		}
+		
+	}
+
+	private void respondToGetToolUsageForPlugin(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException 
+	{
+		Map<Object, Object> dataModel = getToolUsagesAndCountsFromDatabase(request.getParameter(POST_COMMAND_PLUGIN_NAME));
+		processTemplate(response, dataModel, DISPLAY_TOOL_USAGE);
+		
+		baseRequest.setHandled(true);
+	}
+
+	private Map<Object, Object> getToolUsagesAndCountsFromDatabase(String pluginName) 
+	{
+		List<ToolUsage> toolUsages = this.databaseLink.getAllToolUsagesForPlugin(pluginName);
+		List<ToolNameAndCount> toolsAndCounts = countUpAllToolUsages(toolUsages);
+		
+		Map<Object, Object> retval = new HashMap<>();
+		retval.put("toolsAndCounts", toolsAndCounts);
+		return retval;
+	}
+
+	private List<ToolNameAndCount> countUpAllToolUsages(List<ToolUsage> toolUsages) {
+		Map<String, Integer> toolCountsMap = new HashMap<>();
+		
+		List<ToolNameAndCount> retVal = new ArrayList<>();
+		for(String toolName: toolCountsMap.keySet())
+		{
+			retVal.add(new ToolNameAndCount(toolName, toolCountsMap.get(toolName)));
+		}
+		Collections.sort(retVal);
+		return retVal;
 	}
 
 	private Map<Object, Object> getPluginsFollowedDataModelFromDatabase() {
@@ -132,6 +172,25 @@ public class LookupHandler extends AbstractHandler {
 		
 		
 		return retVal;
+	}
+	
+	
+	private class ToolNameAndCount implements Comparable<ToolNameAndCount>
+	{
+		
+		private Integer toolCount;
+		private String toolName;
+
+		public ToolNameAndCount(String toolName, Integer toolCount) {
+			this.toolName = toolName;
+			this.toolCount = toolCount;
+		}
+
+		@Override
+		public int compareTo(ToolNameAndCount o) {
+			return this.toolCount.compareTo(o.toolCount);
+		}
+
 	}
 
 }

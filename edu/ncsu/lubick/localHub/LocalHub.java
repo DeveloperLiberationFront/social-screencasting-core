@@ -330,7 +330,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 		@Override
 		public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName) 
 		{
-			return hubToDebug.databaseManager.getAllToolUsageHistoriesForPlugin(currentPluginName);
+			return hubToDebug.getAllToolUsagesForPlugin(currentPluginName);
 		}
 
 		@Override
@@ -373,6 +373,11 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 	public List<String> getNamesOfAllPlugins() {
 		// TODO Auto-generated method stub
 		return Arrays.asList("Plugin1","Plugin2", "Plugin3");
+	}
+
+
+	public List<ToolUsage> getAllToolUsagesForPlugin(String pluginName) {
+		return databaseManager.getAllToolUsageHistoriesForPlugin(pluginName);
 	}
 
 
