@@ -207,9 +207,9 @@ public class LookupHandler extends AbstractHandler {
 		{	//sort by tool usage, if they are the same, sort by alphabetical order on the tool name
 			if (this.toolCount.compareTo(o.toolCount) != 0)
 			{
-				return -this.toolCount.compareTo(o.toolCount);		//negated so that Collections.sort sorts in descending order
+				return o.toolCount.compareTo(this.toolCount);		//reversed so that Collections.sort sorts in descending order
 			}
-			return -this.toolName.compareTo(o.toolName); 			//negated so that Collections.sort sorts in descending order
+			return o.toolName.compareTo(this.toolName); 			//reversed so that Collections.sort sorts in descending order
 		}
 		
 		@Override
