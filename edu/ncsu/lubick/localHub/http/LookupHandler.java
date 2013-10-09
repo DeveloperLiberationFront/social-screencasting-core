@@ -3,7 +3,6 @@ package edu.ncsu.lubick.localHub.http;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -21,9 +20,14 @@ import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.SimpleNumber;
+import freemarker.template.SimpleScalar;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
 import freemarker.template.Version;
 
 /**
@@ -148,17 +152,29 @@ public class LookupHandler extends AbstractHandler {
 		
 		Map<Object, Object> retval = new HashMap<>();
 		retval.put("toolsAndCounts", toolsAndCounts);
+		retval.put("plugin", pluginName);
 		return retval;
 	}
 
 	private List<ToolNameAndCount> countUpAllToolUsages(List<ToolUsage> toolUsages) {
 		Map<String, Integer> toolCountsMap = new HashMap<>();
-		
+		//add the toolusages to the map
+		for(ToolUsage tu:toolUsages)
+		{
+			Integer previousCount = toolCountsMap.get(tu.getToolName());
+			if (previousCount == null)
+			{
+				previousCount = 0;
+			}
+			toolCountsMap.put(tu.getToolName(), previousCount + 1);
+		}
+		//convert the map back to a list
 		List<ToolNameAndCount> retVal = new ArrayList<>();
 		for(String toolName: toolCountsMap.keySet())
 		{
 			retVal.add(new ToolNameAndCount(toolName, toolCountsMap.get(toolName)));
 		}
+		//sort, using the internal comparator
 		Collections.sort(retVal);
 		return retVal;
 	}
@@ -175,7 +191,7 @@ public class LookupHandler extends AbstractHandler {
 	}
 	
 	
-	private class ToolNameAndCount implements Comparable<ToolNameAndCount>
+	private class ToolNameAndCount implements Comparable<ToolNameAndCount>, TemplateHashModel
 	{
 		
 		private Integer toolCount;
@@ -187,12 +203,13 @@ public class LookupHandler extends AbstractHandler {
 		}
 
 		@Override
-		public int compareTo(ToolNameAndCount o) {
+		public int compareTo(ToolNameAndCount o) 
+		{	//sort by tool usage, if they are the same, sort by alphabetical order on the tool name
 			if (this.toolCount.compareTo(o.toolCount) != 0)
 			{
-				return this.toolCount.compareTo(o.toolCount);
+				return -this.toolCount.compareTo(o.toolCount);		//negated so that Collections.sort sorts in descending order
 			}
-			return this.toolName.compareTo(o.toolName);
+			return -this.toolName.compareTo(o.toolName); 			//negated so that Collections.sort sorts in descending order
 		}
 		
 		@Override
@@ -208,6 +225,33 @@ public class LookupHandler extends AbstractHandler {
 			}
 			return false;
 		}
+
+		@Override
+		public String toString() 
+		{	//for debugging
+			return "ToolNameAndCount [toolName=" + toolName + ", toolCount="
+					+ toolCount + "]";
+		}
+
+		@Override
+		public TemplateModel get(String arg0) throws TemplateModelException {
+			if (arg0.equals("toolName"))
+			{
+				return new SimpleScalar(toolName);
+			}
+			if (arg0.equals("toolCount"))
+			{
+				return new SimpleNumber(toolCount);
+			}
+			throw new TemplateModelException("Does not have a "+arg0);
+		}
+
+		@Override
+		public boolean isEmpty() throws TemplateModelException {
+			return false;
+		}
+		
+		
 
 	}
 

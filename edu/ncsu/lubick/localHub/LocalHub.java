@@ -372,7 +372,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser {
 
 	public List<String> getNamesOfAllPlugins() {
 		// TODO Auto-generated method stub
-		return Arrays.asList("Plugin1","Plugin2", "Plugin3");
+		return Arrays.asList("TestPlugin1","TestPlugin2", "TestPlugin3");
 	}
 
 
