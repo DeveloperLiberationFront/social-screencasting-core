@@ -14,6 +14,8 @@ import org.apache.log4j.Logger;
 
 /**
  * A decoder that pairs with the default encoding in ScreenCasting Module
+ * 
+ * TODO refactor so that the runlength decoding is in here
  * @author Kevin Lubick
  *
  */

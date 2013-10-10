@@ -111,7 +111,8 @@ public class FramePacket //TODO combine with the FramePacket in ScreenCastingMod
 		int rgb = 0xFF000000;
 
 		while (inCursor < this.encodedData.length - 3 && outCursor < this.getFrameSize()) {
-			if (this.encodedData[inCursor] == STREAK_OF_SAME_AS_LAST_TIME_BLOCKS_CONSTANT) {
+			if (this.encodedData[inCursor] == STREAK_OF_SAME_AS_LAST_TIME_BLOCKS_CONSTANT) 
+			{
 				inCursor++;
 
 				int count = (this.encodedData[inCursor] & 0xFF);
@@ -131,7 +132,7 @@ public class FramePacket //TODO combine with the FramePacket in ScreenCastingMod
 				}
 
 			} 
-			else if (this.encodedData[inCursor] < 0) // uncomp
+			else if (this.encodedData[inCursor] < 0) // data is uncompressed
 			{
 				blockSize = this.encodedData[inCursor] & 0x7F;
 				inCursor++;
@@ -151,7 +152,8 @@ public class FramePacket //TODO combine with the FramePacket in ScreenCastingMod
 					}
 				}
 			} 
-			else {
+			else 
+			{
 				blockSize = this.encodedData[inCursor];
 				inCursor++;
 				rgb = ((this.encodedData[inCursor] & 0xFF) << 16)
@@ -163,21 +165,18 @@ public class FramePacket //TODO combine with the FramePacket in ScreenCastingMod
 					transparent = true;
 				}
 				inCursor += 3;
-				for (int loop = 0; loop < blockSize; loop++) {
+				for (int loop = 0; loop < blockSize && outCursor < getFrameSize(); loop++) {
 					if (transparent) {
 						this.decodedData[outCursor] = this.previousData[outCursor];
 					} else {
 						this.decodedData[outCursor] = rgb;
 					}
 					outCursor++;
-					if (outCursor >= this.decodedData.length) {
-						break;
-					}
 				}
 			}
 		}
 		
-		logger.debug("Ending outCursor: "+outCursor);
+		logger.debug("Ending inCursor: "+inCursor+" outCursor: "+outCursor);
 		
 		//TODO this is a hotfix for the bottom of the screen going dark.  I think there is some 
 		//deeper problem, but this fixes it for now.

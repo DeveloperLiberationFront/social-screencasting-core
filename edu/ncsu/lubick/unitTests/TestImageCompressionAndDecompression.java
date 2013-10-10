@@ -6,7 +6,6 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
@@ -29,13 +28,23 @@ import edu.ncsu.lubick.localHub.videoPostProduction.DefaultCodec;
 public class TestImageCompressionAndDecompression
 {
 
-	private static final byte HOMOGENEOUS_FIRST_BYTE = (byte)-127;
+	private static final byte HOMOGENEOUS_FIRST_BYTE = (byte)-127;	//this means the first byte is 
 	private static final Rectangle testImageFrame = new Rectangle(800, 600);
 	private static final int BYTES_FOR_HOMOGENEOUS_IMAGE = 15244;	//observed via validated tests.
 	private FrameCompressor compressorToTest;
 	
 	private static Logger logger = Logger.getLogger(FrameCompressor.class.getName());
 	private byte[] packedBytes;
+	
+	//Patterns for checking
+	private byte[] blueMainPattern = new byte[]{0, 0,-1};		//this is equivalent to RGB(0,0,255)
+	private byte[] blueTailPattern = new byte[]{65, 0, 0, -1};	//Each homogeneous 800x600 ends with 
+	private byte[] darkRedMainPattern = new byte[]{122, 0, 0};
+	private byte[] darkRedTailPattern = new byte[]{65, 122, 0, 0};
+	private byte[] greenMainPattern = new byte[]{0, -1, 0};
+	private byte[] greenTailPattern = new byte[]{65, 0, -1, 0};
+	private byte[] redMainPattern = new byte[]{-1, 0, 0};
+	private byte[] redTailPattern = new byte[]{65, -1, 0, 0};
 	
 	static {
 		PropertyConfigurator.configure(ScreenRecordingModule.LOGGING_FILE_PATH);
@@ -44,7 +53,7 @@ public class TestImageCompressionAndDecompression
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception 
 	{
-		
+		logger.info("Starting CompressionTests");
 	}
 
 	@Before
@@ -56,35 +65,36 @@ public class TestImageCompressionAndDecompression
 	}
 
 	@Test
-	public void testSimpleRed() throws Exception{
+	public void testSimpleRed() throws Exception
+	{
 		File imageFile = new File("./src/test_images/800x600_red.png");
-		String prefaceString = "simple red:";	
-		
-		int numBytes = readInImageAndCompressToPackedBytesArray(imageFile);
 
+		int numBytes = readInImageAndCompressToPackedBytesArray(imageFile);
+		
 		assertEquals(BYTES_FOR_HOMOGENEOUS_IMAGE, numBytes);
 		
 		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
-		
-		logger.info(prefaceString +Arrays.toString(slimmedPackedBytes));
+			
+		verifyCompressedHomogenousImage(slimmedPackedBytes, redMainPattern, redTailPattern);
 	}
 	
 	@Test
-	public void testSimpleGreen() throws Exception{
+	public void testSimpleGreen() throws Exception
+	{
 		File imageFile = new File("./src/test_images/800x600_green.png");
-		String prefaceString = "simple green:";	
 		
 		int numBytes = readInImageAndCompressToPackedBytesArray(imageFile);
-			
+		
 		assertEquals(BYTES_FOR_HOMOGENEOUS_IMAGE, numBytes);
 		
 		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
-		
-		logger.info(prefaceString +Arrays.toString(slimmedPackedBytes));
+			
+		verifyCompressedHomogenousImage(slimmedPackedBytes, greenMainPattern, greenTailPattern);
 	}
 	
 	@Test
-	public void testSimpleBlue() throws Exception{
+	public void testSimpleBlue() throws Exception
+	{
 		File imageFile = new File("./src/test_images/800x600_blue.png");
 		
 		int numBytes = readInImageAndCompressToPackedBytesArray(imageFile);
@@ -93,28 +103,27 @@ public class TestImageCompressionAndDecompression
 		
 		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
 			
-		byte[] mainPattern = new byte[]{0,0,-1,126};
-		byte[] tailPattern = new byte[]{64,0,0, -1};
-		verifyCompressedHomogenousImage(slimmedPackedBytes, mainPattern, tailPattern);
+		verifyCompressedHomogenousImage(slimmedPackedBytes, blueMainPattern, blueTailPattern);
 	}
 	
 
 	@Test
-	public void testSimpleDarkRed() throws Exception{
+	public void testSimpleDarkRed() throws Exception
+	{
 		File imageFile = new File("./src/test_images/800x600_darkRed.png");
-		String prefaceString = "simple darkRed:";	
-		
+
 		int numBytes = readInImageAndCompressToPackedBytesArray(imageFile);
-			
+		
 		assertEquals(BYTES_FOR_HOMOGENEOUS_IMAGE, numBytes);
 		
 		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
-		
-		logger.info(prefaceString +Arrays.toString(slimmedPackedBytes));
+			
+		verifyCompressedHomogenousImage(slimmedPackedBytes, darkRedMainPattern, darkRedTailPattern);
 	}
 	
 	@Test
-	public void testBlueCompressionAndDecompression() throws Exception{
+	public void testBlueCompressionAndDecompression() throws Exception
+	{
 		File imageFile = new File("./src/test_images/800x600_blue.png");
 		
 		int[] rawData = readInImagesRawData(imageFile);		//do this in two steps to have this to compare to later
@@ -125,41 +134,114 @@ public class TestImageCompressionAndDecompression
 		
 		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
 			
-		edu.ncsu.lubick.localHub.videoPostProduction.FramePacket aFrame = DefaultCodec.makeTestFramePacket(rawData.length);
+		int[] uncompressedData = decompressDataInSlimmedPackedBytes(rawData.length,slimmedPackedBytes);
+		
+		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
+	}
+
+	@Test
+	public void testDarkRedCompressionAndDecompression() throws Exception
+	{
+		File imageFile = new File("./src/test_images/800x600_darkRed.png");
+		
+		int[] rawData = readInImagesRawData(imageFile);		//do this in two steps to have this to compare to later
+		
+		int numBytes =  compressToPackedBytesArray(rawData);
+			
+		assertEquals(BYTES_FOR_HOMOGENEOUS_IMAGE, numBytes);
+		
+		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
+			
+		int[] uncompressedData = decompressDataInSlimmedPackedBytes(rawData.length,slimmedPackedBytes);
+		
+		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
+	}
+
+	
+	
+	//=======================================================================================
+	//============================HELPERS===================================================
+	
+	private int[] decompressDataInSlimmedPackedBytes(int numBytesPerFrame, byte[] slimmedPackedBytes) 
+	{
+		edu.ncsu.lubick.localHub.videoPostProduction.FramePacket aFrame = DefaultCodec.makeTestFramePacket(numBytesPerFrame);
 		
 		aFrame.setEncodedData(slimmedPackedBytes);
 		
 		aFrame.runLengthDecode();
 		
 		int[] uncompressedData = aFrame.getData();
-		
-		assertEquals(rawData.length, uncompressedData.length);
-		for(int i = 0;i<rawData.length; i++)
+		return uncompressedData;
+	}
+	
+	@SuppressWarnings("unused")
+	private void debugWriteToImage(int[] uncompressedData, String outputFile) throws IOException 
+	{
+		BufferedImage bufferedImage = new BufferedImage(testImageFrame.width, testImageFrame.height, BufferedImage.TYPE_INT_RGB);
+		bufferedImage.setRGB(0, 0, testImageFrame.width, testImageFrame.height, uncompressedData, 0, testImageFrame.width);
+		ImageIO.write(bufferedImage, "png", new File(outputFile));
+	}
+
+	private void verifyCompressedHomogenousImage(byte[] arrayOfDataBytes, byte[] mainPattern, byte[] tailPattern) {
+		assertEquals(HOMOGENEOUS_FIRST_BYTE, arrayOfDataBytes[0]);
+		verifyArrayMatchesStraightPattern(arrayOfDataBytes, 1, 4, mainPattern);
+		verifyArrayMatchesCompressedPattern(arrayOfDataBytes, 4, BYTES_FOR_HOMOGENEOUS_IMAGE - 4, mainPattern);
+		verifyArrayMatchesStraightPattern(arrayOfDataBytes, BYTES_FOR_HOMOGENEOUS_IMAGE - 4, BYTES_FOR_HOMOGENEOUS_IMAGE, tailPattern);
+	}
+	
+	private void verifyArrayMatchesStraightPattern(byte[] arrayOfDataBytes, int startIndex, int endIndex, byte[] pattern) 
+	{
+		if (pattern.length < endIndex - startIndex)
 		{
-			assertEquals(rawData[i], uncompressedData[i]);
+			fail("There aren't enough numbers in the pattern to do the comparison");
+		}
+		for(int i = 0;startIndex + i < endIndex;i++)
+		{
+			assertEquals("Problem at index " + (startIndex + i),pattern[i] , arrayOfDataBytes[startIndex + i]);
 		}
 	}
 	
-	
-	
-	//=======================================================================================
-	//============================HELPERS===================================================
-
-	private void verifyCompressedHomogenousImage(byte[] slimmedPackedBytes, byte[] mainPattern, byte[] tailPattern) {
-		assertEquals(HOMOGENEOUS_FIRST_BYTE, slimmedPackedBytes[0]);
-		verifyArrayMatchesPattern(slimmedPackedBytes, 1, BYTES_FOR_HOMOGENEOUS_IMAGE - 4, mainPattern);
-		verifyArrayMatchesPattern(slimmedPackedBytes, BYTES_FOR_HOMOGENEOUS_IMAGE - 4, BYTES_FOR_HOMOGENEOUS_IMAGE, tailPattern);
+	@SuppressWarnings("unused")
+	private void verifyArrayMatchesStraightPattern(byte[] expectedBytes, byte[] actualBytes) 
+	{
+		if (actualBytes.length != expectedBytes.length)
+		{
+			fail("There aren't enough numbers in the pattern to do the comparison");
+		}
+		for(int i = 0;i <expectedBytes.length;i++)
+		{
+			assertEquals("Problem at index " + i,expectedBytes[i] , actualBytes[i]);
+		}
 	}
 	
-	private void verifyArrayMatchesPattern(byte[] slimmedPackedBytes, int startIndex, int endIndex, byte[] pattern) {
+	private void verifyArrayMatchesStraightPattern(int[] expectedBytes, int[] actualBytes) 
+	{
+		if (actualBytes.length != expectedBytes.length)
+		{
+			fail("There aren't enough numbers in the pattern to do the comparison");
+		}
+		for(int i = 0;i <expectedBytes.length;i++)
+		{
+			assertEquals("Problem at index " + i,expectedBytes[i] , actualBytes[i]);
+		}
+	}
+
+	private void verifyArrayMatchesCompressedPattern(byte[] slimmedPackedBytes, int startIndex, int endIndex, byte[] pattern) {
 		for(int i = 0;startIndex + i < endIndex;i++)
 		{
-			assertEquals(pattern[i % pattern.length], slimmedPackedBytes[startIndex + i]);
+			if (i % (pattern.length + 1) == 0)
+			{
+				assertEquals(FrameCompressor.MAX_BLOCK_LENGTH, slimmedPackedBytes[startIndex + i]);
+			}
+			else
+			{
+				assertEquals(pattern[i % (pattern.length + 1) - 1] , slimmedPackedBytes[startIndex + i]);
+			}
 		}
 	}
 
 	private byte[] slimDataInPackedBytesArray(int numBytes) {
-		byte[] slimmedPackedBytes = new byte[numBytes + 10];	//Just to make sure we have 0s there
+		byte[] slimmedPackedBytes = new byte[numBytes];	//Just to make sure we have 0s there
 		for (int i = 0;i<slimmedPackedBytes.length; i++)
 		{
 			slimmedPackedBytes[i]=packedBytes[i];
