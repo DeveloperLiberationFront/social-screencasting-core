@@ -156,8 +156,74 @@ public class TestImageCompressionAndDecompression
 		
 		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
 	}
-
 	
+	@Test
+	public void testPurpleCompressionAndDecompression() throws Exception
+	{
+		File imageFile = new File("./src/test_images/800x600_purple.png");
+		
+		int[] rawData = readInImagesRawData(imageFile);		//do this in two steps to have this to compare to later
+		
+		int numBytes =  compressToPackedBytesArray(rawData);
+			
+		assertEquals(BYTES_FOR_HOMOGENEOUS_IMAGE, numBytes);
+		
+		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
+			
+		int[] uncompressedData = decompressDataInSlimmedPackedBytes(rawData.length,slimmedPackedBytes);
+		
+		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
+	}
+	
+	@Test
+	public void testPurpleRedCompressionAndDecompression() throws Exception
+	{
+		File imageFile = new File("./src/test_images/800x600_purple_red.png");
+		
+		int[] rawData = readInImagesRawData(imageFile);		//do this in two steps to have this to compare to later
+		
+		int numBytes =  compressToPackedBytesArray(rawData);
+		
+		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
+			
+		int[] uncompressedData = decompressDataInSlimmedPackedBytes(rawData.length,slimmedPackedBytes);
+		
+		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
+	}
+	
+	@Test
+	public void testPurpleBlueCompressionAndDecompression() throws Exception
+	{
+		File imageFile = new File("./src/test_images/800x600_purple_blue.png");
+		
+		int[] rawData = readInImagesRawData(imageFile);		//do this in two steps to have this to compare to later
+		
+		int numBytes =  compressToPackedBytesArray(rawData);
+		
+		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
+			
+		int[] uncompressedData = decompressDataInSlimmedPackedBytes(rawData.length,slimmedPackedBytes);
+		
+		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
+	}
+	
+	@Test
+	public void testBlueWithBoxCompressionAndDecompression() throws Exception
+	{
+		File imageFile = new File("./src/test_images/800x600_blue_with_box.png");
+		
+		int[] rawData = readInImagesRawData(imageFile);		//do this in two steps to have this to compare to later
+		
+		int numBytes =  compressToPackedBytesArray(rawData);
+		
+		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
+			
+		int[] uncompressedData = decompressDataInSlimmedPackedBytes(rawData.length,slimmedPackedBytes);
+		
+		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
+	}
+
+	Work on compressing two frames in a row
 	
 	//=======================================================================================
 	//============================HELPERS===================================================
