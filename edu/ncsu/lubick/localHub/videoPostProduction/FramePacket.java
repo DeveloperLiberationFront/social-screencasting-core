@@ -32,7 +32,7 @@ import org.apache.log4j.Logger;
  * DEALINGS IN THE SOFTWARE.
  * 
  */
-class FramePacket 
+public class FramePacket //TODO combine with the FramePacket in ScreenCastingModule
 {
 	
 	private static Logger logger = Logger.getLogger(FramePacket.class.getName());
@@ -181,10 +181,10 @@ class FramePacket
 		
 		//TODO this is a hotfix for the bottom of the screen going dark.  I think there is some 
 		//deeper problem, but this fixes it for now.
-		for(;outCursor<getFrameSize();outCursor++)
-		{
-			this.decodedData[outCursor] = this.previousData[outCursor];
-		}
+		//for(;outCursor<getFrameSize();outCursor++)
+		//{
+		//	this.decodedData[outCursor] = this.previousData[outCursor];
+		//}
 		this.result = FramePacket.CHANGES_THIS_FRAME;
 	}
 	

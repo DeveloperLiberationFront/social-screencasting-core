@@ -11,6 +11,7 @@ import java.util.zip.InflaterInputStream;
 
 import org.apache.log4j.Logger;
 
+
 /**
  * A decoder that pairs with the default encoding in ScreenCasting Module
  * @author Kevin Lubick
@@ -233,6 +234,10 @@ public class DefaultCodec implements FrameDecompressorCodecStrategy
 	public void setFrameZeroTime(Date newTimeZero) {
 		this.capFileStartTime = newTimeZero;
 		this.firstFrameTimeStamp=-1;
+	}
+
+	public static FramePacket makeTestFramePacket(int expectedSize) {
+		return new FramePacket(expectedSize, null);
 	}
 	
 }
