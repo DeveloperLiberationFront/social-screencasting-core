@@ -32,10 +32,10 @@ import org.apache.log4j.Logger;
  * DEALINGS IN THE SOFTWARE.
  * 
  */
-public class FramePacket //TODO combine with the FramePacket in ScreenCastingModule
+public class DecompressionFramePacket
 {
 	
-	private static Logger logger = Logger.getLogger(FramePacket.class.getName());
+	private static Logger logger = Logger.getLogger(DecompressionFramePacket.class.getName());
 	
 	public static final int NO_CHANGES_THIS_FRAME = 0;
 	public static final int CHANGES_THIS_FRAME = 1;
@@ -58,7 +58,7 @@ public class FramePacket //TODO combine with the FramePacket in ScreenCastingMod
 		return frameSize;
 	}
 
-	public FramePacket(int expectedSize, FramePacket previousFramePacket) {
+	public DecompressionFramePacket(int expectedSize, DecompressionFramePacket previousFramePacket) {
 		this.frameSize = expectedSize;
 		if (previousFramePacket == null)
 		{
@@ -176,15 +176,16 @@ public class FramePacket //TODO combine with the FramePacket in ScreenCastingMod
 			}
 		}
 		
-		logger.debug("Ending inCursor: "+inCursor+" outCursor: "+outCursor);
+		logger.debug(String.format("Ending inCursor: %d/%d and outCursor: %d/%d",inCursor,encodedData.length-1,outCursor,decodedData.length-1));
 		
-		//TODO this is a hotfix for the bottom of the screen going dark.  I think there is some 
-		//deeper problem, but this fixes it for now.
-		//for(;outCursor<getFrameSize();outCursor++)
-		//{
-		//	this.decodedData[outCursor] = this.previousData[outCursor];
-		//}
-		this.result = FramePacket.CHANGES_THIS_FRAME;
+		//Many times, if we are on the last couple of bytes, we don't read the last 2 bytes that look something like
+		// [..., -1, 62]  and these are ignored because the loop stops if we are past the 3rd to last byte
+		// So, the best way to fix this is just assume if we haven't filled the expected size, copy all the stuff from the end
+		for(;outCursor<decodedData.length && outCursor<previousData.length;outCursor++)
+		{
+			this.decodedData[outCursor] = this.previousData[outCursor];
+		}
+		this.result = DecompressionFramePacket.CHANGES_THIS_FRAME;
 	}
 	
 	@Override

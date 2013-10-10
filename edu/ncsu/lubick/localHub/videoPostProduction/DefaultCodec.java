@@ -27,7 +27,7 @@ public class DefaultCodec implements FrameDecompressorCodecStrategy
 	
 	private Date capFileStartTime;
 
-	private FramePacket previousFramePacket = null;
+	private DecompressionFramePacket previousFramePacket = null;
 	
 	private BufferedImage previousImage = null;
 
@@ -49,7 +49,7 @@ public class DefaultCodec implements FrameDecompressorCodecStrategy
 	public BufferedImage readInFrameImage(InputStream inputStream) throws IOException 
 	{
 		logger.trace("Starting to read in frame");
-		FramePacket framePacket = unpackNextFrame(inputStream);
+		DecompressionFramePacket framePacket = unpackNextFrame(inputStream);
 	
 		if (framePacket == null) //must have reached the file
 		{
@@ -60,9 +60,9 @@ public class DefaultCodec implements FrameDecompressorCodecStrategy
 		//Date frameTime = frame.getFrameTimeStamp();
 	
 		int result = framePacket.getResult();
-		if (result == FramePacket.NO_CHANGES_THIS_FRAME) {
+		if (result == DecompressionFramePacket.NO_CHANGES_THIS_FRAME) {
 			return previousImage;
-		} else if (result == FramePacket.REACHED_END) {
+		} else if (result == DecompressionFramePacket.REACHED_END) {
 			logger.fatal("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 			logger.fatal("I TOTALLY DID NOT EXPECT THIS LINE OF CODE TO BE REACHED");
 			return null;
@@ -79,10 +79,10 @@ public class DefaultCodec implements FrameDecompressorCodecStrategy
 		return bufferedImage;
 	}
 	
-	private FramePacket unpackNextFrame(InputStream inputStream) throws IOException 
+	private DecompressionFramePacket unpackNextFrame(InputStream inputStream) throws IOException 
 	{
 	
-		FramePacket frame = new FramePacket(currentFrameRect.width * currentFrameRect.height, previousFramePacket);
+		DecompressionFramePacket frame = new DecompressionFramePacket(currentFrameRect.width * currentFrameRect.height, previousFramePacket);
 	
 		Date timeStamp = readInFrameTimeStamp(inputStream);
 		
@@ -95,7 +95,7 @@ public class DefaultCodec implements FrameDecompressorCodecStrategy
 	
 		int type = readFrameType(inputStream);
 	
-		if (type == FramePacket.NO_CHANGES_THIS_FRAME || type == FramePacket.REACHED_END) 
+		if (type == DecompressionFramePacket.NO_CHANGES_THIS_FRAME || type == DecompressionFramePacket.REACHED_END) 
 		{
 			frame.setResult(type);
 			return frame;
@@ -112,7 +112,7 @@ public class DefaultCodec implements FrameDecompressorCodecStrategy
 		catch (IOException e) 
 		{
 			logger.error("Problem unpacking ",e);
-			frame.setResult(FramePacket.NO_CHANGES_THIS_FRAME);
+			frame.setResult(DecompressionFramePacket.NO_CHANGES_THIS_FRAME);
 			return frame;
 		}
 		frame.runLengthDecode();
@@ -238,8 +238,8 @@ public class DefaultCodec implements FrameDecompressorCodecStrategy
 		this.firstFrameTimeStamp=-1;
 	}
 
-	public static FramePacket makeTestFramePacket(int expectedSize) {
-		return new FramePacket(expectedSize, null);
+	public static DecompressionFramePacket makeTestFramePacket(int expectedSize) {
+		return new DecompressionFramePacket(expectedSize, null);
 	}
 	
 }
