@@ -34,11 +34,15 @@ public class TestImageCompressionAndDecompression
 	private static final Rectangle TestImage800x600 = new Rectangle(800, 600);
 	private static final Rectangle TestImage1600x900 = new Rectangle(1600, 900);
 	private static final int BYTES_FOR_HOMOGENEOUS_IMAGE = 15244;	//observed via validated tests.
+	private static final int ABSOLUTE_BLACK_PIXEL_VALUE = -16777216;
+	private static final int FUDGED_BLACK_PIXEL_VALUE = -16777215;
 	private FrameCompressor compressorToTest;
 
 	private static Logger logger = Logger.getLogger(TestImageCompressionAndDecompression.class.getName());
 	private byte[] packedBytes;
-
+	private Rectangle imageSizeRectangle;
+	
+	
 	//Patterns for checking
 	private byte[] blueMainPattern = new byte[]{0, 0,-1};		//this is equivalent to RGB(0,0,255)
 	private byte[] blueTailPattern = new byte[]{65, 0, 0, -1};	//Each homogeneous 800x600 ends with 
@@ -48,7 +52,8 @@ public class TestImageCompressionAndDecompression
 	private byte[] greenTailPattern = new byte[]{65, 0, -1, 0};
 	private byte[] redMainPattern = new byte[]{-1, 0, 0};
 	private byte[] redTailPattern = new byte[]{65, -1, 0, 0};
-	private Rectangle imageSizeRectangle;
+	private byte[] blackMainPattern = new byte[]{0, 0, 1};		//all black is compressed to have an RGB of 0,0,1 so as not to confuse the "same as last time" stuff
+	private byte[] blackTailPattern = new byte[]{65, 0, 0, 1};
 
 	static {
 		PropertyConfigurator.configure(ScreenRecordingModule.LOGGING_FILE_PATH);
@@ -130,6 +135,22 @@ public class TestImageCompressionAndDecompression
 
 		verifyCompressedHomogenousImage(slimmedPackedBytes, darkRedMainPattern, darkRedTailPattern);
 	}
+	
+	@Test
+	public void testSimpleBlack() throws Exception
+	{
+		setUpForImageSize(TestImage800x600);
+
+		File imageFile = new File("./src/test_images/800x600_black.png");
+
+		int numBytes = readInImageAndCompressToPackedBytesArray(imageFile);
+
+		assertEquals(BYTES_FOR_HOMOGENEOUS_IMAGE, numBytes);
+
+		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
+
+		verifyCompressedHomogenousImage(slimmedPackedBytes, blackMainPattern, blackTailPattern);
+	}
 
 	@Test
 	public void testBlueCompressionAndDecompression() throws Exception
@@ -148,6 +169,28 @@ public class TestImageCompressionAndDecompression
 
 		int[] uncompressedData = decompressDataInSlimmedPackedBytes(rawData.length,slimmedPackedBytes);
 
+		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
+	}
+	
+	@Test
+	public void testBlackCompressionAndDecompression() throws Exception
+	{
+		setUpForImageSize(TestImage800x600);
+
+		File imageFile = new File("./src/test_images/800x600_black.png");
+
+		int[] rawData = readInImagesRawData(imageFile);		//do this in two steps to have this to compare to later
+
+		int numBytes =  compressToPackedBytesArray(rawData);
+
+		assertEquals(BYTES_FOR_HOMOGENEOUS_IMAGE, numBytes);
+
+		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
+
+		int[] uncompressedData = decompressDataInSlimmedPackedBytes(rawData.length,slimmedPackedBytes);
+
+		if (logger.isTraceEnabled()) debugWriteToImage(uncompressedData, "./src/test_images/testBlackCompressionAndDecompression.png");
+		
 		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
 	}
 
@@ -228,6 +271,24 @@ public class TestImageCompressionAndDecompression
 	}
 
 	@Test
+	public void testYellowWithBlackPatternCompressionAndDecompression() throws Exception
+	{
+		setUpForImageSize(TestImage800x600);
+
+		File imageFile = new File("./src/test_images/800x600_yellow_with_black_pattern.png");
+
+		int[] rawData = readInImagesRawData(imageFile);		//do this in two steps to have this to compare to later
+
+		int numBytes =  compressToPackedBytesArray(rawData);
+
+		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
+
+		int[] uncompressedData = decompressDataInSlimmedPackedBytes(rawData.length,slimmedPackedBytes);
+
+		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
+	}
+	
+	@Test
 	public void testBlueWithBoxCompressionAndDecompression() throws Exception
 	{
 		setUpForImageSize(TestImage800x600);
@@ -246,6 +307,8 @@ public class TestImageCompressionAndDecompression
 
 		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
 	}
+	
+	
 
 	@Test
 	public void testBlueTwoFrames() throws Exception
@@ -278,7 +341,7 @@ public class TestImageCompressionAndDecompression
 		decompressionFrame = decompressDataInSlimmedPackedBytes(decompressionFrame, secondImageSlimmedPackedBytes);
 		int[] uncompressedSecondImageData = decompressionFrame.getData();
 
-		if (logger.isTraceEnabled()) debugWriteToImage(uncompressedSecondImageData, "./src/test_images/test.png");
+		if (logger.isTraceEnabled()) debugWriteToImage(uncompressedSecondImageData, "./src/test_images/testBlueTwoFrames.png");
 		verifyArrayMatchesStraightPattern(firstImageRawData, uncompressedFirstImageData);
 		verifyArrayMatchesStraightPattern(secondImageRawData, uncompressedSecondImageData);
 	}
@@ -316,10 +379,12 @@ public class TestImageCompressionAndDecompression
 		decompressionFrame = decompressDataInSlimmedPackedBytes(decompressionFrame, secondImageSlimmedPackedBytes);
 		int[] uncompressedSecondImageData = decompressionFrame.getData();
 
-		if (logger.isTraceEnabled()) debugWriteToImage(uncompressedFirstImageData, "./src/test_images/test.png");
+		if (logger.isTraceEnabled()) debugWriteToImage(uncompressedFirstImageData, "./src/test_images/testTwoLifelikeFrames.png");
 		verifyArrayMatchesStraightPattern(firstImageRawData, uncompressedFirstImageData);
 		verifyArrayMatchesStraightPattern(secondImageRawData, uncompressedSecondImageData);
 	}
+	
+	
 
 
 
@@ -428,6 +493,10 @@ public class TestImageCompressionAndDecompression
 		}
 		for(int i = 0;i <expectedBytes.length;i++)
 		{
+			if (expectedBytes[i] == ABSOLUTE_BLACK_PIXEL_VALUE)
+			{
+				expectedBytes[i] = FUDGED_BLACK_PIXEL_VALUE;
+			}
 			assertEquals("Problem at index " + i,expectedBytes[i] , actualBytes[i]);
 		}
 	}
