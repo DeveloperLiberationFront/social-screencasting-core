@@ -297,7 +297,10 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 
 
 	public void shutDown() {
-		this.screenRecordingModule.stopRecording();
+		if (screenRecordingModule != null)
+		{
+			this.screenRecordingModule.stopRecording();
+		}
 		currentRunnable.stop();
 		databaseManager.shutDown();
 		

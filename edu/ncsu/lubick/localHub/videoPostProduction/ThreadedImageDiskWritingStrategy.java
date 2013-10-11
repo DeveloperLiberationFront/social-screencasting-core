@@ -65,6 +65,11 @@ public class ThreadedImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 				try {
 					ImageIO.write(tempImage, "png", f);
 					logger.trace("Finished write to disk");
+					if (deleteImagesAfterUse)
+					{
+						//if we are in a debug state, we want to see the files at the end of all of this.
+						f.deleteOnExit();
+					}
 				} catch (IOException e) {
 					logger.error("There was a problem writing an image to disk on a background thread",e);
 				}

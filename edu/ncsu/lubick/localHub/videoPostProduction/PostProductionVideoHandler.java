@@ -46,7 +46,7 @@ public class PostProductionVideoHandler
 
 	public static final String EXPECTED_FILE_EXTENSION = ".cap";
 
-	private static final boolean DELETE_IMAGES_AFTER_USE = true;
+	public static final boolean DELETE_IMAGES_AFTER_USE = true;
 
 	private static final int FRAME_RATE = 5;
 	
