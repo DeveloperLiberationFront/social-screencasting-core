@@ -8,12 +8,10 @@ import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
-import edu.ncsu.lubick.localHub.LocalHub;
-
 public class SQLiteDatabase extends SQLDatabase 
 {
 
-	private static Logger logger = Logger.getLogger(LocalHub.class.getName());
+	private static Logger logger = Logger.getLogger(SQLiteDatabase.class.getName());
 	private static final String DB_EXTENSION_NAME = ".sqlite";
 	private String pathToFile;
 	private Connection connection;

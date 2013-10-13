@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -21,25 +22,32 @@ import edu.ncsu.lubick.localHub.ParsedFileEvent;
 import edu.ncsu.lubick.localHub.ParsedFileListener;
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.database.SQLDatabaseFactory;
+import edu.ncsu.lubick.localHub.database.SQLiteDatabase;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
 
 public class TestLocalHubBasicFileReading {
 
+	private static Logger logger = Logger.getLogger(TestLocalHubBasicFileReading.class.getName());
 	private static final String LOCAL_HUB_MONITOR_LOCATION = "BasicFileReading/";
 	private static final long MILLIS_IN_DAY = 86400000L;
+	private static int testIteration = 1;
 	private static LocalHubDebugAccess localHub;
 	private File testPluginDirectory;
 	//This won't work in the year 2100 or later.  
 	private SimpleDateFormat dateInMinutesToNumber = new SimpleDateFormat("DDDyykkmm");
 	private SimpleDateFormat dateInSecondsToNumber = new SimpleDateFormat("DDDyykkmmss");
-	
+
 	//used with listeners.  These give listeners a place to refer
 	private LoadedFileEvent observedEvent = null;
 	private boolean hasSeenResponseFlag = false;
 
 	private static long currentFastForwardTime = MILLIS_IN_DAY;
+	
+	//used in testReadingInToolStreamAndParsing() 
+	private boolean hasParsedFlag = false;
+	private ParsedFileEvent parsedEvent = null;
 
 	private LoadedFileListener defaultLoadedFileListener = new LoadedFileListener(){
 		@Override
@@ -51,19 +59,22 @@ public class TestLocalHubBasicFileReading {
 		}
 	};
 
+	private ParsedFileListener defaultParsedFileListener = new ParsedFileListener(){
+
+		@Override
+		public void parsedFile(ParsedFileEvent e) {
+			hasParsedFlag = true;
+			parsedEvent = e;
+		}
+
+	};
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception 
 	{
 		//Clear out the testing monitor location
 		assertTrue(UtilitiesForTesting.clearOutDirectory(LOCAL_HUB_MONITOR_LOCATION));
-		File databaseFile = new File(SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
-		if (databaseFile.exists())
-		{
-			assertTrue(databaseFile.delete());
-		}
-		//start the server
-		localHub = LocalHub.startServerAndReturnDebugAccess(LOCAL_HUB_MONITOR_LOCATION, false, false);
+		startLocalHubWithClearDatabase();
 
 
 	}
@@ -71,22 +82,16 @@ public class TestLocalHubBasicFileReading {
 	@AfterClass
 	public static void shutDownAll() throws Exception
 	{
+		logger.info("Shutting down and clearing out all evidence");
 		localHub.shutDown();
 		assertTrue(UtilitiesForTesting.clearOutDirectory(LOCAL_HUB_MONITOR_LOCATION));
 		File f = new File(LOCAL_HUB_MONITOR_LOCATION);
 		f.deleteOnExit();
-	}
-
-
-	private static int testIteration = 1;
-	public static String getCurrentPluginName()
-	{
-		return "TestPlugin" + testIteration;
-	}
-
-	private static void goToNextTest()
-	{
-		testIteration++;
+		while(localHub.isRunning())
+		{
+			Thread.sleep(500);
+		}
+		assertFalse(localHub.isRunning());
 	}
 
 
@@ -95,11 +100,7 @@ public class TestLocalHubBasicFileReading {
 	public void setUp() throws Exception 
 	{
 		//This allows each test to have a different plugin Directory to do things with
-		testPluginDirectory = new File(LOCAL_HUB_MONITOR_LOCATION+getCurrentPluginName()+"/");
-		if (!testPluginDirectory.exists() && !testPluginDirectory.mkdir())
-		{
-			fail("Could not create plugin directory");
-		}
+		makeTestPluginDirectory();
 	}
 
 	@After
@@ -152,6 +153,131 @@ public class TestLocalHubBasicFileReading {
 	}
 
 
+	
+	@Test
+	public void testReadingInToolStreamAndParsing() throws Exception
+	{
+		assertTrue(localHub.isRunning());
+		//Waits in the listener for the response
+		observedEvent = null;
+		hasSeenResponseFlag = false;
+		//Has the event
+
+		//This test happens in the future
+		Date currentTime = getFastForwardedDate();
+
+		IdealizedToolStream ts = IdealizedToolStream.generateRandomToolStream(2, currentTime);
+
+		createToolStreamAndVerifyItWasParsed(ts, currentTime);
+
+		localHub.removeParsedFileListener(defaultParsedFileListener);
+	}
+
+	@Test
+	public void testParsingFilesFromPrexistingPlugin() throws Exception 
+	{
+		shutDownAll();
+		//1 second sleep to make sure everything shuts down okay
+		Thread.sleep(1000);
+		
+		makeTestPluginDirectory();
+		Date currentTime = getFastForwardedDate();
+		Date timeInPast = new Date(currentTime.getTime() - 60*60*1000); //one hour ago
+		IdealizedToolStream pastToolStream = IdealizedToolStream.generateRandomToolStream(30, timeInPast);
+		
+		createToolStreamOnDisk(pastToolStream);
+		
+		startLocalHubWithClearDatabase();
+		
+		IdealizedToolStream newToolStream = IdealizedToolStream.generateRandomToolStream(30, currentTime);
+
+		createToolStreamAndVerifyItWasParsed(newToolStream, currentTime);
+		fail("not implemented yet");
+		
+	}
+	
+
+
+
+	@Test
+	public void testSeveralMinutesWorthOfDataAndExit() throws Exception 
+	{
+		assertTrue(localHub.isRunning());
+		//We'll be making 3 files to simulate multiple things
+		Date currentTime = getFastForwardedDate();
+		Date teePlusOne = new Date(currentTime.getTime() + 60*1000);
+		Date teePlusTwo = new Date(teePlusOne.getTime() + 60*1000);
+		Date teePlusThree = new Date(teePlusTwo.getTime() + 60*1000);
+
+		IdealizedToolStream firstToolStream = IdealizedToolStream.generateRandomToolStream(30, currentTime);
+		IdealizedToolStream secondToolStream = IdealizedToolStream.generateRandomToolStream(40, teePlusOne);
+		IdealizedToolStream thirdToolStream = IdealizedToolStream.generateRandomToolStream(50, teePlusTwo);
+
+		observedEvent = null;
+		hasSeenResponseFlag = false;
+		createToolStreamFileAndVerifyItHappened(firstToolStream, defaultLoadedFileListener);
+
+		observedEvent = null;
+		hasSeenResponseFlag = false;
+		createToolStreamFileAndVerifyItHappened(secondToolStream, defaultLoadedFileListener);
+
+		observedEvent = null;
+		hasSeenResponseFlag = false;
+		createToolStreamFileAndVerifyItHappened(thirdToolStream, defaultLoadedFileListener);
+
+		observedEvent = null;
+		hasSeenResponseFlag = false;
+		createToolStreamFileAndVerifyItHappened("", teePlusThree, defaultLoadedFileListener);
+
+		List<ToolStream.ToolUsage> allHistoriesOfToolUsages = localHub.getAllToolUsageHistoriesForPlugin(getCurrentPluginName());
+
+		assertNotNull(allHistoriesOfToolUsages);
+		assertEquals(120, allHistoriesOfToolUsages.size());
+	}
+
+
+	//@Test  TODO reinstantiate
+	public void testDatabasePullAndVideoCreation() throws Exception 
+	{
+		assertTrue(localHub.isRunning());
+		Date currentTime = getFastForwardedDate();
+		Date teeMinusFive = new Date(currentTime.getTime() - 5*1000);
+		Date teePlusThirty = new Date(currentTime.getTime() + 30*1000);
+		Date teePlusOneM = new Date(currentTime.getTime() + 60*1000);
+
+		IdealizedToolStream firstToolStream = IdealizedToolStream.generateRandomToolStream(30, currentTime);
+		String uniqueToolString = "My.Unique.Tool.name";
+		firstToolStream.addToolUsage(uniqueToolString, "Special", "Ctrl + 7,5,2", teePlusThirty, 10*1000);
+
+		observedEvent = null;
+		hasSeenResponseFlag = false;
+		createToolStreamFileAndVerifyItHappened(firstToolStream, defaultLoadedFileListener);
+
+		String nameOfSourceFile = "SourceVideo."+dateInSecondsToNumber.format(teeMinusFive)+".cap";
+		copyScreenCastCapFileToDirectoryAndVerifyItHappened(new File("./src/ForTesting/oneMinuteCap.cap"), nameOfSourceFile);
+
+		observedEvent = null;
+		hasSeenResponseFlag = false;
+		createToolStreamFileAndVerifyItHappened("", teePlusOneM, defaultLoadedFileListener);
+
+		List<ToolStream.ToolUsage> allHistoriesOfToolUsages = localHub.getAllToolUsageHistoriesForPlugin(getCurrentPluginName());
+
+		assertNotNull(allHistoriesOfToolUsages);
+		assertEquals(31, allHistoriesOfToolUsages.size());
+
+		File outputFile = localHub.extractVideoForLastUsageOfTool(getCurrentPluginName(), uniqueToolString);
+
+		assertNotNull(outputFile);
+		assertTrue(outputFile.exists());
+		assertTrue(outputFile.isFile());
+		assertFalse(outputFile.isHidden());
+		assertTrue(outputFile.getName().endsWith(".mkv"));
+		assertTrue(outputFile.length() > 100000);	//I expect the file size to be at least 100k and no more than 3Mb	
+		assertTrue(outputFile.length() < 3000000);
+
+	}
+
+
 	/**
 	 * Provides a way to create a file and have a listener respond to it.
 	 * 
@@ -194,149 +320,11 @@ public class TestLocalHubBasicFileReading {
 
 		return createdFile;
 	}
-
-
-	private boolean hasParsedFlag = false;
-	private ParsedFileEvent parsedEvent = null;
-	@Test
-	public void testReadingInToolStreamAndParsing() throws Exception
-	{
-		assertTrue(localHub.isRunning());
-		//Waits in the listener for the response
-		observedEvent = null;
-		hasSeenResponseFlag = false;
-		//Has the event
-
-		//This test happens in the future
-		Date currentTime = getFastForwardedDate();
-
-		IdealizedToolStream ts = IdealizedToolStream.generateRandomToolStream(2, currentTime);
-
-		ParsedFileListener parsedFileListener = new ParsedFileListener(){
-
-			@Override
-			public void parsedFile(ParsedFileEvent e) {
-				hasParsedFlag = true;
-				parsedEvent = e;
-			}
-
-		};
-
-		localHub.addParsedFileListener(parsedFileListener);
-
-		createToolStreamFileAndVerifyItHappened(ts.toJSON(), ts.getTimeStamp(), defaultLoadedFileListener);
-
-		//Our tool stream should not have been parsed yet.
-		assertFalse(hasParsedFlag);
-		assertNull(parsedEvent);
-
-		//This should be into the next minute, so the date string will be different
-		Date futureTime = new Date(currentTime.getTime() + (1* 60*1000l));
-		IdealizedToolStream newTS = IdealizedToolStream.generateRandomToolStream(5);
-
-		//reset these to go
-		observedEvent = null;
-		hasSeenResponseFlag = false;
-
-		createToolStreamFileAndVerifyItHappened(newTS.toJSON(), futureTime, defaultLoadedFileListener);
-
-		int timeCounter = 0;
-		while (!hasParsedFlag && timeCounter < 500) 
-		{
-			Thread.sleep(1000);
-			timeCounter++;
-		}
-		if (timeCounter <= 5 && parsedEvent != null)
-		{
-			assertEquals(ts.toJSON(), parsedEvent.getInputJSON());
-			assertTrue(ts.isEquivalent(parsedEvent.getToolStream()));
-			assertEquals(getCurrentPluginName(),parsedEvent.getPluginName());
-			assertEquals(UtilitiesForTesting.truncateTimeToMinute(currentTime), parsedEvent.getFileTimeStamp());
-
-		}
-		else 
-		{
-			fail("test ParsingFile has timed out");
-		}
-
-		localHub.removeParsedFileListener(parsedFileListener);
-	}
-
-	@Test
-	public void testSeveralMinutesWorthOfDataAndExit() throws Exception 
-	{
-		//We'll be making 3 files to simulate multiple things
-		Date currentTime = getFastForwardedDate();
-		Date teePlusOne = new Date(currentTime.getTime() + 60*1000);
-		Date teePlusTwo = new Date(teePlusOne.getTime() + 60*1000);
-		Date teePlusThree = new Date(teePlusTwo.getTime() + 60*1000);
-
-		IdealizedToolStream firstToolStream = IdealizedToolStream.generateRandomToolStream(30, currentTime);
-		IdealizedToolStream secondToolStream = IdealizedToolStream.generateRandomToolStream(40, teePlusOne);
-		IdealizedToolStream thirdToolStream = IdealizedToolStream.generateRandomToolStream(50, teePlusTwo);
-
-		observedEvent = null;
-		hasSeenResponseFlag = false;
-		createToolStreamFileAndVerifyItHappened(firstToolStream.toJSON(), firstToolStream.getTimeStamp(), defaultLoadedFileListener);
-
-		observedEvent = null;
-		hasSeenResponseFlag = false;
-		createToolStreamFileAndVerifyItHappened(secondToolStream.toJSON(), secondToolStream.getTimeStamp(), defaultLoadedFileListener);
-
-		observedEvent = null;
-		hasSeenResponseFlag = false;
-		createToolStreamFileAndVerifyItHappened(thirdToolStream.toJSON(), thirdToolStream.getTimeStamp() , defaultLoadedFileListener);
-
-		observedEvent = null;
-		hasSeenResponseFlag = false;
-		createToolStreamFileAndVerifyItHappened("", teePlusThree, defaultLoadedFileListener);
-
-		List<ToolStream.ToolUsage> allHistoriesOfToolUsages = localHub.getAllToolUsageHistoriesForPlugin(getCurrentPluginName());
-
-		assertNotNull(allHistoriesOfToolUsages);
-		assertEquals(120, allHistoriesOfToolUsages.size());
-	}
 	
-	
-	@Test
-	public void testDatabasePullAndVideoCreation() throws Exception {
-		Date currentTime = getFastForwardedDate();
-		Date teeMinusFive = new Date(currentTime.getTime() - 5*1000);
-		Date teePlusThirty = new Date(currentTime.getTime() + 30*1000);
-		Date teePlusOneM = new Date(currentTime.getTime() + 60*1000);
-		
-		IdealizedToolStream firstToolStream = IdealizedToolStream.generateRandomToolStream(30, currentTime);
-		String uniqueToolString = "My.Unique.Tool.name";
-		firstToolStream.addToolUsage(uniqueToolString, "Special", "Ctrl + 7,5,2", teePlusThirty, 10*1000);
-		
-		observedEvent = null;
-		hasSeenResponseFlag = false;
-		createToolStreamFileAndVerifyItHappened(firstToolStream.toJSON(), firstToolStream.getTimeStamp() , defaultLoadedFileListener);
-
-		String nameOfSourceFile = "SourceVideo."+dateInSecondsToNumber.format(teeMinusFive)+".cap";
-		copyScreenCastCapFileToDirectoryAndVerifyItHappened(new File("./src/ForTesting/oneMinuteCap.cap"), nameOfSourceFile);
-		
-		observedEvent = null;
-		hasSeenResponseFlag = false;
-		createToolStreamFileAndVerifyItHappened("", teePlusOneM, defaultLoadedFileListener);
-		
-		List<ToolStream.ToolUsage> allHistoriesOfToolUsages = localHub.getAllToolUsageHistoriesForPlugin(getCurrentPluginName());
-
-		assertNotNull(allHistoriesOfToolUsages);
-		assertEquals(31, allHistoriesOfToolUsages.size());
-		
-		File outputFile = localHub.extractVideoForLastUsageOfTool(getCurrentPluginName(), uniqueToolString);
-		
-		assertNotNull(outputFile);
-		assertTrue(outputFile.exists());
-		assertTrue(outputFile.isFile());
-		assertFalse(outputFile.isHidden());
-		assertTrue(outputFile.getName().endsWith(".mkv"));
-		assertTrue(outputFile.length() > 100000);	//I expect the file size to be at least 100k and no more than 3Mb	
-		assertTrue(outputFile.length() < 3000000);
-
+	private File createToolStreamFileAndVerifyItHappened(IdealizedToolStream its, LoadedFileListener loadedFileListener) throws Exception
+	{
+		return createToolStreamFileAndVerifyItHappened(its.toJSON(), its.getTimeStamp(), loadedFileListener);
 	}
-
 
 	private File copyScreenCastCapFileToDirectoryAndVerifyItHappened(File capFile, String newFileName) throws IOException, InterruptedException 
 	{
@@ -369,7 +357,12 @@ public class TestLocalHubBasicFileReading {
 		localHub.removeLoadedFileListener(defaultLoadedFileListener);
 
 		return createdFile;
-		
+
+	}
+
+	private static String getCurrentPluginName()
+	{
+		return "TestPlugin" + testIteration;
 	}
 
 	/**
@@ -383,5 +376,74 @@ public class TestLocalHubBasicFileReading {
 		Date retVal = new Date(rightNow.getTime() + currentFastForwardTime);
 		currentFastForwardTime += MILLIS_IN_DAY;
 		return retVal;
+	}
+
+	private static void goToNextTest()
+	{
+		testIteration++;
+	}
+
+	private static void startLocalHubWithClearDatabase() {
+		File databaseFile = new File(SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
+		if (databaseFile.exists())
+		{
+			assertTrue(databaseFile.delete());
+		}
+		//start the server
+		localHub = LocalHub.startServerAndReturnDebugAccess(LOCAL_HUB_MONITOR_LOCATION, false, false);
+	}
+
+	private void makeTestPluginDirectory() {
+		testPluginDirectory = new File(LOCAL_HUB_MONITOR_LOCATION+getCurrentPluginName()+"/");
+		if (!testPluginDirectory.exists() && !testPluginDirectory.mkdir())
+		{
+			fail("Could not create plugin directory");
+		}
+	}
+	
+	private void createToolStreamOnDisk(IdealizedToolStream its) {
+		UtilitiesForTesting.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),
+				getCurrentPluginName()+"."+dateInMinutesToNumber.format(its.getTimeStamp())+".log",its.toJSON());
+
+		
+	}
+
+	private void createToolStreamAndVerifyItWasParsed( IdealizedToolStream ts, Date baselineDate) throws Exception, InterruptedException {
+		localHub.addParsedFileListener(defaultParsedFileListener);
+	
+		createToolStreamFileAndVerifyItHappened(ts, defaultLoadedFileListener);
+	
+		//Our tool stream should not have been parsed yet.
+		assertFalse(hasParsedFlag);
+		assertNull(parsedEvent);
+	
+		//This should be into the next minute, so the date string will be different
+		Date futureTime = new Date(baselineDate.getTime() + (1* 60*1000L));
+		IdealizedToolStream newTS = IdealizedToolStream.generateRandomToolStream(5);
+	
+		//reset these to go
+		observedEvent = null;
+		hasSeenResponseFlag = false;
+	
+		createToolStreamFileAndVerifyItHappened(newTS.toJSON(), futureTime, defaultLoadedFileListener);
+	
+		int timeCounter = 0;
+		while (!hasParsedFlag && timeCounter < 500) 
+		{
+			Thread.sleep(1000);
+			timeCounter++;
+		}
+		if (timeCounter <= 5 && parsedEvent != null)
+		{
+			assertEquals(ts.toJSON(), parsedEvent.getInputJSON());
+			assertTrue(ts.isEquivalent(parsedEvent.getToolStream()));
+			assertEquals(getCurrentPluginName(),parsedEvent.getPluginName());
+			assertEquals(UtilitiesForTesting.truncateTimeToMinute(baselineDate), parsedEvent.getFileTimeStamp());
+	
+		}
+		else 
+		{
+			fail("test ParsingFile has timed out");
+		}
 	}
 }

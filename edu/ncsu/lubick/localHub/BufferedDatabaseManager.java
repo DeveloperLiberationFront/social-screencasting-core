@@ -117,6 +117,12 @@ public class BufferedDatabaseManager
 		}
 		
 		dbAbstraction.close();
+		reset();
+	}
+
+
+	private static void reset() {
+		singletonBufferedDatabaseManager = null; //it is shut down, recreate next time
 	}
 
 	public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName) {

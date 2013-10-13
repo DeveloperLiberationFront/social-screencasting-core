@@ -19,22 +19,27 @@ public class HTTPServer {
 
 	private static Logger logger = Logger.getLogger(HTTPServer.class.getName());
 
+	private Server underlyingServer;
+
 
 	private HTTPServer() {}
 
-	public static void startUpAnHTTPServer(WebQueryInterface wqi) 
+	public static HTTPServer startUpAnHTTPServer(WebQueryInterface wqi) 
 	{
-		Server server = new Server(SERVER_PORT);
-		server.setHandler(HandlerManager.makeHandler(wqi));
+		HTTPServer httpServer = new HTTPServer();
+		httpServer.underlyingServer = new Server(SERVER_PORT);
+		httpServer.underlyingServer.setHandler(HandlerManager.makeHandler(wqi));
 
 		try
 		{
-			server.start();
+			httpServer.underlyingServer.start();
 		} 
 		catch (Exception e)
 		{
 			logger.error("There was a problem starting the server", e);
 		}
+		
+		return httpServer;
 
 	}
 
