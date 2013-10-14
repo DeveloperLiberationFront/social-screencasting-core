@@ -22,7 +22,6 @@ import edu.ncsu.lubick.localHub.ParsedFileEvent;
 import edu.ncsu.lubick.localHub.ParsedFileListener;
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.database.SQLDatabaseFactory;
-import edu.ncsu.lubick.localHub.database.SQLiteDatabase;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
@@ -168,7 +167,9 @@ public class TestLocalHubBasicFileReading {
 
 		IdealizedToolStream ts = IdealizedToolStream.generateRandomToolStream(2, currentTime);
 
-		createToolStreamAndVerifyItWasParsed(ts, currentTime);
+		File toolStream = createToolStreamAndVerifyItWasParsed(ts, currentTime);
+		
+		assertFalse(toolStream.exists());
 
 		localHub.removeParsedFileListener(defaultParsedFileListener);
 	}
@@ -183,16 +184,24 @@ public class TestLocalHubBasicFileReading {
 		makeTestPluginDirectory();
 		Date currentTime = getFastForwardedDate();
 		Date timeInPast = new Date(currentTime.getTime() - 60*60*1000); //one hour ago
-		IdealizedToolStream pastToolStream = IdealizedToolStream.generateRandomToolStream(30, timeInPast);
+		IdealizedToolStream pastToolStream = IdealizedToolStream.generateRandomToolStream(20, timeInPast);
 		
-		createToolStreamOnDisk(pastToolStream);
+		File oldToolStream = createToolStreamOnDisk(pastToolStream);
 		
 		startLocalHubWithClearDatabase();
 		
-		IdealizedToolStream newToolStream = IdealizedToolStream.generateRandomToolStream(30, currentTime);
+		IdealizedToolStream newToolStream = IdealizedToolStream.generateRandomToolStream(40, currentTime);
 
-		createToolStreamAndVerifyItWasParsed(newToolStream, currentTime);
-		fail("not implemented yet");
+		File secondToolStream = createToolStreamAndVerifyItWasParsed(newToolStream, currentTime);
+		
+		List<ToolStream.ToolUsage> allHistoriesOfToolUsages = localHub.getAllToolUsageHistoriesForPlugin(getCurrentPluginName());
+
+		assertNotNull(allHistoriesOfToolUsages);
+		assertEquals(60, allHistoriesOfToolUsages.size());
+		
+		assertFalse(oldToolStream.exists());
+		assertFalse(secondToolStream.exists());
+
 		
 	}
 	
@@ -236,7 +245,7 @@ public class TestLocalHubBasicFileReading {
 	}
 
 
-	//@Test  TODO reinstantiate
+	@Test
 	public void testDatabasePullAndVideoCreation() throws Exception 
 	{
 		assertTrue(localHub.isRunning());
@@ -401,17 +410,18 @@ public class TestLocalHubBasicFileReading {
 		}
 	}
 	
-	private void createToolStreamOnDisk(IdealizedToolStream its) {
-		UtilitiesForTesting.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),
+	private File createToolStreamOnDisk(IdealizedToolStream its) 
+	{
+		return UtilitiesForTesting.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),
 				getCurrentPluginName()+"."+dateInMinutesToNumber.format(its.getTimeStamp())+".log",its.toJSON());
 
 		
 	}
 
-	private void createToolStreamAndVerifyItWasParsed( IdealizedToolStream ts, Date baselineDate) throws Exception, InterruptedException {
+	private File createToolStreamAndVerifyItWasParsed(IdealizedToolStream ts, Date baselineDate) throws Exception, InterruptedException {
+		
 		localHub.addParsedFileListener(defaultParsedFileListener);
-	
-		createToolStreamFileAndVerifyItHappened(ts, defaultLoadedFileListener);
+		File retVal = createToolStreamFileAndVerifyItHappened(ts, defaultLoadedFileListener);
 	
 		//Our tool stream should not have been parsed yet.
 		assertFalse(hasParsedFlag);
@@ -419,7 +429,7 @@ public class TestLocalHubBasicFileReading {
 	
 		//This should be into the next minute, so the date string will be different
 		Date futureTime = new Date(baselineDate.getTime() + (1* 60*1000L));
-		IdealizedToolStream newTS = IdealizedToolStream.generateRandomToolStream(5);
+		IdealizedToolStream newTS = IdealizedToolStream.generateRandomToolStream(0);
 	
 		//reset these to go
 		observedEvent = null;
@@ -445,5 +455,7 @@ public class TestLocalHubBasicFileReading {
 		{
 			fail("test ParsingFile has timed out");
 		}
+		
+		return retVal;
 	}
 }

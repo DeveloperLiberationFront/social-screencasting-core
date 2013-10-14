@@ -53,6 +53,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	private boolean shouldUseHTTPServer;
 	private boolean shouldUseScreenRecording;
 	private ScreenRecordingModule screenRecordingModule;
+	private HTTPServer httpServer;
 
 
 	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, boolean wantHTTP, boolean wantScreenRecording) 
@@ -105,13 +106,13 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		}
 		isRunning = true;
 		currentRunnable = new FileManager(this, this);
-		currentRunnable.setMonitorFolder(this.monitorDirectory);
+		currentRunnable.setMonitorFolderAndUpdateTrackedFiles(this.monitorDirectory);
 		currentThread = new Thread(currentRunnable);
 		currentThread.start();
 	
 		if (shouldUseHTTPServer)
 		{
-			HTTPServer.startUpAnHTTPServer(this);
+			this.httpServer = HTTPServer.startUpAnHTTPServer(this);
 			logger.debug("Server started up");
 		}
 		
@@ -241,7 +242,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 
 	@Override
 	public void parseFile(File fileToParse) {
-
+		logger.debug("parsing file "+fileToParse);
 		String fileContents = FileUtilities.readAllFromFile(fileToParse);
 		ToolStream ts = ToolStream.generateFromJSON(fileContents);
 
@@ -271,6 +272,10 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 
 		databaseManager.writeToolStreamToDatabase(ts);
 
+		if (!fileToParse.delete())
+		{
+			logger.info("Could not delete toolstream file "+fileToParse+" but, continuing anyway.");
+		}
 	}
 
 	public File extractVideoForLastUsageOfTool(String pluginName, String toolName) 
@@ -301,7 +306,10 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		{
 			this.screenRecordingModule.stopRecording();
 		}
-	
+		if (this.httpServer != null)
+		{
+			httpServer.shutDown();
+		}
 		currentRunnable.stop();
 		databaseManager.shutDown();
 		

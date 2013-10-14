@@ -38,9 +38,18 @@ public class HTTPServer {
 		{
 			logger.error("There was a problem starting the server", e);
 		}
-		
+
 		return httpServer;
 
+	}
+
+	public void shutDown() 
+	{
+		try {
+			underlyingServer.stop();
+		} catch (Exception e) {
+			logger.error("Problem shutting down HTTP Server",e);
+		}
 	}
 
 

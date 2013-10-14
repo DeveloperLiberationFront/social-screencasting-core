@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
@@ -27,13 +28,13 @@ public class FileManager implements Runnable {
 	private Set<File> filesToIgnore = new HashSet<>();
 	/**Maps a string, the name of a plugin, to the queue of as of yet unparsed files related to that plugin*/
 	private Map<String, Queue<File>> unparsedFiles = new HashMap<>();
-	
+
 	private File monitorDirectory = null;
 	private LoadedFileListener loadedFileListener = null;
 	private ToolStreamFileParser fileParser = null;
 	private boolean isRunning;
-	
-	
+
+
 	private static Logger logger = Logger.getLogger(FileManager.class.getName());
 
 	public FileManager(LoadedFileListener loadedFileListener, ToolStreamFileParser fileParser) 
@@ -50,48 +51,17 @@ public class FileManager implements Runnable {
 			return;
 		}
 		unparsedFiles.clear();
-		
+
 		//All of the currently tracked files should be here already courtesy of the setter
 		isRunning = true;
 
 		while (isRunning)
 		{
-			Set<File> newFiles = new HashSet<File>();
-			//This is the monitoring code
-			for (File child : this.monitorDirectory.listFiles()) {
-				if (child.isDirectory())
-				{
-					logger.debug("Searching Plugin directory: "+child);
-					for (File innerChild : child.listFiles()) 
-					{
-						if (!innerChild.isDirectory() && !filesFromLastTime.contains(innerChild) && !filesToIgnore.contains(innerChild))
+			Set<File> newFiles = findNewFilesInMonitorDirectory();
 
-						{
-							logger.debug("Found new file "+innerChild);
-							newFiles.add(innerChild);
-						}
-						else
-						{
-							//we only look one folder in.  Any other folders are ignored.
-							logger.trace("Ignoring directory "+innerChild);
-						}
-					}
-				}
-				else if (!filesFromLastTime.contains(child) && !filesToIgnore.contains(child))
-				{
-					logger.debug("Found new file "+child);
-					newFiles.add(child);
-				}
-			}
-			//All the new files have been found in this iteration
-			for (File newFile : newFiles) 
-			{
-				int result = conditionallyAddFileAfterContactingListener(newFile, false, filesFromLastTime);
-				if (result == LoadedFileListener.NO_COMMENT)
-				{
-					parseOrQueueFile(newFile);
-				}
-			}
+			weedOutUnwantedFiles(newFiles);
+			
+			conditionallyParseNewFiles(newFiles, false);
 
 			//Sleep for a second and then do it all again
 			try {
@@ -104,28 +74,123 @@ public class FileManager implements Runnable {
 	}
 
 	/**
+	 * Updates the monitorDirectory to be the passed argument.
+	 * Clears out all currently tracked files and reloads everything
+	 * @param monitorDirectory
+	 */
+	public void setMonitorFolderAndUpdateTrackedFiles(File monitorDirectory) {
+		if (!monitorDirectory.isDirectory())
+		{
+			logger.error("tried to set monitor folder to a non directory.  Ignoring.");
+			return;
+		}
+		this.monitorDirectory = monitorDirectory;
+	
+		logger.debug("Setting monitor folder in LocalHubRunnable.  Clearing all previous tracked files");
+		filesFromLastTime.clear();
+	
+		for (File child : this.monitorDirectory.listFiles()) 
+		{
+			if (child.isDirectory())
+			{
+				filesFromLastTime.addAll(returnAllApprovedFilesInThisDirectory(child, true));
+			}
+			else 
+			{
+				conditionallyAddFileToCollectionAfterContactingListener(child, true, filesFromLastTime);
+			}
+		}
+		logger.debug("New tracked files are "+filesFromLastTime.toString()+" parsing them");
+		
+		conditionallyParseNewFiles(filesFromLastTime,true);
+	
+	}
+
+	public void stop() {
+		isRunning = false;
+	
+	}
+
+	private void weedOutUnwantedFiles(Set<File> newFiles) 
+	{
+		for (Iterator<File> iterator = newFiles.iterator(); iterator.hasNext();) {
+			File file = (File) iterator.next();
+			
+			int result = conditionallyAddFileToCollectionAfterContactingListener(file, false, filesFromLastTime);
+			if (result == LoadedFileListener.DONT_PARSE)
+			{
+				iterator.remove();
+			}
+		}
+	}
+
+	private void conditionallyParseNewFiles(Set<File> newFiles, boolean shouldForceParsing) 
+	{
+		for (File newFile : newFiles) 
+		{
+			parseOrQueueFile(newFile, shouldForceParsing);
+		}
+	}
+
+	private Set<File> findNewFilesInMonitorDirectory() {
+		Set<File> newFiles = new HashSet<File>();
+		//This is the monitoring code
+		for (File child : this.monitorDirectory.listFiles()) {
+			if (child.isDirectory())
+			{
+				searchChildDirectoryForNewFiles(child, newFiles);
+			}
+			else if (!filesFromLastTime.contains(child) && !filesToIgnore.contains(child))
+			{
+				logger.debug("Found new file "+child);
+				newFiles.add(child);
+			}
+		}
+		return newFiles;
+	}
+
+	private void searchChildDirectoryForNewFiles(File directoryToSearch, Set<File> filesFoundSoFar) {
+		logger.debug("Searching Plugin directory: "+directoryToSearch);
+		for (File innerChild : directoryToSearch.listFiles()) 
+		{
+			if (!innerChild.isDirectory() && !filesFromLastTime.contains(innerChild) && !filesToIgnore.contains(innerChild))
+
+			{
+				logger.debug("Found new file "+innerChild);
+				filesFoundSoFar.add(innerChild);
+			}
+			else
+			{
+				//we only look one folder in.  Any other folders are ignored.
+				logger.trace("Ignoring directory "+innerChild);
+			}
+		}
+	}
+
+	/**
 	 * Takes a file, parses off the name and the time and begins to parse any files older than it
-	 * 
-	 * TODO needs to contact the parsed file listener
+	 * @param shouldForceParsing 
 	 * 
 	 * @param newFile
 	 */
-	private void parseOrQueueFile(File file) 
+	private void parseOrQueueFile(File file, boolean shouldForceParsing) 
 	{
 		if (file == null)
 		{
 			return;
 		}
+
 		String fileName = file.getName();
-		int splitPoint = fileName.indexOf('.');
-		if (splitPoint == -1)
+		int splitPointForPluginName= fileName.indexOf('.');
+		if (splitPointForPluginName == -1)
 		{
 			logger.info("File "+file+" can be ignored.  Improperly formated.");
 			return;
 		}
-		String pluginName = fileName.substring(0, splitPoint);
+
+		String pluginName = fileName.substring(0, splitPointForPluginName);
 		logger.debug(file + " was seen to belong to the plugin "+ pluginName);
-		
+
 		Queue<File> filesToParse = unparsedFiles.get(pluginName);
 		if (filesToParse == null)
 		{
@@ -144,38 +209,17 @@ public class FileManager implements Runnable {
 				logger.debug("Parsing file "+filesToParse.peek());
 				fileParser.parseFile(filesToParse.poll());
 			}
-			
 		}
-	}
-
-	/**
-	 * Updates the monitorDirectory to be the passed argument.
-	 * Clears out all currently tracked files and reloads everything
-	 * @param monitorDirectory
-	 */
-	public void setMonitorFolder(File monitorDirectory) {
-		if (!monitorDirectory.isDirectory())
+		
+		if (shouldForceParsing)
 		{
-			logger.error("tried to set monitor folder to a non directory.  Ignoring.");
-			return;
-		}
-		this.monitorDirectory = monitorDirectory;
-
-		logger.debug("Setting monitor folder in LocalHubRunnable.  Clearing all previous tracked files");
-		filesFromLastTime.clear();
-
-		for (File child : this.monitorDirectory.listFiles()) {
-			if (child.isDirectory())
+			filesToParse = unparsedFiles.get(pluginName);
+			while (filesToParse.size() != 0)
 			{
-				filesFromLastTime.addAll(directorySearchHelper(child, true));
-			}
-			else 
-			{
-				conditionallyAddFileAfterContactingListener(child, true, filesFromLastTime);
+				logger.debug("Parsing file "+filesToParse.peek());
+				fileParser.parseFile(filesToParse.poll());
 			}
 		}
-
-		logger.debug("New tracked files are "+filesFromLastTime.toString());
 	}
 
 	/**
@@ -184,12 +228,12 @@ public class FileManager implements Runnable {
 	 * @param isInitialLoading
 	 * @return
 	 */
-	private Set<File> directorySearchHelper(File dirToSearch, boolean isInitialLoading) {
+	private Set<File> returnAllApprovedFilesInThisDirectory(File dirToSearch, boolean isInitialLoading) {
 		Set<File> retVal = new HashSet<>();
 		for (File child : dirToSearch.listFiles()) {
 			if (!child.isDirectory())
 			{
-				conditionallyAddFileAfterContactingListener(child, isInitialLoading, retVal);
+				conditionallyAddFileToCollectionAfterContactingListener(child, isInitialLoading, retVal);
 			}
 			//else we only go one level of folder search.  That's just the implementation
 		}
@@ -203,14 +247,14 @@ public class FileManager implements Runnable {
 	 * @param collectionToAddTo
 	 * @return the response from the listener
 	 */
-	private int conditionallyAddFileAfterContactingListener(File thisFile, boolean isInitialLoading, Collection<File> collectionToAddTo) 
+	private int conditionallyAddFileToCollectionAfterContactingListener(File thisFile, boolean isInitialLoading, Collection<File> collectionToAddTo) 
 	{
 		String fileContents = "[BINARYDATA]";
-		if (!thisFile.getName().endsWith(PostProductionVideoHandler.EXPECTED_FILE_EXTENSION))
+		if (!thisFile.getName().endsWith(PostProductionVideoHandler.EXPECTED_FILE_EXTENSION))	//these get too big to parse
 		{
 			fileContents = FileUtilities.readAllFromFile(thisFile);
 		}
-		
+
 		int response = loadedFileListener.loadFileResponse(new LoadedFileEvent(thisFile.getName(),thisFile.getAbsolutePath(),fileContents,isInitialLoading));
 
 		if (response == LoadedFileListener.NO_COMMENT)
@@ -225,11 +269,6 @@ public class FileManager implements Runnable {
 		}
 		return response;
 
-	}
-
-	public void stop() {
-		isRunning = false;
-		
 	}
 
 
