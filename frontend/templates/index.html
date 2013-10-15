@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Welcome!</title>
+  <link rel="stylesheet" href="basic.css" />
+  <link rel="stylesheet" href="loading.css" />
+</head>
+<body>
+  <h1 class="debug">Click on the plugin name to see more info</h1>
+
+  <table border=1>
+  <tr><th>Name<th>Price
+  <#list pluginNames as plugin>
+  <tr><td>${plugin}<td><form method="POST" action="index"/>
+  <input name="thingToDo" type="hidden" value="getToolUsageForPlugin"/>
+	<input name="pluginName" type="submit" value="${plugin}"/>
+  </#list>
+</table>
+
+<div class="modal"><!-- Place at bottom of page --></div>
+</body>
+</html>  

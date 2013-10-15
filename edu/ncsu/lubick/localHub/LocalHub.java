@@ -437,6 +437,11 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		public File extractVideoForLastUsageOfTool(String pluginName, String toolName) {
 			return hubToDebug.extractVideoForLastUsageOfTool(pluginName,toolName);
 		}
+
+		@Override
+		public List<String> getAllPluginNames() {
+			return hubToDebug.getNamesOfAllPlugins();
+		}
 	
 	}
 

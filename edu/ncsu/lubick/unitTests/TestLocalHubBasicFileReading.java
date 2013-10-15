@@ -170,6 +170,10 @@ public class TestLocalHubBasicFileReading {
 		File toolStream = createToolStreamAndVerifyItWasParsed(ts, currentTime);
 		
 		assertFalse(toolStream.exists());
+		
+		List<String> pluginNames = localHub.getAllPluginNames();
+		logger.debug(pluginNames);
+		assertTrue(pluginNames.contains(getCurrentPluginName()));
 
 		localHub.removeParsedFileListener(defaultParsedFileListener);
 	}

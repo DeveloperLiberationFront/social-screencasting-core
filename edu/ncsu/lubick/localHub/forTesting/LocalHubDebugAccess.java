@@ -24,6 +24,8 @@ public interface LocalHubDebugAccess {
 	void shutDown();
 
 	File extractVideoForLastUsageOfTool(String pluginName, String toolName);
+
+	List<String> getAllPluginNames();
 	
 
 }

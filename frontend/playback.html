@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Storyteller | Playback</title>
+
+  <!-- the location of the icon that shows up on the browser tab -->
+  <link rel="shortcut icon" href="img/favicon.ico" />
+
+  <!-- libraries -->
+    <script src="js/lib/jquery-2.0.3.min.js"></script>
+    <script src="js/lib/md5.js"></script>
+    <script src="js/lib/jquery.scrollTo-1.4.3.1-min.js"></script>
+
+
+  <!-- our scripts -->
+    <!-- ui stuff - used everywhere -->
+    <script src="js/global.js"></script>
+    <script src="js/rightclick.js"></script>
+    <script src="js/utilities.js"></script>
+
+    <!-- make the playback works stuff -->
+    <script src="js/playback/main.js"></script>
+    <script src="js/playback/movement.js"></script>
+    <script src="js/playback/speed.js"></script>
+    <script src="js/playback/settings.js"></script>
+    <script src="js/playback/filter-menu.js"></script>
+
+    <script src="js/playback/storyboard.js"></script>
+    <script src="js/playback/clip.js"></script>
+    <script src="js/playback/selection.js"></script>
+    <script src="js/comments.js"></script>
+
+    <!-- make the filtering work stuffs -->
+    <script src="js/filtering.js"></script>
+
+    <!-- additional stuffs of other natures -->
+    <script src="js/login.js"></script>
+    <script src="js/clip-creation.js"></script>
+    <script src="js/keyboard-shortcuts.js"></script>
+
+
+  <!-- for jquery ui -->
+    <link rel="stylesheet" href="css/lib/jquery-ui.css" />
+    <script src="js/lib/jqui/jquery-ui-1.10.3.custom.min.js"></script>
+
+
+  <!-- for tooltipster -->
+    <link rel="stylesheet" href="css/lib/tooltipster/tooltipster.css"/>
+    <script src="js/lib/jquery.tooltipster.min.js"></script>
+
+  
+  <!-- make our css last, giving us highest precedence -->
+    <link rel="stylesheet" href="css/storyteller/playback.css" />
+
+  <style id="interfaceStyles"></style>
+  <style id="fsStyles"></style>
+</head>
+<body>
+
+  <header>
+    <h1>
+      <span class="story">Story</span><span class="teller">teller</span>:
+      <span id="mode"></span>
+    </h1>
+
+    <ul class="nav">
+      <li><a href="playback.html">Playback</a></li>
+      <li><a href="create-storyboard.html">Create Storyboard</a></li>
+      <li><a href="storyboard.html">Storyboards</a></li>
+      <li><a href="#" id="login">Login</a></li>
+    </ul>
+  </header>
+
+  <!-- formerly #theStuff -->
+  <div id="playbackArea" tabindex="0">
+    <div id="documentsAndComments">
+      <div id="documents">
+        <ul id="documentTabs"></ul>
+        <div id="developerPictures"></div>
+      </div>
+
+      <div id="comments">
+        <div id="newComment">
+          <textarea id="commentText"></textarea>
+          <button id="submitComment">Submit Comment</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="commands">
+      <div id="movement">
+        <button id="stepBack"><img src="/img/playback/backward.svg" draggable="false" /></button>
+        <button id="playPause" onclick="playPause()" class="play-icon">
+          <img id="playIcon" src="/img/playback/play.svg" draggable="false" />
+          <img id="pauseIcon" src="/img/playback/pause.svg" draggable="false" style="display:none;" />
+        </button>
+        <button id="stepForward"><img src="/img/playback/forward.svg" draggable="false" /></button>
+      </div>
+
+      <div id="locationHolder">
+        <div id="locationSlider"></div>
+
+        <div id="timestamp"></div>
+      </div>
+
+      <div id="etcCommands">
+        <button id="filters" onclick="reopenFilterMenu()"><img src="/img/playback/filter.svg" draggable="false"/></button>
+        <button id="export" class="disabled"><img src="img/playback/export.svg" draggable=false /></button>
+        <button id="speed" onclick="toggleSpeedSlider()"><img src="/img/playback/speed.svg" draggable="false" /></button>
+        <button id="settings" onclick="toggleSettings()"><img src="/img/playback/gear.svg" draggable="false"/></button>
+      </div>
+    </div>
+  </div>
+
+
+  <!--<div id="nodeSelect"></div>-->
+
+  <!-- 
+    <pre id="scratchpad"></pre>
+  -->
+
+  <div id="filterSelect" class="no-close" tabindex="0">
+    <div class="times">
+      <div class="startTime">
+        <h3>Start Time</h3>
+
+        <div id="startCalendar" class="calendar"></div>
+
+        <input type="number" class="time time_hour" id="startHour" max="23" min="0" />
+        <input type="number" class="time time_min" id="startMinute" max="59" min="0" />
+        <input type="number" class="time time_sec" id="startSecond" max="59" min="0" />
+      </div>
+
+      <div class="endTime">
+        <h3>End Time</h3>
+        <div id="endCalendar" class="calendar"></div>
+
+        <input type="number" class="time time_hour" id="endHour" max="23" min="0" />
+        <input type="number" class="time time_min" id="endMinute" max="59" min="0" />
+        <input type="number" class="time time_sec" id="endSecond" max="59" min="0" />
+      </div>
+    </div>
+
+    <div class="devDoc">
+      <div class="docs">
+        <h3>Documents</h3>
+        <div id="filterDocuments"></div>
+      </div>
+
+      <div class="devs">
+        <h3>Developers</h3>
+        <div id="filterDevelopers"></div>
+      </div>
+    </div>
+
+    <div class="otherFilters">
+      <h4>Other Filters</h4>
+      <div class="hideDeletes half left">
+        Hide Deletes Under <br />
+        <input type="number" min="0" max="25" value=0 id="hideDeletes" />
+         Seconds
+      </div>
+    
+      
+      <div class="etcFilters">
+      <!--
+        <label class="checkbox">
+          <input type="checkbox" id="showPasteOrigin">
+          Show Paste Origin
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" id="showOnlyDeletes">
+          Show Only Deletes
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" id="showEndResultOnly">
+          Show End Result Only
+        </label>
+      -->
+        <label class="checkbox">
+          <input type="radio" name="relevantBlockType" value="chars" checked>
+          Show Everything
+        </label>
+        <label class="checkbox">
+          <input type="radio" name="relevantBlockType" value="words">
+          Show Whole Words
+        </label>
+        <label class="checkbox">
+          <input type="radio" name="relevantBlockType" value="lines">
+          Show Whole Lines
+        </label>
+      </div>
+    </div>
+  </div>  <!-- close filters -->
+
+  <div id="speedHolder">
+    <div id="speedSlider"></div>
+  </div>
+
+  <div id="settingsMenu">
+    <h4>Font Size</h4>
+
+    <div id="fontSize">
+      <button id="preFontMinus" onclick="decFontSize()">-</button>
+      <input type="text" id="curFontSize" />
+      <button id="preFontPlus" onclick="incFontSize()">+</button>
+    </div>
+  </div>
+
+  <div id = "clipCreationDialog">
+    <input type="text" id="clipName" placeholder="Clip Name" />
+    <textarea id="clipDescription" placeholder="Clip Description"></textarea>
+  </div>
+  <div id="loginbox" tabindex="0"></div>
+
+</body>
+</html>
