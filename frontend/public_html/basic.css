@@ -1,3 +1,34 @@
 .debug {
 	color:red;
 }
+
+.hidden{
+	display:none;
+}
+
+.moreInfo{
+	border: 1px solid black;
+	background-color:yellow;
+	height:100px;
+	width:100px;
+	margin:0 20px;
+	float:left;
+}
+
+#resultsTable{
+	display:block;
+	float:left;
+	margin-left:20%;
+	margin-right:20px;
+}
+
+.clickMe{
+	text-decoration:underline;
+	font-size:16px;
+}
+.hoverOver{
+	font-style:italic;
+}
+td, tr, th{
+	padding:4px;
+}

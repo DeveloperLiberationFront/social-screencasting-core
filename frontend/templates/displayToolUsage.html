@@ -3,15 +3,21 @@
 <head>
   <title>Results for plugin query</title>
   <link rel="stylesheet" href="basic.css" />
+  
 </head>
 <body>
   <h1 class="debug">The following tool usages are for plugin "${plugin}"</h1>
 
-  <table border=1>
-  <tr><th>Tool Name<th>Number of Occurrences
+  <table border=1 id="resultsTable">
+  <tr><th>Tool Name<th>Number of Occurrences<th>View More Info
   <#list toolsAndCounts as thisToolCount>
-  <tr><td>${thisToolCount.toolName}<td>${thisToolCount.toolCount}
+  <tr><td>${thisToolCount.toolName}<td>${thisToolCount.toolCount}<td class="clickMe" data-toolid= "${thisToolCount.toolName}"  > click to view
   </#list>
 </table>
+<div class="moreInfo hidden">
+</div>
+
+<script src="jquery.min.js"></script>
+<script src="requestMoreInfo.js"></script>
 </body>
 </html>  
