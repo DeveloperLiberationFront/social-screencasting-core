@@ -246,6 +246,16 @@ public class TestLocalHubBasicFileReading {
 
 		assertNotNull(allHistoriesOfToolUsages);
 		assertEquals(120, allHistoriesOfToolUsages.size());
+		
+		for(ToolStream.ToolUsage tu:allHistoriesOfToolUsages)
+		{
+			assertNotNull(tu.getTimeStamp());
+			assertNotNull(tu.getToolClass());
+			assertNotNull(tu.getToolKeyPresses());
+			assertNotNull(tu.getToolName());
+			assertEquals(getCurrentPluginName(), tu.getPluginName());
+			
+		}
 	}
 
 
