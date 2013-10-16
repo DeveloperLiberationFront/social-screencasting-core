@@ -1,6 +1,5 @@
 package edu.ncsu.lubick.localHub.http;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,79 +13,44 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
-import freemarker.template.Configuration;
-import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.SimpleNumber;
 import freemarker.template.SimpleScalar;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
-import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import freemarker.template.Version;
 
 /**
  * This handler will be able to talk to the database.
  * @author KevinLubick
  *
  */
-public class LookupHandler extends AbstractHandler {
+public class LookupHandler extends TemplateHandlerWithDatabaseLink {
 
 	private static final String POST_COMMAND_PLUGIN_NAME = "pluginName";
 	private static final String POST_COMMAND_GET_TOOL_USAGE_FOR_PLUGIN = "getToolUsageForPlugin";
 	private static final String PLUGIN_VIEWER = "index.html";
 	private static final String DISPLAY_TOOL_USAGE = "displayToolUsage.html";
 	private static Logger logger;
-	private static Configuration cfg;		//Template Configuration
 	
-	private String httpRequestPattern;
-	private WebQueryInterface databaseLink;	
 	
 	//static initializer
 	static {
 		logger = Logger.getLogger(LookupHandler.class.getName());
-		try {
-			logger.trace("Setting up template configuration");
-			setupTemplateConfiguration();
-		} catch (IOException e) {
-			logger.fatal("There was a problem booting up the template configuration");
-		}
+		
 	}
 
 	public LookupHandler(String matchPattern, WebQueryInterface databaseLink) 
 	{
-		this.httpRequestPattern = matchPattern;
-		this.databaseLink = databaseLink;
+		super(matchPattern,databaseLink);
 	}
 
-	private static void setupTemplateConfiguration() throws IOException {
-		cfg = new Configuration();
-
-		cfg.setDirectoryForTemplateLoading(new File("./frontend/templates"));
-
-		// Specify how templates will see the data-model. This is an advanced topic...
-		// for now just use this:
-		cfg.setObjectWrapper(new DefaultObjectWrapper());
-
-		cfg.setDefaultEncoding("UTF-8");
-
-		// Sets how errors will appear. Here we assume we are developing HTML pages.
-		// For production systems TemplateExceptionHandler.RETHROW_HANDLER is better.
-		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
-
-		cfg.setIncompatibleImprovements(new Version(2, 3, 20));  // FreeMarker 2.3.20 
-	}
-	
 	@Override
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-		if (!target.equals(httpRequestPattern))
+		if (!checkIfWeHandleThisRequest(target))
 		{
-			logger.debug("LookupHandler passing on target "+target);
 			return;
 		}
 		logger.debug(String.format("HTML Request %s, with target %s" , baseRequest.toString(), target));
@@ -111,16 +75,6 @@ public class LookupHandler extends AbstractHandler {
 		Map<Object, Object> root = getPluginsFollowedDataModelFromDatabase();
 
 		processTemplate(response, root, PLUGIN_VIEWER);
-	}
-
-	private void processTemplate(HttpServletResponse response, Map<Object, Object> templateData, String templateName) throws IOException {
-		Template temp = cfg.getTemplate(templateName);
-
-		try {
-			temp.process(templateData, response.getWriter());
-		} catch (TemplateException e) {
-			logger.error("Problem with the template",e);
-		}
 	}
 
 	private void respondToPost(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException 
@@ -255,6 +209,11 @@ public class LookupHandler extends AbstractHandler {
 		
 		
 
+	}
+
+	@Override
+	protected Logger getLogger() {
+		return logger;
 	}
 
 }

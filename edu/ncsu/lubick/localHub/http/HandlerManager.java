@@ -14,8 +14,7 @@ public class HandlerManager
 	private static Logger logger = Logger.getLogger(HandlerManager.class.getName());
 
 	private static String[] staticResources = new String[]{
-			"frontend/public_html/",
-			"Scratch/"
+			"frontend/public_html/"
 	} ;
 
 	private HandlerManager() {}
@@ -25,9 +24,7 @@ public class HandlerManager
 		
 		h.addHandler(new LookupHandler("/", wqi));
 		h.addHandler(new LookupHandler("/index", wqi));
-		h.addHandler(new PlaybackHandler("/playback",wqi));
-		
-		//Put this last, else it will try and fail to list the directory on "/" match
+
 		
 		
 		ResourceCollection resourceCollection = new ResourceCollection(staticResources);
