@@ -24,7 +24,7 @@ public class HandlerManager
 		
 		h.addHandler(new LookupHandler("/", wqi));
 		h.addHandler(new LookupHandler("/index", wqi));
-
+		h.addHandler(new VideoCreator("/makeVideo",wqi));
 		
 		
 		ResourceCollection resourceCollection = new ResourceCollection(staticResources);

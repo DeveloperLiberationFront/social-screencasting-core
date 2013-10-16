@@ -19,6 +19,8 @@ import freemarker.template.Version;
 
 public abstract class TemplateHandlerWithDatabaseLink extends AbstractHandler {
 
+	protected static final String PLUGIN_VIEWER = "index.html";
+	protected static final String DISPLAY_TOOL_USAGE = "displayToolUsage.html";
 	protected String httpRequestPattern;
 	protected WebQueryInterface databaseLink;
 	protected static Configuration cfg;		//Template Configuration

@@ -31,8 +31,6 @@ public class LookupHandler extends TemplateHandlerWithDatabaseLink {
 
 	private static final String POST_COMMAND_PLUGIN_NAME = "pluginName";
 	private static final String POST_COMMAND_GET_TOOL_USAGE_FOR_PLUGIN = "getToolUsageForPlugin";
-	private static final String PLUGIN_VIEWER = "index.html";
-	private static final String DISPLAY_TOOL_USAGE = "displayToolUsage.html";
 	private static Logger logger;
 	
 	
@@ -81,7 +79,6 @@ public class LookupHandler extends TemplateHandlerWithDatabaseLink {
 	{
 
 		logger.debug("POST parameters recieved "+request.getParameterMap());
-		//logger.debug("Thing to do: "+request.getParameter("thingToDo"));
 		logger.debug("PluginName: "+request.getParameter(POST_COMMAND_PLUGIN_NAME));
 		
 		if (request.getParameter("thingToDo").equals(POST_COMMAND_GET_TOOL_USAGE_FOR_PLUGIN))	

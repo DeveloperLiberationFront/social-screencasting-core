@@ -3,6 +3,7 @@
 <head>
   <title>Results for plugin query</title>
   <link rel="stylesheet" href="basic.css" />
+  <link rel="stylesheet" href="loading.css" />
   
 </head>
 <body>
@@ -11,11 +12,13 @@
   <table border=1 id="resultsTable">
   <tr><th>Tool Name<th>Number of Occurrences<th>View More Info
   <#list toolsAndCounts as thisToolCount>
-  <tr><td>${thisToolCount.toolName}<td>${thisToolCount.toolCount}<td class="clickMe" data-toolid= "${thisToolCount.toolName}"  > click to view
+  <tr><td>${thisToolCount.toolName}<td>${thisToolCount.toolCount}<td class="clickMe" data-tool-name= "${thisToolCount.toolName}" data-plugin-name="${plugin}" > click to view
   </#list>
 </table>
 <div class="moreInfo hidden">
 </div>
+
+<div class="modal"><!-- Place at bottom of page --></div>
 
 <script src="jquery.min.js"></script>
 <script src="requestMoreInfo.js"></script>

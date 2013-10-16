@@ -70,9 +70,9 @@ public class ToolStream {
 		
 		public ToolUsage(String toolName, String toolClass, String keyPresses, Date timeStamp, int duration) 
 		{
-			this.toolName = toolName;
-			this.toolClass = toolClass;
-			this.keyPresses = keyPresses;
+			this.toolName = toolName.trim();
+			this.toolClass = toolClass.trim();
+			this.keyPresses = keyPresses.trim();
 			this.timeStamp = timeStamp;
 			this.duration = duration;
 		}
