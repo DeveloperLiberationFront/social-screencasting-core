@@ -30,6 +30,7 @@ public class HTTPServer {
 		httpServer.underlyingServer = new Server(SERVER_PORT);
 		httpServer.underlyingServer.setHandler(HandlerManager.makeHandler(wqi));
 
+		
 		try
 		{
 			httpServer.underlyingServer.start();

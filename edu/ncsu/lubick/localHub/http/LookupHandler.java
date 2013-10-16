@@ -42,7 +42,7 @@ public class LookupHandler extends AbstractHandler {
 	private static final String PLUGIN_VIEWER = "index.html";
 	private static final String DISPLAY_TOOL_USAGE = "displayToolUsage.html";
 	private static Logger logger;
-	private static Configuration cfg;
+	private static Configuration cfg;		//Template Configuration
 	
 	private String httpRequestPattern;
 	private WebQueryInterface databaseLink;	
