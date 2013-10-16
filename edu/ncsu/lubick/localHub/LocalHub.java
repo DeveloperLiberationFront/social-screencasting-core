@@ -278,6 +278,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		}
 	}
 
+	@Override
 	public File extractVideoForLastUsageOfTool(String pluginName, String toolName) 
 	{
 		ToolUsage lastToolUsage = databaseManager.getLastInstanceOfToolUsage(pluginName,toolName);

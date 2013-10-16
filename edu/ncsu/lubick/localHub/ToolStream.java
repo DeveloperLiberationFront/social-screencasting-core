@@ -67,14 +67,21 @@ public class ToolStream {
 		private String toolName, toolClass, keyPresses;
 		private Date timeStamp;
 		private int duration;
+		private String pluginName;
 		
-		public ToolUsage(String toolName, String toolClass, String keyPresses, Date timeStamp, int duration) 
+		private ToolUsage(String toolName, String toolClass, String keyPresses, Date timeStamp, int duration) 
 		{
 			this.toolName = toolName.trim();
 			this.toolClass = toolClass.trim();
 			this.keyPresses = keyPresses.trim();
 			this.timeStamp = timeStamp;
 			this.duration = duration;
+		}
+		
+		public ToolUsage(String toolName, String toolClass, String keyPresses, String pluginName, Date timeStamp, int duration) 
+		{
+			this(toolName, toolClass, keyPresses, timeStamp, duration);
+			setPluginName(pluginName);
 		}
 
 		public static ToolUsage buildFromJSONObject(JSONObject jobj) throws JSONException
@@ -104,6 +111,15 @@ public class ToolStream {
 			return duration;
 		}
 
+		public String getPluginName() {
+			return this.pluginName;
+		}
+		
+		public void setPluginName(String pluginName)
+		{
+			this.pluginName = pluginName;
+		}
+
 	}
 
 	public void setTimeStamp(Date associatedDate) {
@@ -116,7 +132,10 @@ public class ToolStream {
 
 	public void setAssociatedPlugin(String pluginName) {
 		this.pluginName = pluginName;
-		
+		for(ToolUsage tu: this.listOfToolUsages)
+		{
+			tu.setPluginName(pluginName);
+		}
 	}
 
 	public String getAssociatedPlugin() {

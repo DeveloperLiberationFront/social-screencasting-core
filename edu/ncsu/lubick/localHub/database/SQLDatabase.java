@@ -128,7 +128,7 @@ public abstract class SQLDatabase extends DBAbstraction  {
 				int duration = results.getInt("tool_use_duration");
 
 
-				toolUsages.add(new ToolUsage(toolName, toolClass, keyPresses, timestamp, duration));
+				toolUsages.add(new ToolUsage(toolName, toolClass, keyPresses, currentPluginName, timestamp, duration));
 			}			
 
 		}
@@ -186,7 +186,7 @@ public abstract class SQLDatabase extends DBAbstraction  {
 				int duration = results.getInt("tool_use_duration");
 
 
-				toolUsage = new ToolUsage(toolName, toolClass, keyPresses, timestamp, duration);
+				toolUsage = new ToolUsage(toolName, toolClass, keyPresses, pluginName, timestamp, duration);
 			}			
 
 		}

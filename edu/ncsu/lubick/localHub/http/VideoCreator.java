@@ -12,6 +12,7 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 
 import edu.ncsu.lubick.localHub.WebQueryInterface;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
 
 public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Handler {
 
@@ -68,12 +69,22 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 
 	private void makeVideo(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException 
 	{
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			logger.error("Was interrupted",e);
+		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
+		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
+		
+		if (pluginName == null || toolName == null)
+		{
+			response.getWriter().println("<span>Internal Error. </span>");
+			return;
 		}
-		response.getWriter().println("<span>This video file has been generated as fred.xml </span>");
+		
+		File madeVideo = this.databaseLink.extractVideoForLastUsageOfTool(pluginName, toolName);
+		if (madeVideo == null)
+		{
+			response.getWriter().println("<span>Internal Video Creation Error. </span>");
+			return;
+		}
+		response.getWriter().println("<span>This video file has been generated as "+madeVideo.getAbsolutePath()+" </span>");
 		baseRequest.setHandled(true);
 	}
 
@@ -82,7 +93,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
 		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
 		
-		String expectedVideoFileName = makeFileNameForToolPlugin(pluginName,toolName);
+		String expectedVideoFileName = PostProductionVideoHandler.makeFileNameForToolPlugin(pluginName,toolName);
 		File expectedVideoFile = new File(expectedVideoFileName);
 	
 		logger.debug("If file existed, it would be called "+expectedVideoFile.getAbsolutePath());
@@ -103,16 +114,6 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		
 	}
 
-	private String makeFileNameForToolPlugin(String pluginName, String toolName) 
-	{
-		//TODO probably move this logic elsewhere
-		if (toolName ==null)
-		{
-			logger.info("Got a null toolname, recovering with empty string");
-			toolName = "";
-		}
-		return "Scratch/renderedVideos/"+pluginName+Math.abs(toolName.hashCode())+".mkv";
-	}
 
 	@Override
 	protected Logger getLogger() {

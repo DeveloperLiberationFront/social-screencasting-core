@@ -112,8 +112,8 @@ public class PostProductionVideoHandler
 			decompressionCodec.readInFileHeader(inputStream);
 			fastFowardStreamToTime(inputStream, timeToLookFor);
 			
-			
-			retVal = extractDemoVideoToFile(inputStream);
+			File newVideoFile = new File(makeFileNameForToolPlugin(specificToolUse.getPluginName(), specificToolUse.getToolName()));
+			retVal = extractDemoVideoToFile(inputStream, newVideoFile);
 
 		} catch (IOException e) {
 			logger.error("There was a problem extracting the video",e);
@@ -138,7 +138,7 @@ public class PostProductionVideoHandler
 		}
 	}
 
-	private File extractDemoVideoToFile(InputStream inputStream) throws IOException 
+	private File extractDemoVideoToFile(InputStream inputStream, File newVideoFile) throws IOException 
 	{
 		imageWriter.reset();
 		for(int i = 0;i<FRAME_RATE * (RUN_UP_TIME + TOOL_DEMO_TIME);i++)
@@ -161,7 +161,7 @@ public class PostProductionVideoHandler
 		
 		imageWriter.waitUntilDoneWriting();
 		
-		File newVideoFile = new File("./Scratch/temp.mkv");
+		
 		if (newVideoFile.exists() && !newVideoFile.delete())
 		{
 			logger.error("could not establish a temporary video file");
@@ -214,6 +214,17 @@ public class PostProductionVideoHandler
 		}).start();
 	}
 
+	public static String makeFileNameForToolPlugin(String pluginName, String toolName) 
+	{
+		if (toolName ==null)
+		{
+			logger.info("Got a null toolname, recovering with empty string");
+			toolName = "";
+		}
+		return "Scratch/renderedVideos/"+pluginName+Math.abs(toolName.hashCode())+".mkv";
+	}
+
+	
 	/**
 	 * Adds an extra file to this handler to use if the wanted toolstream's behavior extends over 
 	 * the end of the loaded cap file
