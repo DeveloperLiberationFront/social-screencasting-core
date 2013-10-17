@@ -1,7 +1,6 @@
 package edu.ncsu.lubick.unitTests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -18,6 +17,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.wet.wired.jsr.recorder.CapFileManager;
+import com.wet.wired.jsr.recorder.compression.CompressionFramePacket;
 import com.wet.wired.jsr.recorder.compression.FrameCompressor;
 import com.wet.wired.jsr.recorder.compression.FrameCompressorCodecStrategy;
 import com.wet.wired.jsr.recorder.compression.FrameCompressorSavingStrategy;
@@ -443,11 +443,11 @@ public class TestImageCompressionAndDecompression
 
 	private BufferedImage decompressImageFromSlimmedPackedBytes(byte[] slimmedPackedBytes) throws IOException 
 	{
-		DecompressionFramePacket updatedFrame = new DecompressionFramePacket(imageSizeRectangle);
+		DecompressionFramePacket decompressionPacket = new DecompressionFramePacket(imageSizeRectangle);
 
-		updatedFrame.setEncodedData(slimmedPackedBytes);
+		decompressionPacket.setEncodedData(slimmedPackedBytes);
 
-		BufferedImage image = decompressorToTest.decodeFramePacketToBufferedImage(updatedFrame);
+		BufferedImage image = decompressorToTest.decodeFramePacketToBufferedImage(decompressionPacket);
 
 		return image;
 	}
@@ -541,7 +541,12 @@ public class TestImageCompressionAndDecompression
 	//returns number of bytes in this compressed bit
 	private int compressToPackedBytesArray(int[] rawData) 
 	{
-		int numBytes = compressorToTest.compressData(rawData, packedBytes, false);
+		CompressionFramePacket compressionPacket = new CompressionFramePacket(rawData.length);
+		compressionPacket.dataToWriteBuffer = packedBytes;
+		compressionPacket.newData = rawData;
+		compressionPacket.isFullFrame = false;
+		
+		int numBytes = compressorToTest.compressData(compressionPacket);
 
 		return numBytes;
 	}
