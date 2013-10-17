@@ -241,7 +241,7 @@ public class PostProductionVideoHandler
 			logger.info("Got a null toolname, recovering with empty string");
 			toolName = "";
 		}
-		return "Scratch/renderedVideos/"+pluginName+createNumberForVideoFile(toolName)+".mkv"; 
+		return "Scratch\\renderedVideos\\"+pluginName+createNumberForVideoFile(toolName)+".mkv"; 
 	}
 
 	private static int createNumberForVideoFile(String toolName) {

@@ -18,9 +18,13 @@ import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
 
-public class TestVideoPostProduction {
-	
+public class TestVideoPostProduction 
+{
 	private static final String TEST_PLUGIN_NAME = "Testing";
+	private static final String DEFAULT_TESTING_KEYPRESS = "Ctrl+5";
+	private static final String DEFAULT_TESTING_TOOL_CLASS = "Debug";
+	
+	
 	private SimpleDateFormat dateInSecondsToNumber = FileUtilities.makeDateInSecondsToNumberFormatter();
 	
 	static {
@@ -31,7 +35,7 @@ public class TestVideoPostProduction {
 	public void testSingleToolUsageExtraction() {
 		
 		File capFile = new File("./src/ForTesting/oneMinuteCap.cap");
-		
+		String toolName = "WhomboTool #1";
 		
 		assertTrue(capFile.exists());
 		
@@ -44,20 +48,19 @@ public class TestVideoPostProduction {
 		
 		Date datePlusFifteen = new Date(date.getTime() + 15*1000);	//plus fifteen seconds
 		
-		ToolUsage testToolUsage = makeToolUsage(datePlusFifteen, "WhomboTool #1");
+		ToolUsage testToolUsage = makeToolUsage(datePlusFifteen, toolName);
 		
 		File outputFile = handler.extractVideoForToolUsage(testToolUsage);
 		
 		verifyVideoFileIsCorrectlyMade(outputFile);
-		
-		assertEquals(PostProductionVideoHandler.makeFileNameForToolPlugin(TEST_PLUGIN_NAME, "WhomboTool #1"), outputFile.getName());
+		verifyVideoNamedProperly(outputFile, toolName);
 	}
 
 	@Test
 	public void testSingleToolUsageExtractionReallyEarly() {
 		
 		File capFile = new File("./src/ForTesting/oneMinuteCap.cap");
-		
+		String toolName = "WhomboTool #2";
 		
 		assertTrue(capFile.exists());
 		
@@ -70,11 +73,12 @@ public class TestVideoPostProduction {
 		
 		Date datePlusOne = new Date(date.getTime() + 1*1000);	//plus one second
 		
-		ToolUsage testToolUsage = makeToolUsage(datePlusOne, "WhomboTool #2");
+		ToolUsage testToolUsage = makeToolUsage(datePlusOne, toolName);
 		
 		File outputFile = handler.extractVideoForToolUsage(testToolUsage);
 		
 		verifyVideoFileIsCorrectlyMade(outputFile);
+		verifyVideoNamedProperly(outputFile, toolName);
 	}
 	
 	@Test
@@ -82,6 +86,7 @@ public class TestVideoPostProduction {
 		
 		File firstcapFile = new File("./src/ForTesting/oneMinuteCap.cap");
 		File secondCapFile = new File("./src/ForTesting/oneMinuteCap.cap");	//we'll just reuse this for testing
+		String toolName = "WhomboTool #3";
 		
 		assertTrue(firstcapFile.exists());
 		assertTrue(secondCapFile.exists());
@@ -97,11 +102,12 @@ public class TestVideoPostProduction {
 		
 		Date datePlusFiftyFive = new Date(date.getTime() + 55*1000);	//plus 55 seconds, plenty to over run this file
 		
-		ToolUsage testToolUsage = makeToolUsage(datePlusFiftyFive, "WhomboTool #2");
+		ToolUsage testToolUsage = makeToolUsage(datePlusFiftyFive, toolName);
 		
 		File outputFile = handler.extractVideoForToolUsage(testToolUsage);
 		
 		verifyVideoFileIsCorrectlyMade(outputFile);
+		verifyVideoNamedProperly(outputFile, toolName);
 		
 	}
 	
@@ -150,6 +156,18 @@ public class TestVideoPostProduction {
 		
 	}
 
+	private ToolUsage makeToolUsage(Date toolUsageDate, String toolUsageName) {
+		IdealizedToolStream iToolStream = new IdealizedToolStream(toolUsageDate);
+		iToolStream.addToolUsage(toolUsageName, DEFAULT_TESTING_TOOL_CLASS, DEFAULT_TESTING_KEYPRESS,toolUsageDate, 1);
+		
+		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
+		toolStream.setAssociatedPlugin(TEST_PLUGIN_NAME);
+		assertEquals(1,toolStream.getAsList().size());
+		
+		ToolUsage testToolUsage = toolStream.getAsList().get(0);
+		return testToolUsage;
+	}
+
 	private void verifyVideoFileIsCorrectlyMade(File outputFile) {
 		assertNotNull(outputFile);
 		assertTrue(outputFile.exists());
@@ -160,16 +178,8 @@ public class TestVideoPostProduction {
 		assertTrue(outputFile.length() < 2000000);
 	}
 
-	private ToolUsage makeToolUsage(Date toolUsageDate, String toolUsageName) {
-		IdealizedToolStream iToolStream = new IdealizedToolStream(toolUsageDate);
-		iToolStream.addToolUsage(toolUsageName, "Debug", "Ctrl+5",toolUsageDate, 1);
-		
-		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
-		toolStream.setAssociatedPlugin(TEST_PLUGIN_NAME);
-		assertEquals(1,toolStream.getAsList().size());
-		
-		ToolUsage testToolUsage = toolStream.getAsList().get(0);
-		return testToolUsage;
+	private void verifyVideoNamedProperly(File outputFile, String toolName) {
+		assertEquals(PostProductionVideoHandler.makeFileNameForToolPlugin(TEST_PLUGIN_NAME, toolName), outputFile.getPath());
 	}
 	
 
