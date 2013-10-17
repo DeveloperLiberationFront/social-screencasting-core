@@ -102,6 +102,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		{
 			logger.debug("It exists!");
 			response.getWriter().println("<span>This video file has been generated as "+expectedVideoFile.getAbsolutePath()+"</span>");
+			
 		}
 		else
 		{

@@ -356,8 +356,7 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		return zSize;
 	}
 
-	private int getNextByte(InputStream inputStream) throws IOException,
-			ReachedEndOfCapFileException {
+	private int getNextByte(InputStream inputStream) throws IOException, ReachedEndOfCapFileException {
 		int readBuffer;
 		readBuffer = inputStream.read();
 		if (readBuffer == -1)
