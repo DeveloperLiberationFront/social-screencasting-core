@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 
 import javax.imageio.ImageIO;
 
@@ -21,6 +22,7 @@ import com.wet.wired.jsr.recorder.compression.CompressionFramePacket;
 import com.wet.wired.jsr.recorder.compression.FrameCompressor;
 import com.wet.wired.jsr.recorder.compression.FrameCompressorCodecStrategy;
 import com.wet.wired.jsr.recorder.compression.FrameCompressorSavingStrategy;
+import com.wet.wired.jsr.recorder.compression.FrameDataPack;
 
 import edu.ncsu.lubick.ScreenRecordingModule;
 import edu.ncsu.lubick.localHub.videoPostProduction.DecompressionFramePacket;
@@ -42,6 +44,9 @@ public class TestImageCompressionAndDecompression
 	
 	private FrameCompressorCodecStrategy compressorToTest;
 	private FrameDecompressorCodecStrategy decompressorToTest;
+	private CompressionFramePacket compressionPacket;
+	private DecompressionFramePacket decompressionPacket;
+	
 	private byte[] packedBytes;
 	private Rectangle imageSizeRectangle;
 	
@@ -57,6 +62,7 @@ public class TestImageCompressionAndDecompression
 	private byte[] redTailPattern = new byte[]{65, -1, 0, 0};
 	private byte[] blackMainPattern = new byte[]{0, 0, 1};		//all black is compressed to have an RGB of 0,0,1 so as not to confuse the "same as last time" stuff
 	private byte[] blackTailPattern = new byte[]{65, 0, 0, 1};
+	
 
 	static {
 		PropertyConfigurator.configure(ScreenRecordingModule.LOGGING_FILE_PATH);
@@ -327,14 +333,17 @@ public class TestImageCompressionAndDecompression
 		int[] secondImageRawData = readInImagesRawData(secondImage);
 
 
-		int numBytes =  compressToPackedBytesArray(firstImageRawData);
-		logger.trace("First frame compressed bytes "+numBytes);
-		byte[] firstImageSlimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
+		int firstNumBytes =  compressToPackedBytesArray(firstImageRawData);
+		logger.trace("First frame compressed bytes "+firstNumBytes);
+		byte[] firstImageSlimmedPackedBytes = slimDataInPackedBytesArray(firstNumBytes);
 
-		numBytes = compressToPackedBytesArray(secondImageRawData);
-		logger.trace("Second frame compressed bytes "+numBytes);
+		int secondNumBytes = compressToPackedBytesArray(secondImageRawData);
+		logger.trace("Second frame compressed bytes "+secondNumBytes);
+		
+		assertTrue(secondNumBytes<firstNumBytes);
 
-		byte [] secondImageSlimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
+		byte [] secondImageSlimmedPackedBytes = slimDataInPackedBytesArray(secondNumBytes);
+		
 		logger.trace("The last 500 bytes are "+last500BytesToString(secondImageSlimmedPackedBytes));
 
 		int[] uncompressedFirstImageData = decompressDataInSlimmedPackedBytes(firstImageSlimmedPackedBytes);
@@ -343,6 +352,8 @@ public class TestImageCompressionAndDecompression
 
 		if (logger.isTraceEnabled()) debugWriteToImage(uncompressedSecondImageData, "./src/test_images/testBlueTwoFrames.png");
 		verifyArrayMatchesStraightPattern(firstImageRawData, uncompressedFirstImageData);
+		
+		debugWriteToImage(uncompressedSecondImageData, "./test.png");
 		verifyArrayMatchesStraightPattern(secondImageRawData, uncompressedSecondImageData);
 	}
 
@@ -358,15 +369,17 @@ public class TestImageCompressionAndDecompression
 		File secondImage = new File("./src/test_images/full_screen_0009.png");
 		int[] secondImageRawData = readInImagesRawData(secondImage);
 
-		int numBytes =  compressToPackedBytesArray(firstImageRawData);
-		logger.trace("First frame compressed bytes "+numBytes);
-		byte[] firstImageSlimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
+		int firstNumBytes =  compressToPackedBytesArray(firstImageRawData);
+		logger.trace("First frame compressed bytes "+firstNumBytes);
+		byte[] firstImageSlimmedPackedBytes = slimDataInPackedBytesArray(firstNumBytes);
 		if (logger.isTraceEnabled()) logger.trace("The last 500 bytes of the compressed first frame are "+last500BytesToString(firstImageSlimmedPackedBytes));
 
-		numBytes = compressToPackedBytesArray(secondImageRawData);
-		logger.trace("Second frame compressed bytes "+numBytes);
+		int secondNumBytes = compressToPackedBytesArray(secondImageRawData);
+		logger.trace("Second frame compressed bytes "+secondNumBytes);
+		
+		assertTrue(secondNumBytes<firstNumBytes);
 
-		byte [] secondImageSlimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
+		byte [] secondImageSlimmedPackedBytes = slimDataInPackedBytesArray(secondNumBytes);
 
 		int[] uncompressedFirstImageData = decompressDataInSlimmedPackedBytes(firstImageSlimmedPackedBytes);
 
@@ -421,6 +434,8 @@ public class TestImageCompressionAndDecompression
 		
 		decompressorToTest = prepareDecompressorForImageSize();
 		
+		compressionPacket = new CompressionFramePacket(imageSize.width * imageSize.height);
+		decompressionPacket = new DecompressionFramePacket(imageSizeRectangle);
 		
 		packedBytes = new byte[imageSize.width * imageSize.height*3];
 	}
@@ -443,7 +458,6 @@ public class TestImageCompressionAndDecompression
 
 	private BufferedImage decompressImageFromSlimmedPackedBytes(byte[] slimmedPackedBytes) throws IOException 
 	{
-		DecompressionFramePacket decompressionPacket = new DecompressionFramePacket(imageSizeRectangle);
 
 		decompressionPacket.setEncodedData(slimmedPackedBytes);
 
@@ -541,11 +555,13 @@ public class TestImageCompressionAndDecompression
 	//returns number of bytes in this compressed bit
 	private int compressToPackedBytesArray(int[] rawData) 
 	{
-		CompressionFramePacket compressionPacket = new CompressionFramePacket(rawData.length);
-		compressionPacket.dataToWriteBuffer = packedBytes;
-		compressionPacket.newData = rawData;
-		compressionPacket.isFullFrame = false;
 		
+		FrameDataPack dataPack = new FrameDataPack(rawData, new Date().getTime());
+		
+		compressionPacket.updateFieldsForNextFrame(dataPack);
+		compressionPacket.dataToWriteBuffer = packedBytes;		//using this for "spying" reasons instead of compressionPacket.resizeInternalBytesIfNeeded();
+		compressionPacket.isFullFrame = false;
+
 		int numBytes = compressorToTest.compressData(compressionPacket);
 
 		return numBytes;

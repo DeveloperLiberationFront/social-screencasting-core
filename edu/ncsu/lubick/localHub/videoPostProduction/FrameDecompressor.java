@@ -75,7 +75,7 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 	{
 	
 		DecompressionFramePacket frame = new DecompressionFramePacket(currentFrameRect);
-		frame.setPreviousFramePacket(previousFramePacket);
+		
 		
 		Date timeStamp = this.fdrs.readInFrameTimeStamp(inputStream);
 		
@@ -193,6 +193,8 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 			logger.error("I got null when decoding.  Returning previous image");
 			return previousImage;
 		}
+		
+		framePacket.setPreviousFramePacket(previousFramePacket);
 		
 		decodeFramePacketUsingRunTimeEncoding(framePacket);
 		
