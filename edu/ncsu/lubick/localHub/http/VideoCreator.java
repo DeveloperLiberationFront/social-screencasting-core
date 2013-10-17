@@ -99,7 +99,6 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		File expectedVideoFile = new File(expectedVideoFileName);
 	
 		logger.debug("If file existed, it would be called "+expectedVideoFile.getAbsolutePath());
-		//TODO refactor to use templates.  That's what I've got them for
 		if (expectedVideoFile.exists())
 		{
 			logger.debug("It exists!");
