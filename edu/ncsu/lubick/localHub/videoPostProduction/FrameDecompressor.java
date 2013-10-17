@@ -54,19 +54,6 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		this.fdrs = fdrs;
 	}
 	
-	@Override
-	public void readInFileHeader(InputStream inputStream) throws IOException {
-		int width = inputStream.read();
-		width = width << 8;
-		width += inputStream.read();
-		int height = inputStream.read();
-		height = height << 8;
-		height += inputStream.read();
-	
-		this.currentFrameRect = new Rectangle(width, height);
-	}
-	
-
 	public BufferedImage readInFrameImage(InputStream inputStream) throws IOException 
 	{
 		logger.trace("Starting to read in frame");
@@ -81,7 +68,7 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		
 		
 	}
-	
+
 	private DecompressionFramePacket unpackNextFrame(InputStream inputStream) throws IOException 
 	{
 	
@@ -117,10 +104,32 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 			frame.setResult(DecompressionFramePacket.NO_CHANGES_THIS_FRAME);
 			return frame;
 		}
-
+	
 		return frame;
 	}
+
+	public Date getPreviousFrameTimeStamp() {
+		return previousFramePacket.getFrameTimeStamp();
+	}
+
+	public void setFrameZeroTime(Date newTimeZero) {
+		this.capFileStartTime = newTimeZero;
+		this.firstFrameTimeStamp=-1;
+	}
+
+	@Override
+	public void readInFileHeader(InputStream inputStream) throws IOException {
+		int width = inputStream.read();
+		width = width << 8;
+		width += inputStream.read();
+		int height = inputStream.read();
+		height = height << 8;
+		height += inputStream.read();
 	
+		this.currentFrameRect = new Rectangle(width, height);
+	}
+	
+
 	/*
 	 * The first four bytes from the data stream 
 	 */
@@ -131,6 +140,166 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		logger.trace("Packed Code:"+type);
 		//Convert the type to a positive int.  It shouldn't be otherwise, but just in case
 		return (type & 0xFF);
+	}
+
+	/**
+	 * The first part in any frame is the time stamp.  This attempts to read the time stamp, or, if we've reached
+	 * the end of the file, will return null and set reachedEOF to true.
+	 * @param inputStream
+	 * @return
+	 * @throws IOException
+	 */
+	@Override
+	public Date readInFrameTimeStamp(InputStream inputStream) throws IOException {
+		int readBuffer = inputStream.read();
+		if (readBuffer < 0)
+		{
+			return null;
+		}
+		int timeOffset = readBuffer;
+		timeOffset = timeOffset << 8;
+		readBuffer = inputStream.read();
+		timeOffset += readBuffer;
+		timeOffset = timeOffset << 8;
+		readBuffer = inputStream.read();
+		timeOffset += readBuffer;
+		timeOffset = timeOffset << 8;
+		readBuffer = inputStream.read();
+		timeOffset += readBuffer;
+	
+		return makeNewFrameTimeStamp(timeOffset);
+	}
+
+	@Override
+	public void decompressFrameDataToStream(InputStream inputStream, ByteArrayOutputStream bO) throws IOException {
+		byte[] compressedData = readCompressedData(inputStream);
+		
+		decompressData(bO, compressedData);
+		
+	}
+
+	@Override
+	public BufferedImage decodeFramePacketToBufferedImage(DecompressionFramePacket framePacket) 
+	{
+		if (framePacket == null)
+		{
+			logger.error("I got null when decoding.  Returning previous image");
+			return previousImage;
+		}
+		
+		decodeFramePacketUsingRunTimeEncoding(framePacket);
+		
+		logger.debug("read in frame "+framePacket);
+		
+		//Date frameTime = frame.getFrameTimeStamp();
+	
+		int result = framePacket.getResult();
+		if (result == DecompressionFramePacket.NO_CHANGES_THIS_FRAME) {
+			return previousImage;
+		} else if (result == DecompressionFramePacket.REACHED_END) {
+			logger.fatal("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			logger.fatal("I TOTALLY DID NOT EXPECT THIS LINE OF CODE TO BE REACHED");
+			return null;
+		}
+		previousFramePacket = framePacket;
+	
+		BufferedImage bufferedImage = new BufferedImage(framePacket.getFrameDimensions().width, framePacket.getFrameDimensions().height,
+				BufferedImage.TYPE_INT_RGB);
+		bufferedImage.setRGB(0, 0, framePacket.getFrameDimensions().width, framePacket.getFrameDimensions().height, framePacket.getData(), 0,
+				framePacket.getFrameDimensions().width);
+	
+		previousImage = bufferedImage;
+	
+		return bufferedImage;
+	}
+
+	private void decodeFramePacketUsingRunTimeEncoding(DecompressionFramePacket packet) {
+		packet.decodedData = new int[packet.getFrameSize()];
+	
+		int inCursor = 0;
+		int outCursor = 0;
+	
+		int blockSize = 0;
+	
+		int rgb = 0xFF000000;
+	
+		while (inCursor < packet.encodedData.length - 3 && outCursor < packet.getFrameSize()) {
+			if (packet.encodedData[inCursor] == STREAK_OF_SAME_AS_LAST_TIME_BLOCKS_CONSTANT) 
+			{
+				inCursor++;
+	
+				int count = (packet.encodedData[inCursor] & 0xFF);
+				inCursor++;
+	
+				int size = count * MAX_BLOCK_LENGTH;
+				if (size > packet.decodedData.length) {
+					size = packet.decodedData.length;
+				}
+	
+				for (int loop = 0; loop < (MAX_BLOCK_LENGTH * count); loop++) {
+					packet.decodedData[outCursor] = packet.previousData[outCursor];
+					outCursor++;
+					if (outCursor >= packet.decodedData.length) {
+						break;
+					}
+				}
+	
+			} 
+			else if (packet.encodedData[inCursor] < 0) // data is uncompressed
+			{
+				blockSize = packet.encodedData[inCursor] & 0x7F;
+				inCursor++;
+	
+				for (int loop = 0; loop < blockSize; loop++) {
+					rgb = ((packet.encodedData[inCursor] & 0xFF) << 16)
+							| ((packet.encodedData[inCursor + 1] & 0xFF) << 8)
+							| (packet.encodedData[inCursor + 2] & 0xFF) | ALPHA;
+					if (rgb == ALPHA) {
+						rgb = packet.previousData[outCursor];
+					}
+					inCursor += 3;
+					packet.decodedData[outCursor] = rgb;
+					outCursor++;
+					if (outCursor >= packet.decodedData.length) {
+						break;
+					}
+				}
+			} 
+			else 
+			{
+				blockSize = packet.encodedData[inCursor];
+				inCursor++;
+				rgb = ((packet.encodedData[inCursor] & 0xFF) << 16)
+						| ((packet.encodedData[inCursor + 1] & 0xFF) << 8)
+						| (packet.encodedData[inCursor + 2] & 0xFF) | ALPHA;
+	
+				boolean transparent = false;
+				if (rgb == ALPHA) {
+					transparent = true;
+				}
+				inCursor += 3;
+				for (int loop = 0; loop < blockSize && outCursor < packet.getFrameSize(); loop++) {
+					if (transparent) {
+						packet.decodedData[outCursor] = packet.previousData[outCursor];
+					} else {
+						packet.decodedData[outCursor] = rgb;
+					}
+					outCursor++;
+				}
+			}
+		}
+		
+		logger.debug(String.format("Ending inCursor: %d/%d and outCursor: %d/%d",inCursor,packet.encodedData.length-1,outCursor,packet.decodedData.length-1));
+		
+		//Many times, if we are on the last couple of bytes, we don't read the last 2 bytes that look something like
+		// [..., -1, 62]  and these are ignored because the loop stops if we are past the 3rd to last byte
+		// So, the best way to fix this is just assume if we haven't filled the expected size, copy all the stuff from the end
+		for(;outCursor<packet.decodedData.length && outCursor<packet.previousData.length;outCursor++)
+		{
+			packet.decodedData[outCursor] = packet.previousData[outCursor];
+		}
+		
+		packet.setResult(DecompressionFramePacket.CHANGES_THIS_FRAME);
 	}
 
 	private byte[] readCompressedData(InputStream inputStream) throws IOException {
@@ -191,34 +360,6 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		bO.flush();
 	}
 	
-	/**
-	 * The first part in any frame is the time stamp.  This attempts to read the time stamp, or, if we've reached
-	 * the end of the file, will return null and set reachedEOF to true.
-	 * @param inputStream
-	 * @return
-	 * @throws IOException
-	 */
-	@Override
-	public Date readInFrameTimeStamp(InputStream inputStream) throws IOException {
-		int readBuffer = inputStream.read();
-		if (readBuffer < 0)
-		{
-			return null;
-		}
-		int timeOffset = readBuffer;
-		timeOffset = timeOffset << 8;
-		readBuffer = inputStream.read();
-		timeOffset += readBuffer;
-		timeOffset = timeOffset << 8;
-		readBuffer = inputStream.read();
-		timeOffset += readBuffer;
-		timeOffset = timeOffset << 8;
-		readBuffer = inputStream.read();
-		timeOffset += readBuffer;
-	
-		return makeNewFrameTimeStamp(timeOffset);
-	}
-	
 	private Date makeNewFrameTimeStamp(int timeOffset) 
 	{
 		if (this.firstFrameTimeStamp == -1)
@@ -227,151 +368,6 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 			return this.capFileStartTime;
 		}
 		return new Date(this.capFileStartTime.getTime() + (timeOffset - this.firstFrameTimeStamp));
-	}
-
-
-	public Date getPreviousFrameTimeStamp() {
-		return previousFramePacket.getFrameTimeStamp();
-	}
-
-
-	public void setFrameZeroTime(Date newTimeZero) {
-		this.capFileStartTime = newTimeZero;
-		this.firstFrameTimeStamp=-1;
-	}
-
-	
-
-	private void decodeFramePacketUsingRunTimeEncoding(DecompressionFramePacket packet) {
-		packet.decodedData = new int[packet.getFrameSize()];
-
-		int inCursor = 0;
-		int outCursor = 0;
-
-		int blockSize = 0;
-
-		int rgb = 0xFF000000;
-
-		while (inCursor < packet.encodedData.length - 3 && outCursor < packet.getFrameSize()) {
-			if (packet.encodedData[inCursor] == STREAK_OF_SAME_AS_LAST_TIME_BLOCKS_CONSTANT) 
-			{
-				inCursor++;
-
-				int count = (packet.encodedData[inCursor] & 0xFF);
-				inCursor++;
-
-				int size = count * MAX_BLOCK_LENGTH;
-				if (size > packet.decodedData.length) {
-					size = packet.decodedData.length;
-				}
-
-				for (int loop = 0; loop < (MAX_BLOCK_LENGTH * count); loop++) {
-					packet.decodedData[outCursor] = packet.previousData[outCursor];
-					outCursor++;
-					if (outCursor >= packet.decodedData.length) {
-						break;
-					}
-				}
-
-			} 
-			else if (packet.encodedData[inCursor] < 0) // data is uncompressed
-			{
-				blockSize = packet.encodedData[inCursor] & 0x7F;
-				inCursor++;
-
-				for (int loop = 0; loop < blockSize; loop++) {
-					rgb = ((packet.encodedData[inCursor] & 0xFF) << 16)
-							| ((packet.encodedData[inCursor + 1] & 0xFF) << 8)
-							| (packet.encodedData[inCursor + 2] & 0xFF) | ALPHA;
-					if (rgb == ALPHA) {
-						rgb = packet.previousData[outCursor];
-					}
-					inCursor += 3;
-					packet.decodedData[outCursor] = rgb;
-					outCursor++;
-					if (outCursor >= packet.decodedData.length) {
-						break;
-					}
-				}
-			} 
-			else 
-			{
-				blockSize = packet.encodedData[inCursor];
-				inCursor++;
-				rgb = ((packet.encodedData[inCursor] & 0xFF) << 16)
-						| ((packet.encodedData[inCursor + 1] & 0xFF) << 8)
-						| (packet.encodedData[inCursor + 2] & 0xFF) | ALPHA;
-
-				boolean transparent = false;
-				if (rgb == ALPHA) {
-					transparent = true;
-				}
-				inCursor += 3;
-				for (int loop = 0; loop < blockSize && outCursor < packet.getFrameSize(); loop++) {
-					if (transparent) {
-						packet.decodedData[outCursor] = packet.previousData[outCursor];
-					} else {
-						packet.decodedData[outCursor] = rgb;
-					}
-					outCursor++;
-				}
-			}
-		}
-		
-		logger.debug(String.format("Ending inCursor: %d/%d and outCursor: %d/%d",inCursor,packet.encodedData.length-1,outCursor,packet.decodedData.length-1));
-		
-		//Many times, if we are on the last couple of bytes, we don't read the last 2 bytes that look something like
-		// [..., -1, 62]  and these are ignored because the loop stops if we are past the 3rd to last byte
-		// So, the best way to fix this is just assume if we haven't filled the expected size, copy all the stuff from the end
-		for(;outCursor<packet.decodedData.length && outCursor<packet.previousData.length;outCursor++)
-		{
-			packet.decodedData[outCursor] = packet.previousData[outCursor];
-		}
-		
-		packet.setResult(DecompressionFramePacket.CHANGES_THIS_FRAME);
-	}
-
-	@Override
-	public void decompressFrameDataToStream(InputStream inputStream, ByteArrayOutputStream bO) throws IOException {
-		byte[] compressedData = readCompressedData(inputStream);
-		
-		decompressData(bO, compressedData);
-		
-	}
-
-	@Override
-	public BufferedImage decodeFramePacketToBufferedImage(DecompressionFramePacket framePacket) 
-	{
-		if (framePacket == null)
-		{
-			logger.error("I got null when decoding.  Returning previous image");
-			return previousImage;
-		}
-		
-		decodeFramePacketUsingRunTimeEncoding(framePacket);
-		
-		logger.debug("read in frame "+framePacket);
-		
-		//Date frameTime = frame.getFrameTimeStamp();
-	
-		int result = framePacket.getResult();
-		if (result == DecompressionFramePacket.NO_CHANGES_THIS_FRAME) {
-			return previousImage;
-		} else if (result == DecompressionFramePacket.REACHED_END) {
-			logger.fatal("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-			logger.fatal("I TOTALLY DID NOT EXPECT THIS LINE OF CODE TO BE REACHED");
-			return null;
-		}
-		previousFramePacket = framePacket;
-	
-		BufferedImage bufferedImage = new BufferedImage(framePacket.getFrameDimensions().width, framePacket.getFrameDimensions().height,
-				BufferedImage.TYPE_INT_RGB);
-		bufferedImage.setRGB(0, 0, framePacket.getFrameDimensions().width, framePacket.getFrameDimensions().height, framePacket.getData(), 0,
-				framePacket.getFrameDimensions().width);
-	
-		previousImage = bufferedImage;
-	
-		return bufferedImage;
 	}
 	
 }
