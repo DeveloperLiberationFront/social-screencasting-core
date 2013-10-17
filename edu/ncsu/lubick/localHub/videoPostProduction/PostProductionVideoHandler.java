@@ -90,9 +90,8 @@ public class PostProductionVideoHandler
 		this.capFileStartTime = startTime;
 		decompressor.setFrameZeroTime(capFileStartTime);
 	}
-
-	public File extractVideoForToolUsage(ToolUsage specificToolUse)
-	{
+	
+	public File extractVideoForToolUsageThrowingException(ToolUsage specificToolUse) throws VideoEncodingException {
 		if (this.currentCapFile== null || this.capFileStartTime == null)
 		{
 			logger.error("PostProductionVideo object needed to have a file to load and a start time");
@@ -115,13 +114,29 @@ public class PostProductionVideoHandler
 			File newVideoFile = new File(makeFileNameForToolPlugin(specificToolUse.getPluginName(), specificToolUse.getToolName()));
 			retVal = extractDemoVideoToFile(inputStream, newVideoFile);
 
-		} catch (IOException | VideoEncodingException e) {
+		} catch (IOException e) {
 			logger.error("There was a problem extracting the video",e);
-		} 
+		} catch (ReachedEndOfCapFileException e) 
+		{
+			logger.error("Unexpectedly hit the end of the cap file when seeking to start of tool usage");
+			throw new VideoEncodingException("Unexpectedly hit the end of the cap file when seeking to start of tool usage", e);
+		}
+		
 		return retVal;
 	}
+	
 
-	private void fastFowardStreamToTime(FileInputStream inputStream, Date timeToLookFor) throws IOException, VideoEncodingException 
+	public File extractVideoForToolUsage(ToolUsage specificToolUse)
+	{
+		try {
+			return extractVideoForToolUsageThrowingException(specificToolUse);
+		} catch (VideoEncodingException e) {
+			logger.error("There was a problem extracting the video.  An effort was made to produce some video",e);
+		}
+		return null;
+	}
+
+	private void fastFowardStreamToTime(FileInputStream inputStream, Date timeToLookFor) throws IOException, VideoEncodingException, ReachedEndOfCapFileException 
 	{
 		if (timeToLookFor.equals(capFileStartTime))	//no fast forwarding required
 		{
@@ -149,8 +164,7 @@ public class PostProductionVideoHandler
 			} catch (VideoEncodingException e) {
 				logger.error("There was a problem making the video frames.  Attempting to make a video from what I've got",e);
 				break;
-			}
-			if (tempImage == null)
+			} catch (ReachedEndOfCapFileException e) 
 			{
 				if (queueOfOverloadFiles.size() == 0)
 				{
@@ -273,7 +287,8 @@ public class PostProductionVideoHandler
 		}
 		
 	}
-	
+
+
 
 
 }

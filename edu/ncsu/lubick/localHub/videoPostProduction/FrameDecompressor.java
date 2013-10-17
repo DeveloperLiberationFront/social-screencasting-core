@@ -20,6 +20,8 @@ import org.apache.log4j.Logger;
  */
 public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameDecompressorReadingStrategy  
 {
+	private static final int NORMAL_END_OF_CAP_FILE_COMPRESSED_FRAME_SIZE = -16843009;
+
 	private static Logger logger = Logger.getLogger(FrameDecompressor.class.getName());
 
 	private Rectangle currentFrameRect;
@@ -54,14 +56,14 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		this.fdrs = fdrs;
 	}
 	
-	public BufferedImage readInFrameImage(InputStream inputStream) throws IOException, VideoEncodingException 
+	public BufferedImage readInFrameImage(InputStream inputStream) throws IOException, VideoEncodingException, ReachedEndOfCapFileException 
 	{
 		logger.trace("Starting to read in frame");
 		DecompressionFramePacket framePacket = unpackNextFrame(inputStream);
 		
 		if (framePacket == null) //must have reached the file
 		{
-			return null;
+			throw new ReachedEndOfCapFileException();
 		}
 		
 		return this.fdcs.decodeFramePacketToBufferedImage(framePacket);
@@ -69,7 +71,7 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		
 	}
 
-	private DecompressionFramePacket unpackNextFrame(InputStream inputStream) throws IOException, VideoEncodingException 
+	private DecompressionFramePacket unpackNextFrame(InputStream inputStream) throws IOException, VideoEncodingException, ReachedEndOfCapFileException 
 	{
 	
 		DecompressionFramePacket frame = new DecompressionFramePacket(currentFrameRect);
@@ -104,10 +106,10 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 			frame.setResult(DecompressionFramePacket.NO_CHANGES_THIS_FRAME);
 			return frame;
 		}
-		catch (RuntimeException re)
+		catch (RuntimeException e)
 		{
-			logger.error("Probably a malformed screencapture packet", re);
-			throw new VideoEncodingException(re);
+			logger.error("Probably a malformed screencapture packet", e);
+			throw new VideoEncodingException(e);
 		}
 	
 		return frame;
@@ -176,7 +178,7 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 	}
 
 	@Override
-	public void decompressFrameDataToStream(InputStream inputStream, ByteArrayOutputStream bO) throws IOException {
+	public void decompressFrameDataToStream(InputStream inputStream, ByteArrayOutputStream bO) throws IOException, ReachedEndOfCapFileException {
 		byte[] compressedData = readCompressedData(inputStream);
 		
 		decompressData(bO, compressedData);
@@ -307,13 +309,14 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		packet.setResult(DecompressionFramePacket.CHANGES_THIS_FRAME);
 	}
 
-	private byte[] readCompressedData(InputStream inputStream) throws IOException {
+	private byte[] readCompressedData(InputStream inputStream) throws IOException, ReachedEndOfCapFileException {
 	
 		int compressedFrameSize = readCompressedFrameSize(inputStream);
 	
-		if (compressedFrameSize <1)
+		if (compressedFrameSize < 0 && compressedFrameSize != NORMAL_END_OF_CAP_FILE_COMPRESSED_FRAME_SIZE)
 		{
-			logger.error("Frame size was "+compressedFrameSize);
+			logger.error("Frame size was unexpectedly negative "+compressedFrameSize);
+			throw new ReachedEndOfCapFileException("Frame size was unexpectedly negative "+compressedFrameSize+", so just assuming end of file"); 
 		}
 		
 		byte[] compressedData = new byte[compressedFrameSize];
@@ -332,24 +335,34 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		return compressedData;
 	}
 
-	private int readCompressedFrameSize(InputStream inputStream) throws IOException 
+	private int readCompressedFrameSize(InputStream inputStream) throws IOException, ReachedEndOfCapFileException 
 	{
 		int readBuffer;
-		readBuffer = inputStream.read();
-	
+		readBuffer = getNextByte(inputStream);
 		int zSize = readBuffer;
 		zSize = zSize << 8;
-		readBuffer = inputStream.read();
+		readBuffer = getNextByte(inputStream);
 		zSize += readBuffer;
 		zSize = zSize << 8;
-		readBuffer = inputStream.read();
+		readBuffer = getNextByte(inputStream);
 		zSize += readBuffer;
 		zSize = zSize << 8;
-		readBuffer = inputStream.read();
+		readBuffer = getNextByte(inputStream);
 		zSize += readBuffer;
 	
 		logger.trace("Zipped Frame size:"+zSize);
 		return zSize;
+	}
+
+	private int getNextByte(InputStream inputStream) throws IOException,
+			ReachedEndOfCapFileException {
+		int readBuffer;
+		readBuffer = inputStream.read();
+		if (readBuffer == -1)
+		{
+			throw new ReachedEndOfCapFileException();
+		}
+		return readBuffer;
 	}
 
 	private void decompressData(ByteArrayOutputStream bO, byte[] compressedData) throws IOException {

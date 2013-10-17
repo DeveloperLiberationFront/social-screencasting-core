@@ -20,7 +20,7 @@ public interface FrameDecompressorReadingStrategy
 
 	int readFrameType(InputStream inputStream) throws IOException;
 
-	void decompressFrameDataToStream(InputStream inputStream, ByteArrayOutputStream bO) throws IOException;
+	void decompressFrameDataToStream(InputStream inputStream, ByteArrayOutputStream bO) throws IOException, ReachedEndOfCapFileException;
 	
 	
 }

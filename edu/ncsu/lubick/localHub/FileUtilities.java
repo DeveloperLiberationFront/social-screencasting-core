@@ -3,6 +3,7 @@ package edu.ncsu.lubick.localHub;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 
 import org.apache.log4j.Logger;
 
@@ -44,6 +45,10 @@ public class FileUtilities
 			return "0"+i;
 		}
 		return String.valueOf(i);
+	}
+
+	public static SimpleDateFormat makeDateInSecondsToNumberFormatter() {
+		return new SimpleDateFormat("DDDyykkmmss");
 	}
 	
 }

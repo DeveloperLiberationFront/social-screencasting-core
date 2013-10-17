@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.ncsu.lubick.localHub.FileUtilities;
 import edu.ncsu.lubick.localHub.LoadedFileEvent;
 import edu.ncsu.lubick.localHub.LoadedFileListener;
 import edu.ncsu.lubick.localHub.LocalHub;
@@ -36,7 +37,7 @@ public class TestLocalHubBasicFileReading {
 	private File testPluginDirectory;
 	//This won't work in the year 2100 or later.  
 	private SimpleDateFormat dateInMinutesToNumber = new SimpleDateFormat("DDDyykkmm");
-	private SimpleDateFormat dateInSecondsToNumber = new SimpleDateFormat("DDDyykkmmss");
+	private SimpleDateFormat dateInSecondsToNumber = FileUtilities.makeDateInSecondsToNumberFormatter();
 
 	//used with listeners.  These give listeners a place to refer
 	private LoadedFileEvent observedEvent = null;

@@ -218,7 +218,7 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		List<FileDateStructs> retVal = new ArrayList<>();
 		
 		StringBuilder sqlQueryBuilder = new StringBuilder();
-		sqlQueryBuilder.append("SELECT file_name, video_start_time FROM RawVideoCapFiles ");
+		sqlQueryBuilder.append("SELECT DISTINCT file_name, video_start_time FROM RawVideoCapFiles ");
 		sqlQueryBuilder.append("WHERE (video_start_time<");
 		sqlQueryBuilder.append(timeStamp.getTime()/1000);
 		sqlQueryBuilder.append(" AND video_start_time+duration>");
@@ -227,7 +227,7 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		sqlQueryBuilder.append((timeStamp.getTime()+duration*2L) / 1000);
 		sqlQueryBuilder.append(" AND video_start_time+duration>");
 		sqlQueryBuilder.append((timeStamp.getTime()+duration*2L) / 1000);
-		sqlQueryBuilder.append(")");
+		sqlQueryBuilder.append(") ORDER BY video_start_time");
 		
 		try (ResultSet results = executeWithResults(sqlQueryBuilder.toString());)
 		{

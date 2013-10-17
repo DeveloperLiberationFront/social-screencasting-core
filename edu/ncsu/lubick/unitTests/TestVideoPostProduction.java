@@ -3,18 +3,25 @@ package edu.ncsu.lubick.unitTests;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
+import edu.ncsu.lubick.localHub.FileUtilities;
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolStream;
+import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
+import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
 
 public class TestVideoPostProduction {
+	
+	private static final String TEST_PLUGIN_NAME = "Testing";
+	private SimpleDateFormat dateInSecondsToNumber = FileUtilities.makeDateInSecondsToNumberFormatter();
 	
 	static {
 		PropertyConfigurator.configure(LocalHub.LOGGING_FILE_PATH);
@@ -37,23 +44,15 @@ public class TestVideoPostProduction {
 		
 		Date datePlusFifteen = new Date(date.getTime() + 15*1000);	//plus fifteen seconds
 		
-		IdealizedToolStream iToolStream = new IdealizedToolStream(date);
-		iToolStream.addToolUsage("WhomboTool #5", "Debug", "Ctrl+5",datePlusFifteen, 1);
+		ToolUsage testToolUsage = makeToolUsage(datePlusFifteen, "WhomboTool #1");
 		
-		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
-		assertEquals(1,toolStream.getAsList().size());
+		File outputFile = handler.extractVideoForToolUsage(testToolUsage);
 		
-		File outputFile = handler.extractVideoForToolUsage(toolStream.getAsList().get(0));
+		verifyVideoFileIsCorrectlyMade(outputFile);
 		
-		assertNotNull(outputFile);
-		assertTrue(outputFile.exists());
-		assertTrue(outputFile.isFile());
-		assertFalse(outputFile.isHidden());
-		assertTrue(outputFile.getName().endsWith(".mkv"));
-		assertTrue(outputFile.length() > 1000000);	//I expect the file size to be at least 1 Mb and no more than 2Mb	
-		assertTrue(outputFile.length() < 2000000);
+		assertEquals(PostProductionVideoHandler.makeFileNameForToolPlugin(TEST_PLUGIN_NAME, "WhomboTool #1"), outputFile.getName());
 	}
-	
+
 	@Test
 	public void testSingleToolUsageExtractionReallyEarly() {
 		
@@ -71,21 +70,11 @@ public class TestVideoPostProduction {
 		
 		Date datePlusOne = new Date(date.getTime() + 1*1000);	//plus one second
 		
-		IdealizedToolStream iToolStream = new IdealizedToolStream(date);
-		iToolStream.addToolUsage("WhomboTool #5", "Debug", "Ctrl+5",datePlusOne, 1);
+		ToolUsage testToolUsage = makeToolUsage(datePlusOne, "WhomboTool #2");
 		
-		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
-		assertEquals(1,toolStream.getAsList().size());
+		File outputFile = handler.extractVideoForToolUsage(testToolUsage);
 		
-		File outputFile = handler.extractVideoForToolUsage(toolStream.getAsList().get(0));
-		
-		assertNotNull(outputFile);
-		assertTrue(outputFile.exists());
-		assertTrue(outputFile.isFile());
-		assertFalse(outputFile.isHidden());
-		assertTrue(outputFile.getName().endsWith(".mkv"));
-		assertTrue(outputFile.length() > 1000000);	//I expect the file size to be at least 1 Mb and no more than 2Mb	
-		assertTrue(outputFile.length() < 2000000);
+		verifyVideoFileIsCorrectlyMade(outputFile);
 	}
 	
 	@Test
@@ -108,28 +97,80 @@ public class TestVideoPostProduction {
 		
 		Date datePlusFiftyFive = new Date(date.getTime() + 55*1000);	//plus 55 seconds, plenty to over run this file
 		
+		ToolUsage testToolUsage = makeToolUsage(datePlusFiftyFive, "WhomboTool #2");
+		
+		File outputFile = handler.extractVideoForToolUsage(testToolUsage);
+		
+		verifyVideoFileIsCorrectlyMade(outputFile);
+		
+	}
+	
+	@Test
+	public void testBug8() throws Exception{ //https://bitbucket.org/klubick/screencasting-module/issue/8/extracting-some-tools-causes-a
+		//I think this is an overlap problem.
+		
+		File firstcapFile = new File("./src/ForTesting/bug8.screencasts.28913211516.cap");
+		File secondCapFile = new File("./src/ForTesting/bug8.screencasts.28913211615.cap");	
+		
+		assertTrue(firstcapFile.exists());
+		assertTrue(secondCapFile.exists());
+		
+		Date date = dateInSecondsToNumber.parse("28913211516");
+		Date secondDate = dateInSecondsToNumber.parse("28913211615");
+		
+		assertNotNull(date);
+		assertNotNull(secondDate);
+		
+		PostProductionVideoHandler handler = new PostProductionVideoHandler();
+		handler.loadFile(firstcapFile);
+		handler.enqueueOverLoadFile(secondCapFile, secondDate);
+		
+		handler.setCurrentFileStartTime(date);
+		
+		Date dateOfBuggyToolUsage = new Date(1381972574596L);	//from the bug report.
+		
 		IdealizedToolStream iToolStream = new IdealizedToolStream(date);
-		iToolStream.addToolUsage("WhomboTool #5", "Debug", "Ctrl+5",datePlusFiftyFive, 1);
+
+		iToolStream.addToolUsage("Open Call Hierarchy", "", "MENU",dateOfBuggyToolUsage, 15000);
 		
 		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
+		toolStream.setAssociatedPlugin("Eclipse");
 		assertEquals(1,toolStream.getAsList().size());
 		
-		File outputFile = handler.extractVideoForToolUsage(toolStream.getAsList().get(0));
+		File outputFile = null;
+		try {
+			outputFile = handler.extractVideoForToolUsageThrowingException(toolStream.getAsList().get(0));
+			//throws an exception if there was a problem
+		} catch (VideoEncodingException e) {
+			e.printStackTrace();
+			fail("Should not have caught an exception here");
+		}
 		
+		verifyVideoFileIsCorrectlyMade(outputFile);
+		
+	}
+
+	private void verifyVideoFileIsCorrectlyMade(File outputFile) {
 		assertNotNull(outputFile);
 		assertTrue(outputFile.exists());
 		assertTrue(outputFile.isFile());
 		assertFalse(outputFile.isHidden());
 		assertTrue(outputFile.getName().endsWith(".mkv"));
-		assertTrue(outputFile.length() > 1000000);	//I expect the file size to be at least 1 Mb and no more than 2Mb	
+		assertTrue(outputFile.length() > 500000);	//I expect the file size to be at least 1 Mb and no more than 2Mb	
 		assertTrue(outputFile.length() < 2000000);
+	}
+
+	private ToolUsage makeToolUsage(Date toolUsageDate, String toolUsageName) {
+		IdealizedToolStream iToolStream = new IdealizedToolStream(toolUsageDate);
+		iToolStream.addToolUsage(toolUsageName, "Debug", "Ctrl+5",toolUsageDate, 1);
 		
+		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
+		toolStream.setAssociatedPlugin(TEST_PLUGIN_NAME);
+		assertEquals(1,toolStream.getAsList().size());
 		
+		ToolUsage testToolUsage = toolStream.getAsList().get(0);
+		return testToolUsage;
 	}
 	
-	@Test
-	public void testBug8() { //https://bitbucket.org/klubick/screencasting-module/issue/8/extracting-some-tools-causes-a
-		
-	}
 
 }

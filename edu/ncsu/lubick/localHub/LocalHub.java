@@ -39,7 +39,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	private boolean isRunning = false;
 	private File monitorDirectory = null;
 	private SimpleDateFormat dateInMinutesToNumber = new SimpleDateFormat("DDDyykkmm");
-	private SimpleDateFormat dateInSecondsToNumber = new SimpleDateFormat("DDDyykkmmss");
+	private SimpleDateFormat dateInSecondsToNumber = FileUtilities.makeDateInSecondsToNumberFormatter();
 	private FileManager currentRunnable = null;
 
 	private BufferedDatabaseManager databaseManager = null;
