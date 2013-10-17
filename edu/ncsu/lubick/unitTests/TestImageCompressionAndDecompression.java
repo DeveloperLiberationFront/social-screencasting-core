@@ -1,6 +1,7 @@
 package edu.ncsu.lubick.unitTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -17,14 +18,14 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.wet.wired.jsr.recorder.CapFileManager;
-import com.wet.wired.jsr.recorder.compression.CompressionFramePacket;
 import com.wet.wired.jsr.recorder.compression.FrameCompressor;
 import com.wet.wired.jsr.recorder.compression.FrameCompressorCodecStrategy;
 import com.wet.wired.jsr.recorder.compression.FrameCompressorSavingStrategy;
 
 import edu.ncsu.lubick.ScreenRecordingModule;
 import edu.ncsu.lubick.localHub.videoPostProduction.DecompressionFramePacket;
-import edu.ncsu.lubick.localHub.videoPostProduction.DefaultCodec;
+import edu.ncsu.lubick.localHub.videoPostProduction.FrameDecompressor;
+import edu.ncsu.lubick.localHub.videoPostProduction.FrameDecompressorCodecStrategy;
 
 
 public class TestImageCompressionAndDecompression
@@ -34,11 +35,13 @@ public class TestImageCompressionAndDecompression
 	private static final Rectangle TestImage800x600 = new Rectangle(800, 600);
 	private static final Rectangle TestImage1600x900 = new Rectangle(1600, 900);
 	private static final int BYTES_FOR_HOMOGENEOUS_IMAGE = 15244;	//observed via validated tests.
+	
 	private static final int ABSOLUTE_BLACK_PIXEL_VALUE = -16777216;
 	private static final int FUDGED_BLACK_PIXEL_VALUE = -16777215;
-	private FrameCompressor compressorToTest;
-
 	private static Logger logger = Logger.getLogger(TestImageCompressionAndDecompression.class.getName());
+	
+	private FrameCompressorCodecStrategy compressorToTest;
+	private FrameDecompressorCodecStrategy decompressorToTest;
 	private byte[] packedBytes;
 	private Rectangle imageSizeRectangle;
 	
@@ -167,8 +170,8 @@ public class TestImageCompressionAndDecompression
 
 		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
 
-		int[] uncompressedData = decompressDataInSlimmedPackedBytes(rawData.length,slimmedPackedBytes);
-
+		int[] uncompressedData = decompressDataInSlimmedPackedBytes(slimmedPackedBytes);
+		
 		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
 	}
 	
@@ -187,8 +190,8 @@ public class TestImageCompressionAndDecompression
 
 		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
 
-		int[] uncompressedData = decompressDataInSlimmedPackedBytes(rawData.length,slimmedPackedBytes);
-
+		int[] uncompressedData = decompressDataInSlimmedPackedBytes(slimmedPackedBytes);
+		
 		if (logger.isTraceEnabled()) debugWriteToImage(uncompressedData, "./src/test_images/testBlackCompressionAndDecompression.png");
 		
 		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
@@ -209,8 +212,8 @@ public class TestImageCompressionAndDecompression
 
 		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
 
-		int[] uncompressedData = decompressDataInSlimmedPackedBytes(rawData.length,slimmedPackedBytes);
-
+		int[] uncompressedData = decompressDataInSlimmedPackedBytes(slimmedPackedBytes);
+		
 		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
 	}
 
@@ -229,10 +232,12 @@ public class TestImageCompressionAndDecompression
 
 		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
 
-		int[] uncompressedData = decompressDataInSlimmedPackedBytes(rawData.length,slimmedPackedBytes);
+		int[] uncompressedData = decompressDataInSlimmedPackedBytes(slimmedPackedBytes);
 
 		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
 	}
+
+
 
 	@Test
 	public void testPurpleRedCompressionAndDecompression() throws Exception
@@ -247,8 +252,8 @@ public class TestImageCompressionAndDecompression
 
 		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
 
-		int[] uncompressedData = decompressDataInSlimmedPackedBytes(rawData.length,slimmedPackedBytes);
-
+		int[] uncompressedData = decompressDataInSlimmedPackedBytes(slimmedPackedBytes);
+		
 		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
 	}
 
@@ -265,8 +270,8 @@ public class TestImageCompressionAndDecompression
 
 		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
 
-		int[] uncompressedData = decompressDataInSlimmedPackedBytes(rawData.length,slimmedPackedBytes);
-
+		int[] uncompressedData = decompressDataInSlimmedPackedBytes(slimmedPackedBytes);
+		
 		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
 	}
 
@@ -283,8 +288,8 @@ public class TestImageCompressionAndDecompression
 
 		byte[] slimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
 
-		int[] uncompressedData = decompressDataInSlimmedPackedBytes(rawData.length,slimmedPackedBytes);
-
+		int[] uncompressedData = decompressDataInSlimmedPackedBytes(slimmedPackedBytes);
+		
 		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
 	}
 	
@@ -303,7 +308,7 @@ public class TestImageCompressionAndDecompression
 
 		logger.trace("Blue with Box compressed bytes are "+Arrays.toString(slimmedPackedBytes));
 
-		int[] uncompressedData = decompressDataInSlimmedPackedBytes(rawData.length,slimmedPackedBytes);
+		int[] uncompressedData = decompressDataInSlimmedPackedBytes(slimmedPackedBytes);
 
 		verifyArrayMatchesStraightPattern(rawData, uncompressedData);
 	}
@@ -321,25 +326,20 @@ public class TestImageCompressionAndDecompression
 		File secondImage = new File("./src/test_images/800x600_blue_with_box.png");
 		int[] secondImageRawData = readInImagesRawData(secondImage);
 
-		CompressionFramePacket thisFrame = FrameCompressor.makeTestFramePacket(firstImageRawData.length);
 
-		int numBytes =  compressToPackedBytesArray(firstImageRawData, thisFrame);
+		int numBytes =  compressToPackedBytesArray(firstImageRawData);
 		logger.trace("First frame compressed bytes "+numBytes);
 		byte[] firstImageSlimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
 
-		numBytes = compressToPackedBytesArray(secondImageRawData, thisFrame);
+		numBytes = compressToPackedBytesArray(secondImageRawData);
 		logger.trace("Second frame compressed bytes "+numBytes);
 
 		byte [] secondImageSlimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
 		logger.trace("The last 500 bytes are "+last500BytesToString(secondImageSlimmedPackedBytes));
 
-		DecompressionFramePacket decompressionFrame = DefaultCodec.makeTestFramePacket(firstImageRawData.length);
+		int[] uncompressedFirstImageData = decompressDataInSlimmedPackedBytes(firstImageSlimmedPackedBytes);
 
-		decompressionFrame = decompressDataInSlimmedPackedBytes(decompressionFrame, firstImageSlimmedPackedBytes);
-		int[] uncompressedFirstImageData = decompressionFrame.getData();
-
-		decompressionFrame = decompressDataInSlimmedPackedBytes(decompressionFrame, secondImageSlimmedPackedBytes);
-		int[] uncompressedSecondImageData = decompressionFrame.getData();
+		int[] uncompressedSecondImageData =  decompressDataInSlimmedPackedBytes(secondImageSlimmedPackedBytes);
 
 		if (logger.isTraceEnabled()) debugWriteToImage(uncompressedSecondImageData, "./src/test_images/testBlueTwoFrames.png");
 		verifyArrayMatchesStraightPattern(firstImageRawData, uncompressedFirstImageData);
@@ -358,26 +358,19 @@ public class TestImageCompressionAndDecompression
 		File secondImage = new File("./src/test_images/full_screen_0009.png");
 		int[] secondImageRawData = readInImagesRawData(secondImage);
 
-		CompressionFramePacket thisFrame = FrameCompressor.makeTestFramePacket(firstImageRawData.length);
-
-		int numBytes =  compressToPackedBytesArray(firstImageRawData, thisFrame);
+		int numBytes =  compressToPackedBytesArray(firstImageRawData);
 		logger.trace("First frame compressed bytes "+numBytes);
 		byte[] firstImageSlimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
 		if (logger.isTraceEnabled()) logger.trace("The last 500 bytes of the compressed first frame are "+last500BytesToString(firstImageSlimmedPackedBytes));
 
-		numBytes = compressToPackedBytesArray(secondImageRawData, thisFrame);
+		numBytes = compressToPackedBytesArray(secondImageRawData);
 		logger.trace("Second frame compressed bytes "+numBytes);
 
 		byte [] secondImageSlimmedPackedBytes = slimDataInPackedBytesArray(numBytes);
 
+		int[] uncompressedFirstImageData = decompressDataInSlimmedPackedBytes(firstImageSlimmedPackedBytes);
 
-		DecompressionFramePacket decompressionFrame = DefaultCodec.makeTestFramePacket(firstImageRawData.length);
-
-		decompressionFrame = decompressDataInSlimmedPackedBytes(decompressionFrame, firstImageSlimmedPackedBytes);
-		int[] uncompressedFirstImageData = decompressionFrame.getData();
-
-		decompressionFrame = decompressDataInSlimmedPackedBytes(decompressionFrame, secondImageSlimmedPackedBytes);
-		int[] uncompressedSecondImageData = decompressionFrame.getData();
+		int[] uncompressedSecondImageData =  decompressDataInSlimmedPackedBytes(secondImageSlimmedPackedBytes);
 
 		if (logger.isTraceEnabled()) debugWriteToImage(uncompressedFirstImageData, "./src/test_images/testTwoLifelikeFrames.png");
 		verifyArrayMatchesStraightPattern(firstImageRawData, uncompressedFirstImageData);
@@ -420,31 +413,45 @@ public class TestImageCompressionAndDecompression
 		builder.append(']');
 		return builder.toString();
 	}
-	private void setUpForImageSize(Rectangle imageSize) 
+	private void setUpForImageSize(Rectangle imageSize) throws IOException 
 	{
 		this.imageSizeRectangle = imageSize;
 		CapFileManager manager = new HiddenCapFileManager();
 		compressorToTest = new FrameCompressor(manager, imageSize.width * imageSize.height);
+		
+		decompressorToTest = prepareDecompressorForImageSize(imageSize);
+		
+		
 		packedBytes = new byte[imageSize.width * imageSize.height*3];
 	}
 
-	private int[] decompressDataInSlimmedPackedBytes(int numBytesPerFrame, byte[] slimmedPackedBytes) 
+	private FrameDecompressorCodecStrategy prepareDecompressorForImageSize(Rectangle imageSize) throws IOException 
 	{
-		DecompressionFramePacket temporaryFrame = DefaultCodec.makeTestFramePacket(numBytesPerFrame);
+		FrameDecompressorCodecStrategy decompressor = new FrameDecompressor();
 
-		return decompressDataInSlimmedPackedBytes(temporaryFrame, slimmedPackedBytes).getData();
+		return decompressor;
 	}
 
-	private DecompressionFramePacket decompressDataInSlimmedPackedBytes(DecompressionFramePacket aFrame, byte[] slimmedPackedBytes) 
+
+	private int[] decompressDataInSlimmedPackedBytes(byte[] slimmedPackedBytes) throws IOException 
+	{		
+		
+		BufferedImage image = decompressImageFromSlimmedPackedBytes(slimmedPackedBytes);
+
+		return convertBufferedImageToIntArray(image);
+	}
+
+	private BufferedImage decompressImageFromSlimmedPackedBytes(byte[] slimmedPackedBytes) throws IOException 
 	{
-		DecompressionFramePacket updatedFrame = new DecompressionFramePacket(aFrame.getFrameSize(), aFrame);
+		DecompressionFramePacket updatedFrame = new DecompressionFramePacket(imageSizeRectangle);
 
 		updatedFrame.setEncodedData(slimmedPackedBytes);
 
-		updatedFrame.runLengthDecode();
+		BufferedImage image = decompressorToTest.decodeFramePacketToBufferedImage(updatedFrame);
 
-		return updatedFrame;
+		return image;
 	}
+
 
 	private void debugWriteToImage(int[] uncompressedData, String outputFile) throws IOException 
 	{
@@ -530,27 +537,29 @@ public class TestImageCompressionAndDecompression
 		return compressToPackedBytesArray(rawData);
 	}
 
-	private int compressToPackedBytesArray(int[] rawData) {
-		CompressionFramePacket tempFrame = FrameCompressor.makeTestFramePacket(rawData.length);
 
-		return compressToPackedBytesArray(rawData, tempFrame);
-	}
-
-	private int compressToPackedBytesArray(int[] rawData, CompressionFramePacket frameToUse) 
+	//returns number of bytes in this compressed bit
+	private int compressToPackedBytesArray(int[] rawData) 
 	{
-		frameToUse.updateFieldsForNextFrame(rawData, -1, false);
-		int numBytes = compressorToTest.compressDataUsingRunLengthEncoding(rawData, frameToUse, packedBytes, false);
+		int numBytes = compressorToTest.compressData(rawData, packedBytes, false);
 
 		return numBytes;
 	}
 
 
 	private int[] readInImagesRawData(File imageFile) throws IOException {
-		int[] rawData = new int[imageSizeRectangle.width * imageSizeRectangle.height];
-
+		
 		BufferedImage image = ImageIO.read(imageFile);
 
+		return convertBufferedImageToIntArray(image);
+	}
+
+
+	private int[] convertBufferedImageToIntArray(BufferedImage image) {
+		int[] rawData = new int[imageSizeRectangle.width * imageSizeRectangle.height];
+		
 		image.getRGB(0, 0, imageSizeRectangle.width, imageSizeRectangle.height, rawData, 0, imageSizeRectangle.width);
+		
 		return rawData;
 	}
 

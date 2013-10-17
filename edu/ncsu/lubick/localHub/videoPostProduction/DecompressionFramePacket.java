@@ -1,8 +1,7 @@
 package edu.ncsu.lubick.localHub.videoPostProduction;
 
+import java.awt.Rectangle;
 import java.util.Date;
-
-import org.apache.log4j.Logger;
 
 /*
  * Most of the this class is adapted from software that is under
@@ -34,32 +33,34 @@ import org.apache.log4j.Logger;
  */
 public class DecompressionFramePacket
 {
-	
-	private static Logger logger = Logger.getLogger(DecompressionFramePacket.class.getName());
-	
+
 	public static final int NO_CHANGES_THIS_FRAME = 0;
 	public static final int CHANGES_THIS_FRAME = 1;
 	public static final int REACHED_END = -1;
-	public static final int ALPHA = 0xFF000000;
-	
-	private static final int MAX_BLOCK_LENGTH = 126;
 
-	private static final byte STREAK_OF_SAME_AS_LAST_TIME_BLOCKS_CONSTANT = (byte) 0xFF;
-	
-	
-	private int[] previousData = new int[1];	//to avoid null pointers
 	private int result;
 	private Date frameTimeStamp;
-	private byte[] encodedData = new byte[1];
+	//Maybe deprecated
 	private int frameSize;
-	private int[] decodedData = new int[1];
+
+	int[] previousData = new int[1];	//to avoid null pointers
+	byte[] encodedData = new byte[1];
+	int[] decodedData = new int[1];
+	private Rectangle frameDimensions;
 
 	public int getFrameSize() {
 		return frameSize;
 	}
 
-	public DecompressionFramePacket(int expectedSize, DecompressionFramePacket previousFramePacket) {
-		this.frameSize = expectedSize;
+	public DecompressionFramePacket(Rectangle frameDimensions) {
+		this.frameSize = frameDimensions.width * frameDimensions.height;
+		this.frameDimensions = frameDimensions;
+		previousData = new int[frameSize];
+
+	}
+
+	public void setPreviousFramePacket(DecompressionFramePacket previousFramePacket)
+	{
 		if (previousFramePacket == null)
 		{
 			previousData = new int[frameSize];
@@ -69,8 +70,6 @@ public class DecompressionFramePacket
 			previousData = previousFramePacket.decodedData;
 		}
 	}
-
-
 
 	public int[] getData() {
 		return decodedData;
@@ -100,94 +99,8 @@ public class DecompressionFramePacket
 		this.encodedData = packed;
 	}
 
-	public void runLengthDecode() {
-		this.decodedData = new int[this.getFrameSize()];
 
-		int inCursor = 0;
-		int outCursor = 0;
 
-		int blockSize = 0;
-
-		int rgb = 0xFF000000;
-
-		while (inCursor < this.encodedData.length - 3 && outCursor < this.getFrameSize()) {
-			if (this.encodedData[inCursor] == STREAK_OF_SAME_AS_LAST_TIME_BLOCKS_CONSTANT) 
-			{
-				inCursor++;
-
-				int count = (this.encodedData[inCursor] & 0xFF);
-				inCursor++;
-
-				int size = count * MAX_BLOCK_LENGTH;
-				if (size > this.decodedData.length) {
-					size = this.decodedData.length;
-				}
-
-				for (int loop = 0; loop < (MAX_BLOCK_LENGTH * count); loop++) {
-					this.decodedData[outCursor] = this.previousData[outCursor];
-					outCursor++;
-					if (outCursor >= this.decodedData.length) {
-						break;
-					}
-				}
-
-			} 
-			else if (this.encodedData[inCursor] < 0) // data is uncompressed
-			{
-				blockSize = this.encodedData[inCursor] & 0x7F;
-				inCursor++;
-
-				for (int loop = 0; loop < blockSize; loop++) {
-					rgb = ((this.encodedData[inCursor] & 0xFF) << 16)
-							| ((this.encodedData[inCursor + 1] & 0xFF) << 8)
-							| (this.encodedData[inCursor + 2] & 0xFF) | ALPHA;
-					if (rgb == ALPHA) {
-						rgb = this.previousData[outCursor];
-					}
-					inCursor += 3;
-					this.decodedData[outCursor] = rgb;
-					outCursor++;
-					if (outCursor >= this.decodedData.length) {
-						break;
-					}
-				}
-			} 
-			else 
-			{
-				blockSize = this.encodedData[inCursor];
-				inCursor++;
-				rgb = ((this.encodedData[inCursor] & 0xFF) << 16)
-						| ((this.encodedData[inCursor + 1] & 0xFF) << 8)
-						| (this.encodedData[inCursor + 2] & 0xFF) | ALPHA;
-
-				boolean transparent = false;
-				if (rgb == ALPHA) {
-					transparent = true;
-				}
-				inCursor += 3;
-				for (int loop = 0; loop < blockSize && outCursor < getFrameSize(); loop++) {
-					if (transparent) {
-						this.decodedData[outCursor] = this.previousData[outCursor];
-					} else {
-						this.decodedData[outCursor] = rgb;
-					}
-					outCursor++;
-				}
-			}
-		}
-		
-		logger.debug(String.format("Ending inCursor: %d/%d and outCursor: %d/%d",inCursor,encodedData.length-1,outCursor,decodedData.length-1));
-		
-		//Many times, if we are on the last couple of bytes, we don't read the last 2 bytes that look something like
-		// [..., -1, 62]  and these are ignored because the loop stops if we are past the 3rd to last byte
-		// So, the best way to fix this is just assume if we haven't filled the expected size, copy all the stuff from the end
-		for(;outCursor<decodedData.length && outCursor<previousData.length;outCursor++)
-		{
-			this.decodedData[outCursor] = this.previousData[outCursor];
-		}
-		this.result = DecompressionFramePacket.CHANGES_THIS_FRAME;
-	}
-	
 	@Override
 	public String toString() {
 		return "FramePacket [frameSize=" + frameSize + ", result=" + result
@@ -195,6 +108,10 @@ public class DecompressionFramePacket
 				+ previousData.length + ", encodedDataLength="
 				+ encodedData.length + ", decodedDataLength="
 				+ decodedData.length + "]";
+	}
+
+	public Rectangle getFrameDimensions() {
+		return this.frameDimensions;
 	}
 
 }

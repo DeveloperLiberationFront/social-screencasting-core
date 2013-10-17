@@ -62,7 +62,7 @@ public class PostProductionVideoHandler
 
 	private Queue<OverloadFile> queueOfOverloadFiles = new LinkedList<>();
 	
-	private FrameDecompressorCodecStrategy decompressionCodec = new DefaultCodec();
+	private FrameDecompressor decompressor = new FrameDecompressor();
 	private ImageDiskWritingStrategy imageWriter = new ThreadedImageDiskWritingStrategy("./Scratch/", DELETE_IMAGES_AFTER_USE);
 	//private ImageDiskWritingStrategy imageWriter = new BlockingImageDiskWritingStrategy("./Scratch/", DELETE_IMAGES_AFTER_USE);
 
@@ -88,7 +88,7 @@ public class PostProductionVideoHandler
 			throw new IllegalArgumentException("The start time cannot be null");
 		}
 		this.capFileStartTime = startTime;
-		decompressionCodec.setFrameZeroTime(capFileStartTime);
+		decompressor.setFrameZeroTime(capFileStartTime);
 	}
 
 	public File extractVideoForToolUsage(ToolUsage specificToolUse)
@@ -109,7 +109,7 @@ public class PostProductionVideoHandler
 		File retVal = null;
 		try(FileInputStream inputStream = new FileInputStream(currentCapFile);) 
 		{
-			decompressionCodec.readInFileHeader(inputStream);
+			decompressor.readInFileHeader(inputStream);
 			fastFowardStreamToTime(inputStream, timeToLookFor);
 			
 			File newVideoFile = new File(makeFileNameForToolPlugin(specificToolUse.getPluginName(), specificToolUse.getToolName()));
@@ -132,8 +132,8 @@ public class PostProductionVideoHandler
 		
 		while (currTimeStamp.before(timeToLookFor))
 		{
-			decompressionCodec.readInFrameImage(inputStream);
-			currTimeStamp = decompressionCodec.getPreviousFrameTimeStamp();
+			decompressor.readInFrameImage(inputStream);
+			currTimeStamp = decompressor.getPreviousFrameTimeStamp();
 			
 		}
 	}
@@ -143,7 +143,7 @@ public class PostProductionVideoHandler
 		imageWriter.reset();
 		for(int i = 0;i<FRAME_RATE * (RUN_UP_TIME + TOOL_DEMO_TIME);i++)
 		{
-			BufferedImage tempImage = decompressionCodec.readInFrameImage(inputStream);
+			BufferedImage tempImage = decompressor.readInFrameImage(inputStream);
 			if (tempImage == null)
 			{
 				if (queueOfOverloadFiles.size() == 0)
@@ -248,7 +248,7 @@ public class PostProductionVideoHandler
 		oldInputStream.close();
 		OverloadFile nextFile = queueOfOverloadFiles.poll();
 		FileInputStream inputStream = new FileInputStream(nextFile.file);
-		decompressionCodec.readInFileHeader(inputStream);
+		decompressor.readInFileHeader(inputStream);
 		
 		setCurrentFileStartTime(nextFile.date);
 
