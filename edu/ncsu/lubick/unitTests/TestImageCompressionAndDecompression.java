@@ -419,13 +419,13 @@ public class TestImageCompressionAndDecompression
 		CapFileManager manager = new HiddenCapFileManager();
 		compressorToTest = new FrameCompressor(manager, imageSize.width * imageSize.height);
 		
-		decompressorToTest = prepareDecompressorForImageSize(imageSize);
+		decompressorToTest = prepareDecompressorForImageSize();
 		
 		
 		packedBytes = new byte[imageSize.width * imageSize.height*3];
 	}
 
-	private FrameDecompressorCodecStrategy prepareDecompressorForImageSize(Rectangle imageSize) throws IOException 
+	private FrameDecompressorCodecStrategy prepareDecompressorForImageSize() throws IOException 
 	{
 		FrameDecompressorCodecStrategy decompressor = new FrameDecompressor();
 

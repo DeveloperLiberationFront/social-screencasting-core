@@ -110,18 +110,18 @@ public class PostProductionVideoHandler
 		try(FileInputStream inputStream = new FileInputStream(currentCapFile);) 
 		{
 			decompressor.readInFileHeader(inputStream);
-			fastFowardStreamToTime(inputStream, timeToLookFor);
+			fastFowardStreamToTime(inputStream, timeToLookFor); //throws VideoEncodingException if there was a problem prior to the important bits
 			
 			File newVideoFile = new File(makeFileNameForToolPlugin(specificToolUse.getPluginName(), specificToolUse.getToolName()));
 			retVal = extractDemoVideoToFile(inputStream, newVideoFile);
 
-		} catch (IOException e) {
+		} catch (IOException | VideoEncodingException e) {
 			logger.error("There was a problem extracting the video",e);
-		}
+		} 
 		return retVal;
 	}
 
-	private void fastFowardStreamToTime(FileInputStream inputStream, Date timeToLookFor) throws IOException 
+	private void fastFowardStreamToTime(FileInputStream inputStream, Date timeToLookFor) throws IOException, VideoEncodingException 
 	{
 		if (timeToLookFor.equals(capFileStartTime))	//no fast forwarding required
 		{
@@ -132,7 +132,7 @@ public class PostProductionVideoHandler
 		
 		while (currTimeStamp.before(timeToLookFor))
 		{
-			decompressor.readInFrameImage(inputStream);
+			decompressor.readInFrameImage(inputStream); //throws VideoEncodingException if there was a problem
 			currTimeStamp = decompressor.getPreviousFrameTimeStamp();
 			
 		}
@@ -143,7 +143,13 @@ public class PostProductionVideoHandler
 		imageWriter.reset();
 		for(int i = 0;i<FRAME_RATE * (RUN_UP_TIME + TOOL_DEMO_TIME);i++)
 		{
-			BufferedImage tempImage = decompressor.readInFrameImage(inputStream);
+			BufferedImage tempImage;
+			try {
+				tempImage = decompressor.readInFrameImage(inputStream);
+			} catch (VideoEncodingException e) {
+				logger.error("There was a problem making the video frames.  Attempting to make a video from what I've got",e);
+				break;
+			}
 			if (tempImage == null)
 			{
 				if (queueOfOverloadFiles.size() == 0)

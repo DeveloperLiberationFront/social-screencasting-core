@@ -127,5 +127,9 @@ public class TestVideoPostProduction {
 		
 	}
 	
+	@Test
+	public void testBug8() { //https://bitbucket.org/klubick/screencasting-module/issue/8/extracting-some-tools-causes-a
+		
+	}
 
 }

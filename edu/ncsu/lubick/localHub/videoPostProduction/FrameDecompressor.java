@@ -54,7 +54,7 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		this.fdrs = fdrs;
 	}
 	
-	public BufferedImage readInFrameImage(InputStream inputStream) throws IOException 
+	public BufferedImage readInFrameImage(InputStream inputStream) throws IOException, VideoEncodingException 
 	{
 		logger.trace("Starting to read in frame");
 		DecompressionFramePacket framePacket = unpackNextFrame(inputStream);
@@ -69,7 +69,7 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		
 	}
 
-	private DecompressionFramePacket unpackNextFrame(InputStream inputStream) throws IOException 
+	private DecompressionFramePacket unpackNextFrame(InputStream inputStream) throws IOException, VideoEncodingException 
 	{
 	
 		DecompressionFramePacket frame = new DecompressionFramePacket(currentFrameRect);
@@ -103,6 +103,11 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 			logger.error("Problem unpacking ",e);
 			frame.setResult(DecompressionFramePacket.NO_CHANGES_THIS_FRAME);
 			return frame;
+		}
+		catch (RuntimeException re)
+		{
+			logger.error("Probably a malformed screencapture packet", re);
+			throw new VideoEncodingException(re);
 		}
 	
 		return frame;
@@ -306,6 +311,11 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 	
 		int compressedFrameSize = readCompressedFrameSize(inputStream);
 	
+		if (compressedFrameSize <1)
+		{
+			logger.error("Frame size was "+compressedFrameSize);
+		}
+		
 		byte[] compressedData = new byte[compressedFrameSize];
 		int readCursor = 0;
 		int sizeRead = 0;

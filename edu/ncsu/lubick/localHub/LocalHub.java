@@ -286,6 +286,8 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 
 		List<FileDateStructs> filesToload = databaseManager.getVideoFilesLinkedToTimePeriod(lastToolUsage.getTimeStamp(),lastToolUsage.getDuration());
 
+		
+		logger.debug("Loading files "+filesToload);
 		if (filesToload == null || filesToload.size() == 0)
 		{
 			return null;
@@ -368,8 +370,11 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		public int loadFileResponse(LoadedFileEvent e) {
 			if (e.getFileName().endsWith(PostProductionVideoHandler.EXPECTED_FILE_EXTENSION))
 			{
-				logger.info("Found ScreenCapFile "+e.getFileName());
-				addVideoFileToDatabase(e.getFullFileName());
+				if (!e.wasInitialReadIn())
+				{
+					logger.info("Found ScreenCapFile "+e.getFileName());
+					addVideoFileToDatabase(e.getFullFileName());
+				}
 				return LoadedFileListener.DONT_PARSE;
 			}
 	
