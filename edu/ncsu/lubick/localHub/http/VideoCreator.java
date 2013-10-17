@@ -2,6 +2,8 @@ package edu.ncsu.lubick.localHub.http;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -101,14 +103,22 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		if (expectedVideoFile.exists())
 		{
 			logger.debug("It exists!");
-			response.getWriter().println("<span>This video file has been generated as "+expectedVideoFile.getAbsolutePath()+"</span>");
-			
+			//response.getWriter().println("<span>This video file has been generated as "+expectedVideoFile.getAbsolutePath()+"</span>");
+			Map<Object, Object> dataModel = new HashMap<Object, Object>();
+			dataModel.put("path", expectedVideoFile.getAbsolutePath());
+			logger.debug("template model: "+dataModel);
+			processTemplate(response, dataModel, "generatedVideo.html.piece");
 		}
 		else
 		{
 			logger.debug("It does not");
-			response.getWriter().println("<p>This video file does not exist yet </p>");
-			response.getWriter().println("<div class='requestGeneration' data-tool-name='"+toolName+"' data-plugin-name='"+pluginName+"'> Click here to generate it</div>");
+			//response.getWriter().println("<p>This video file does not exist yet </p>");
+			//response.getWriter().println("<div class='requestGeneration' data-tool-name='"+toolName+"' data-plugin-name='"+pluginName+"'> Click here to generate it</div>");
+			
+			Map<Object, Object> dataModel = new HashMap<Object, Object>();
+			dataModel.put("toolName", toolName);
+			dataModel.put("pluginName",pluginName);
+			processTemplate(response, dataModel, "videoDoesNotExist.html.piece");
 		}
 		baseRequest.setHandled(true);
 		
