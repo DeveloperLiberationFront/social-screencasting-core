@@ -339,18 +339,13 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 
 	private int readCompressedFrameSize(InputStream inputStream) throws IOException, ReachedEndOfCapFileException 
 	{
-		int readBuffer;
-		readBuffer = getNextByte(inputStream);
-		int zSize = readBuffer;
-		zSize = zSize << 8;
-		readBuffer = getNextByte(inputStream);
-		zSize += readBuffer;
-		zSize = zSize << 8;
-		readBuffer = getNextByte(inputStream);
-		zSize += readBuffer;
-		zSize = zSize << 8;
-		readBuffer = getNextByte(inputStream);
-		zSize += readBuffer;
+		int zSize = 0;
+		for (int i = 0 ;i< 4;i++)		//4 bytes to an int
+		{
+			zSize = zSize << 8;	//done here to effectively have the bit shifting only done 3 times
+			int readBuffer = getNextByte(inputStream);
+			zSize += readBuffer;
+		}
 	
 		logger.trace("Zipped Frame size:"+zSize);
 		return zSize;
@@ -361,7 +356,7 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		readBuffer = inputStream.read();
 		if (readBuffer == -1)
 		{
-			throw new ReachedEndOfCapFileException();
+			throw new ReachedEndOfCapFileException("Normal End of File (I think)");
 		}
 		return readBuffer;
 	}
