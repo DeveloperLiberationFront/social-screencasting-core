@@ -8,6 +8,8 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -22,9 +24,7 @@ public class AnimationHelper extends JPanel implements KeyListener
 	private BufferedImage unActivatedKeyboard = null;
 	private BufferedImage activatedKeyboard = null;
 	
-	
-	
-	private AnimatedKeyPress currentRectangle = AnimatedKeyPressFactory.getOffScreen();
+	private Map<Integer, AnimatedKeyPress> activatedAnimations = new HashMap<>();
 	
 	
 	public AnimationHelper() throws IOException {
@@ -39,7 +39,7 @@ public class AnimationHelper extends JPanel implements KeyListener
 	public static void main(String[] args) throws IOException {
 		JFrame outerFrame = new JFrame("test");
 		outerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		outerFrame.setBounds(0, 0, 540, 190);
+		outerFrame.setBounds(0, 0, 560, 200);
 		
 		AnimationHelper innerPanel = new AnimationHelper();
 		innerPanel.setSize(800,600);
@@ -58,14 +58,18 @@ public class AnimationHelper extends JPanel implements KeyListener
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		g.drawImage(unActivatedKeyboard, 0, 0, null);
-		currentRectangle.drawAnimatedSegment(g, activatedKeyboard);
+		for(AnimatedKeyPress animations:activatedAnimations.values())
+		{
+			animations.drawAnimatedSegment(g, activatedKeyboard);
+		}
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e) {
 		System.out.println("Pressed: "+e);
 
-		this.currentRectangle = AnimatedKeyPressFactory.makeAnimatedKeyPress(e);
+		AnimatedKeyPress animation = AnimatedKeyPressFactory.makeAnimatedKeyPress(e);
+		activatedAnimations.put(e.getKeyCode(), animation);
 		repaint();
 		
 	}
@@ -73,7 +77,7 @@ public class AnimationHelper extends JPanel implements KeyListener
 	@Override
 	public void keyReleased(KeyEvent e) {
 		System.out.println("Released: "+e);
-		currentRectangle = AnimatedKeyPressFactory.getOffScreen();
+		activatedAnimations.remove(e.getKeyCode());
 		repaint();
 	}
 
