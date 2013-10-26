@@ -11,6 +11,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -28,7 +29,7 @@ public class AnimationHelper extends JPanel implements MouseMotionListener, KeyL
 	private final double widthOfSquare = 27.6;
 	private final Point Q_START = new Point(47,67);
 	private final int Q_HEIGHT = 24;
-	private final Point A_START = new Point(55,91);
+	private final Point A_START = new Point(56,91);
 	private final int A_HEIGHT = 23;
 	private final Point Z_START = new Point(65,114);
 	private final int Z_HEIGHT = 23;
@@ -88,6 +89,7 @@ public class AnimationHelper extends JPanel implements MouseMotionListener, KeyL
 	public void keyPressed(KeyEvent e) {
 		System.out.println("Pressed: "+e);
 		Point rowCol = getRowColForKeyPress(e);
+		System.out.println(rowCol);
 		Rectangle adjustedRectToShow = createRecForRowCol(rowCol);
 		if (adjustedRectToShow == null)
 		{
@@ -111,6 +113,20 @@ public class AnimationHelper extends JPanel implements MouseMotionListener, KeyL
 			
 			return new Rectangle(offSetX, Q_START.y, roundedWidthOfSquare, Q_HEIGHT);
 		}
+		if (rowCol.x == 1)
+		{
+			int roundedWidthOfSquare = (int)Math.round(widthOfSquare);
+			int offSetX = (int)Math.round(rowCol.y * widthOfSquare + A_START.x);
+			
+			return new Rectangle(offSetX, A_START.y, roundedWidthOfSquare, A_HEIGHT);
+		}
+		if (rowCol.x == 2)
+		{
+			int roundedWidthOfSquare = (int)Math.round(widthOfSquare);
+			int offSetX = (int)Math.round(rowCol.y * widthOfSquare + Z_START.x);
+			
+			return new Rectangle(offSetX, Z_START.y, roundedWidthOfSquare, Z_HEIGHT);
+		}
 		return null;
 	}
 
@@ -122,17 +138,52 @@ public class AnimationHelper extends JPanel implements MouseMotionListener, KeyL
 	}
 	
 	
-	private char[] firstRow = new char[]{'q','w','e','r','t','y','u','i','o','p'};
+	private char[] firstRow = new char[]{'q','w','e','r','t','y','u','i','o','p','[',']'};
+	private char[] secondRow = new char[]{'a','s','d','f','g','h','j','k','l',';','\''};
+	private char[] thirdRow = new char[]{'z','x','c','v','b','n','m',',','.','/'};
 	
 
 	private int getRowForKeyPress(KeyEvent e) {
-		return 0;
+		if (arrayContains(firstRow, e.getKeyChar()))
+		{
+			return 0;
+		}
+		if (arrayContains(secondRow, e.getKeyChar()))
+		{
+			return 1;
+		}
+		if (arrayContains(thirdRow, e.getKeyChar()))
+		{
+			return 2;
+		}
+		return -1;
+		
+	}
+	
+	private boolean arrayContains(char[] array, char searchTerm)
+	{
+		for(Character c: array)
+		{
+			if (c.equals(searchTerm))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	private int getColForKeyPress(KeyEvent e) {
 		for (int i = 0;i<firstRow.length;i++)
 		{
-			if (firstRow[i] == e.getKeyChar())
+			if (i<firstRow.length && firstRow[i] == e.getKeyChar())
+			{
+				return i;
+			}
+			if (i<secondRow.length && secondRow[i] == e.getKeyChar())
+			{
+				return i;
+			}
+			if (i<thirdRow.length && thirdRow[i] == e.getKeyChar())
 			{
 				return i;
 			}
