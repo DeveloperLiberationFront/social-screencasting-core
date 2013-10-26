@@ -3,6 +3,8 @@ package edu.ncsu.lubick.localHub.videoPostProduction.animation;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
@@ -14,7 +16,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class AnimationHelper extends JPanel implements MouseMotionListener
+public class AnimationHelper extends JPanel implements MouseMotionListener, KeyListener
 {
 	/**
 	 * 
@@ -23,9 +25,16 @@ public class AnimationHelper extends JPanel implements MouseMotionListener
 	private BufferedImage unActivatedKeyboard = null;
 	private BufferedImage activatedKeyboard = null;
 	
-
+	private final double widthOfSquare = 27.6;
+	private final Point Q_START = new Point(47,67);
+	private final int Q_HEIGHT = 24;
+	private final Point A_START = new Point(55,91);
+	private final int A_HEIGHT = 23;
+	private final Point Z_START = new Point(65,114);
+	private final int Z_HEIGHT = 23;
 	
-	Rectangle currentRectangle = new Rectangle(0, 0, 25, 25);
+	private final Rectangle offScreen = new Rectangle(-25, -25, 25, 25);
+	private Rectangle currentRectangle = new Rectangle(-25, -25, 25, 25);
 	
 	public AnimationHelper() throws IOException {
 		File unactivatedKeyboardPath = new File("bin/imageAssets/QWERTY_keyboard_small.png");
@@ -44,7 +53,8 @@ public class AnimationHelper extends JPanel implements MouseMotionListener
 		AnimationHelper innerPanel = new AnimationHelper();
 		innerPanel.setSize(800,600);
 		outerFrame.add(innerPanel);
-		innerPanel.addMouseMotionListener(innerPanel);
+		//innerPanel.addMouseMotionListener(innerPanel);
+		outerFrame.addKeyListener(innerPanel);
 		outerFrame.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -72,6 +82,75 @@ public class AnimationHelper extends JPanel implements MouseMotionListener
 		currentRectangle.x = e.getX();
 		currentRectangle.y = e.getY();
 		repaint();
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		System.out.println("Pressed: "+e);
+		Point rowCol = getRowColForKeyPress(e);
+		Rectangle adjustedRectToShow = createRecForRowCol(rowCol);
+		if (adjustedRectToShow == null)
+		{
+			return;
+		}
+		this.currentRectangle = adjustedRectToShow;
+		repaint();
+		
+	}
+
+	private Rectangle createRecForRowCol(Point rowCol) 
+	{
+		if (rowCol.y == -1)
+		{
+			return null;
+		}
+		if (rowCol.x == 0)
+		{
+			int roundedWidthOfSquare = (int)Math.round(widthOfSquare);
+			int offSetX = (int)Math.round(rowCol.y * widthOfSquare + Q_START.x);
+			
+			return new Rectangle(offSetX, Q_START.y, roundedWidthOfSquare, Q_HEIGHT);
+		}
+		return null;
+	}
+
+	private Point getRowColForKeyPress(KeyEvent e) {
+		int row = getRowForKeyPress(e);
+		int col = getColForKeyPress(e);
+		
+		return new Point(row, col);
+	}
+	
+	
+	private char[] firstRow = new char[]{'q','w','e','r','t','y','u','i','o','p'};
+	
+
+	private int getRowForKeyPress(KeyEvent e) {
+		return 0;
+	}
+	
+	private int getColForKeyPress(KeyEvent e) {
+		for (int i = 0;i<firstRow.length;i++)
+		{
+			if (firstRow[i] == e.getKeyChar())
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
+
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		System.out.println("Released: "+e);
+		currentRectangle = offScreen;
+		repaint();
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		
 	}
 	
 	
