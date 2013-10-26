@@ -1,14 +1,15 @@
 package edu.ncsu.lubick.localHub.videoPostProduction.animation;
 
+import static java.awt.event.KeyEvent.*;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 
 public class AnimatedKeyPressFactory 
 {
-	private static char[] firstRow = new char[]{'q','w','e','r','t','y','u','i','o','p','[',']'};
-	private static char[] secondRow = new char[]{'a','s','d','f','g','h','j','k','l',';','\''};
-	private static char[] thirdRow = new char[]{'z','x','c','v','b','n','m',',','.','/'};
+	private static int[] qwertyRow = new int[]{VK_Q,VK_W,VK_E,VK_R,VK_T,VK_Y,VK_U,VK_I,VK_O,VK_P,VK_OPEN_BRACKET,VK_CLOSE_BRACKET};
+	private static int[] asdfRow = new int[]{VK_A,VK_S,VK_D,VK_F,VK_G,VK_H,VK_J,VK_K,VK_L,VK_SEMICOLON,VK_QUOTE};
+	private static int[] zxcvRow = new int[]{VK_Z,VK_X,VK_C,VK_V,VK_B,VK_N,VK_M,VK_COMMA,VK_PERIOD,VK_SLASH};
 	
 	
 	private static AnimatedKeyPress offscreen = new AnimatedKeyPress() {
@@ -22,18 +23,20 @@ public class AnimatedKeyPressFactory
 	
 	public static AnimatedKeyPress makeAnimatedKeyPress(KeyEvent ke)
 	{
-		if (getIndexInArray(firstRow, ke.getKeyChar()) != -1)
+		int keyCode = ke.getKeyCode();
+		if (getIndexInArray(qwertyRow, keyCode) != -1)
 		{
-			return new QRowLetterKey(getIndexInArray(firstRow, ke.getKeyChar()));
+			return new QRowLetterKey(getIndexInArray(qwertyRow, keyCode));
 		}
-		if (getIndexInArray(secondRow, ke.getKeyChar())!= -1)
+		if (getIndexInArray(asdfRow, keyCode)!= -1)
 		{
-			return new ARowLetterKey(getIndexInArray(secondRow, ke.getKeyChar()));
+			return new ARowLetterKey(getIndexInArray(asdfRow, keyCode));
 		}
-		if (getIndexInArray(thirdRow, ke.getKeyChar())!= -1)
+		if (getIndexInArray(zxcvRow, keyCode)!= -1)
 		{
-			return new ZRowLetterKey(getIndexInArray(thirdRow, ke.getKeyChar()));
+			return new ZRowLetterKey(getIndexInArray(zxcvRow, keyCode));
 		}
+		
 		
 		return getOffScreen();
 	}
@@ -43,7 +46,7 @@ public class AnimatedKeyPressFactory
 		return offscreen;
 	}
 	
-	private static int getIndexInArray(char[] array, char searchTerm)
+	private static int getIndexInArray(int[] array, int searchTerm)
 	{
 		for(int i = 0;i<array.length;i++)
 		{
