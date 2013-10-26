@@ -14,7 +14,7 @@ public class AnimatedKeyPressFactory
 	private static AnimatedKeyPress offscreen = new AnimatedKeyPress() {
 		
 		@Override
-		public void drawAnimatedSegment(Graphics g, BufferedImage img) {}
+		public void drawAnimatedSegment(Graphics g, BufferedImage img) {}	//do nothing
 	};
 
 	
@@ -38,7 +38,7 @@ public class AnimatedKeyPressFactory
 		return getOffScreen();
 	}
 	
-	public static  AnimatedKeyPress getOffScreen()
+	public static AnimatedKeyPress getOffScreen()
 	{
 		return offscreen;
 	}
