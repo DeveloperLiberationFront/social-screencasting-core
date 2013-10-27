@@ -8,10 +8,15 @@ public abstract class OversizedAnimatedKey implements AnimatedKeyPress {
 
 	protected abstract Rectangle getRegion();
 	
+	protected void copyFromImageToGraphics(Graphics g, BufferedImage img, int firstX, int firstY, int secondX, int secondY)
+	{
+		g.drawImage(img, firstX, firstY, secondX, secondY, firstX, firstY, secondX, secondY, null);
+	}
+	
 	@Override
 	public void drawAnimatedSegment(Graphics g, BufferedImage img) {
-		g.drawImage(img, getRegion().x, getRegion().y, getRegion().x + getRegion().width,  getRegion().y + getRegion().height,
-				getRegion().x, getRegion().y, getRegion().x + getRegion().width,  getRegion().y + getRegion().height, null);
+		copyFromImageToGraphics(g, img, getRegion().x, getRegion().y, 
+				getRegion().x + getRegion().width, getRegion().y + getRegion().height);
 	}
 
 }
@@ -70,8 +75,8 @@ class EnterLetterKey extends OversizedAnimatedKey
 	public void drawAnimatedSegment(Graphics g, BufferedImage img) {
 		super.drawAnimatedSegment(g, img);	//draws first rectangle
 		
-		g.drawImage(img, secondRectangle.x, secondRectangle.y, secondRectangle.x + secondRectangle.width,  secondRectangle.y + secondRectangle.height,
-				secondRectangle.x, secondRectangle.y, secondRectangle.x + secondRectangle.width,  secondRectangle.y + secondRectangle.height, null);
+		//draw second rectangle
+		copyFromImageToGraphics(g, img, secondRectangle.x, secondRectangle.y, secondRectangle.x + secondRectangle.width,  secondRectangle.y + secondRectangle.height);
 	}
 	
 	
