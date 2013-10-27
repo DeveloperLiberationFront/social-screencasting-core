@@ -1,9 +1,8 @@
 package edu.ncsu.lubick.localHub.videoPostProduction.animation;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import static java.awt.event.KeyEvent.*;
+
+import java.util.ArrayList;
 
 public class ShortcutsToKeyCodesConverter 
 {
@@ -22,8 +21,6 @@ public class ShortcutsToKeyCodesConverter
 		
 		String[] individualKeys = splitOutCommands(uppercaseString);
 		
-		System.out.println(Arrays.toString(individualKeys));
-		
 		int[] retVal = new int[individualKeys.length];
 		for(int i = 0;i<individualKeys.length;i++)
 		{
@@ -33,6 +30,8 @@ public class ShortcutsToKeyCodesConverter
 		return retVal;
 	}
 
+	//Can't do a simple split because of things like CTRL+,
+	//So, we will go one by one through each slot, checking to see if the command is the first thing
 	private String[] splitOutCommands(String commands) 
 	{
 		ArrayList<String> buildUpCommands = new ArrayList<>();
@@ -41,7 +40,6 @@ public class ShortcutsToKeyCodesConverter
 		
 		String[] retVal = new String[buildUpCommands.size()];
 		return buildUpCommands.toArray(retVal);
-		//return uppercaseString.split(KEY_SEPERATORS);
 	}
 
 	private void recursiveSplitOfCommands(ArrayList<String> buildUpCommands, String commands) {
@@ -51,16 +49,14 @@ public class ShortcutsToKeyCodesConverter
 			return;
 		}
 		String[] things = commands.split(KEY_SEPERATORS,2);
-		System.out.println(Arrays.toString(things));
+
 		if (things.length == 0)
 		{
-			System.out.println("option 1");
 			return;
 		}
 		buildUpCommands.add(things[0].trim());
 		if (things.length == 1)
 		{
-			System.out.println("option 2");
 			return; //nothing left to parse
 		}
 		recursiveSplitOfCommands(buildUpCommands, things[1].trim());
@@ -116,16 +112,6 @@ public class ShortcutsToKeyCodesConverter
 	private int handleLetter(char c) 
 	{
 		return VK_A+c - 'A';
-//		switch (c) {
-//		case '.':
-//			return VK_PERIOD;
-//		case ',':
-//			return VK_COMMA;
-//
-//		default:
-//			
-//		}
-		
 	}
 
 	private int handleNumber(int numberForKeyCode) {

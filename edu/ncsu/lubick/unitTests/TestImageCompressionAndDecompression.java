@@ -471,6 +471,10 @@ public class TestImageCompressionAndDecompression
 	{
 		BufferedImage bufferedImage = new BufferedImage(imageSizeRectangle.width, imageSizeRectangle.height, BufferedImage.TYPE_INT_RGB);
 		bufferedImage.setRGB(0, 0, imageSizeRectangle.width, imageSizeRectangle.height, uncompressedData, 0, imageSizeRectangle.width);
+		debugWriteImageToFile(bufferedImage, outputFile);
+	}
+
+	public static void debugWriteImageToFile(BufferedImage bufferedImage, String outputFile) throws IOException {
 		ImageIO.write(bufferedImage, "png", new File(outputFile));
 	}
 

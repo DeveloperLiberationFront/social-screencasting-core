@@ -1,10 +1,10 @@
 package edu.ncsu.lubick.unitTests;
 
+import static edu.ncsu.lubick.unitTests.TestImageCompressionAndDecompression.*;
 import static java.awt.event.KeyEvent.*;
 import static org.junit.Assert.*;
 
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -65,19 +65,6 @@ public class TestKeypressAnimationGeneration {
 	}
 
 	@Test
-	public void testKeyboardCreation() throws Exception 
-	{
-		KeypressAnimationMaker akm = new AnimatedKeyboardMaker();
-		ShortcutsToKeyCodesConverter converter = new ShortcutsToKeyCodesConverter();
-
-		int[] keycodes = converter.convert("Alt+Shift+X, T");
-
-		BufferedImage img = akm.makeAnimationForKeyCodes(keycodes);
-		assertNotNull(img);
-
-	}
-	
-	@Test
 	public void testNumberCommand() throws Exception 
 	{
 		ShortcutsToKeyCodesConverter converter = new ShortcutsToKeyCodesConverter();
@@ -107,11 +94,27 @@ public class TestKeypressAnimationGeneration {
 
 		int[] results = converter.convert("Ctrl+,");	//navigate previous
 
-		System.err.println(Arrays.toString(results));
 		assertEquals(2, results.length);
 		assertEquals(VK_CONTROL, results[0]);
 		assertEquals(VK_COMMA, results[1]);
 
+	}
+
+	@Test
+	public void testKeyboardCreation() throws Exception 
+	{
+		KeypressAnimationMaker akm = new AnimatedKeyboardMaker();
+		ShortcutsToKeyCodesConverter converter = new ShortcutsToKeyCodesConverter();
+	
+		int[] keycodes = converter.convert("Alt+Shift+X, T");
+	
+		BufferedImage img = akm.makeAnimationForKeyCodes(keycodes);
+		assertNotNull(img);
+		
+		debugWriteImageToFile(img, "thing.png");
+		
+		fail("Not implemek");
+	
 	}
 
 }

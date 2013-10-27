@@ -1,6 +1,7 @@
 package edu.ncsu.lubick.localHub.videoPostProduction.animation;
 
 import static java.awt.event.KeyEvent.*;
+
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -23,10 +24,7 @@ public class AnimatedKeyPressFactory
 	
 	private AnimatedKeyPressFactory() {}
 	
-	public static AnimatedKeyPress makeAnimatedKeyPress(KeyEvent ke)
-	{
-		int keyCode = ke.getKeyCode();
-		
+	public static AnimatedKeyPress makeAnimatedKeyPress(int keyCode) {
 		if (getIndexInArray(qwertyRow, keyCode) != -1)
 		{
 			return new QRowLetterKey(getIndexInArray(qwertyRow, keyCode));
@@ -71,6 +69,12 @@ public class AnimatedKeyPressFactory
 		return getOffScreen();
 	}
 	
+	public static AnimatedKeyPress makeAnimatedKeyPress(KeyEvent ke)
+	{
+		int keyCode = ke.getKeyCode();
+		return makeAnimatedKeyPress(keyCode);	
+	}
+	
 	public static AnimatedKeyPress getOffScreen()
 	{
 		return offscreen;
@@ -87,5 +91,7 @@ public class AnimatedKeyPressFactory
 		}
 		return -1;
 	}
+
+
 		
 }

@@ -5,5 +5,5 @@ import java.awt.image.BufferedImage;
 
 public interface AnimatedKeyPress {
 	
-	public void drawAnimatedSegment(Graphics g, BufferedImage img);
+	public void drawAnimatedSegment(Graphics g, BufferedImage activatedImage);
 }

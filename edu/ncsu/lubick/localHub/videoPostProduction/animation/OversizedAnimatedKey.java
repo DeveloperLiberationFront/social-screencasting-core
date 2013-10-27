@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.localHub.videoPostProduction.animation;
 
+import static edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedKeyboardMaker.*;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -7,11 +8,6 @@ import java.awt.image.BufferedImage;
 public abstract class OversizedAnimatedKey implements AnimatedKeyPress {
 
 	protected abstract Rectangle getRegion();
-	
-	protected void copyFromImageToGraphics(Graphics g, BufferedImage img, int firstX, int firstY, int secondX, int secondY)
-	{
-		g.drawImage(img, firstX, firstY, secondX, secondY, firstX, firstY, secondX, secondY, null);
-	}
 	
 	@Override
 	public void drawAnimatedSegment(Graphics g, BufferedImage img) {
@@ -76,7 +72,7 @@ class EnterLetterKey extends OversizedAnimatedKey
 		super.drawAnimatedSegment(g, img);	//draws first rectangle
 		
 		//draw second rectangle
-		copyFromImageToGraphics(g, img, secondRectangle.x, secondRectangle.y, secondRectangle.x + secondRectangle.width,  secondRectangle.y + secondRectangle.height);
+		AnimatedKeyboardMaker.copyFromImageToGraphics(g, img, secondRectangle.x, secondRectangle.y, secondRectangle.x + secondRectangle.width,  secondRectangle.y + secondRectangle.height);
 	}
 	
 	
