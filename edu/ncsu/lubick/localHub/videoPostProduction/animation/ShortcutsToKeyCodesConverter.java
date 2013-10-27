@@ -45,6 +45,11 @@ public class ShortcutsToKeyCodesConverter
 	}
 
 	private void recursiveSplitOfCommands(ArrayList<String> buildUpCommands, String commands) {
+		if (commands.matches(KEY_SEPERATORS))
+		{
+			buildUpCommands.add(commands);
+			return;
+		}
 		String[] things = commands.split(KEY_SEPERATORS,2);
 		System.out.println(Arrays.toString(things));
 		if (things.length == 0)
@@ -111,6 +116,16 @@ public class ShortcutsToKeyCodesConverter
 	private int handleLetter(char c) 
 	{
 		return VK_A+c - 'A';
+//		switch (c) {
+//		case '.':
+//			return VK_PERIOD;
+//		case ',':
+//			return VK_COMMA;
+//
+//		default:
+//			
+//		}
+		
 	}
 
 	private int handleNumber(int numberForKeyCode) {

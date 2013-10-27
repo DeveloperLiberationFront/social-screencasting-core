@@ -76,6 +76,30 @@ public class TestKeypressAnimationGeneration {
 		assertNotNull(img);
 
 	}
+	
+	@Test
+	public void testNumberCommand() throws Exception 
+	{
+		ShortcutsToKeyCodesConverter converter = new ShortcutsToKeyCodesConverter();
+
+		int[] results = converter.convert("Ctrl+7");
+
+		assertEquals(2, results.length);
+		assertEquals(VK_CONTROL, results[0]);
+		assertEquals(VK_7, results[1]);
+	}
+	
+	@Test
+	public void testPunctuationCommand() throws Exception 
+	{
+		ShortcutsToKeyCodesConverter converter = new ShortcutsToKeyCodesConverter();
+
+		int[] results = converter.convert("Ctrl+/");
+
+		assertEquals(2, results.length);
+		assertEquals(VK_CONTROL, results[0]);
+		assertEquals(VK_SLASH, results[1]);
+	}
 
 	@Test
 	public void testTrickyPatterns() throws Exception {
@@ -86,7 +110,7 @@ public class TestKeypressAnimationGeneration {
 		System.err.println(Arrays.toString(results));
 		assertEquals(2, results.length);
 		assertEquals(VK_CONTROL, results[0]);
-		assertEquals(VK_COMMA, results[0]);
+		assertEquals(VK_COMMA, results[1]);
 
 	}
 
