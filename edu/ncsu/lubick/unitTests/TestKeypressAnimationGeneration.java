@@ -4,6 +4,7 @@ import static java.awt.event.KeyEvent.*;
 import static org.junit.Assert.*;
 
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -82,7 +83,7 @@ public class TestKeypressAnimationGeneration {
 
 		int[] results = converter.convert("Ctrl+,");	//navigate previous
 
-		System.err.println(results);
+		System.err.println(Arrays.toString(results));
 		assertEquals(2, results.length);
 		assertEquals(VK_CONTROL, results[0]);
 		assertEquals(VK_COMMA, results[0]);
