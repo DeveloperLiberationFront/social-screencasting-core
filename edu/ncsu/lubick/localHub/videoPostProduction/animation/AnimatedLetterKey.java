@@ -4,6 +4,11 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 
+/**
+ * Represents a block of same-sized keys, like letters (but also used for numbers)
+ * @author KevinLubick
+ *
+ */
 public abstract class AnimatedLetterKey implements AnimatedKeyPress
 {
 
@@ -97,6 +102,29 @@ class ZRowLetterKey extends AnimatedLetterKey
 	@Override
 	protected int getRowHeight() {
 		return Z_HEIGHT;
+	}
+
+}
+
+class NumberRowLetterKey extends AnimatedLetterKey 
+{
+	final Point BACKTICK_START = new Point(3,43);
+	final int BACKTICK_HEIGHT = 24;
+	
+
+	public NumberRowLetterKey(int column) {
+		super(column);
+	}
+
+
+	@Override
+	protected Point getBasePoint() {
+		return BACKTICK_START;
+	}
+
+	@Override
+	protected int getRowHeight() {
+		return BACKTICK_HEIGHT;
 	}
 
 }
