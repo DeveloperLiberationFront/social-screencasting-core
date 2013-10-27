@@ -42,6 +42,10 @@ public class FunctionRowLetterKey implements AnimatedKeyPress
 		{
 			offset += 14;
 		}
+		if (this.column >= 13)
+		{
+			offset += 28;
+		}
 		
 		return offset;
 	}

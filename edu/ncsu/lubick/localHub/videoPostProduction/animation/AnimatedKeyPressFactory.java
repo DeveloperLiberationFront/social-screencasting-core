@@ -26,6 +26,7 @@ public class AnimatedKeyPressFactory
 	public static AnimatedKeyPress makeAnimatedKeyPress(KeyEvent ke)
 	{
 		int keyCode = ke.getKeyCode();
+		
 		if (getIndexInArray(qwertyRow, keyCode) != -1)
 		{
 			return new QRowLetterKey(getIndexInArray(qwertyRow, keyCode));
@@ -46,6 +47,23 @@ public class AnimatedKeyPressFactory
 		{
 			return new FunctionRowLetterKey(getIndexInArray(functionRow, keyCode));
 		}
+		if (keyCode == VK_TAB)	//java doesn't seem to register this, so change it to VK_T for debugging
+		{
+			return new TabLetterKey();
+		}
+		if (keyCode == VK_SHIFT)	
+		{
+			return new ShiftLetterKey();
+		}
+		if (keyCode == VK_CONTROL)	
+		{
+			return new ControlLetterKey();
+		}
+		if (keyCode == VK_ALT)	
+		{
+			return new AltLetterKey();
+		}
+		
 		return getOffScreen();
 	}
 	
