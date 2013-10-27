@@ -63,6 +63,10 @@ public class AnimatedKeyPressFactory
 		{
 			return new AltLetterKey();
 		}
+		if (keyCode == VK_ENTER)	
+		{
+			return new EnterLetterKey();
+		}
 		
 		return getOffScreen();
 	}

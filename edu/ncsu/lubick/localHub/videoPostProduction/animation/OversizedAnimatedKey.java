@@ -55,3 +55,25 @@ class AltLetterKey extends OversizedAnimatedKey
 	}
 	
 }
+class EnterLetterKey extends OversizedAnimatedKey 
+{
+	//draws with two rectangle regions
+	private Rectangle firstRectangle = new Rectangle(358, 91, 59, 24);
+	private Rectangle secondRectangle = new Rectangle(379, 67, 38, 26);
+	
+	@Override
+	protected Rectangle getRegion() {
+		return firstRectangle;
+	}
+	
+	@Override
+	public void drawAnimatedSegment(Graphics g, BufferedImage img) {
+		super.drawAnimatedSegment(g, img);	//draws first rectangle
+		
+		g.drawImage(img, secondRectangle.x, secondRectangle.y, secondRectangle.x + secondRectangle.width,  secondRectangle.y + secondRectangle.height,
+				secondRectangle.x, secondRectangle.y, secondRectangle.x + secondRectangle.width,  secondRectangle.y + secondRectangle.height, null);
+	}
+	
+	
+	
+}
