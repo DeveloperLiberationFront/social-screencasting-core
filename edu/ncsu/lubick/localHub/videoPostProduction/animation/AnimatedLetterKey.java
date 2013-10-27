@@ -29,8 +29,6 @@ public abstract class AnimatedLetterKey implements AnimatedKeyPress
 		int roundedWidthOfSquare = (int)Math.round(widthOfSquare);
 		int offSetX = (int)Math.round(column * widthOfSquare + getBasePoint().x);
 		
-		//return new Rectangle(offSetX, Q_START.y, roundedWidthOfSquare, Q_HEIGHT);
-		
 		g.drawImage(img, offSetX, getBasePoint().y, offSetX + roundedWidthOfSquare,  getBasePoint().y + getRowHeight(),
 				offSetX, getBasePoint().y, offSetX + roundedWidthOfSquare,  getBasePoint().y + getRowHeight(), null);
 	}

@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 
 public class AnimatedKeyPressFactory 
 {
+	private static int[] functionRow = new int[]{VK_ESCAPE,VK_F1, VK_F2, VK_F3, VK_F4, VK_F5, VK_F6, VK_F7, VK_F8, VK_F9,VK_F10, VK_F11,VK_F12, VK_PRINTSCREEN, VK_SCROLL_LOCK, VK_PAUSE};
 	private static int[] numberRow = new int[]{VK_BACK_QUOTE, VK_1, VK_2, VK_3, VK_4,VK_5,VK_6,VK_7,VK_8,VK_9,VK_0,VK_MINUS,VK_EQUALS,VK_BACK_SLASH,VK_BACK_SPACE};
 	private static int[] qwertyRow = new int[]{VK_Q,VK_W,VK_E,VK_R,VK_T,VK_Y,VK_U,VK_I,VK_O,VK_P,VK_OPEN_BRACKET,VK_CLOSE_BRACKET};
 	private static int[] asdfRow = new int[]{VK_A,VK_S,VK_D,VK_F,VK_G,VK_H,VK_J,VK_K,VK_L,VK_SEMICOLON,VK_QUOTE};
@@ -41,7 +42,10 @@ public class AnimatedKeyPressFactory
 		{
 			return new NumberRowLetterKey(getIndexInArray(numberRow, keyCode));
 		}
-		
+		if (getIndexInArray(functionRow, keyCode) != -1)
+		{
+			return new FunctionRowLetterKey(getIndexInArray(functionRow, keyCode));
+		}
 		return getOffScreen();
 	}
 	
