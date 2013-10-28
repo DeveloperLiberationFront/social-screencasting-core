@@ -168,7 +168,7 @@ public class TestImageCompressionAndDecompression
 
 		File imageFile = new File("./src/test_images/800x600_blue.png");
 
-		int[] rawData = readInImagesRawData(imageFile);		//do this in two steps to have this to compare to later
+		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile);		//do this in two steps to have this to compare to later
 
 		int numBytes =  compressToPackedBytesArray(rawData);
 
@@ -188,7 +188,7 @@ public class TestImageCompressionAndDecompression
 
 		File imageFile = new File("./src/test_images/800x600_black.png");
 
-		int[] rawData = readInImagesRawData(imageFile);		//do this in two steps to have this to compare to later
+		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile);		//do this in two steps to have this to compare to later
 
 		int numBytes =  compressToPackedBytesArray(rawData);
 
@@ -210,7 +210,7 @@ public class TestImageCompressionAndDecompression
 
 		File imageFile = new File("./src/test_images/800x600_darkRed.png");
 
-		int[] rawData = readInImagesRawData(imageFile);		//do this in two steps to have this to compare to later
+		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile);		//do this in two steps to have this to compare to later
 
 		int numBytes =  compressToPackedBytesArray(rawData);
 
@@ -230,7 +230,7 @@ public class TestImageCompressionAndDecompression
 
 		File imageFile = new File("./src/test_images/800x600_purple.png");
 
-		int[] rawData = readInImagesRawData(imageFile);		//do this in two steps to have this to compare to later
+		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile);		//do this in two steps to have this to compare to later
 
 		int numBytes =  compressToPackedBytesArray(rawData);
 
@@ -252,7 +252,7 @@ public class TestImageCompressionAndDecompression
 
 		File imageFile = new File("./src/test_images/800x600_purple_red.png");
 
-		int[] rawData = readInImagesRawData(imageFile);		//do this in two steps to have this to compare to later
+		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile);		//do this in two steps to have this to compare to later
 
 		int numBytes =  compressToPackedBytesArray(rawData);
 
@@ -270,7 +270,7 @@ public class TestImageCompressionAndDecompression
 
 		File imageFile = new File("./src/test_images/800x600_purple_blue.png");
 
-		int[] rawData = readInImagesRawData(imageFile);		//do this in two steps to have this to compare to later
+		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile);		//do this in two steps to have this to compare to later
 
 		int numBytes =  compressToPackedBytesArray(rawData);
 
@@ -288,7 +288,7 @@ public class TestImageCompressionAndDecompression
 
 		File imageFile = new File("./src/test_images/800x600_yellow_with_black_pattern.png");
 
-		int[] rawData = readInImagesRawData(imageFile);		//do this in two steps to have this to compare to later
+		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile);		//do this in two steps to have this to compare to later
 
 		int numBytes =  compressToPackedBytesArray(rawData);
 
@@ -306,7 +306,7 @@ public class TestImageCompressionAndDecompression
 
 		File imageFile = new File("./src/test_images/800x600_blue_with_box.png");
 
-		int[] rawData = readInImagesRawData(imageFile);		//do this in two steps to have this to compare to later
+		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile);		//do this in two steps to have this to compare to later
 
 		int numBytes =  compressToPackedBytesArray(rawData);
 
@@ -327,10 +327,10 @@ public class TestImageCompressionAndDecompression
 		setUpForImageSize(TestImage800x600);
 
 		File firstImage = new File("./src/test_images/800x600_blue.png");
-		int[] firstImageRawData = readInImagesRawData(firstImage);		//do this in two steps to have this to compare to later
+		int[] firstImageRawData = readInImagesRawDataUsingImplicitSize(firstImage);		//do this in two steps to have this to compare to later
 
 		File secondImage = new File("./src/test_images/800x600_blue_with_box.png");
-		int[] secondImageRawData = readInImagesRawData(secondImage);
+		int[] secondImageRawData = readInImagesRawDataUsingImplicitSize(secondImage);
 
 
 		int firstNumBytes =  compressToPackedBytesArray(firstImageRawData);
@@ -363,11 +363,11 @@ public class TestImageCompressionAndDecompression
 		setUpForImageSize(TestImage1600x900); //Set up for the larger frame size here:
 
 		File firstImage = new File("./src/test_images/full_screen_0008.png");
-		int[] firstImageRawData = readInImagesRawData(firstImage);	
+		int[] firstImageRawData = readInImagesRawDataUsingImplicitSize(firstImage);	
 		if (logger.isTraceEnabled()) logger.trace("The last 500 bytes of the uncompressed first frame are "+last500IntsToString(firstImageRawData));
 
 		File secondImage = new File("./src/test_images/full_screen_0009.png");
-		int[] secondImageRawData = readInImagesRawData(secondImage);
+		int[] secondImageRawData = readInImagesRawDataUsingImplicitSize(secondImage);
 
 		int firstNumBytes =  compressToPackedBytesArray(firstImageRawData);
 		logger.trace("First frame compressed bytes "+firstNumBytes);
@@ -550,7 +550,7 @@ public class TestImageCompressionAndDecompression
 	}
 
 	private int readInImageAndCompressToPackedBytesArray(File imageFile) throws IOException {
-		int[] rawData = readInImagesRawData(imageFile);
+		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile);
 
 		return compressToPackedBytesArray(rawData);
 	}
@@ -572,13 +572,29 @@ public class TestImageCompressionAndDecompression
 	}
 
 
-	private int[] readInImagesRawData(File imageFile) throws IOException {
+	private int[] readInImagesRawDataUsingImplicitSize(File imageFile) throws IOException {
 		
 		BufferedImage image = ImageIO.read(imageFile);
 
 		return convertBufferedImageToIntArray(image);
 	}
+	
+	private static int[] readInImagesRawData(File imageFile) throws IOException {
+		
+		BufferedImage image = ImageIO.read(imageFile);
+		
+		Rectangle imageSize = new Rectangle(0,0, image.getWidth(), image.getHeight());
 
+		return convertBufferedImageToIntArray(image, imageSize);
+	}
+
+	private static int[] convertBufferedImageToIntArray(BufferedImage image, Rectangle imageSizeRectangle) {
+		int[] rawData = new int[imageSizeRectangle.width * imageSizeRectangle.height];
+		
+		image.getRGB(0, 0, imageSizeRectangle.width, imageSizeRectangle.height, rawData, 0, imageSizeRectangle.width);
+		
+		return rawData;
+	}
 
 	private int[] convertBufferedImageToIntArray(BufferedImage image) {
 		int[] rawData = new int[imageSizeRectangle.width * imageSizeRectangle.height];
@@ -586,6 +602,32 @@ public class TestImageCompressionAndDecompression
 		image.getRGB(0, 0, imageSizeRectangle.width, imageSizeRectangle.height, rawData, 0, imageSizeRectangle.width);
 		
 		return rawData;
+	}
+	
+	public static boolean doTwoImagesMatch(String fileOne, String fileTwo) throws IOException
+	{
+		File firstImage = new File(fileOne);
+		int[] firstImageRawData = readInImagesRawData(firstImage);	
+		File secondImage = new File(fileTwo);
+		int[] secondImageRawData = readInImagesRawData(secondImage);	
+		return verifyArrayMatchesExactly(firstImageRawData, secondImageRawData);
+
+	}
+	
+
+	private static boolean verifyArrayMatchesExactly(int[] firstImageRawData, int[] secondImageRawData) {
+		if (firstImageRawData.length != secondImageRawData.length)
+		{
+			return false;
+		}
+		for (int i = 0;i<firstImageRawData.length;i++)
+		{
+			if (firstImageRawData[i] != secondImageRawData[i])
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 

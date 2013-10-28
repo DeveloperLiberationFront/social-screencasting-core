@@ -111,10 +111,10 @@ public class TestKeypressAnimationGeneration {
 		BufferedImage img = akm.makeAnimationForKeyCodes(keycodes);
 		assertNotNull(img);
 		
-		debugWriteImageToFile(img, "thing.png");
+		debugWriteImageToFile(img, "test.png");
 		
-		fail("Not implemek");
-	
+		assertTrue(doTwoImagesMatch("./src/test_images/AltShiftXT.png", "test.png"));
+		
 	}
 
 }

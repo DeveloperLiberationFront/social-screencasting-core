@@ -14,7 +14,13 @@ public class AnimatedKeyboardMaker implements KeypressAnimationMaker {
 	private static BufferedImage activatedKeyboard;
 	
 	
-	public AnimatedKeyboardMaker() throws IOException {
+	public AnimatedKeyboardMaker() throws IOException 
+	{
+		conditionallyLoadImages();
+	}
+
+	private static void conditionallyLoadImages() throws IOException 
+	{
 		if (unActivatedKeyboard == null)
 		{
 			File unactivatedKeyboardPath = new File("bin/imageAssets/QWERTY_keyboard_small.png");
