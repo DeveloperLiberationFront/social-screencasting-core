@@ -245,32 +245,39 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		logger.debug("parsing file "+fileToParse);
 		String fileContents = FileUtilities.readAllFromFile(fileToParse);
 		ToolStream ts = ToolStream.generateFromJSON(fileContents);
-
-		//Expecting name convention
-		//PLUGIN_NAME.ENCODEDEDATE.log
-		String fileName = fileToParse.getName();
-		String pluginName = fileName.substring(0, fileName.indexOf('.'));
-
-		Date associatedDate;
-		try {
-			associatedDate = extractStartTime(fileName, this.dateInMinutesToNumber);
-		} 
-		catch (ImproperlyEncodedDateException e) {
-			logger.error("Problem parsing time info from file" + fileToParse + "  Skipping...", e);
-			return;
-		}
-
-		ts.setTimeStamp(associatedDate);
-		ts.setAssociatedPlugin(pluginName);
-
-		ParsedFileEvent event = new ParsedFileEvent(fileContents, ts, pluginName, associatedDate, fileToParse);
-
-		for(ParsedFileListener parsedFileListener : parsedFileListeners)
+		
+		if (ts == null)
 		{
-			parsedFileListener.parsedFile(event);
+			logger.info("malformed tool stream, deleting");
 		}
+		else
+		{
+			//Expecting name convention
+			//PLUGIN_NAME.ENCODEDEDATE.log
+			String fileName = fileToParse.getName();
+			String pluginName = fileName.substring(0, fileName.indexOf('.'));
 
-		databaseManager.writeToolStreamToDatabase(ts);
+			Date associatedDate;
+			try {
+				associatedDate = extractStartTime(fileName, this.dateInMinutesToNumber);
+			} 
+			catch (ImproperlyEncodedDateException e) {
+				logger.error("Problem parsing time info from file" + fileToParse + "  Skipping...", e);
+				return;
+			}
+
+			ts.setTimeStamp(associatedDate);
+			ts.setAssociatedPlugin(pluginName);
+
+			ParsedFileEvent event = new ParsedFileEvent(fileContents, ts, pluginName, associatedDate, fileToParse);
+
+			for(ParsedFileListener parsedFileListener : parsedFileListeners)
+			{
+				parsedFileListener.parsedFile(event);
+			}
+
+			databaseManager.writeToolStreamToDatabase(ts);
+		}
 
 		if (!fileToParse.delete())
 		{

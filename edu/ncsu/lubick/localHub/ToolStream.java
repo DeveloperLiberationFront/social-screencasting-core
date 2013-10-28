@@ -48,8 +48,8 @@ public class ToolStream {
 				tu = ToolUsage.buildFromJSONObject(jobj);
 				
 			} catch (JSONException e) {
-				logger.error("Malformed JSON.  Returning null", e);
-				return null;
+				logger.error("Malformed JSON.  Skipping", e);
+				continue;
 			}
 			
 			ts.listOfToolUsages.add(tu);
