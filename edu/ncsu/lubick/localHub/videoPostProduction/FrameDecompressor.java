@@ -81,6 +81,7 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		{
 			return null;
 		}
+		logger.trace("Read in timestamp "+timeStamp);
 	
 		frame.setFrameTimeStamp(timeStamp);
 	

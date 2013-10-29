@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
 
 public interface WebQueryInterface {
 
@@ -11,6 +12,6 @@ public interface WebQueryInterface {
 
 	List<String> getNamesOfAllPlugins();
 
-	File extractVideoForLastUsageOfTool(String pluginName, String toolName);
+	File extractVideoForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException;
 
 }

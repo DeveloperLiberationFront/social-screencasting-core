@@ -6,8 +6,10 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -24,10 +26,13 @@ import com.wet.wired.jsr.recorder.compression.FrameCompressorCodecStrategy;
 import com.wet.wired.jsr.recorder.compression.FrameCompressorSavingStrategy;
 import com.wet.wired.jsr.recorder.compression.FrameDataPack;
 
+import edu.ncsu.lubick.BasicCapFileManager;
 import edu.ncsu.lubick.ScreenRecordingModule;
+import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
 import edu.ncsu.lubick.localHub.videoPostProduction.DecompressionFramePacket;
 import edu.ncsu.lubick.localHub.videoPostProduction.FrameDecompressor;
 import edu.ncsu.lubick.localHub.videoPostProduction.FrameDecompressorCodecStrategy;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
 
 
 public class TestImageCompressionAndDecompression
@@ -390,9 +395,55 @@ public class TestImageCompressionAndDecompression
 		verifyArrayMatchesStraightPattern(secondImageRawData, uncompressedSecondImageData);
 	}
 	
+	@Test
+	public void test10FrameSequence() throws Exception 
+	{
+		File testCapFile = new File("testCapfile.cap");
+		BasicCapFileManager testCapFileManager = new BasicCapFileManager(testCapFile);
+		testCapFileManager.setAndWriteFrameWidth(1600);
+		testCapFileManager.setAndWriteFrameHeight(900);
+		
+		
+		setUpForImageSizeUsingCapManager(TestImage1600x900, testCapFileManager); //Set up for the larger frame size here and use a cap manager so we can check the output
+		List<File> testImages = load10TestImages();
+		
+		for(File f: testImages)
+		{
+			BufferedImage image = ImageIO.read(f);
+			int[] rawData = convertBufferedImageToIntArray(image);
+			FrameDataPack pack = makeFrameDataPack(rawData);
+			((FrameCompressor)compressorToTest).packFrame(pack);
+		}
+
+		File testSequenceFolder = new File("./Scratch/");
+		UtilitiesForTesting.clearOutDirectory("./Scratch/");
+		PostProductionVideoHandler.debugWriteOutAllImagesInCapFile(testCapFile, testSequenceFolder);
+		
+		File[] createdFiles = testSequenceFolder.listFiles();
+		//because listFiles() returns things out of order, we must sort
+		Arrays.sort(createdFiles);
+		assertEquals(testImages.size(), createdFiles.length);
+		for(int i = 0;i < createdFiles.length; i++)
+		{
+			File fileOne = testImages.get(i);
+			File fileTwo = createdFiles[i];
+			assertTrue(fileOne + " != "+fileTwo,doTwoImagesMatch(fileOne, fileTwo));
+		}
+		
+	}
 	
-
-
+	private List<File> load10TestImages() throws IOException 
+	{
+		List<File> retVal = new ArrayList<>();
+		for(int i = 1;i<=10;i++)
+		{
+			String imageName = String.format("./src/test_images/sequence (%d).png", i);
+			File imageFile = new File(imageName);
+			assertTrue(imageFile.exists());
+			retVal.add(imageFile);
+		}
+		return retVal;
+	}
 
 	//=======================================================================================
 	//============================HELPERS===================================================
@@ -430,6 +481,19 @@ public class TestImageCompressionAndDecompression
 	{
 		this.imageSizeRectangle = imageSize;
 		CapFileManager manager = new HiddenCapFileManager();
+		compressorToTest = new FrameCompressor(manager, imageSize.width * imageSize.height);
+		
+		decompressorToTest = prepareDecompressorForImageSize();
+		
+		compressionPacket = new CompressionFramePacket(imageSize.width * imageSize.height);
+		decompressionPacket = new DecompressionFramePacket(imageSizeRectangle);
+		
+		packedBytes = new byte[imageSize.width * imageSize.height*3];
+	}
+	
+	private void setUpForImageSizeUsingCapManager(Rectangle imageSize, CapFileManager manager) throws IOException 
+	{
+		this.imageSizeRectangle = imageSize;
 		compressorToTest = new FrameCompressor(manager, imageSize.width * imageSize.height);
 		
 		decompressorToTest = prepareDecompressorForImageSize();
@@ -560,7 +624,7 @@ public class TestImageCompressionAndDecompression
 	private int compressToPackedBytesArray(int[] rawData) 
 	{
 		
-		FrameDataPack dataPack = new FrameDataPack(rawData, new Date().getTime());
+		FrameDataPack dataPack = makeFrameDataPack(rawData);
 		
 		compressionPacket.updateFieldsForNextFrame(dataPack);
 		compressionPacket.dataToWriteBuffer = packedBytes;		//using this for "spying" reasons instead of compressionPacket.resizeInternalBytesIfNeeded();
@@ -569,6 +633,11 @@ public class TestImageCompressionAndDecompression
 		int numBytes = compressorToTest.compressData(compressionPacket);
 
 		return numBytes;
+	}
+
+	private FrameDataPack makeFrameDataPack(int[] rawData) {
+		FrameDataPack dataPack = new FrameDataPack(rawData, new Date().getTime());
+		return dataPack;
 	}
 
 
@@ -606,10 +675,14 @@ public class TestImageCompressionAndDecompression
 	
 	public static boolean doTwoImagesMatch(String fileOne, String fileTwo) throws IOException
 	{
-		File firstImage = new File(fileOne);
-		int[] firstImageRawData = readInImagesRawData(firstImage);	
-		File secondImage = new File(fileTwo);
-		int[] secondImageRawData = readInImagesRawData(secondImage);	
+		return doTwoImagesMatch(new File(fileOne), new File(fileTwo));
+	}
+	
+	public static boolean doTwoImagesMatch(File fileOne, File fileTwo) throws IOException
+	{
+		int[] firstImageRawData = readInImagesRawData(fileOne);	
+
+		int[] secondImageRawData = readInImagesRawData(fileTwo);	
 		return verifyArrayMatchesExactly(firstImageRawData, secondImageRawData);
 
 	}
@@ -646,10 +719,10 @@ public class TestImageCompressionAndDecompression
 		public void setAndWriteFrameHeight(int height) throws IOException {}
 
 		@Override
-		public void startWritingFrame(boolean isFullFrame) throws IOException {}
+		public void notifyStartWritingFrame(boolean isFullFrame) throws IOException {}
 
 		@Override
-		public void endWritingFrame() {}
+		public void notifyEndWritingFrame() {}
 
 		@Override
 		public void write(int i) throws IOException {}

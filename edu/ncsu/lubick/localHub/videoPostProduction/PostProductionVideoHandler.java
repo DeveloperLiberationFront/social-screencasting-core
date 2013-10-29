@@ -3,6 +3,7 @@ package edu.ncsu.lubick.localHub.videoPostProduction;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -52,7 +53,7 @@ public class PostProductionVideoHandler
 	
 	private static final int RUN_UP_TIME = 5;
 	
-	private static final int TOOL_DEMO_TIME = 15;
+	//private static final int TOOL_DEMO_TIME = 15;
 
 	private File currentCapFile;
 
@@ -64,6 +65,8 @@ public class PostProductionVideoHandler
 	
 	private FrameDecompressor decompressor = new FrameDecompressor();
 	private ImageDiskWritingStrategy imageWriter = new ThreadedImageDiskWritingStrategy("./Scratch/", DELETE_IMAGES_AFTER_USE);
+
+	private double toolDemoInSeconds;
 	//private ImageDiskWritingStrategy imageWriter = new BlockingImageDiskWritingStrategy("./Scratch/", DELETE_IMAGES_AFTER_USE);
 
 	public void loadFile(File capFile) {
@@ -79,6 +82,37 @@ public class PostProductionVideoHandler
 		}
 		this.currentCapFile = capFile;
 
+	}
+	
+	public static void debugWriteOutAllImagesInCapFile(File capFile, File outputDirectory)
+	{
+		PostProductionVideoHandler thisHandler = new PostProductionVideoHandler();
+		thisHandler.setCurrentFileStartTime(new Date());
+		thisHandler.loadFile(capFile);
+		if (!outputDirectory.mkdirs() && !outputDirectory.exists())
+		{
+			throw new RuntimeException("could not make output directory for debugWriteOutAllImagesInCapFile");
+		}
+		//set the output writer to be where we want
+		thisHandler.imageWriter = new ThreadedImageDiskWritingStrategy(outputDirectory.getPath(), false);
+		//write out all the images
+		try(FileInputStream inputStream = new FileInputStream(thisHandler.currentCapFile);) 
+		{
+			thisHandler.decompressor.readInFileHeader(inputStream);
+			
+			thisHandler.imageWriter.reset();
+			
+			thisHandler.extractAllImagesInStream(inputStream);
+			
+			thisHandler.imageWriter.waitUntilDoneWriting();
+		} 
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} 
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	public void setCurrentFileStartTime(Date startTime) {
@@ -100,7 +134,7 @@ public class PostProductionVideoHandler
 		
 		Date timeToLookFor = findStartingTime(specificToolUse);
 		
-			
+		this.toolDemoInSeconds = specificToolUse.getDuration()/1000.0;
 		File createdVideoFileToReturn = null;
 		try(FileInputStream inputStream = new FileInputStream(currentCapFile);) 
 		{
@@ -162,7 +196,7 @@ public class PostProductionVideoHandler
 	{
 		imageWriter.reset();
 		
-		extractAllImagesToDisk(inputStream);
+		extractImagesForTimePeriodToDisk(inputStream);
 		
 		imageWriter.waitUntilDoneWriting();
 		
@@ -178,8 +212,8 @@ public class PostProductionVideoHandler
 		return newVideoFile;
 	}
 
-	private void extractAllImagesToDisk(InputStream inputStream) throws IOException {
-		for(int i = 0;i<FRAME_RATE * (RUN_UP_TIME + TOOL_DEMO_TIME);i++)
+	private void extractImagesForTimePeriodToDisk(InputStream inputStream) throws IOException {
+		for(int i = 0;i<FRAME_RATE * (RUN_UP_TIME + toolDemoInSeconds);i++)
 		{
 			BufferedImage tempImage;
 			try {
@@ -198,6 +232,26 @@ public class PostProductionVideoHandler
 				//call this image a mulligan and go to the top of the loop.
 				i--;
 				continue;
+			}
+			imageWriter.writeImageToDisk(tempImage);
+		}
+	}
+	
+	private void extractAllImagesInStream(InputStream inputStream) throws IOException {
+		while(true)
+		{
+			BufferedImage tempImage = null;
+			try {
+				tempImage = decompressor.readInFrameImage(inputStream);
+			} 
+			catch (VideoEncodingException e) {
+				logger.error("There was a problem making the video frames. Stopping extraction...",e);
+				break;
+			} 
+			catch (ReachedEndOfCapFileException e) 
+			{
+				logger.info("reached the end of the cap file");
+				break;
 			}
 			imageWriter.writeImageToDisk(tempImage);
 		}
@@ -255,7 +309,7 @@ public class PostProductionVideoHandler
 			logger.info("Got a null toolname, recovering with empty string");
 			toolName = "";
 		}
-		return "Scratch\\renderedVideos\\"+pluginName+createNumberForVideoFile(toolName)+".mkv"; 
+		return "renderedVideos\\"+pluginName+createNumberForVideoFile(toolName)+".mkv"; 
 	}
 
 	private static int createNumberForVideoFile(String toolName) {

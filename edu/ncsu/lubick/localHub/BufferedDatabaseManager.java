@@ -136,8 +136,12 @@ public class BufferedDatabaseManager
 	}
 
 
-	public List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int duration) 
+	private List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int duration) 
 	{
+		if (duration > 120)
+		{
+			logger.info("WARNING: Duration of Screencast longer than 2 minutes.  Are you sure that you converted milliseconds to seconds?");
+		}
 		waitForThreadPool();
 		List<FileDateStructs> retVal = null;
 		try {
@@ -158,6 +162,7 @@ public class BufferedDatabaseManager
 	
 	public List<FileDateStructs> getVideoFilesLinkedToTimePeriod(ToolUsage tu) 
 	{
+		//convert milliseconds to seconds, as that is what the database has durations for videos stored in
 		int durationInSecondsRoundedUp = (int) Math.ceil(tu.getDuration()/1000.0);
 		return getVideoFilesLinkedToTimePeriod(tu.getTimeStamp(), durationInSecondsRoundedUp);
 	}

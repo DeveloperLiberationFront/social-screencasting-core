@@ -15,6 +15,7 @@ import org.eclipse.jetty.server.Request;
 
 import edu.ncsu.lubick.localHub.WebQueryInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
+import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
 
 public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Handler {
 
@@ -80,12 +81,19 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 			return;
 		}
 		
-		File madeVideo = this.databaseLink.extractVideoForLastUsageOfTool(pluginName, toolName);
-		if (madeVideo == null)
-		{
+		File madeVideo;
+		try {
+			madeVideo = this.databaseLink.extractVideoForLastUsageOfTool(pluginName, toolName);
+		} catch (VideoEncodingException e) {
+			logger.fatal("Error caught when video making requested: ",e);
 			response.getWriter().println("<span>Internal Video Creation Error. </span>");
+			response.getWriter().println("<div>");
+			response.getWriter().print(e.getLocalizedMessage());
+			response.getWriter().println("</div>");
+			baseRequest.setHandled(true);
 			return;
 		}
+
 		response.getWriter().println("<span>This video file has been generated as "+madeVideo.getAbsolutePath()+" </span>");
 		baseRequest.setHandled(true);
 	}

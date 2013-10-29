@@ -18,6 +18,7 @@ import edu.ncsu.lubick.localHub.database.SQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.http.HTTPServer;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
+import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
 
 public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQueryInterface, ParsedFileListener {
 
@@ -286,18 +287,19 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	}
 
 	@Override
-	public File extractVideoForLastUsageOfTool(String pluginName, String toolName) 
+	public File extractVideoForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException 
 	{
 		ToolUsage lastToolUsage = databaseManager.getLastInstanceOfToolUsage(pluginName,toolName);
 		videoPostProductionHandler = new PostProductionVideoHandler();
 
-		List<FileDateStructs> filesToload = databaseManager.getVideoFilesLinkedToTimePeriod(lastToolUsage.getTimeStamp(),lastToolUsage.getDuration());
+		List<FileDateStructs> filesToload = databaseManager.getVideoFilesLinkedToTimePeriod(lastToolUsage);
 
 		
 		logger.debug("Loading files "+filesToload);
 		if (filesToload == null || filesToload.size() == 0)
 		{
-			return null;
+			logger.error("There were no video files that match the tool usage");
+			throw new VideoEncodingException("There were no video files that match the tool usage");
 		}
 		videoPostProductionHandler.loadFile(filesToload.get(0).file);
 		videoPostProductionHandler.setCurrentFileStartTime(filesToload.get(0).startTime);
@@ -307,7 +309,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 			videoPostProductionHandler.enqueueOverLoadFile(filesToload.get(i).file,filesToload.get(i).startTime);
 		}
 
-		return videoPostProductionHandler.extractVideoForToolUsage(lastToolUsage);
+		return videoPostProductionHandler.extractVideoForToolUsageThrowingException(lastToolUsage);
 	}
 
 
@@ -447,7 +449,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		}
 	
 		@Override
-		public File extractVideoForLastUsageOfTool(String pluginName, String toolName) {
+		public File extractVideoForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException {
 			return hubToDebug.extractVideoForLastUsageOfTool(pluginName,toolName);
 		}
 
