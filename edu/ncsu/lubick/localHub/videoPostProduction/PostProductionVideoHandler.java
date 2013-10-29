@@ -46,7 +46,7 @@ public class PostProductionVideoHandler
 
 	public static final String EXPECTED_FILE_EXTENSION = ".cap";
 
-	public static final boolean DELETE_IMAGES_AFTER_USE = true;
+	public static final boolean DELETE_IMAGES_AFTER_USE = false;
 
 	private static final int FRAME_RATE = 5;
 	
@@ -92,27 +92,23 @@ public class PostProductionVideoHandler
 	}
 	
 	public File extractVideoForToolUsageThrowingException(ToolUsage specificToolUse) throws VideoEncodingException {
-		if (this.currentCapFile== null || this.capFileStartTime == null)
+		if (this.currentCapFile == null || this.capFileStartTime == null)
 		{
 			logger.error("PostProductionVideo object needed to have a file to load and a start time");
 			return null;
 		}
 		
-		Date timeToLookFor = new Date(specificToolUse.getTimeStamp().getTime() - RUN_UP_TIME *1000);
-		if (timeToLookFor.before(capFileStartTime))
-		{
-			timeToLookFor = capFileStartTime;
-		}
+		Date timeToLookFor = findStartingTime(specificToolUse);
 		
 			
-		File retVal = null;
+		File createdVideoFileToReturn = null;
 		try(FileInputStream inputStream = new FileInputStream(currentCapFile);) 
 		{
 			decompressor.readInFileHeader(inputStream);
 			fastFowardStreamToTime(inputStream, timeToLookFor); //throws VideoEncodingException if there was a problem prior to the important bits
 			
-			File newVideoFile = new File(makeFileNameForToolPlugin(specificToolUse.getPluginName(), specificToolUse.getToolName()));
-			retVal = extractDemoVideoToFile(inputStream, newVideoFile);
+			File tempFile = new File(makeFileNameForToolPlugin(specificToolUse.getPluginName(), specificToolUse.getToolName()));
+			createdVideoFileToReturn = extractDemoVideoToFile(inputStream, tempFile);
 
 		} catch (IOException e) {
 			logger.error("There was a problem extracting the video",e);
@@ -122,7 +118,16 @@ public class PostProductionVideoHandler
 			throw new VideoEncodingException("Unexpectedly hit the end of the cap file when seeking to start of tool usage", e);
 		}
 		
-		return retVal;
+		return createdVideoFileToReturn;
+	}
+
+	private Date findStartingTime(ToolUsage specificToolUse) {
+		Date timeToLookFor = new Date(specificToolUse.getTimeStamp().getTime() - RUN_UP_TIME *1000);
+		if (timeToLookFor.before(capFileStartTime))
+		{
+			timeToLookFor = capFileStartTime;
+		}
+		return timeToLookFor;
 	}
 	
 
@@ -156,6 +161,24 @@ public class PostProductionVideoHandler
 	private File extractDemoVideoToFile(InputStream inputStream, File newVideoFile) throws IOException 
 	{
 		imageWriter.reset();
+		
+		extractAllImagesToDisk(inputStream);
+		
+		imageWriter.waitUntilDoneWriting();
+		
+		
+		if (newVideoFile.exists() && !newVideoFile.delete())
+		{
+			logger.error("could not establish a temporary video file");
+			return null;
+		}
+
+		combineImageFilesToVideo(newVideoFile);
+
+		return newVideoFile;
+	}
+
+	private void extractAllImagesToDisk(InputStream inputStream) throws IOException {
 		for(int i = 0;i<FRAME_RATE * (RUN_UP_TIME + TOOL_DEMO_TIME);i++)
 		{
 			BufferedImage tempImage;
@@ -178,24 +201,15 @@ public class PostProductionVideoHandler
 			}
 			imageWriter.writeImageToDisk(tempImage);
 		}
-		
-		imageWriter.waitUntilDoneWriting();
-		
-		
-		if (newVideoFile.exists() && !newVideoFile.delete())
-		{
-			logger.error("could not establish a temporary video file");
-			return null;
-		}
-
-		executeEncoding(newVideoFile);
-
-		return newVideoFile;
 	}
 
  
-	private void executeEncoding(File newVideoFile) throws IOException 
+	private void combineImageFilesToVideo(File newVideoFile) throws IOException 
 	{
+		if (!newVideoFile.getParentFile().mkdirs() && !newVideoFile.getParentFile().exists())
+		{
+			throw new IOException("Could not make the output folder "+newVideoFile.getParentFile());
+		}
 		//TODO make this more flexible, not hardcoded.  i.e. the user should specify where their ffmpeg is
 		
 		String executableString = "./src/FFMPEGbin/ffmpeg.exe -r 5 -pix_fmt yuv420p -i ./Scratch/temp%04d.png  -vcodec libx264 "+newVideoFile.getPath();

@@ -155,6 +155,12 @@ public class BufferedDatabaseManager
 
 		return retVal;
 	}
+	
+	public List<FileDateStructs> getVideoFilesLinkedToTimePeriod(ToolUsage tu) 
+	{
+		int durationInSecondsRoundedUp = (int) Math.ceil(tu.getDuration());
+		return getVideoFilesLinkedToTimePeriod(tu.getTimeStamp(), durationInSecondsRoundedUp);
+	}
 
 	public ToolUsage getLastInstanceOfToolUsage(String pluginName, String toolName) {
 		waitForThreadPool();
