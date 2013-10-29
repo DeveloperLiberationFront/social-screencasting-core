@@ -158,7 +158,7 @@ public class BufferedDatabaseManager
 	
 	public List<FileDateStructs> getVideoFilesLinkedToTimePeriod(ToolUsage tu) 
 	{
-		int durationInSecondsRoundedUp = (int) Math.ceil(tu.getDuration());
+		int durationInSecondsRoundedUp = (int) Math.ceil(tu.getDuration()/1000.0);
 		return getVideoFilesLinkedToTimePeriod(tu.getTimeStamp(), durationInSecondsRoundedUp);
 	}
 
