@@ -8,7 +8,7 @@ import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
-public class SQLiteDatabase extends SQLDatabase 
+public class SQLiteDatabase extends SQLDatabase
 {
 
 	private static Logger logger = Logger.getLogger(SQLiteDatabase.class.getName());
@@ -17,37 +17,37 @@ public class SQLiteDatabase extends SQLDatabase
 	private Connection connection;
 	private Statement previouslyExecutedStatement;
 
-	public SQLiteDatabase(String databaseLocation) 
+	public SQLiteDatabase(String databaseLocation)
 	{
-		//check the filename has the right extension
-		if(databaseLocation.endsWith(DB_EXTENSION_NAME))
+		// check the filename has the right extension
+		if (databaseLocation.endsWith(DB_EXTENSION_NAME))
 		{
-			logger.debug("Creating database at location: "+databaseLocation);
-			//open a connection to a db so that this server can access the db
+			logger.debug("Creating database at location: " + databaseLocation);
+			// open a connection to a db so that this server can access the db
 			open(databaseLocation);
 		}
-		else //incorrect file name
+		else
+		// incorrect file name
 		{
-			throw new DBAbstractionException("The database file name must end with " + DB_EXTENSION_NAME +" : "+databaseLocation);
+			throw new DBAbstractionException("The database file name must end with " + DB_EXTENSION_NAME + " : " + databaseLocation);
 		}
 	}
-
 
 	private void open(String path)
 	{
 		try
 		{
-			//load the sqlite-JDBC driver using the class loader
+			// load the sqlite-JDBC driver using the class loader
 			Class.forName("org.sqlite.JDBC");
 
-			//set the path to the sqlite database file
+			// set the path to the sqlite database file
 			this.pathToFile = path;
 
-			//create a database connection, will open the sqlite db if it
-			//exists and create a new sqlite database if it does not exist
+			// create a database connection, will open the sqlite db if it
+			// exists and create a new sqlite database if it does not exist
 			this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.pathToFile);
 
-			//create the tables (if they do not already exist)
+			// create the tables (if they do not already exist)
 			createTables();
 		}
 		catch (ClassNotFoundException e)
@@ -59,13 +59,13 @@ public class SQLiteDatabase extends SQLDatabase
 			throw new DBAbstractionException(e);
 		}
 	}
-	
+
 	@Override
 	public void close()
 	{
 		try
 		{
-			//close the JDBC connection
+			// close the JDBC connection
 			connection.close();
 
 		}
@@ -75,27 +75,26 @@ public class SQLiteDatabase extends SQLDatabase
 		}
 	}
 
-
-	//helpers to perform queries
+	// helpers to perform queries
 	@Override
 	protected void executeWithNoResults(String sql)
 	{
-		logger.debug("Executing sql query (no results expected): "+sql);
-		//create a statement
+		logger.debug("Executing sql query (no results expected): " + sql);
+		// create a statement
 		try (Statement statement = connection.createStatement();)
 		{
 			// set timeout to 30 sec.
 			statement.setQueryTimeout(30);
 
-			//execute the query
+			// execute the query
 			statement.executeUpdate(sql);
 		}
 		catch (SQLException e)
 		{
-			logger.error("Problem with Query Text: \n"+ sql);
+			logger.error("Problem with Query Text: \n" + sql);
 
-			//if something bad happened in the sql, wrap up the
-			//exception and pass it on up
+			// if something bad happened in the sql, wrap up the
+			// exception and pass it on up
 			throw new DBAbstractionException(e);
 		}
 	}
@@ -103,41 +102,44 @@ public class SQLiteDatabase extends SQLDatabase
 	@Override
 	protected ResultSet executeWithResults(String sql)
 	{
-		logger.debug("Executing sql query for results: "+sql);
+		logger.debug("Executing sql query for results: " + sql);
 		ResultSet results = null;
 
-		//create a statement
+		// create a statement
 		try
 		{
 			previouslyExecutedStatement = connection.createStatement();
 			// set timeout to 30 sec.
 			previouslyExecutedStatement.setQueryTimeout(30);
 
-			//execute the query and get back a generic set of results
+			// execute the query and get back a generic set of results
 			results = previouslyExecutedStatement.executeQuery(sql);
 
 		}
 		catch (SQLException e)
 		{
-			logger.error("Problem with Query Text: \n"+ sql);
-			
+			logger.error("Problem with Query Text: \n" + sql);
+
 			throw new DBAbstractionException(e);
 		}
 
-		//Warning!  Closing the statement before the results are used invalidates the ResultSet
+		// Warning! Closing the statement before the results are used
+		// invalidates the ResultSet
 		return results;
 	}
-	
+
 	@Override
-	protected void cleanUpAfterQuery() {
+	protected void cleanUpAfterQuery()
+	{
 		if (previouslyExecutedStatement != null)
-			try {
+			try
+			{
 				previouslyExecutedStatement.close();
-			} catch (SQLException e) {
-				logger.error("Problem closing statement",e);
+			}
+			catch (SQLException e)
+			{
+				logger.error("Problem closing statement", e);
 			}
 	}
-
-
 
 }

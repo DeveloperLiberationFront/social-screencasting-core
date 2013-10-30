@@ -7,11 +7,12 @@ import java.util.Date;
  * An event that is triggered when a toolstream file is being parsed.
  * 
  * This is different from when it has been detected, which produces a
- * LoadedFileEvent.  
+ * LoadedFileEvent.
+ * 
  * @author Kevin Lubick
- *
+ * 
  */
-public class ParsedFileEvent 
+public class ParsedFileEvent
 {
 
 	private String inputString;
@@ -20,8 +21,7 @@ public class ParsedFileEvent
 	private Date fileTimeStamp;
 	private File parsedFile;
 
-
-	public ParsedFileEvent(String inputString, ToolStream generatedToolStream, String associatedPluginName, Date fileTimeStamp, File parsedFile) 
+	public ParsedFileEvent(String inputString, ToolStream generatedToolStream, String associatedPluginName, Date fileTimeStamp, File parsedFile)
 	{
 		this.inputString = inputString;
 		this.generatedToolStream = generatedToolStream;
@@ -29,27 +29,30 @@ public class ParsedFileEvent
 		this.fileTimeStamp = fileTimeStamp;
 		this.parsedFile = parsedFile;
 	}
-	
-	public String getInputJSON() {
+
+	public String getInputJSON()
+	{
 		return this.inputString;
 	}
 
-	public ToolStream getToolStream() {
+	public ToolStream getToolStream()
+	{
 		return this.generatedToolStream;
 	}
 
-	public String getPluginName() {
+	public String getPluginName()
+	{
 		return this.associatedPluginName;
 	}
 
-	public Date getFileTimeStamp() {
+	public Date getFileTimeStamp()
+	{
 		return this.fileTimeStamp;
 	}
 
-	public File getParsedFile() {
+	public File getParsedFile()
+	{
 		return parsedFile;
 	}
-
-	
 
 }

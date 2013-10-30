@@ -41,8 +41,10 @@ import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
  * DEALINGS IN THE SOFTWARE.
  * 
  */
-public class PostProductionVideoHandler 
+public class PostProductionVideoHandler
 {
+	private static final String SCRATCH_DIR = "./Scratch/";
+
 	private static Logger logger = Logger.getLogger(PostProductionVideoHandler.class.getName());
 
 	public static final String EXPECTED_FILE_EXTENSION = ".cap";
@@ -50,26 +52,31 @@ public class PostProductionVideoHandler
 	public static final boolean DELETE_IMAGES_AFTER_USE = false;
 
 	private static final int FRAME_RATE = 5;
-	
+
 	private static final int RUN_UP_TIME = 5;
-	
-	//private static final int TOOL_DEMO_TIME = 15;
+
+	// private static final int TOOL_DEMO_TIME = 15;
 
 	private File currentCapFile;
 
 	private Date capFileStartTime;
 
-	
+	private PostProductionAnimationStrategy postProductionAnimator = new DefaultAnimationStrategy(SCRATCH_DIR);
 
 	private Queue<OverloadFile> queueOfOverloadFiles = new LinkedList<>();
-	
+
 	private FrameDecompressor decompressor = new FrameDecompressor();
-	private ImageDiskWritingStrategy imageWriter = new ThreadedImageDiskWritingStrategy("./Scratch/", DELETE_IMAGES_AFTER_USE);
+	private ImageDiskWritingStrategy imageWriter = new ThreadedImageDiskWritingStrategy(SCRATCH_DIR,
+			DELETE_IMAGES_AFTER_USE);
 
 	private double toolDemoInSeconds;
-	//private ImageDiskWritingStrategy imageWriter = new BlockingImageDiskWritingStrategy("./Scratch/", DELETE_IMAGES_AFTER_USE);
+	// private ImageDiskWritingStrategy imageWriter = new
+	// BlockingImageDiskWritingStrategy("./Scratch/", DELETE_IMAGES_AFTER_USE);
 
-	public void loadFile(File capFile) {
+	private ToolUsage currentToolStream;
+
+	public void loadFile(File capFile)
+	{
 		if (capFile == null)
 		{
 			logger.error("Recieved null file to load in PostProductionVideoHandler");
@@ -77,13 +84,14 @@ public class PostProductionVideoHandler
 		}
 		if (!capFile.getName().endsWith(EXPECTED_FILE_EXTENSION))
 		{
-			logger.error("Expected cap file to have an extension "+EXPECTED_FILE_EXTENSION +" not like "+capFile.getName());
+			logger.error("Expected cap file to have an extension " + EXPECTED_FILE_EXTENSION + " not like "
+					+ capFile.getName());
 			this.currentCapFile = null;
 		}
 		this.currentCapFile = capFile;
 
 	}
-	
+
 	public static void debugWriteOutAllImagesInCapFile(File capFile, File outputDirectory)
 	{
 		PostProductionVideoHandler thisHandler = new PostProductionVideoHandler();
@@ -93,29 +101,32 @@ public class PostProductionVideoHandler
 		{
 			throw new RuntimeException("could not make output directory for debugWriteOutAllImagesInCapFile");
 		}
-		//set the output writer to be where we want
+		// set the output writer to be where we want
 		thisHandler.imageWriter = new ThreadedImageDiskWritingStrategy(outputDirectory.getPath(), false);
-		//write out all the images
-		try(FileInputStream inputStream = new FileInputStream(thisHandler.currentCapFile);) 
+		// write out all the images
+		try (FileInputStream inputStream = new FileInputStream(thisHandler.currentCapFile);)
 		{
 			thisHandler.decompressor.readInFileHeader(inputStream);
-			
+
 			thisHandler.imageWriter.reset();
-			
+
 			thisHandler.extractAllImagesInStream(inputStream);
-			
+
 			thisHandler.imageWriter.waitUntilDoneWriting();
-		} 
-		catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} 
-		catch (IOException e) {
+		}
+		catch (FileNotFoundException e)
+		{
 			e.printStackTrace();
 		}
-		
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
 	}
 
-	public void setCurrentFileStartTime(Date startTime) {
+	public void setCurrentFileStartTime(Date startTime)
+	{
 		if (startTime == null)
 		{
 			logger.error("Recieved null startTime in PostProductionVideoHandler");
@@ -124,83 +135,107 @@ public class PostProductionVideoHandler
 		this.capFileStartTime = startTime;
 		decompressor.setFrameZeroTime(capFileStartTime);
 	}
-	
-	public File extractVideoForToolUsageThrowingException(ToolUsage specificToolUse) throws VideoEncodingException {
+
+	public File extractVideoForToolUsageThrowingException(ToolUsage specificToolUse) throws VideoEncodingException
+	{
 		if (this.currentCapFile == null || this.capFileStartTime == null)
 		{
 			logger.error("PostProductionVideo object needed to have a file to load and a start time");
 			return null;
 		}
-		
+
 		Date timeToLookFor = findStartingTime(specificToolUse);
-		
-		this.toolDemoInSeconds = specificToolUse.getDuration()/1000.0;
+
+		this.toolDemoInSeconds = specificToolUse.getDuration() / 1000.0;
+
+		this.currentToolStream = specificToolUse;
+
 		File createdVideoFileToReturn = null;
-		try(FileInputStream inputStream = new FileInputStream(currentCapFile);) 
+		try (FileInputStream inputStream = new FileInputStream(currentCapFile);)
 		{
 			decompressor.readInFileHeader(inputStream);
-			fastFowardStreamToTime(inputStream, timeToLookFor); //throws VideoEncodingException if there was a problem prior to the important bits
-			
-			File tempFile = new File(makeFileNameForToolPlugin(specificToolUse.getPluginName(), specificToolUse.getToolName()));
+			fastFowardStreamToTime(inputStream, timeToLookFor); // throws
+																// VideoEncodingException
+																// if there was
+																// a problem
+																// prior to the
+																// important
+																// bits
+
+			File tempFile = new File(makeFileNameForToolPlugin(specificToolUse.getPluginName(),
+					specificToolUse.getToolName()));
 			createdVideoFileToReturn = extractDemoVideoToFile(inputStream, tempFile);
 
-		} catch (IOException e) {
-			logger.error("There was a problem extracting the video",e);
-		} catch (ReachedEndOfCapFileException e) 
+		}
+		catch (IOException e)
+		{
+			logger.error("There was a problem extracting the video", e);
+		}
+		catch (ReachedEndOfCapFileException e)
 		{
 			logger.error("Unexpectedly hit the end of the cap file when seeking to start of tool usage");
-			throw new VideoEncodingException("Unexpectedly hit the end of the cap file when seeking to start of tool usage", e);
+			throw new VideoEncodingException(
+					"Unexpectedly hit the end of the cap file when seeking to start of tool usage", e);
 		}
-		
+
 		return createdVideoFileToReturn;
 	}
 
-	private Date findStartingTime(ToolUsage specificToolUse) {
-		Date timeToLookFor = new Date(specificToolUse.getTimeStamp().getTime() - RUN_UP_TIME *1000);
+	private Date findStartingTime(ToolUsage specificToolUse)
+	{
+		Date timeToLookFor = new Date(specificToolUse.getTimeStamp().getTime() - RUN_UP_TIME * 1000);
 		if (timeToLookFor.before(capFileStartTime))
 		{
 			timeToLookFor = capFileStartTime;
 		}
 		return timeToLookFor;
 	}
-	
 
 	public File extractVideoForToolUsage(ToolUsage specificToolUse)
 	{
-		try {
+		try
+		{
 			return extractVideoForToolUsageThrowingException(specificToolUse);
-		} catch (VideoEncodingException e) {
-			logger.error("There was a problem extracting the video.  An effort was made to produce some video",e);
+		}
+		catch (VideoEncodingException e)
+		{
+			logger.error("There was a problem extracting the video.  An effort was made to produce some video", e);
 		}
 		return null;
 	}
 
-	private void fastFowardStreamToTime(FileInputStream inputStream, Date timeToLookFor) throws IOException, VideoEncodingException, ReachedEndOfCapFileException 
+	private void fastFowardStreamToTime(FileInputStream inputStream, Date timeToLookFor) throws IOException,
+			VideoEncodingException, ReachedEndOfCapFileException
 	{
-		if (timeToLookFor.equals(capFileStartTime))	//no fast forwarding required
+		if (timeToLookFor.equals(capFileStartTime)) // no fast forwarding
+													// required
 		{
 			return;
 		}
-		
+
 		Date currTimeStamp = capFileStartTime;
-		
+
 		while (currTimeStamp.before(timeToLookFor))
 		{
-			decompressor.readInFrameImage(inputStream); //throws VideoEncodingException if there was a problem
+			decompressor.readInFrameImage(inputStream); // throws
+														// VideoEncodingException
+														// if there was a
+														// problem
 			currTimeStamp = decompressor.getPreviousFrameTimeStamp();
-			
+
 		}
 	}
 
-	private File extractDemoVideoToFile(InputStream inputStream, File newVideoFile) throws IOException 
+	private File extractDemoVideoToFile(InputStream inputStream, File newVideoFile) throws IOException
 	{
 		imageWriter.reset();
-		
-		extractImagesForTimePeriodToDisk(inputStream);
-		
+
+		extractImagesForTimePeriodToScratchFolder(inputStream);
+
 		imageWriter.waitUntilDoneWriting();
-		
-		
+
+		postProductionAnimator.addAnimationToImagesInScratchFolderForToolStream(this.currentToolStream);
+
 		if (newVideoFile.exists() && !newVideoFile.delete())
 		{
 			logger.error("could not establish a temporary video file");
@@ -212,16 +247,21 @@ public class PostProductionVideoHandler
 		return newVideoFile;
 	}
 
-	private void extractImagesForTimePeriodToDisk(InputStream inputStream) throws IOException {
-		for(int i = 0;i<FRAME_RATE * (RUN_UP_TIME + toolDemoInSeconds);i++)
+	private void extractImagesForTimePeriodToScratchFolder(InputStream inputStream) throws IOException
+	{
+		for (int i = 0; i < FRAME_RATE * (RUN_UP_TIME + toolDemoInSeconds); i++)
 		{
 			BufferedImage tempImage;
-			try {
+			try
+			{
 				tempImage = decompressor.readInFrameImage(inputStream);
-			} catch (VideoEncodingException e) {
-				logger.error("There was a problem making the video frames.  Attempting to make a video from what I've got",e);
+			}
+			catch (VideoEncodingException e)
+			{
+				logger.error("There was a problem making the video frames.  Attempting to make a video from what I've got", e);
 				break;
-			} catch (ReachedEndOfCapFileException e) 
+			}
+			catch (ReachedEndOfCapFileException e)
 			{
 				if (queueOfOverloadFiles.size() == 0)
 				{
@@ -229,26 +269,29 @@ public class PostProductionVideoHandler
 					break;
 				}
 				inputStream = goToNextFileInQueue(inputStream);
-				//call this image a mulligan and go to the top of the loop.
+				// call this image a mulligan and go to the top of the loop.
 				i--;
 				continue;
 			}
 			imageWriter.writeImageToDisk(tempImage);
 		}
 	}
-	
-	private void extractAllImagesInStream(InputStream inputStream) throws IOException {
-		while(true)
+
+	private void extractAllImagesInStream(InputStream inputStream) throws IOException
+	{
+		while (true)
 		{
 			BufferedImage tempImage = null;
-			try {
+			try
+			{
 				tempImage = decompressor.readInFrameImage(inputStream);
-			} 
-			catch (VideoEncodingException e) {
-				logger.error("There was a problem making the video frames. Stopping extraction...",e);
+			}
+			catch (VideoEncodingException e)
+			{
+				logger.error("There was a problem making the video frames. Stopping extraction...", e);
 				break;
-			} 
-			catch (ReachedEndOfCapFileException e) 
+			}
+			catch (ReachedEndOfCapFileException e)
 			{
 				logger.info("reached the end of the cap file");
 				break;
@@ -257,87 +300,98 @@ public class PostProductionVideoHandler
 		}
 	}
 
- 
-	private void combineImageFilesToVideo(File newVideoFile) throws IOException 
+	private void combineImageFilesToVideo(File newVideoFile) throws IOException
 	{
 		if (!newVideoFile.getParentFile().mkdirs() && !newVideoFile.getParentFile().exists())
 		{
-			throw new IOException("Could not make the output folder "+newVideoFile.getParentFile());
+			throw new IOException("Could not make the output folder " + newVideoFile.getParentFile());
 		}
-		//TODO make this more flexible, not hardcoded.  i.e. the user should specify where their ffmpeg is
-		
-		String executableString = "./src/FFMPEGbin/ffmpeg.exe -r 5 -pix_fmt yuv420p -i ./Scratch/temp%04d.png  -vcodec libx264 "+newVideoFile.getPath();
-		
-		//Using Runtime.exec() because I couldn't get ProcessBuilder to handle the arguments on 
-		//ffempeg well. 
+		// TODO make this more flexible, not hardcoded. i.e. the user should
+		// specify where their ffmpeg is
+
+		String executableString = "./src/FFMPEGbin/ffmpeg.exe -r 5 -pix_fmt yuv420p -i ./Scratch/temp%04d.png  -vcodec libx264 "
+				+ newVideoFile.getPath();
+
+		// Using Runtime.exec() because I couldn't get ProcessBuilder to handle
+		// the arguments on
+		// ffempeg well.
 		Process process = Runtime.getRuntime().exec(executableString);
-		
+
 		inheritIO(process.getInputStream(), "Normal Output");
 		inheritIO(process.getErrorStream(), "Error Output");
 		logger.debug("Rendering video");
-		try {
-			logger.debug("FFMPEG exited with state "+process.waitFor());
-		} catch (InterruptedException e) {
-			logger.error("There was a problem with ffmpeg",e);
+		try
+		{
+			logger.debug("FFMPEG exited with state " + process.waitFor());
+		}
+		catch (InterruptedException e)
+		{
+			logger.error("There was a problem with ffmpeg", e);
 		}
 	}
 
-	
-	private static void inheritIO(final InputStream src, final String identifer) 
+	private static void inheritIO(final InputStream src, final String identifer)
 	{
-		//used to spy on a process's output, similar to what ProcessBuilder does
+		// used to spy on a process's output, similar to what ProcessBuilder
+		// does
 		new Thread(new Runnable() {
-			public void run() {
-				try(Scanner sc = new Scanner(src);) 
+			public void run()
+			{
+				try (Scanner sc = new Scanner(src);)
 				{
-					while (sc.hasNextLine()) {
+					while (sc.hasNextLine())
+					{
 						String string = sc.nextLine();
-						logger.trace("From "+identifer+":"+ string);
+						logger.trace("From " + identifer + ":" + string);
 					}
-				} catch (Exception e) {
-					logger.error("Problem in stream monitoring",e);
+				}
+				catch (Exception e)
+				{
+					logger.error("Problem in stream monitoring", e);
 				}
 
 			}
 		}).start();
 	}
 
-	public static String makeFileNameForToolPlugin(String pluginName, String toolName) 
+	public static String makeFileNameForToolPlugin(String pluginName, String toolName)
 	{
-		if (toolName ==null)
+		if (toolName == null)
 		{
 			logger.info("Got a null toolname, recovering with empty string");
 			toolName = "";
 		}
-		return "renderedVideos\\"+pluginName+createNumberForVideoFile(toolName)+".mkv"; 
+		return "renderedVideos\\" + pluginName + createNumberForVideoFile(toolName) + ".mkv";
 	}
 
-	private static int createNumberForVideoFile(String toolName) {
+	private static int createNumberForVideoFile(String toolName)
+	{
 		int retval = toolName.hashCode();
 		if (toolName.hashCode() == Integer.MIN_VALUE)
 			retval = 0;
 		return Math.abs(retval);
 	}
 
-	
 	/**
-	 * Adds an extra file to this handler to use if the wanted toolstream's behavior extends over 
-	 * the end of the loaded cap file
+	 * Adds an extra file to this handler to use if the wanted toolstream's
+	 * behavior extends over the end of the loaded cap file
+	 * 
 	 * @param extraCapFile
 	 * @param extraDate
 	 */
-	public void enqueueOverLoadFile(File extraCapFile, Date extraDate) {
+	public void enqueueOverLoadFile(File extraCapFile, Date extraDate)
+	{
 		this.queueOfOverloadFiles.offer(new OverloadFile(extraCapFile, extraDate));
-		
+
 	}
 
-	private InputStream goToNextFileInQueue(InputStream oldInputStream) throws IOException 
+	private InputStream goToNextFileInQueue(InputStream oldInputStream) throws IOException
 	{
 		oldInputStream.close();
 		OverloadFile nextFile = queueOfOverloadFiles.poll();
 		FileInputStream inputStream = new FileInputStream(nextFile.file);
 		decompressor.readInFileHeader(inputStream);
-		
+
 		setCurrentFileStartTime(nextFile.date);
 
 		return inputStream;
@@ -349,14 +403,12 @@ public class PostProductionVideoHandler
 		private Date date;
 		private File file;
 
-		public OverloadFile(File extraCapFile, Date extraDate) {
+		public OverloadFile(File extraCapFile, Date extraDate)
+		{
 			this.file = extraCapFile;
 			this.date = extraDate;
 		}
-		
+
 	}
-
-
-
 
 }

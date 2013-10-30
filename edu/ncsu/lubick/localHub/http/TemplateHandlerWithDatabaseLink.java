@@ -23,60 +23,69 @@ public abstract class TemplateHandlerWithDatabaseLink extends AbstractHandler {
 	protected static final String DISPLAY_TOOL_USAGE = "displayToolUsage.html";
 	protected String httpRequestPattern;
 	protected WebQueryInterface databaseLink;
-	protected static Configuration cfg;		//Template Configuration
+	protected static Configuration cfg; // Template Configuration
 
-	public TemplateHandlerWithDatabaseLink(String matchPattern, WebQueryInterface databaseLink) 
+	public TemplateHandlerWithDatabaseLink(String matchPattern, WebQueryInterface databaseLink)
 	{
 		this.httpRequestPattern = matchPattern;
 		this.databaseLink = databaseLink;
-		try {
+		try
+		{
 			getLogger().trace("Setting up template configuration");
 			setupTemplateConfiguration();
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			getLogger().fatal("There was a problem booting up the template configuration");
 		}
 	}
 
-
-
-	private static void setupTemplateConfiguration() throws IOException {
+	private static void setupTemplateConfiguration() throws IOException
+	{
 		cfg = new Configuration();
 
 		cfg.setDirectoryForTemplateLoading(new File("./frontend/templates"));
 
-		// Specify how templates will see the data-model. This is an advanced topic...
+		// Specify how templates will see the data-model. This is an advanced
+		// topic...
 		// for now just use this:
 		cfg.setObjectWrapper(new DefaultObjectWrapper());
 
 		cfg.setDefaultEncoding("UTF-8");
 
-		// Sets how errors will appear. Here we assume we are developing HTML pages.
-		// For production systems TemplateExceptionHandler.RETHROW_HANDLER is better.
+		// Sets how errors will appear. Here we assume we are developing HTML
+		// pages.
+		// For production systems TemplateExceptionHandler.RETHROW_HANDLER is
+		// better.
 		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
 
-		cfg.setIncompatibleImprovements(new Version(2, 3, 20));  // FreeMarker 2.3.20 
+		cfg.setIncompatibleImprovements(new Version(2, 3, 20)); // FreeMarker
+																// 2.3.20
 	}
 
-	protected void processTemplate(HttpServletResponse response, Map<Object, Object> templateData, String templateName) throws IOException {
+	protected void processTemplate(HttpServletResponse response, Map<Object, Object> templateData, String templateName) throws IOException
+	{
 		Template temp = cfg.getTemplate(templateName);
 
-		try {
+		try
+		{
 			temp.process(templateData, response.getWriter());
-		} catch (TemplateException e) {
-			getLogger().error("Problem with the template",e);
+		}
+		catch (TemplateException e)
+		{
+			getLogger().error("Problem with the template", e);
 		}
 	}
 
-	protected boolean checkIfWeHandleThisRequest(String target) {
+	protected boolean checkIfWeHandleThisRequest(String target)
+	{
 		if (!target.equals(httpRequestPattern))
 		{
-			getLogger().debug("LookupHandler passing on target "+target);
+			getLogger().debug("LookupHandler passing on target " + target);
 			return false;
 		}
 		return true;
 	}
-
-
 
 	protected abstract Logger getLogger();
 

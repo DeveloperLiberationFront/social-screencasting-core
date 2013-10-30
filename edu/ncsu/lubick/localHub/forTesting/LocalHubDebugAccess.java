@@ -11,13 +11,14 @@ import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
 public interface LocalHubDebugAccess {
 
 	boolean isRunning();
-	
-	//Listeners
+
+	// Listeners
 	void addLoadedFileListener(LoadedFileListener loadedFileListener);
+
 	void removeLoadedFileListener(LoadedFileListener loadedFileListener);
 
-	
 	void addParsedFileListener(ParsedFileListener parsedFileListener);
+
 	void removeParsedFileListener(ParsedFileListener parsedFileListener);
 
 	List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName);
@@ -27,6 +28,5 @@ public interface LocalHubDebugAccess {
 	File extractVideoForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException;
 
 	List<String> getAllPluginNames();
-	
 
 }

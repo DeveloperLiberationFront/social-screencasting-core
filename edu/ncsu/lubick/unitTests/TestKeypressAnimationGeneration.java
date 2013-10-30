@@ -15,7 +15,8 @@ import edu.ncsu.lubick.localHub.videoPostProduction.animation.ShortcutsToKeyCode
 public class TestKeypressAnimationGeneration {
 
 	@Test
-	public void testCopy() {
+	public void testCopy()
+	{
 		ShortcutsToKeyCodesConverter converter = new ShortcutsToKeyCodesConverter();
 
 		int[] results = converter.convert("Ctrl+C");
@@ -27,7 +28,8 @@ public class TestKeypressAnimationGeneration {
 	}
 
 	@Test
-	public void testCopyLowerCase() {
+	public void testCopyLowerCase()
+	{
 		ShortcutsToKeyCodesConverter converter = new ShortcutsToKeyCodesConverter();
 
 		int[] results = converter.convert("ctrl+c");
@@ -39,7 +41,8 @@ public class TestKeypressAnimationGeneration {
 	}
 
 	@Test
-	public void testComplicatedJunitTests() {
+	public void testComplicatedJunitTests()
+	{
 		ShortcutsToKeyCodesConverter converter = new ShortcutsToKeyCodesConverter();
 
 		int[] results = converter.convert("Alt+Shift+X, T");
@@ -53,7 +56,8 @@ public class TestKeypressAnimationGeneration {
 	}
 
 	@Test
-	public void testOpenDeclaration() {
+	public void testOpenDeclaration()
+	{
 		ShortcutsToKeyCodesConverter converter = new ShortcutsToKeyCodesConverter();
 
 		int[] results = converter.convert("F3");
@@ -61,11 +65,10 @@ public class TestKeypressAnimationGeneration {
 		assertEquals(1, results.length);
 		assertEquals(VK_F3, results[0]);
 
-
 	}
 
 	@Test
-	public void testNumberCommand() throws Exception 
+	public void testNumberCommand() throws Exception
 	{
 		ShortcutsToKeyCodesConverter converter = new ShortcutsToKeyCodesConverter();
 
@@ -75,9 +78,9 @@ public class TestKeypressAnimationGeneration {
 		assertEquals(VK_CONTROL, results[0]);
 		assertEquals(VK_7, results[1]);
 	}
-	
+
 	@Test
-	public void testPunctuationCommand() throws Exception 
+	public void testPunctuationCommand() throws Exception
 	{
 		ShortcutsToKeyCodesConverter converter = new ShortcutsToKeyCodesConverter();
 
@@ -89,10 +92,11 @@ public class TestKeypressAnimationGeneration {
 	}
 
 	@Test
-	public void testTrickyPatterns() throws Exception {
+	public void testTrickyPatterns() throws Exception
+	{
 		ShortcutsToKeyCodesConverter converter = new ShortcutsToKeyCodesConverter();
 
-		int[] results = converter.convert("Ctrl+,");	//navigate previous
+		int[] results = converter.convert("Ctrl+,"); // navigate previous
 
 		assertEquals(2, results.length);
 		assertEquals(VK_CONTROL, results[0]);
@@ -101,20 +105,20 @@ public class TestKeypressAnimationGeneration {
 	}
 
 	@Test
-	public void testKeyboardCreation() throws Exception 
+	public void testKeyboardCreation() throws Exception
 	{
 		KeypressAnimationMaker akm = new AnimatedKeyboardMaker();
 		ShortcutsToKeyCodesConverter converter = new ShortcutsToKeyCodesConverter();
-	
+
 		int[] keycodes = converter.convert("Alt+Shift+X, T");
-	
+
 		BufferedImage img = akm.makeAnimationForKeyCodes(keycodes);
 		assertNotNull(img);
-		
+
 		debugWriteImageToFile(img, "test.png");
-		
+
 		assertTrue(doTwoImagesMatch("./src/test_images/AltShiftXT.png", "test.png"));
-		
+
 	}
 
 }

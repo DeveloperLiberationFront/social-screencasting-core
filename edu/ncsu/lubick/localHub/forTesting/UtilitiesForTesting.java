@@ -10,48 +10,55 @@ import org.apache.log4j.Logger;
 
 public class UtilitiesForTesting {
 
-	private UtilitiesForTesting() {}
+	private UtilitiesForTesting()
+	{
+	}
+
 	private static Logger logger = Logger.getLogger(UtilitiesForTesting.class.getName());
 
-
 	/**
-	 * Creates a file in the given directory with the given fileName and then writes
-	 * the fileContents to disk.
+	 * Creates a file in the given directory with the given fileName and then
+	 * writes the fileContents to disk.
 	 * 
 	 * If the file already exists, the file will be deleted and overwritten.
+	 * 
 	 * @param directory
 	 * @param fileName
 	 * @param fileContents
 	 * @return
 	 */
-	public static File createAbsoluteFileWithContent(String directory, String fileName, String fileContents) {
+	public static File createAbsoluteFileWithContent(String directory, String fileName, String fileContents)
+	{
 		File newFile = new File(directory, fileName);
-		if (newFile.exists()) 
+		if (newFile.exists())
 		{
 			logger.debug(newFile.toString() + " already exists, deleting first");
 			if (!newFile.delete())
 			{
-				logger.info("Could not overwrite file "+newFile.toString());
+				logger.info("Could not overwrite file " + newFile.toString());
 			}
 		}
-		try 
+		try
 		{
 			if (!newFile.createNewFile())
 			{
-				logger.error("Could not create file "+newFile.toString());
+				logger.error("Could not create file " + newFile.toString());
 			}
-		} 
-		catch (IOException e) 
+		}
+		catch (IOException e)
 		{
 			logger.error("Could not create file", e);
 			return null;
 		}
 
-		//Using try with resources.  This automatically closes up afterwards, ignoring(?) thrown exception
-		try(FileOutputStream fos = new FileOutputStream(newFile);) 
+		// Using try with resources. This automatically closes up afterwards,
+		// ignoring(?) thrown exception
+		try (FileOutputStream fos = new FileOutputStream(newFile);)
 		{
 			fos.write(fileContents.getBytes());
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			logger.error("Could not write message to file", e);
 		}
 
@@ -63,25 +70,24 @@ public class UtilitiesForTesting {
 	 * @param directory
 	 * @return
 	 */
-	public static boolean clearOutDirectory(String directory) 
+	public static boolean clearOutDirectory(String directory)
 	{
 		File rootDirectory = new File(directory);
 		return clearOutDirectory(rootDirectory);
 	}
-	
-	public static boolean clearOutDirectory(File rootDirectory) 
+
+	public static boolean clearOutDirectory(File rootDirectory)
 	{
-		if (!rootDirectory.exists() || (rootDirectory.isDirectory() && rootDirectory.listFiles().length ==0))
+		if (!rootDirectory.exists() || (rootDirectory.isDirectory() && rootDirectory.listFiles().length == 0))
 		{
 			return true;
 		}
 		return recursivelyClearDirectory(rootDirectory);
 	}
 
-
-	private static boolean recursivelyClearDirectory(File parentDirectory) 
+	private static boolean recursivelyClearDirectory(File parentDirectory)
 	{
-		for(File f: parentDirectory.listFiles())
+		for (File f : parentDirectory.listFiles())
 		{
 			if (f.isDirectory())
 			{
@@ -96,22 +102,25 @@ public class UtilitiesForTesting {
 		return parentDirectory.listFiles().length == 0;
 	}
 
-	public static Date truncateTimeToMinute(Date date) 
+	public static Date truncateTimeToMinute(Date date)
 	{
 		return truncateTimeToMinute(date.getTime());
 	}
 
-	public static Date truncateTimeToMinute(long milliseconds) 
+	public static Date truncateTimeToMinute(long milliseconds)
 	{
-		//Divide then multiply by 60000 (the number of milliseconds in a minute) to round to nearest minute
+		// Divide then multiply by 60000 (the number of milliseconds in a
+		// minute) to round to nearest minute
 		return new Date((milliseconds / 60000) * 60000);
 	}
 
-	public static File copyFileToFolder(String parentDir, String newFileName, File sourceOfFileToCopy) throws IOException {
-		File destination = new File(parentDir,newFileName);
+	public static File copyFileToFolder(String parentDir, String newFileName, File sourceOfFileToCopy) throws IOException
+	{
+		File destination = new File(parentDir, newFileName);
 		if ((destination.exists() && !destination.delete()) || destination.isDirectory())
 		{
-			logger.error("there was a problem copying the file." + (destination.isDirectory()?"File was a directory":"File already exists and won't be deleted"));
+			logger.error("there was a problem copying the file."
+					+ (destination.isDirectory() ? "File was a directory" : "File already exists and won't be deleted"));
 			return null;
 		}
 		if (!destination.createNewFile())
@@ -120,7 +129,7 @@ public class UtilitiesForTesting {
 		}
 		FileOutputStream fos = new FileOutputStream(destination);
 		Files.copy(sourceOfFileToCopy.toPath(), fos);
-		
+
 		return destination;
 	}
 

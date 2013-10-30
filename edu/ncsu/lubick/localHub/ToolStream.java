@@ -16,60 +16,68 @@ public class ToolStream {
 	public static final String TOOL_KEY_PRESSES = "Tool_Key_Presses";
 	public static final String TOOL_TIMESTAMP = "Tool_Timestamp";
 	public static final String TOOL_DURATION = "Tool_Duration";
-	
-	
+
 	private List<ToolUsage> listOfToolUsages;
 	private Date timeStamp;
 	private String pluginName;
-	
+
 	private static Logger logger = Logger.getLogger(ToolStream.class.getName());
 
-	protected ToolStream() {
+	protected ToolStream()
+	{
 		listOfToolUsages = new ArrayList<>();
 	}
 
-	public static ToolStream generateFromJSON(String fileContents) {
+	public static ToolStream generateFromJSON(String fileContents)
+	{
 		JSONArray jArray;
-		try {
+		try
+		{
 			jArray = new JSONArray(fileContents);
-		} catch (JSONException e) {
+		}
+		catch (JSONException e)
+		{
 			logger.error("Problem reading in from JSON", e);
 			return null;
 		}
-		
+
 		ToolStream ts = new ToolStream();
-		
-		for(int i = 0; i< jArray.length(); i++)
+
+		for (int i = 0; i < jArray.length(); i++)
 		{
 			JSONObject jobj;
 			ToolUsage tu;
-			try {
+			try
+			{
 				jobj = jArray.getJSONObject(i);
 				tu = ToolUsage.buildFromJSONObject(jobj);
-				
-			} catch (JSONException e) {
+
+			}
+			catch (JSONException e)
+			{
 				logger.error("Malformed JSON.  Skipping", e);
 				continue;
 			}
-			
+
 			ts.listOfToolUsages.add(tu);
 		}
-		
+
 		return ts;
 	}
-	
-	public List<ToolUsage> getAsList() {
+
+	public List<ToolUsage> getAsList()
+	{
 		return this.listOfToolUsages;
 	}
-	
+
 	public static class ToolUsage {
-		
+
 		private String toolName, toolClass, keyPresses;
 		private Date timeStamp;
 		private int duration;
 		private String pluginName;
-		
-		private ToolUsage(String toolName, String toolClass, String keyPresses, Date timeStamp, int duration) 
+
+		private ToolUsage(String toolName, String toolClass, String keyPresses, Date timeStamp, int duration)
 		{
 			this.toolName = toolName.trim();
 			this.toolClass = toolClass.trim();
@@ -77,8 +85,8 @@ public class ToolStream {
 			this.timeStamp = timeStamp;
 			this.duration = duration;
 		}
-		
-		public ToolUsage(String toolName, String toolClass, String keyPresses, String pluginName, Date timeStamp, int duration) 
+
+		public ToolUsage(String toolName, String toolClass, String keyPresses, String pluginName, Date timeStamp, int duration)
 		{
 			this(toolName, toolClass, keyPresses, timeStamp, duration);
 			setPluginName(pluginName);
@@ -91,30 +99,36 @@ public class ToolStream {
 					jobj.getInt(ToolStream.TOOL_DURATION));
 		}
 
-		public String getToolName() {
+		public String getToolName()
+		{
 			return toolName;
 		}
 
-		public String getToolClass() {
+		public String getToolClass()
+		{
 			return toolClass;
 		}
 
-		public String getToolKeyPresses() {
+		public String getToolKeyPresses()
+		{
 			return keyPresses;
 		}
 
-		public Date getTimeStamp() {
+		public Date getTimeStamp()
+		{
 			return timeStamp;
 		}
 
-		public int getDuration() {
+		public int getDuration()
+		{
 			return duration;
 		}
 
-		public String getPluginName() {
+		public String getPluginName()
+		{
 			return this.pluginName;
 		}
-		
+
 		public void setPluginName(String pluginName)
 		{
 			this.pluginName = pluginName;
@@ -122,23 +136,27 @@ public class ToolStream {
 
 	}
 
-	public void setTimeStamp(Date associatedDate) {
+	public void setTimeStamp(Date associatedDate)
+	{
 		this.timeStamp = associatedDate;
 	}
+
 	public Date getTimeStamp()
 	{
 		return this.timeStamp;
 	}
 
-	public void setAssociatedPlugin(String pluginName) {
+	public void setAssociatedPlugin(String pluginName)
+	{
 		this.pluginName = pluginName;
-		for(ToolUsage tu: this.listOfToolUsages)
+		for (ToolUsage tu : this.listOfToolUsages)
 		{
 			tu.setPluginName(pluginName);
 		}
 	}
 
-	public String getAssociatedPlugin() {
+	public String getAssociatedPlugin()
+	{
 		return pluginName;
 	}
 }

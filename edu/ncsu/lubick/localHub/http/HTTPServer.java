@@ -1,13 +1,11 @@
 package edu.ncsu.lubick.localHub.http;
 
-
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Server;
 
 import edu.ncsu.lubick.localHub.WebQueryInterface;
 
 public class HTTPServer {
-
 
 	// HTTP Port Number
 	public static final int SERVER_PORT = 4443;
@@ -21,20 +19,20 @@ public class HTTPServer {
 
 	private Server underlyingServer;
 
+	private HTTPServer()
+	{
+	}
 
-	private HTTPServer() {}
-
-	public static HTTPServer startUpAnHTTPServer(WebQueryInterface wqi) 
+	public static HTTPServer startUpAnHTTPServer(WebQueryInterface wqi)
 	{
 		HTTPServer httpServer = new HTTPServer();
 		httpServer.underlyingServer = new Server(SERVER_PORT);
 		httpServer.underlyingServer.setHandler(HandlerManager.makeHandler(wqi));
 
-		
 		try
 		{
 			httpServer.underlyingServer.start();
-		} 
+		}
 		catch (Exception e)
 		{
 			logger.error("There was a problem starting the server", e);
@@ -44,15 +42,16 @@ public class HTTPServer {
 
 	}
 
-	public void shutDown() 
+	public void shutDown()
 	{
-		try {
+		try
+		{
 			underlyingServer.stop();
-		} catch (Exception e) {
-			logger.error("Problem shutting down HTTP Server",e);
+		}
+		catch (Exception e)
+		{
+			logger.error("Problem shutting down HTTP Server", e);
 		}
 	}
-
-
 
 }

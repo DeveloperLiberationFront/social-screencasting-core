@@ -9,30 +9,31 @@ import java.util.List;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 
-public abstract class SQLDatabase extends DBAbstraction  {
+public abstract class SQLDatabase extends DBAbstraction {
 
-	protected abstract void executeWithNoResults(String string); 
+	protected abstract void executeWithNoResults(String string);
+
 	protected abstract ResultSet executeWithResults(String sql);
+
 	protected abstract void cleanUpAfterQuery();
 
-	protected void createTables() {
+	protected void createTables()
+	{
 		createToolUsageTable();
 		createRawVideoCapFiles();
 	}
-	
-	
-	private void createRawVideoCapFiles() {
+
+	private void createRawVideoCapFiles()
+	{
 		/*
-		RawVideoCapFiles Schema
-			CREATE TABLE IF NOT EXISTS RawVideoCapFiles (
-				file_id INTEGER PRIMARY KEY AUTOINCREMENT
-				file_name TEXT,
-				video_start_time INTEGER, //The video's start time is only accurate to the nearest second
-				duration INTEGER //This is in seconds
-				
-			)
+		 * RawVideoCapFiles Schema CREATE TABLE IF NOT EXISTS RawVideoCapFiles (
+		 * file_id INTEGER PRIMARY KEY AUTOINCREMENT file_name TEXT,
+		 * video_start_time INTEGER, //The video's start time is only accurate
+		 * to the nearest second duration INTEGER //This is in seconds
+		 * 
+		 * )
 		 */
-		//build up the sql
+		// build up the sql
 		StringBuilder sqlTableQueryBuilder = new StringBuilder();
 		sqlTableQueryBuilder.append("CREATE TABLE IF NOT EXISTS RawVideoCapFiles ( ");
 		sqlTableQueryBuilder.append("file_id INTEGER PRIMARY KEY AUTOINCREMENT, ");
@@ -40,25 +41,21 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		sqlTableQueryBuilder.append("video_start_time INTEGER, ");
 		sqlTableQueryBuilder.append("duration INTEGER");
 		sqlTableQueryBuilder.append(") ");
-	
-		//execute the query
+
+		// execute the query
 		executeWithNoResults(sqlTableQueryBuilder.toString());
 		cleanUpAfterQuery();
 	}
-	private void createToolUsageTable() {
+
+	private void createToolUsageTable()
+	{
 		/*
-		ToolUsage Schema
-			CREATE TABLE IF NOT EXISTS ToolUsages (
-				use_id INTEGER PRIMARY KEY AUTOINCREMENT
-				plugin_name TEXT,
-				usage_timestamp INTEGER,
-				tool_name TEXT, 
-				tool_key_presses TEXT,
-				class_of_tool TEXT,
-				tool_use_duration INTEGER
-			)
+		 * ToolUsage Schema CREATE TABLE IF NOT EXISTS ToolUsages ( use_id
+		 * INTEGER PRIMARY KEY AUTOINCREMENT plugin_name TEXT, usage_timestamp
+		 * INTEGER, tool_name TEXT, tool_key_presses TEXT, class_of_tool TEXT,
+		 * tool_use_duration INTEGER )
 		 */
-		//build up the sql
+		// build up the sql
 		StringBuilder sqlTableQueryBuilder = new StringBuilder();
 		sqlTableQueryBuilder.append("CREATE TABLE IF NOT EXISTS ToolUsages ( ");
 		sqlTableQueryBuilder.append("use_id INTEGER PRIMARY KEY AUTOINCREMENT, ");
@@ -69,15 +66,15 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		sqlTableQueryBuilder.append("class_of_tool TEXT, ");
 		sqlTableQueryBuilder.append("tool_use_duration INTEGER");
 		sqlTableQueryBuilder.append(") ");
-	
-		//execute the query
+
+		// execute the query
 		executeWithNoResults(sqlTableQueryBuilder.toString());
 		cleanUpAfterQuery();
 	}
-	
-	
+
 	@Override
-	public void storeToolUsage(ToolUsage tu, String associatedPlugin) {
+	public void storeToolUsage(ToolUsage tu, String associatedPlugin)
+	{
 		StringBuilder sqlQueryBuilder = new StringBuilder();
 		sqlQueryBuilder.append("INSERT INTO ToolUsages ( ");
 		sqlQueryBuilder.append("plugin_name, ");
@@ -90,46 +87,45 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		sqlQueryBuilder.append("',");
 		sqlQueryBuilder.append(tu.getTimeStamp().getTime());
 		sqlQueryBuilder.append(",'");
-		sqlQueryBuilder.append(tu.getToolName()); 
+		sqlQueryBuilder.append(tu.getToolName());
 		sqlQueryBuilder.append("', '");
 		sqlQueryBuilder.append(tu.getToolKeyPresses());
 		sqlQueryBuilder.append("', '");
-		sqlQueryBuilder.append(tu.getToolClass()); 
+		sqlQueryBuilder.append(tu.getToolClass());
 		sqlQueryBuilder.append("', ");
-		sqlQueryBuilder.append(tu.getDuration()); 
+		sqlQueryBuilder.append(tu.getDuration());
 		sqlQueryBuilder.append(")");
-		
+
 		executeWithNoResults(sqlQueryBuilder.toString());
 		cleanUpAfterQuery();
 	}
-	
-	
+
 	@Override
-	public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName) {
-		
+	public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName)
+	{
+
 		List<ToolUsage> toolUsages = new ArrayList<>();
 		StringBuilder sqlQueryBuilder = new StringBuilder();
 		sqlQueryBuilder.append("SELECT * FROM ToolUsages ");
 		sqlQueryBuilder.append("WHERE plugin_name='");
 		sqlQueryBuilder.append(currentPluginName);
 		sqlQueryBuilder.append("'");
-		
+
 		try (ResultSet results = executeWithResults(sqlQueryBuilder.toString());)
 		{
-			//perform the query
-			
-			while(results.next())
+			// perform the query
+
+			while (results.next())
 			{
 				String toolName = results.getString("tool_name");
 				Date timestamp = new Date(results.getLong("usage_timestamp"));
 				String toolClass = results.getString("class_of_tool");
-		
+
 				String keyPresses = results.getString("tool_key_presses");
 				int duration = results.getInt("tool_use_duration");
 
-
 				toolUsages.add(new ToolUsage(toolName, toolClass, keyPresses, currentPluginName, timestamp, duration));
-			}			
+			}
 
 		}
 		catch (SQLException ex)
@@ -140,12 +136,13 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		{
 			cleanUpAfterQuery();
 		}
-		
+
 		return toolUsages;
 	}
-	
+
 	@Override
-	public void storeVideoFile(File newVideoFile, Date videoStartTime, int durationOfClip) {
+	public void storeVideoFile(File newVideoFile, Date videoStartTime, int durationOfClip)
+	{
 		StringBuilder sqlQueryBuilder = new StringBuilder();
 		sqlQueryBuilder.append("INSERT INTO RawVideoCapFiles ( ");
 		sqlQueryBuilder.append("file_name, ");
@@ -153,18 +150,26 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		sqlQueryBuilder.append("duration ) VALUES ('");
 		sqlQueryBuilder.append(newVideoFile.getAbsolutePath());
 		sqlQueryBuilder.append("',");
-		sqlQueryBuilder.append(videoStartTime.getTime() / 1000); //The video's start time is only accurate to the nearest second
+		sqlQueryBuilder.append(videoStartTime.getTime() / 1000); // The video's
+																	// start
+																	// time is
+																	// only
+																	// accurate
+																	// to the
+																	// nearest
+																	// second
 		sqlQueryBuilder.append(",");
-		sqlQueryBuilder.append(durationOfClip); //This is in seconds
+		sqlQueryBuilder.append(durationOfClip); // This is in seconds
 		sqlQueryBuilder.append(")");
-		
+
 		executeWithNoResults(sqlQueryBuilder.toString());
 		cleanUpAfterQuery();
-		
+
 	}
-	
+
 	@Override
-	public ToolUsage getLastInstanceOfToolUsage(String pluginName, String toolName) {
+	public ToolUsage getLastInstanceOfToolUsage(String pluginName, String toolName)
+	{
 		ToolUsage toolUsage = null;
 		StringBuilder sqlQueryBuilder = new StringBuilder();
 		sqlQueryBuilder.append("SELECT * FROM ToolUsages ");
@@ -173,21 +178,20 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		sqlQueryBuilder.append("' AND tool_name='");
 		sqlQueryBuilder.append(toolName);
 		sqlQueryBuilder.append("' ORDER BY usage_timestamp DESC");
-		
+
 		try (ResultSet results = executeWithResults(sqlQueryBuilder.toString());)
 		{
-			//perform the query
-			if(results.next())
+			// perform the query
+			if (results.next())
 			{
 				Date timestamp = new Date(results.getLong("usage_timestamp"));
 				String toolClass = results.getString("class_of_tool");
-		
+
 				String keyPresses = results.getString("tool_key_presses");
 				int duration = results.getInt("tool_use_duration");
 
-
 				toolUsage = new ToolUsage(toolName, toolClass, keyPresses, pluginName, timestamp, duration);
-			}			
+			}
 
 		}
 		catch (SQLException ex)
@@ -198,49 +202,55 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		{
 			cleanUpAfterQuery();
 		}
-		
+
 		return toolUsage;
 	}
-	
+
 	/*
-	RawVideoCapFiles Schema
-		CREATE TABLE IF NOT EXISTS RawVideoCapFiles (
-			file_id INTEGER PRIMARY KEY AUTOINCREMENT
-			file_name TEXT,
-			video_start_time INTEGER, //The video's start time is only accurate to the nearest second
-			duration INTEGER //This is in seconds
-			
-		)
+	 * RawVideoCapFiles Schema CREATE TABLE IF NOT EXISTS RawVideoCapFiles (
+	 * file_id INTEGER PRIMARY KEY AUTOINCREMENT file_name TEXT,
+	 * video_start_time INTEGER, //The video's start time is only accurate to
+	 * the nearest second duration INTEGER //This is in seconds
+	 * 
+	 * )
 	 */
-	
+
 	public List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int duration)
 	{
 		List<FileDateStructs> retVal = new ArrayList<>();
-		
+
 		StringBuilder sqlQueryBuilder = new StringBuilder();
 		sqlQueryBuilder.append("SELECT DISTINCT file_name, video_start_time FROM RawVideoCapFiles ");
 		sqlQueryBuilder.append("WHERE (video_start_time<");
-		sqlQueryBuilder.append(timeStamp.getTime()/1000);
+		sqlQueryBuilder.append(timeStamp.getTime() / 1000);
 		sqlQueryBuilder.append(" AND video_start_time+duration>");
-		sqlQueryBuilder.append(timeStamp.getTime()/1000);
+		sqlQueryBuilder.append(timeStamp.getTime() / 1000);
 		sqlQueryBuilder.append(") OR ( video_start_time<");
-		sqlQueryBuilder.append((timeStamp.getTime()+duration*2L) / 1000);
+		sqlQueryBuilder.append((timeStamp.getTime() + duration * 2L) / 1000);
 		sqlQueryBuilder.append(" AND video_start_time+duration>");
-		sqlQueryBuilder.append((timeStamp.getTime()+duration*2L) / 1000);
+		sqlQueryBuilder.append((timeStamp.getTime() + duration * 2L) / 1000);
 		sqlQueryBuilder.append(") ORDER BY video_start_time");
-		
+
 		try (ResultSet results = executeWithResults(sqlQueryBuilder.toString());)
 		{
-			//perform the query
-			while(results.next())
+			// perform the query
+			while (results.next())
 			{
-				Date videoTimestamp = new Date(results.getLong("video_start_time")*1000);	//multiply by 1000 to convert from seconds to millis
+				Date videoTimestamp = new Date(results.getLong("video_start_time") * 1000); // multiply
+																							// by
+																							// 1000
+																							// to
+																							// convert
+																							// from
+																							// seconds
+																							// to
+																							// millis
 				File file = new File(results.getString("file_name"));
 
 				FileDateStructs newResult = new FileDateStructs(file, videoTimestamp);
 
 				retVal.add(newResult);
-			}			
+			}
 
 		}
 		catch (SQLException ex)
@@ -251,26 +261,26 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		{
 			cleanUpAfterQuery();
 		}
-		
+
 		return retVal;
 	}
-	
+
 	@Override
-	public List<String> getNamesOfAllPlugins() 
+	public List<String> getNamesOfAllPlugins()
 	{
 		String sqlQuery = "SELECT DISTINCT plugin_name FROM ToolUsages";
-		
+
 		List<String> retVal = new ArrayList<String>();
-		
+
 		try (ResultSet results = executeWithResults(sqlQuery);)
 		{
-			//perform the query
-			while(results.next())
+			// perform the query
+			while (results.next())
 			{
-				String plugin_name= results.getString("plugin_name");
+				String plugin_name = results.getString("plugin_name");
 
 				retVal.add(plugin_name);
-			}			
+			}
 
 		}
 		catch (SQLException ex)
@@ -283,5 +293,5 @@ public abstract class SQLDatabase extends DBAbstraction  {
 		}
 		return retVal;
 	}
-	
+
 }

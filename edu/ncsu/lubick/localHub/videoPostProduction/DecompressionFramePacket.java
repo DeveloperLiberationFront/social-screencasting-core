@@ -40,19 +40,21 @@ public class DecompressionFramePacket
 
 	private int result;
 	private Date frameTimeStamp;
-	//Maybe deprecated
+	// Maybe deprecated
 	private int frameSize;
 
-	int[] previousData = new int[1];	//to avoid null pointers
+	int[] previousData = new int[1]; // to avoid null pointers
 	byte[] encodedData = new byte[1];
 	int[] decodedData = new int[1];
 	private Rectangle frameDimensions;
 
-	public int getFrameSize() {
+	public int getFrameSize()
+	{
 		return frameSize;
 	}
 
-	public DecompressionFramePacket(Rectangle frameDimensions) {
+	public DecompressionFramePacket(Rectangle frameDimensions)
+	{
 		this.frameSize = frameDimensions.width * frameDimensions.height;
 		this.frameDimensions = frameDimensions;
 		previousData = new int[frameSize];
@@ -71,38 +73,44 @@ public class DecompressionFramePacket
 		}
 	}
 
-	public int[] getData() {
+	public int[] getData()
+	{
 		return decodedData;
 	}
 
-	public int getResult() {
+	public int getResult()
+	{
 		return result;
 	}
 
-	public Date getFrameTimeStamp() {
+	public Date getFrameTimeStamp()
+	{
 		return frameTimeStamp;
 	}
 
-	public void setFrameTimeStamp(Date date) {
+	public void setFrameTimeStamp(Date date)
+	{
 		this.frameTimeStamp = date;
 	}
 
-	public void setResult(int result) {
+	public void setResult(int result)
+	{
 		this.result = result;
 	}
 
-	public byte[] getEncodedData() {
+	public byte[] getEncodedData()
+	{
 		return encodedData;
 	}
 
-	public void setEncodedData(byte[] packed) {
+	public void setEncodedData(byte[] packed)
+	{
 		this.encodedData = packed;
 	}
 
-
-
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		return "FramePacket [frameSize=" + frameSize + ", result=" + result
 				+ ", frameTimeStamp=" + frameTimeStamp + ", previousDataLength="
 				+ previousData.length + ", encodedDataLength="
@@ -110,7 +118,8 @@ public class DecompressionFramePacket
 				+ decodedData.length + "]";
 	}
 
-	public Rectangle getFrameDimensions() {
+	public Rectangle getFrameDimensions()
+	{
 		return this.frameDimensions;
 	}
 
