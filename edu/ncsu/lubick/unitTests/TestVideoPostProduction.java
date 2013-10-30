@@ -108,7 +108,8 @@ public class TestVideoPostProduction
 
 		Date datePlusFiftyFive = new Date(date.getTime() + 55 * 1000); // plus 55 seconds, plenty to over run this file
 
-		ToolUsage testToolUsage = makeToolUsage(datePlusFiftyFive, toolName);
+		ToolUsage testToolUsage = makeToolUsage(datePlusFiftyFive, toolName, 10*1000);
+		
 
 		File outputFile = handler.extractVideoForToolUsage(testToolUsage);
 
@@ -169,8 +170,13 @@ public class TestVideoPostProduction
 
 	private ToolUsage makeToolUsage(Date toolUsageDate, String toolUsageName)
 	{
+		return makeToolUsage(toolUsageDate, toolUsageName, 2000);
+	}
+	
+	private ToolUsage makeToolUsage(Date toolUsageDate, String toolUsageName, int duration)
+	{
 		IdealizedToolStream iToolStream = new IdealizedToolStream(toolUsageDate);
-		iToolStream.addToolUsage(toolUsageName, DEFAULT_TESTING_TOOL_CLASS, DEFAULT_TESTING_KEYPRESS, toolUsageDate, 2000);
+		iToolStream.addToolUsage(toolUsageName, DEFAULT_TESTING_TOOL_CLASS, DEFAULT_TESTING_KEYPRESS, toolUsageDate, duration);
 
 		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
 		toolStream.setAssociatedPlugin(TEST_PLUGIN_NAME);

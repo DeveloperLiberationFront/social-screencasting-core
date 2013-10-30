@@ -53,7 +53,7 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		this.fdrs = fdrs;
 	}
 
-	public BufferedImage readInFrameImage(InputStream inputStream) throws IOException, VideoEncodingException, ReachedEndOfCapFileException
+	public DecompressionFramePacket readInNextFrame(InputStream inputStream) throws IOException, VideoEncodingException, ReachedEndOfCapFileException
 	{
 		logger.trace("Starting to read in frame");
 		DecompressionFramePacket framePacket = unpackNextFrame(inputStream);
@@ -62,9 +62,8 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		{
 			throw new ReachedEndOfCapFileException();
 		}
-		framePacket = this.fdcs.decodeFramePacket(framePacket);
-		previousImage = this.fdcs.createBufferedImageFromDecompressedFramePacket(framePacket);
-		return previousImage;
+		previousFramePacket = this.fdcs.decodeFramePacket(framePacket);
+		return previousFramePacket;
 
 	}
 	

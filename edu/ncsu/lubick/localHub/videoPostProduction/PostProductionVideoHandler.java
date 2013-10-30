@@ -14,7 +14,6 @@ import java.util.Scanner;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
-import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeyboardAnimation;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.DefaultAnimationStrategy;
 
 /* Some parts of this (the decoding aspect) have the following license:
@@ -220,8 +219,10 @@ public class PostProductionVideoHandler
 	{
 		imageWriter.reset();
 
+		logger.debug("starting extraction");
 		extractImagesForTimePeriodToScratchFolder(inputStream);
 
+		logger.debug("waiting until all the images are done extracting");
 		imageWriter.waitUntilDoneWriting();
 
 		logger.info("Adding animation to video");
@@ -242,10 +243,13 @@ public class PostProductionVideoHandler
 	{
 		for (int i = 0; i < FRAME_RATE * (RUN_UP_TIME + toolDemoInSeconds); i++)
 		{
-			BufferedImage tempImage;
+			BufferedImage tempImage = null;
+			DecompressionFramePacket framePacket = null;
 			try
 			{
-				tempImage = decompressor.readInFrameImage(inputStream);
+				framePacket = decompressor.readInNextFrame(inputStream);
+				tempImage = decompressor.createBufferedImageFromDecompressedFramePacket(framePacket);
+				
 			}
 			catch (VideoEncodingException e)
 			{
@@ -265,6 +269,7 @@ public class PostProductionVideoHandler
 				continue;
 			}
 			imageWriter.writeImageToDisk(tempImage);
+
 		}
 	}
 
@@ -275,7 +280,8 @@ public class PostProductionVideoHandler
 			BufferedImage tempImage = null;
 			try
 			{
-				tempImage = decompressor.readInFrameImage(inputStream);
+				DecompressionFramePacket framePacket = decompressor.readInNextFrame(inputStream);
+				tempImage = decompressor.createBufferedImageFromDecompressedFramePacket(framePacket);
 			}
 			catch (VideoEncodingException e)
 			{

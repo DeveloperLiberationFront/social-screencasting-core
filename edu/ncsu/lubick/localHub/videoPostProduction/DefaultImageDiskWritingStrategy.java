@@ -1,6 +1,7 @@
 package edu.ncsu.lubick.localHub.videoPostProduction;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
@@ -50,5 +51,6 @@ public abstract class DefaultImageDiskWritingStrategy implements ImageDiskWritin
 			}
 		}
 	}
+	
 
 }
