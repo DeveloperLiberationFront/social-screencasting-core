@@ -170,7 +170,7 @@ public class TestVideoPostProduction
 	private ToolUsage makeToolUsage(Date toolUsageDate, String toolUsageName)
 	{
 		IdealizedToolStream iToolStream = new IdealizedToolStream(toolUsageDate);
-		iToolStream.addToolUsage(toolUsageName, DEFAULT_TESTING_TOOL_CLASS, DEFAULT_TESTING_KEYPRESS, toolUsageDate, 15);
+		iToolStream.addToolUsage(toolUsageName, DEFAULT_TESTING_TOOL_CLASS, DEFAULT_TESTING_KEYPRESS, toolUsageDate, 2000);
 
 		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
 		toolStream.setAssociatedPlugin(TEST_PLUGIN_NAME);

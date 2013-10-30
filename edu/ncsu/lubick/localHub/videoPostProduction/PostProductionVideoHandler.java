@@ -3,10 +3,9 @@ package edu.ncsu.lubick.localHub.videoPostProduction;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -106,7 +105,7 @@ public class PostProductionVideoHandler
 		// set the output writer to be where we want
 		thisHandler.imageWriter = new ThreadedImageDiskWritingStrategy(outputDirectory.getPath(), false);
 		// write out all the images
-		try (FileInputStream inputStream = new FileInputStream(thisHandler.currentCapFile);)
+		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(Files.readAllBytes(thisHandler.currentCapFile.toPath())))
 		{
 			thisHandler.decompressor.readInFileHeader(inputStream);
 
@@ -115,10 +114,6 @@ public class PostProductionVideoHandler
 			thisHandler.extractAllImagesInStream(inputStream);
 
 			thisHandler.imageWriter.waitUntilDoneWriting();
-		}
-		catch (FileNotFoundException e)
-		{
-			e.printStackTrace();
 		}
 		catch (IOException e)
 		{
@@ -147,20 +142,23 @@ public class PostProductionVideoHandler
 		}
 
 		Date timeToLookFor = findStartingTime(specificToolUse);
+		
+		logger.info("The video for "+specificToolUse.toString()+" will start at "+timeToLookFor);
 
 		this.toolDemoInSeconds = specificToolUse.getDuration() / 1000.0;
 
 		this.currentToolStream = specificToolUse;
 
 		File createdVideoFileToReturn = null;
-		try (FileInputStream inputStream = new FileInputStream(currentCapFile);)
+		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(Files.readAllBytes(currentCapFile.toPath())))
 		{
-			
 			decompressor.readInFileHeader(inputStream);
+			logger.info("Fast forwarding to the appropriate time");
 			fastFowardStreamToTime(inputStream, timeToLookFor); // throws VideoEncodingException if there was a problem prior to the important bits
 
 			File tempFile = new File(makeFileNameForToolPlugin(specificToolUse.getPluginName(),
 					specificToolUse.getToolName()));
+			logger.info("Beginning the extraction of the frames");
 			createdVideoFileToReturn = extractDemoVideoToFile(inputStream, tempFile);
 
 		}
@@ -201,8 +199,7 @@ public class PostProductionVideoHandler
 		return null;
 	}
 
-	private void fastFowardStreamToTime(FileInputStream inputStream, Date timeToLookFor) throws IOException,
-			VideoEncodingException, ReachedEndOfCapFileException
+	private void fastFowardStreamToTime(InputStream inputStream, Date timeToLookFor) throws IOException, VideoEncodingException, ReachedEndOfCapFileException
 	{
 		if (timeToLookFor.equals(capFileStartTime)) // no fast forwarding  required
 		{
@@ -213,7 +210,7 @@ public class PostProductionVideoHandler
 
 		while (currTimeStamp.before(timeToLookFor))
 		{
-			decompressor.readInFrameImage(inputStream); // throws VideoEncodingException if there was a problem
+			decompressor.bypassNextFrame(inputStream); // throws VideoEncodingException if there was a problem
 			currTimeStamp = decompressor.getPreviousFrameTimeStamp();
 
 		}
@@ -392,7 +389,7 @@ public class PostProductionVideoHandler
 	{
 		oldInputStream.close();
 		OverloadFile nextFile = queueOfOverloadFiles.poll();
-		FileInputStream inputStream = new FileInputStream(nextFile.file);
+		ByteArrayInputStream inputStream = new ByteArrayInputStream(Files.readAllBytes(nextFile.file.toPath()));
 		decompressor.readInFileHeader(inputStream);
 
 		setCurrentFileStartTime(nextFile.date);

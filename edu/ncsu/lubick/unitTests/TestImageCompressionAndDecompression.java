@@ -657,7 +657,8 @@ public class TestImageCompressionAndDecompression
 
 		decompressionPacket.setEncodedData(slimmedPackedBytes);
 
-		BufferedImage image = decompressorToTest.decodeFramePacketToBufferedImage(decompressionPacket);
+		decompressionPacket = decompressorToTest.decodeFramePacket(decompressionPacket);
+		BufferedImage image = decompressorToTest.createBufferedImageFromDecompressedFramePacket(decompressionPacket);
 
 		return image;
 	}

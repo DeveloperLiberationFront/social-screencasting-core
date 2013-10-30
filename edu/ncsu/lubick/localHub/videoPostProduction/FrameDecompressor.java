@@ -62,8 +62,23 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		{
 			throw new ReachedEndOfCapFileException();
 		}
+		framePacket = this.fdcs.decodeFramePacket(framePacket);
+		previousImage = this.fdcs.createBufferedImageFromDecompressedFramePacket(framePacket);
+		return previousImage;
 
-		return this.fdcs.decodeFramePacketToBufferedImage(framePacket);
+	}
+	
+	public void bypassNextFrame(InputStream inputStream) throws IOException, VideoEncodingException, ReachedEndOfCapFileException
+	{
+		logger.trace("Starting to read in frame");
+		DecompressionFramePacket framePacket = unpackNextFrame(inputStream);
+
+		if (framePacket == null) // must have reached the file
+		{
+			throw new ReachedEndOfCapFileException();
+		}
+
+		previousFramePacket = this.fdcs.decodeFramePacket(framePacket);	
 
 	}
 
@@ -190,12 +205,12 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 	}
 
 	@Override
-	public BufferedImage decodeFramePacketToBufferedImage(DecompressionFramePacket framePacket)
+	public DecompressionFramePacket decodeFramePacket(DecompressionFramePacket framePacket)
 	{
 		if (framePacket == null)
 		{
 			logger.error("I got null when decoding.  Returning previous image");
-			return previousImage;
+			return null;
 		}
 
 		framePacket.setPreviousFramePacket(previousFramePacket);
@@ -204,12 +219,10 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 
 		logger.debug("read in frame " + framePacket);
 
-		// Date frameTime = frame.getFrameTimeStamp();
-
 		int result = framePacket.getResult();
 		if (result == DecompressionFramePacket.NO_CHANGES_THIS_FRAME)
 		{
-			return previousImage;
+			return null;
 		}
 		else if (result == DecompressionFramePacket.REACHED_END)
 		{
@@ -219,12 +232,16 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		}
 		previousFramePacket = framePacket;
 
+		return framePacket;
+	}
+
+	@Override
+	public BufferedImage createBufferedImageFromDecompressedFramePacket(DecompressionFramePacket framePacket)
+	{
 		BufferedImage bufferedImage = new BufferedImage(framePacket.getFrameDimensions().width, framePacket.getFrameDimensions().height,
 				BufferedImage.TYPE_INT_RGB);
 		bufferedImage.setRGB(0, 0, framePacket.getFrameDimensions().width, framePacket.getFrameDimensions().height, framePacket.getData(), 0,
 				framePacket.getFrameDimensions().width);
-
-		previousImage = bufferedImage;
 
 		return bufferedImage;
 	}
