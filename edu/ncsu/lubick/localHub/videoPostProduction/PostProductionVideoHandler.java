@@ -14,7 +14,7 @@ import java.util.Scanner;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
-import edu.ncsu.lubick.localHub.videoPostProduction.animation.DefaultAnimationStrategy;
+import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeyboardAnimation;
 
 /* Some parts of this (the decoding aspect) have the following license:
  * 
@@ -62,8 +62,8 @@ public class PostProductionVideoHandler
 
 	private Date capFileStartTime;
 
-	private PostProductionAnimationStrategy postProductionAnimator = new DefaultAnimationStrategy(SCRATCH_DIR);
-	//private PostProductionAnimationStrategy postProductionAnimator = new CornerKeyboardAnimation(SCRATCH_DIR, FRAME_RATE, RUN_UP_TIME);
+	//private PostProductionAnimationStrategy postProductionAnimator = new NoAnimationStrategy();
+	private PostProductionAnimationStrategy postProductionAnimator = new CornerKeyboardAnimation(SCRATCH_DIR, FRAME_RATE, RUN_UP_TIME);
 	
 	private Queue<OverloadFile> queueOfOverloadFiles = new LinkedList<>();
 

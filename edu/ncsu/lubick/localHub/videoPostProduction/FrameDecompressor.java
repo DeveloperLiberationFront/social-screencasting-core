@@ -29,8 +29,6 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 
 	private DecompressionFramePacket previousFramePacket = null;
 
-	private BufferedImage previousImage = null;
-
 	private static final int MAX_BLOCK_LENGTH = 126;
 
 	private static final byte STREAK_OF_SAME_AS_LAST_TIME_BLOCKS_CONSTANT = (byte) 0xFF;

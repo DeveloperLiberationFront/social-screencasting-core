@@ -9,9 +9,10 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionAnimationStrat
  * @author KevinLubick
  * 
  */
-public class DefaultAnimationStrategy implements PostProductionAnimationStrategy {
+public class NoAnimationStrategy implements PostProductionAnimationStrategy {
 
-	public DefaultAnimationStrategy(String scratchDir)
+
+	public NoAnimationStrategy()
 	{
 	}
 

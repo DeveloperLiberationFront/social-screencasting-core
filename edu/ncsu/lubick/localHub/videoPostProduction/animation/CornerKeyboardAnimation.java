@@ -2,7 +2,6 @@ package edu.ncsu.lubick.localHub.videoPostProduction.animation;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;

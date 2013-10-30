@@ -1,6 +1,7 @@
 package edu.ncsu.lubick.localHub.videoPostProduction.animation;
 
 import static edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedKeyboardMaker.*;
+
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
