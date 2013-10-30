@@ -68,13 +68,9 @@ public class PostProductionVideoHandler
 	private Queue<OverloadFile> queueOfOverloadFiles = new LinkedList<>();
 
 	private FrameDecompressor decompressor = new FrameDecompressor();
-	private ImageDiskWritingStrategy imageWriter = new ThreadedImageDiskWritingStrategy(SCRATCH_DIR,
-			DELETE_IMAGES_AFTER_USE);
+	private ImageDiskWritingStrategy imageWriter = new ThreadedImageDiskWritingStrategy(SCRATCH_DIR, DELETE_IMAGES_AFTER_USE);
 
 	private double toolDemoInSeconds;
-	// private ImageDiskWritingStrategy imageWriter = new
-	// BlockingImageDiskWritingStrategy("./Scratch/", DELETE_IMAGES_AFTER_USE);
-
 	private ToolUsage currentToolStream;
 
 	public void loadFile(File capFile)
