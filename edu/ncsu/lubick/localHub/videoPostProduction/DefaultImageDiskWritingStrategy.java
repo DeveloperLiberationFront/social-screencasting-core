@@ -23,7 +23,7 @@ public abstract class DefaultImageDiskWritingStrategy implements ImageDiskWritin
 		}
 		this.deleteImagesAfterUse = deleteImagesAfterUse;
 
-		reset();
+		//reset();
 	}
 
 	public abstract Logger getLogger();

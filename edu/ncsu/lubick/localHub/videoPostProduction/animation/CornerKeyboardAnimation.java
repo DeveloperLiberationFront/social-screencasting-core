@@ -1,6 +1,8 @@
 package edu.ncsu.lubick.localHub.videoPostProduction.animation;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -57,7 +59,7 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 		{
 			animationSource = new AnimatedKeyboardMaker();
 		}
-		toolUsage.getToolKeyPresses();
+		diskWriter.resetWithOutClearingFolder();
 
 		File[] imagesToAddAnimationTo = scratchDir.listFiles(new FileFilter() {
 			
@@ -94,9 +96,14 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 	private void addAnimationToImageAndSaveToDisk(BufferedImage animation, File sourceFile) throws IOException
 	{
 		BufferedImage frameImage = ImageIO.read(sourceFile);
+		Graphics2D g = frameImage.createGraphics();
 		
+
+		int x = frameImage.getWidth() - animation.getWidth();
+		int y = frameImage.getHeight() - animation.getHeight();
+		g.drawImage(animation, x, y, animation.getWidth(), animation.getHeight(), null);
 		
-		diskWriter.writeImageToDisk(frameImage,sourceFile);
+		diskWriter.writeImageToDisk(frameImage, sourceFile);
 	}
 
 }

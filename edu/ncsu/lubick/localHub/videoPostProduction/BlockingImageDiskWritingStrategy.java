@@ -53,4 +53,10 @@ public class BlockingImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 	{
 		return logger;
 	}
+
+	@Override
+	public void resetWithOutClearingFolder()
+	{
+		//Do nothing
+	}
 }

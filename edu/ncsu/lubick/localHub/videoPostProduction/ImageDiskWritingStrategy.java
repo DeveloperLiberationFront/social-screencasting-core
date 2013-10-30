@@ -13,4 +13,6 @@ public interface ImageDiskWritingStrategy {
 	void reset();
 
 	void writeImageToDisk(BufferedImage image, File outputFile) throws IOException;
+
+	void resetWithOutClearingFolder();
 }

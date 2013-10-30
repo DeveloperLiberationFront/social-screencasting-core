@@ -1,6 +1,7 @@
 package edu.ncsu.lubick.localHub.videoPostProduction;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -154,14 +155,9 @@ public class PostProductionVideoHandler
 		File createdVideoFileToReturn = null;
 		try (FileInputStream inputStream = new FileInputStream(currentCapFile);)
 		{
+			
 			decompressor.readInFileHeader(inputStream);
-			fastFowardStreamToTime(inputStream, timeToLookFor); // throws
-																// VideoEncodingException
-																// if there was
-																// a problem
-																// prior to the
-																// important
-																// bits
+			fastFowardStreamToTime(inputStream, timeToLookFor); // throws VideoEncodingException if there was a problem prior to the important bits
 
 			File tempFile = new File(makeFileNameForToolPlugin(specificToolUse.getPluginName(),
 					specificToolUse.getToolName()));
@@ -231,6 +227,7 @@ public class PostProductionVideoHandler
 
 		imageWriter.waitUntilDoneWriting();
 
+		logger.info("Adding animation to video");
 		postProductionAnimator.addAnimationToImagesInScratchFolderForToolStream(this.currentToolStream);
 
 		if (newVideoFile.exists() && !newVideoFile.delete())
@@ -238,9 +235,9 @@ public class PostProductionVideoHandler
 			logger.error("could not establish a temporary video file");
 			return null;
 		}
-
+		logger.info("Rendering Video");
 		combineImageFilesToVideo(newVideoFile);
-
+		logger.info("Video Rendered");
 		return newVideoFile;
 	}
 

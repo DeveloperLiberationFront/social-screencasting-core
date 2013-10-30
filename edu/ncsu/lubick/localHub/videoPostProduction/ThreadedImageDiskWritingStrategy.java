@@ -27,11 +27,7 @@ public class ThreadedImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 	{
 		super.reset();
 
-		if (workingThreadPool != null)
-		{
-			workingThreadPool.shutdownNow();
-		}
-		this.workingThreadPool = Executors.newCachedThreadPool(Executors.defaultThreadFactory());
+		resetWithOutClearingFolder();
 	}
 
 	@Override
@@ -99,6 +95,16 @@ public class ThreadedImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 	public Logger getLogger()
 	{
 		return logger;
+	}
+
+	@Override
+	public void resetWithOutClearingFolder()
+	{
+		if (workingThreadPool != null)
+		{
+			workingThreadPool.shutdownNow();
+		}
+		this.workingThreadPool = Executors.newCachedThreadPool(Executors.defaultThreadFactory());
 	}
 
 }
