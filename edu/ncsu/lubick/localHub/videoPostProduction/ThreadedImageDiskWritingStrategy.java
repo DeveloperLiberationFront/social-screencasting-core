@@ -63,6 +63,13 @@ public class ThreadedImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 		{
 			logger.debug("The image file already exists, going to overwrite");
 		}
+		writeImageToDisk(tempImage, f);
+
+	}
+
+	@Override
+	public void writeImageToDisk(final BufferedImage image, final File outputFile)
+	{
 		logger.trace("Starting write to disk");
 		workingThreadPool.submit(new Runnable() {
 
@@ -71,13 +78,13 @@ public class ThreadedImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 			{
 				try
 				{
-					ImageIO.write(tempImage, "png", f);
+					ImageIO.write(image, PostProductionVideoHandler.INTERMEDIATE_FILE_FORMAT, outputFile);
 					logger.trace("Finished write to disk");
 					if (deleteImagesAfterUse)
 					{
 						// if we are in a debug state, we want to see the files
 						// at the end of all of this.
-						f.deleteOnExit();
+						outputFile.deleteOnExit();
 					}
 				}
 				catch (IOException e)
@@ -86,7 +93,6 @@ public class ThreadedImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 				}
 			}
 		});
-
 	}
 
 	@Override

@@ -34,11 +34,7 @@ public class AnimatedKeyboardMaker implements KeypressAnimationMaker {
 	@Override
 	public BufferedImage makeAnimationForKeyCodes(int[] keycodes)
 	{
-		int width = unActivatedKeyboard.getWidth();
-		int height = unActivatedKeyboard.getHeight();
-		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-
-		copyFromImageToGraphics(img.getGraphics(), unActivatedKeyboard, 0, 0, width, height);
+		BufferedImage img = makeUnactivatedAnimation();
 
 		for (int keyCode : keycodes)
 		{
@@ -50,9 +46,21 @@ public class AnimatedKeyboardMaker implements KeypressAnimationMaker {
 
 	}
 
+	@Override
+	public BufferedImage makeUnactivatedAnimation()
+	{
+		int width = unActivatedKeyboard.getWidth();
+		int height = unActivatedKeyboard.getHeight();
+		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+		copyFromImageToGraphics(img.getGraphics(), unActivatedKeyboard, 0, 0, width, height);
+		return img;
+	}
+
 	public static void copyFromImageToGraphics(Graphics g, BufferedImage img, int firstX, int firstY, int secondX, int secondY)
 	{
 		g.drawImage(img, firstX, firstY, secondX, secondY, firstX, firstY, secondX, secondY, null);
 	}
+
 
 }

@@ -6,4 +6,6 @@ public interface KeypressAnimationMaker {
 
 	BufferedImage makeAnimationForKeyCodes(int[] keycodes);
 
+	BufferedImage makeUnactivatedAnimation();
+
 }

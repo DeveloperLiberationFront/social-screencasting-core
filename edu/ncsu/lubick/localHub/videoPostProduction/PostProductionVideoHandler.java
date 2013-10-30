@@ -14,6 +14,7 @@ import java.util.Scanner;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeyboardAnimation;
 
 /* Some parts of this (the decoding aspect) have the following license:
  * 
@@ -43,6 +44,8 @@ import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
  */
 public class PostProductionVideoHandler
 {
+	public static final String INTERMEDIATE_FILE_FORMAT = "png";
+
 	private static final String SCRATCH_DIR = "./Scratch/";
 
 	private static Logger logger = Logger.getLogger(PostProductionVideoHandler.class.getName());
@@ -55,14 +58,13 @@ public class PostProductionVideoHandler
 
 	private static final int RUN_UP_TIME = 5;
 
-	// private static final int TOOL_DEMO_TIME = 15;
-
 	private File currentCapFile;
 
 	private Date capFileStartTime;
 
-	private PostProductionAnimationStrategy postProductionAnimator = new DefaultAnimationStrategy(SCRATCH_DIR);
-
+	//private PostProductionAnimationStrategy postProductionAnimator = new DefaultAnimationStrategy(SCRATCH_DIR);
+	private PostProductionAnimationStrategy postProductionAnimator = new CornerKeyboardAnimation(SCRATCH_DIR, FRAME_RATE, RUN_UP_TIME);
+	
 	private Queue<OverloadFile> queueOfOverloadFiles = new LinkedList<>();
 
 	private FrameDecompressor decompressor = new FrameDecompressor();
@@ -84,8 +86,7 @@ public class PostProductionVideoHandler
 		}
 		if (!capFile.getName().endsWith(EXPECTED_FILE_EXTENSION))
 		{
-			logger.error("Expected cap file to have an extension " + EXPECTED_FILE_EXTENSION + " not like "
-					+ capFile.getName());
+			logger.error("Expected cap file to have an extension " + EXPECTED_FILE_EXTENSION + " not like " + capFile.getName());
 			this.currentCapFile = null;
 		}
 		this.currentCapFile = capFile;
@@ -207,8 +208,7 @@ public class PostProductionVideoHandler
 	private void fastFowardStreamToTime(FileInputStream inputStream, Date timeToLookFor) throws IOException,
 			VideoEncodingException, ReachedEndOfCapFileException
 	{
-		if (timeToLookFor.equals(capFileStartTime)) // no fast forwarding
-													// required
+		if (timeToLookFor.equals(capFileStartTime)) // no fast forwarding  required
 		{
 			return;
 		}
@@ -217,10 +217,7 @@ public class PostProductionVideoHandler
 
 		while (currTimeStamp.before(timeToLookFor))
 		{
-			decompressor.readInFrameImage(inputStream); // throws
-														// VideoEncodingException
-														// if there was a
-														// problem
+			decompressor.readInFrameImage(inputStream); // throws VideoEncodingException if there was a problem
 			currTimeStamp = decompressor.getPreviousFrameTimeStamp();
 
 		}
@@ -309,12 +306,9 @@ public class PostProductionVideoHandler
 		// TODO make this more flexible, not hardcoded. i.e. the user should
 		// specify where their ffmpeg is
 
-		String executableString = "./src/FFMPEGbin/ffmpeg.exe -r 5 -pix_fmt yuv420p -i ./Scratch/temp%04d.png  -vcodec libx264 "
-				+ newVideoFile.getPath();
+		String executableString = compileExecutableString(newVideoFile);
 
-		// Using Runtime.exec() because I couldn't get ProcessBuilder to handle
-		// the arguments on
-		// ffempeg well.
+		// Using Runtime.exec() because I couldn't get ProcessBuilder to handle the arguments on ffempeg well.
 		Process process = Runtime.getRuntime().exec(executableString);
 
 		inheritIO(process.getInputStream(), "Normal Output");
@@ -328,6 +322,18 @@ public class PostProductionVideoHandler
 		{
 			logger.error("There was a problem with ffmpeg", e);
 		}
+	}
+
+	private String compileExecutableString(File newVideoFile)
+	{
+		StringBuilder builder = new StringBuilder();
+		builder.append("./src/FFMPEGbin/ffmpeg.exe -r 5 -pix_fmt yuv420p -i ");
+		builder.append(SCRATCH_DIR);
+		builder.append("temp%04d.");
+		builder.append(INTERMEDIATE_FILE_FORMAT);
+		builder.append("  -vcodec libx264 ");
+		builder.append(newVideoFile.getPath());
+		return builder.toString();
 	}
 
 	private static void inheritIO(final InputStream src, final String identifer)

@@ -19,21 +19,26 @@ public class BlockingImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 	}
 
 	@Override
-	public void writeImageToDisk(BufferedImage readFrame) throws IOException
+	public void writeImageToDisk(BufferedImage image) throws IOException
 	{
-		File f = new File(workingDir, getNextFileName());
+		File f = new File(workingDir, getNextFileName());	//gets filenames from listener
 		if (!f.createNewFile())
 		{
 			logger.debug("The image file already exists, going to overwrite");
 		}
+		writeImageToDisk(image, f);
+	}
+
+	@Override
+	public void writeImageToDisk(BufferedImage image, File outputFile) throws IOException
+	{
 		logger.trace("Starting write to disk");
-		ImageIO.write(readFrame, "png", f);
+		ImageIO.write(image, PostProductionVideoHandler.INTERMEDIATE_FILE_FORMAT, outputFile);
 		logger.trace("Finished write to disk");
 		if (deleteImagesAfterUse)
 		{
-			// if we are in a debug state, we want to see the files at the end
-			// of all of this.
-			f.deleteOnExit();
+			// if we are in a debug state, we want to see the files at the end of all of this.
+			outputFile.deleteOnExit();
 		}
 	}
 
