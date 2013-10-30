@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeyboardAnimation;
+import edu.ncsu.lubick.localHub.videoPostProduction.animation.DefaultAnimationStrategy;
 
 /* Some parts of this (the decoding aspect) have the following license:
  * 
@@ -62,8 +63,8 @@ public class PostProductionVideoHandler
 
 	private Date capFileStartTime;
 
-	//private PostProductionAnimationStrategy postProductionAnimator = new DefaultAnimationStrategy(SCRATCH_DIR);
-	private PostProductionAnimationStrategy postProductionAnimator = new CornerKeyboardAnimation(SCRATCH_DIR, FRAME_RATE, RUN_UP_TIME);
+	private PostProductionAnimationStrategy postProductionAnimator = new DefaultAnimationStrategy(SCRATCH_DIR);
+	//private PostProductionAnimationStrategy postProductionAnimator = new CornerKeyboardAnimation(SCRATCH_DIR, FRAME_RATE, RUN_UP_TIME);
 	
 	private Queue<OverloadFile> queueOfOverloadFiles = new LinkedList<>();
 
@@ -156,8 +157,7 @@ public class PostProductionVideoHandler
 			logger.info("Fast forwarding to the appropriate time");
 			fastFowardStreamToTime(inputStream, timeToLookFor); // throws VideoEncodingException if there was a problem prior to the important bits
 
-			File tempFile = new File(makeFileNameForToolPlugin(specificToolUse.getPluginName(),
-					specificToolUse.getToolName()));
+			File tempFile = new File(makeFileNameForToolPlugin(specificToolUse.getPluginName(), specificToolUse.getToolName()));
 			logger.info("Beginning the extraction of the frames");
 			createdVideoFileToReturn = extractDemoVideoToFile(inputStream, tempFile);
 
