@@ -5,27 +5,24 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
-import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
 import org.apache.log4j.Logger;
-import org.junit.experimental.runners.Enclosed;
 
-import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToMediaOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.AbstractImagesToMediaOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 
-public class ImagesToGifOutput implements ImagesToMediaOutput {
+public class ImagesToGifOutput extends AbstractImagesToMediaOutput {
 
 	private static final String GIF_EXTENSION = "gif";
 	private static Logger logger = Logger.getLogger(ImagesToGifOutput.class.getName());
-	private File scratchDir;
+	
 	
 	public ImagesToGifOutput(String scratchDir)
 	{
-		this.scratchDir = new File(scratchDir);
+		super(new File(scratchDir));
 	}
 	
 	@Override
@@ -65,20 +62,6 @@ public class ImagesToGifOutput implements ImagesToMediaOutput {
 		encoder.addFrame(image);
 	}
 
-	private File[] getImageFilesToAnimate()
-	{
-		File[] imagesToAnimate = scratchDir.listFiles(new FileFilter() {
-			
-			@Override
-			public boolean accept(File pathname)
-			{
-				return pathname.getName().endsWith(PostProductionHandler.INTERMEDIATE_FILE_FORMAT);
-			}
-		});
-		Arrays.sort(imagesToAnimate);
-		return imagesToAnimate;
-	}
-
 	private AnimatedGifEncoder makeGifEncoder(File newGifFile)
 	{
 		AnimatedGifEncoder e = new AnimatedGifEncoder();
@@ -91,24 +74,23 @@ public class ImagesToGifOutput implements ImagesToMediaOutput {
 	private File makeGifFile(String fileNameMinusExtension) throws IOException
 	{
 		File newGifFile = new File(fileNameMinusExtension + "." + GIF_EXTENSION);
-		if (!newGifFile.getParentFile().mkdirs() && !newGifFile.getParentFile().exists())
-		{
-			throw new IOException("Could not make the output folder " + newGifFile.getParentFile());
-		}
-
-		if (newGifFile.exists() && !newGifFile.delete())
-		{
-			logger.error("Could not make video file.  Could not delete previous gif " + newGifFile);
-			throw new IOException("Could not make video file.  Could not delete previous gif" + newGifFile);
-		}
+		cleanUpForFile(newGifFile);
 		
 		return newGifFile; 
 	}
+
+	
 
 	@Override
 	public String getMediaTypeInfo()
 	{
 		return "Video/gif";
+	}
+
+	@Override
+	protected Logger getLogger()
+	{
+		return logger;
 	}
 
 }

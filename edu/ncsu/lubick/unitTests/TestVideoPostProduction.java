@@ -18,6 +18,7 @@ import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
 import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
+import edu.ncsu.lubick.localHub.videoPostProduction.ThumbnailGenerator;
 import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.gif.ImagesToGifOutput;
 
@@ -60,13 +61,13 @@ public class TestVideoPostProduction
 	}
 	
 	@Test
-	public void testSingleToolUsageExtractionVideoAndGif() throws Exception
+	public void testSingleToolUsageExtractionVideoThumbnailAndGif() throws Exception
 	{
-		PostProductionHandler handler = makeVideoAndGifPostProductionHandler();
+		PostProductionHandler handler = makeVideoThumbnailAndGifPostProductionHandler();
 		
 		List<File> outputMedia = testARandomToolInAHandler(handler);
 		
-		assertEquals(2, outputMedia.size());
+		assertEquals(3, outputMedia.size());
 		assertNotNull(outputMedia.get(0));
 		verifyVideoFileIsCorrectlyMade(outputMedia.get(0));
 		verifyVideoNamedProperly(outputMedia.get(0), WHOMBO_TOOL_1);
@@ -74,6 +75,10 @@ public class TestVideoPostProduction
 		assertNotNull(outputMedia.get(1));
 		verifyGifFileIsCorrectlyMade(outputMedia.get(1));
 		verifyGifNamedProperly(outputMedia.get(1), WHOMBO_TOOL_1);
+		
+		assertNotNull(outputMedia.get(2));
+		verifyThumbnailFileIsCorrectlyMade(outputMedia.get(2));
+		verifyThumbnailNamedProperly(outputMedia.get(2), WHOMBO_TOOL_1);
 	}
 
 	private List<File> testARandomToolInAHandler(PostProductionHandler handler) throws VideoEncodingException
@@ -100,6 +105,7 @@ public class TestVideoPostProduction
 
 		return mediaOutputs;
 	}
+
 
 	@Test
 	public void testSingleToolUsageExtractionReallyEarly() throws Exception
@@ -253,10 +259,24 @@ public class TestVideoPostProduction
 		assertTrue(outputFile.exists());
 		assertTrue(outputFile.isFile());
 		assertFalse(outputFile.isHidden());
-		assertTrue(outputFile.length() > 500000); // I expect the file size to
-													// be at least 1 Mb and no
-													// more than 2Mb
+		assertTrue(outputFile.length() > 500000);
 		assertTrue(outputFile.length() < 10*1000*1000);
+	}
+	
+	private void verifyThumbnailNamedProperly(File outputFile, String toolName)
+	{
+		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
+		assertTrue(outputFile.getPath().endsWith(ThumbnailGenerator.THUMBNAIL_EXTENSION));
+	}
+	
+	private void verifyThumbnailFileIsCorrectlyMade(File outputFile)
+	{
+		assertNotNull(outputFile);
+		assertTrue(outputFile.exists());
+		assertTrue(outputFile.isFile());
+		assertFalse(outputFile.isHidden());
+		assertTrue(outputFile.length() > 500); 
+		assertTrue(outputFile.length() < 2*1000*1000);
 	}
 
 	private void verifyVideoNamedProperly(File outputFile, String toolName)
@@ -294,11 +314,12 @@ public class TestVideoPostProduction
 		return handler;
 	}
 	
-	private PostProductionHandler makeVideoAndGifPostProductionHandler()
+	private PostProductionHandler makeVideoThumbnailAndGifPostProductionHandler()
 	{
 		PostProductionHandler handler = new PostProductionHandler();
 		handler.addNewMediaOutput(new ImagesToVideoOutput());
 		handler.addNewMediaOutput(new ImagesToGifOutput(PostProductionHandler.getIntermediateFolderLocation()));
+		handler.addNewMediaOutput(new ThumbnailGenerator());
 		return handler;
 	}
 

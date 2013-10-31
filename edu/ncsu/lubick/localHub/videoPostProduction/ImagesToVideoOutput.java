@@ -7,8 +7,13 @@ import java.util.Scanner;
 
 import org.apache.log4j.Logger;
 
-public class ImagesToVideoOutput implements ImagesToMediaOutput 
+public class ImagesToVideoOutput extends AbstractImagesToMediaOutput 
 {
+	public ImagesToVideoOutput()
+	{
+		super(new File(PostProductionHandler.getIntermediateFolderLocation()));
+	}
+
 	public static final String VIDEO_EXTENSION = "mkv";
 	private static Logger logger = Logger.getLogger(ImagesToVideoOutput.class.getName());
 	
@@ -17,16 +22,6 @@ public class ImagesToVideoOutput implements ImagesToMediaOutput
 	{
 		File newVideoFile = makeVideoFile(fileNameMinusExtension);
 		
-		if (!newVideoFile.getParentFile().mkdirs() && !newVideoFile.getParentFile().exists())
-		{
-			throw new IOException("Could not make the output folder " + newVideoFile.getParentFile());
-		}
-		
-		if (newVideoFile.exists() && !newVideoFile.delete())
-		{
-			logger.error("Could not make video file.  Could not delete previous video");
-			return null;
-		}
 		
 		// TODO make this more flexible, not hardcoded. i.e. the user should
 		// specify where their ffmpeg is
@@ -51,16 +46,19 @@ public class ImagesToVideoOutput implements ImagesToMediaOutput
 		return newVideoFile;
 	}
 	
-	private File makeVideoFile(String fileNameMinusExtension)
+	private File makeVideoFile(String fileNameMinusExtension) throws IOException
 	{
-		return new File(fileNameMinusExtension + "." + VIDEO_EXTENSION);
+		File newFile = new File(fileNameMinusExtension + "." + VIDEO_EXTENSION);
+		cleanUpForFile(newFile);
+		
+		return newFile;
 	}
 
 	private String compileExecutableString(File newVideoFile)
 	{
 		StringBuilder builder = new StringBuilder();
 		builder.append("./src/FFMPEGbin/ffmpeg.exe -r 5 -pix_fmt yuv420p -i ");
-		builder.append(PostProductionHandler.getIntermediateFolderLocation());
+		builder.append(scratchDir);
 		builder.append("temp%04d.");
 		builder.append(PostProductionHandler.INTERMEDIATE_FILE_FORMAT);
 		builder.append("  -vcodec libx264 ");
@@ -96,6 +94,12 @@ public class ImagesToVideoOutput implements ImagesToMediaOutput
 	public String getMediaTypeInfo()
 	{
 		return "Video/mkv";
+	}
+
+	@Override
+	protected Logger getLogger()
+	{
+		return logger;
 	}
 
 }
