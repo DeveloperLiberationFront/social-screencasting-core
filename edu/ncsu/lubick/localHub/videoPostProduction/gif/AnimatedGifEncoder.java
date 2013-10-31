@@ -933,7 +933,7 @@ class NeuQuant {
 	public void unbiasnet()
 	{
 
-		int i, j;
+		int i;
 
 		for (i = 0; i < netsize; i++)
 		{
@@ -1195,7 +1195,7 @@ class LZWEncoder {
 	// table clear for block compress
 	void cl_block(OutputStream outs) throws IOException
 	{
-		cl_hash(hsize);
+		cl_hash();
 		free_ent = ClearCode + 2;
 		clear_flg = true;
 
@@ -1203,9 +1203,9 @@ class LZWEncoder {
 	}
 
 	// reset code table
-	void cl_hash(int hsize)
+	void cl_hash()
 	{
-		for (int i = 0; i < hsize; ++i)
+		for (int i = 0; i < this.hsize; ++i)
 			htab[i] = -1;
 	}
 
@@ -1225,7 +1225,7 @@ class LZWEncoder {
 		// Set up the necessary values
 		clear_flg = false;
 		n_bits = g_init_bits;
-		maxcode = MAXCODE(n_bits);
+		maxcode = MAXCODE();
 
 		ClearCode = 1 << (init_bits - 1);
 		EOFCode = ClearCode + 1;
@@ -1241,7 +1241,7 @@ class LZWEncoder {
 		hshift = 8 - hshift; // set hash code range bound
 
 		hsize_reg = hsize;
-		cl_hash(hsize_reg); // clear hash table
+		cl_hash(); // clear hash table
 
 		output(ClearCode, outs);
 
@@ -1312,7 +1312,7 @@ class LZWEncoder {
 		}
 	}
 
-	final int MAXCODE(int n_bits)
+	final int MAXCODE()
 	{
 		return (1 << n_bits) - 1;
 	}
@@ -1356,7 +1356,8 @@ class LZWEncoder {
 		{
 			if (clear_flg)
 			{
-				maxcode = MAXCODE(n_bits = g_init_bits);
+				n_bits = g_init_bits;
+				maxcode = MAXCODE();
 				clear_flg = false;
 			}
 			else
@@ -1365,7 +1366,7 @@ class LZWEncoder {
 				if (n_bits == maxbits)
 					maxcode = maxmaxcode;
 				else
-					maxcode = MAXCODE(n_bits);
+					maxcode = MAXCODE();
 			}
 		}
 
