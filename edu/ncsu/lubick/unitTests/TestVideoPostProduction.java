@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
@@ -15,11 +16,13 @@ import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
-import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
+import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
 
 public class TestVideoPostProduction
 {
+	private static final String WHOMBO_TOOL_1 = "WhomboTool #1";
 	private static final String TEST_PLUGIN_NAME = "Testing";
 	private static final String DEFAULT_TESTING_KEYPRESS = "Ctrl+5";
 	private static final String DEFAULT_TESTING_TOOL_CLASS = "Debug";
@@ -32,17 +35,51 @@ public class TestVideoPostProduction
 	}
 
 	@Test
-	public void testSingleToolUsageExtraction()
+	public void testSingleToolUsageExtractionVideo() throws Exception
 	{
+		PostProductionHandler handler = makeVideoPostProductionHandler();
+		
+		List<File> outputMedia = testARandomToolInAHandler(handler);
+		
+		assertEquals(1, outputMedia.size());
+		verifyVideoFileIsCorrectlyMade(outputMedia.get(0));
+		verifyVideoNamedProperly(outputMedia.get(0), WHOMBO_TOOL_1);
+	}
+	
+	@Test
+	public void testSingleToolUsageExtractionGif() throws Exception
+	{
+		PostProductionHandler handler = makeGifPostProductionHandler();
+		
+		List<File> outputMedia = testARandomToolInAHandler(handler);
+		
+		assertEquals(1, outputMedia.size());
+		verifyGifFileIsCorrectlyMade(outputMedia.get(0));
+		verifyGifNamedProperly(outputMedia.get(0), WHOMBO_TOOL_1);
+	}
+	
+	@Test
+	public void testSingleToolUsageExtractionVideoAndGif() throws Exception
+	{
+		PostProductionHandler handler = makeVideoAndGifPostProductionHandler();
+		
+		List<File> outputMedia = testARandomToolInAHandler(handler);
+		
+		assertEquals(2, outputMedia.size());
+		verifyVideoFileIsCorrectlyMade(outputMedia.get(0));
+		verifyVideoNamedProperly(outputMedia.get(0), WHOMBO_TOOL_1);
+	}
 
+	private List<File> testARandomToolInAHandler(PostProductionHandler handler) throws VideoEncodingException
+	{
 		File capFile = new File("./src/ForTesting/oneMinuteCap.cap");
-		String toolName = "WhomboTool #1";
+		String toolName = WHOMBO_TOOL_1;
 
 		assertTrue(capFile.exists());
 
 		Date date = UtilitiesForTesting.truncateTimeToMinute(new Date());
 
-		PostProductionVideoHandler handler = new PostProductionVideoHandler();
+		
 		handler.loadFile(capFile);
 
 		handler.setCurrentFileStartTime(date);
@@ -52,15 +89,14 @@ public class TestVideoPostProduction
 																		// seconds
 
 		ToolUsage testToolUsage = makeToolUsage(datePlusFifteen, toolName);
+		
+		List<File> mediaOutputs = handler.extractMediaForToolUsage(testToolUsage);
 
-		File outputFile = handler.extractVideoForToolUsage(testToolUsage);
-
-		verifyVideoFileIsCorrectlyMade(outputFile);
-		verifyVideoNamedProperly(outputFile, toolName);
+		return mediaOutputs;
 	}
 
 	@Test
-	public void testSingleToolUsageExtractionReallyEarly()
+	public void testSingleToolUsageExtractionReallyEarly() throws Exception
 	{
 
 		File capFile = new File("./src/ForTesting/oneMinuteCap.cap");
@@ -70,7 +106,7 @@ public class TestVideoPostProduction
 
 		Date date = UtilitiesForTesting.truncateTimeToMinute(new Date());
 
-		PostProductionVideoHandler handler = new PostProductionVideoHandler();
+		PostProductionHandler handler = makeVideoPostProductionHandler();
 		handler.loadFile(capFile);
 
 		handler.setCurrentFileStartTime(date);
@@ -80,14 +116,14 @@ public class TestVideoPostProduction
 
 		ToolUsage testToolUsage = makeToolUsage(datePlusOne, toolName);
 
-		File outputFile = handler.extractVideoForToolUsage(testToolUsage);
+		File outputFile = getVideoFromHandler(handler, testToolUsage);
 
 		verifyVideoFileIsCorrectlyMade(outputFile);
 		verifyVideoNamedProperly(outputFile, toolName);
 	}
 
 	@Test
-	public void testSingleToolUsageExtractionOverlappingFiles()
+	public void testSingleToolUsageExtractionOverlappingFiles() throws Exception
 	{
 
 		File firstcapFile = new File("./src/ForTesting/oneMinuteCap.cap");
@@ -100,7 +136,7 @@ public class TestVideoPostProduction
 		Date date = UtilitiesForTesting.truncateTimeToMinute(new Date());
 		Date secondDate = UtilitiesForTesting.truncateTimeToMinute(new Date(date.getTime() + 61 * 1000));
 
-		PostProductionVideoHandler handler = new PostProductionVideoHandler();
+		PostProductionHandler handler = makeVideoPostProductionHandler();
 		handler.loadFile(firstcapFile);
 		handler.enqueueOverLoadFile(secondCapFile, secondDate);
 
@@ -111,7 +147,7 @@ public class TestVideoPostProduction
 		ToolUsage testToolUsage = makeToolUsage(datePlusFiftyFive, toolName, 10*1000);
 		
 
-		File outputFile = handler.extractVideoForToolUsage(testToolUsage);
+		File outputFile = getVideoFromHandler(handler, testToolUsage);
 
 		verifyVideoFileIsCorrectlyMade(outputFile);
 		verifyVideoNamedProperly(outputFile, toolName);
@@ -135,7 +171,7 @@ public class TestVideoPostProduction
 		assertNotNull(date);
 		assertNotNull(secondDate);
 
-		PostProductionVideoHandler handler = new PostProductionVideoHandler();
+		PostProductionHandler handler = makeVideoPostProductionHandler();
 		handler.loadFile(firstcapFile);
 		handler.enqueueOverLoadFile(secondCapFile, secondDate);
 
@@ -155,7 +191,7 @@ public class TestVideoPostProduction
 		File outputFile = null;
 		try
 		{
-			outputFile = handler.extractVideoForToolUsageThrowingException(toolStream.getAsList().get(0));
+			outputFile = getVideoFromHandler(handler, toolStream.getAsList().get(0));
 			// throws an exception if there was a problem
 		}
 		catch (VideoEncodingException e)
@@ -201,7 +237,44 @@ public class TestVideoPostProduction
 
 	private void verifyVideoNamedProperly(File outputFile, String toolName)
 	{
-		assertEquals(PostProductionVideoHandler.makeFileNameForToolPlugin(TEST_PLUGIN_NAME, toolName), outputFile.getPath());
+		assertEquals(PostProductionHandler.makeFileNameForToolPlugin(TEST_PLUGIN_NAME, toolName), outputFile.getPath());
+	}
+
+	private File getVideoFromHandler(PostProductionHandler handler, ToolUsage testToolUsage) throws VideoEncodingException
+	{
+		List<File> mediaOutputs = handler.extractMediaForToolUsage(testToolUsage);
+		if (mediaOutputs == null)
+		{
+			return null;
+		}
+		for(File f: mediaOutputs)
+		{
+			if (f.getName().endsWith(ImagesToVideoOutput.VIDEO_EXTENSION))
+				return f;
+		}
+		return null;
+	}
+
+	private PostProductionHandler makeVideoPostProductionHandler()
+	{
+		PostProductionHandler handler = new PostProductionHandler();
+		handler.addNewMediaOutput(new ImagesToVideoOutput());
+		return handler;
+	}
+	
+	private PostProductionHandler makeGifPostProductionHandler()
+	{
+		PostProductionHandler handler = new PostProductionHandler();
+		handler.addNewMediaOutput(new ImagesToGifOutput());
+		return handler;
+	}
+	
+	private PostProductionHandler makeVideoAndGifPostProductionHandler()
+	{
+		PostProductionHandler handler = new PostProductionHandler();
+		handler.addNewMediaOutput(new ImagesToVideoOutput());
+		handler.addNewMediaOutput(new ImagesToGifOutput());
+		return handler;
 	}
 
 }

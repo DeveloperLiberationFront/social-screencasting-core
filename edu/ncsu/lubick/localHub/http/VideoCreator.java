@@ -14,7 +14,7 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 
 import edu.ncsu.lubick.localHub.WebQueryInterface;
-import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
 
 public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Handler {
@@ -109,7 +109,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
 		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
 
-		String expectedVideoFileName = PostProductionVideoHandler.makeFileNameForToolPlugin(pluginName, toolName);
+		String expectedVideoFileName = PostProductionHandler.makeFileNameForToolPlugin(pluginName, toolName);
 		File expectedVideoFile = new File(expectedVideoFileName);
 
 		logger.debug("If file existed, it would be called " + expectedVideoFile.getAbsolutePath());

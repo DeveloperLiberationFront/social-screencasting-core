@@ -33,7 +33,7 @@ public class BlockingImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 	public void writeImageToDisk(BufferedImage image, File outputFile) throws IOException
 	{
 		logger.trace("Starting write to disk");
-		ImageIO.write(image, PostProductionVideoHandler.INTERMEDIATE_FILE_FORMAT, outputFile);
+		ImageIO.write(image, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, outputFile);
 		logger.trace("Finished write to disk");
 		if (deleteImagesAfterUse)
 		{

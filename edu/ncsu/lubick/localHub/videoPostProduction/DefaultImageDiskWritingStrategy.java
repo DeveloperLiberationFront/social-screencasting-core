@@ -31,7 +31,7 @@ public abstract class DefaultImageDiskWritingStrategy implements ImageDiskWritin
 	protected String getNextFileName()
 	{
 		currentTempImageNumber++;
-		return "temp" + FileUtilities.padIntTo4Digits(currentTempImageNumber) + "."+PostProductionVideoHandler.INTERMEDIATE_FILE_FORMAT;
+		return "temp" + FileUtilities.padIntTo4Digits(currentTempImageNumber) + "."+PostProductionHandler.INTERMEDIATE_FILE_FORMAT;
 	}
 
 	@Override
@@ -41,7 +41,7 @@ public abstract class DefaultImageDiskWritingStrategy implements ImageDiskWritin
 
 		for (File file : workingDir.listFiles())
 		{
-			if (file.getName().endsWith(PostProductionVideoHandler.INTERMEDIATE_FILE_FORMAT))
+			if (file.getName().endsWith(PostProductionHandler.INTERMEDIATE_FILE_FORMAT))
 			{
 				if (!file.delete())
 				{

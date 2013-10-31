@@ -74,7 +74,7 @@ public class ThreadedImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 			{
 				try
 				{
-					ImageIO.write(image, PostProductionVideoHandler.INTERMEDIATE_FILE_FORMAT, outputFile);
+					ImageIO.write(image, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, outputFile);
 					logger.trace("Finished write to disk");
 					if (deleteImagesAfterUse)
 					{

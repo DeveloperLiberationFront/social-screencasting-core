@@ -32,7 +32,7 @@ import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
 import edu.ncsu.lubick.localHub.videoPostProduction.DecompressionFramePacket;
 import edu.ncsu.lubick.localHub.videoPostProduction.FrameDecompressor;
 import edu.ncsu.lubick.localHub.videoPostProduction.FrameDecompressorCodecStrategy;
-import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 
 public class TestImageCompressionAndDecompression
 {
@@ -549,7 +549,7 @@ public class TestImageCompressionAndDecompression
 
 		File testSequenceFolder = new File("./Scratch/");
 		UtilitiesForTesting.clearOutDirectory("./Scratch/");
-		PostProductionVideoHandler.debugWriteOutAllImagesInCapFile(testCapFile, testSequenceFolder);
+		PostProductionHandler.debugWriteOutAllImagesInCapFile(testCapFile, testSequenceFolder);
 
 		File[] createdFiles = testSequenceFolder.listFiles();
 		// because listFiles() returns things out of order, we must sort

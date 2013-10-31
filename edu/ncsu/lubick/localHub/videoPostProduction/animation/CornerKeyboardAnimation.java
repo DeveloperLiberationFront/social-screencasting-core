@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.videoPostProduction.ImageDiskWritingStrategy;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionAnimationStrategy;
-import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.ThreadedImageDiskWritingStrategy;
 
 public class CornerKeyboardAnimation implements PostProductionAnimationStrategy 
@@ -65,7 +65,7 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 			@Override
 			public boolean accept(File pathname)
 			{
-				return pathname.getName().endsWith(PostProductionVideoHandler.INTERMEDIATE_FILE_FORMAT);
+				return pathname.getName().endsWith(PostProductionHandler.INTERMEDIATE_FILE_FORMAT);
 			}
 		});
 		Arrays.sort(imagesToAddAnimationTo);

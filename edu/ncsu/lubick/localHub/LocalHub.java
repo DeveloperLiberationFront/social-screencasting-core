@@ -17,7 +17,8 @@ import edu.ncsu.lubick.localHub.database.DBAbstraction.FileDateStructs;
 import edu.ncsu.lubick.localHub.database.SQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.http.HTTPServer;
-import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionVideoHandler;
+import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
 
 public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQueryInterface, ParsedFileListener {
@@ -47,7 +48,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	private FileManager currentRunnable = null;
 
 	private BufferedDatabaseManager databaseManager = null;
-	private PostProductionVideoHandler videoPostProductionHandler;
+	private PostProductionHandler videoPostProductionHandler;
 
 	// listeners
 	private Set<LoadedFileListener> loadedFileListeners = new HashSet<>();
@@ -305,8 +306,9 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	@Override
 	public File extractVideoForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException
 	{
+		setUpPostProductionHandler();
 		ToolUsage lastToolUsage = databaseManager.getLastInstanceOfToolUsage(pluginName, toolName);
-		videoPostProductionHandler = new PostProductionVideoHandler();
+		
 
 		List<FileDateStructs> filesToload = databaseManager.getVideoFilesLinkedToTimePeriod(lastToolUsage);
 
@@ -324,7 +326,29 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 			videoPostProductionHandler.enqueueOverLoadFile(filesToload.get(i).file, filesToload.get(i).startTime);
 		}
 
-		return videoPostProductionHandler.extractVideoForToolUsageThrowingException(lastToolUsage);
+		return getOnlyVideoFileFromHandler(lastToolUsage);
+	}
+
+	private void setUpPostProductionHandler()
+	{
+		this.videoPostProductionHandler = new PostProductionHandler();
+		this.videoPostProductionHandler.addNewMediaOutput(new ImagesToVideoOutput());
+	}
+	
+	private File getOnlyVideoFileFromHandler(ToolUsage toolUsage) throws VideoEncodingException
+	{
+		
+		List<File> mediaOutputs = videoPostProductionHandler.extractMediaForToolUsage(toolUsage);
+		if (mediaOutputs == null)
+		{
+			return null;
+		}
+		for(File f: mediaOutputs)
+		{
+			if (f.getName().endsWith(ImagesToVideoOutput.VIDEO_EXTENSION))
+				return f;
+		}
+		return null;
 	}
 
 	public void shutDown()
@@ -401,7 +425,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		@Override
 		public int loadFileResponse(LoadedFileEvent e)
 		{
-			if (e.getFileName().endsWith(PostProductionVideoHandler.EXPECTED_FILE_EXTENSION))
+			if (e.getFileName().endsWith(PostProductionHandler.EXPECTED_FILE_EXTENSION))
 			{
 				if (!e.wasInitialReadIn())
 				{
