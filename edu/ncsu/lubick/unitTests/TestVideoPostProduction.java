@@ -19,6 +19,7 @@ import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
 import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
+import edu.ncsu.lubick.localHub.videoPostProduction.gif.ImagesToGifOutput;
 
 public class TestVideoPostProduction
 {
@@ -66,8 +67,13 @@ public class TestVideoPostProduction
 		List<File> outputMedia = testARandomToolInAHandler(handler);
 		
 		assertEquals(2, outputMedia.size());
+		assertNotNull(outputMedia.get(0));
 		verifyVideoFileIsCorrectlyMade(outputMedia.get(0));
 		verifyVideoNamedProperly(outputMedia.get(0), WHOMBO_TOOL_1);
+		
+		assertNotNull(outputMedia.get(1));
+		verifyGifFileIsCorrectlyMade(outputMedia.get(1));
+		verifyGifNamedProperly(outputMedia.get(1), WHOMBO_TOOL_1);
 	}
 
 	private List<File> testARandomToolInAHandler(PostProductionHandler handler) throws VideoEncodingException
@@ -228,7 +234,25 @@ public class TestVideoPostProduction
 		assertTrue(outputFile.exists());
 		assertTrue(outputFile.isFile());
 		assertFalse(outputFile.isHidden());
-		assertTrue(outputFile.getName().endsWith(".mkv"));
+		assertTrue(outputFile.getName().endsWith(ImagesToVideoOutput.VIDEO_EXTENSION));
+		assertTrue(outputFile.length() > 500000); // I expect the file size to
+													// be at least 1 Mb and no
+													// more than 2Mb
+		assertTrue(outputFile.length() < 2000000);
+	}
+
+	private void verifyGifNamedProperly(File outputFile, String toolName)
+	{
+		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameForToolPlugin(TEST_PLUGIN_NAME, toolName)));
+		assertTrue(outputFile.getPath().endsWith(".gif"));
+	}
+	
+	private void verifyGifFileIsCorrectlyMade(File outputFile)
+	{
+		assertNotNull(outputFile);
+		assertTrue(outputFile.exists());
+		assertTrue(outputFile.isFile());
+		assertFalse(outputFile.isHidden());
 		assertTrue(outputFile.length() > 500000); // I expect the file size to
 													// be at least 1 Mb and no
 													// more than 2Mb
@@ -237,7 +261,8 @@ public class TestVideoPostProduction
 
 	private void verifyVideoNamedProperly(File outputFile, String toolName)
 	{
-		assertEquals(PostProductionHandler.makeFileNameForToolPlugin(TEST_PLUGIN_NAME, toolName), outputFile.getPath());
+		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameForToolPlugin(TEST_PLUGIN_NAME, toolName)));
+		assertTrue(outputFile.getPath().endsWith(ImagesToVideoOutput.VIDEO_EXTENSION));
 	}
 
 	private File getVideoFromHandler(PostProductionHandler handler, ToolUsage testToolUsage) throws VideoEncodingException
