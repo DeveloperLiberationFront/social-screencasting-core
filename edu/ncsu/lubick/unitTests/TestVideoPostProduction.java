@@ -243,7 +243,7 @@ public class TestVideoPostProduction
 
 	private void verifyGifNamedProperly(File outputFile, String toolName)
 	{
-		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameForToolPlugin(TEST_PLUGIN_NAME, toolName)));
+		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
 		assertTrue(outputFile.getPath().endsWith(".gif"));
 	}
 	
@@ -256,12 +256,12 @@ public class TestVideoPostProduction
 		assertTrue(outputFile.length() > 500000); // I expect the file size to
 													// be at least 1 Mb and no
 													// more than 2Mb
-		assertTrue(outputFile.length() < 2000000);
+		assertTrue(outputFile.length() < 10*1000*1000);
 	}
 
 	private void verifyVideoNamedProperly(File outputFile, String toolName)
 	{
-		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameForToolPlugin(TEST_PLUGIN_NAME, toolName)));
+		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
 		assertTrue(outputFile.getPath().endsWith(ImagesToVideoOutput.VIDEO_EXTENSION));
 	}
 
@@ -290,7 +290,7 @@ public class TestVideoPostProduction
 	private PostProductionHandler makeGifPostProductionHandler()
 	{
 		PostProductionHandler handler = new PostProductionHandler();
-		handler.addNewMediaOutput(new ImagesToGifOutput());
+		handler.addNewMediaOutput(new ImagesToGifOutput(PostProductionHandler.getIntermediateFolderLocation()));
 		return handler;
 	}
 	
@@ -298,7 +298,7 @@ public class TestVideoPostProduction
 	{
 		PostProductionHandler handler = new PostProductionHandler();
 		handler.addNewMediaOutput(new ImagesToVideoOutput());
-		handler.addNewMediaOutput(new ImagesToGifOutput());
+		handler.addNewMediaOutput(new ImagesToGifOutput(PostProductionHandler.getIntermediateFolderLocation()));
 		return handler;
 	}
 

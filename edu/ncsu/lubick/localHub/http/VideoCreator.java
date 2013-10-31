@@ -109,7 +109,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
 		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
 
-		String expectedVideoFileName = PostProductionHandler.makeFileNameForToolPlugin(pluginName, toolName);
+		String expectedVideoFileName = PostProductionHandler.makeFileNameForToolPluginMedia(pluginName, toolName);
 		File expectedVideoFile = new File(expectedVideoFileName);
 
 		logger.debug("If file existed, it would be called " + expectedVideoFile.getAbsolutePath());

@@ -21,6 +21,13 @@ public class ImagesToVideoOutput implements ImagesToMediaOutput
 		{
 			throw new IOException("Could not make the output folder " + newVideoFile.getParentFile());
 		}
+		
+		if (newVideoFile.exists() && !newVideoFile.delete())
+		{
+			logger.error("Could not make video file.  Could not delete previous video");
+			return null;
+		}
+		
 		// TODO make this more flexible, not hardcoded. i.e. the user should
 		// specify where their ffmpeg is
 

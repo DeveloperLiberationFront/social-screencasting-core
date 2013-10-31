@@ -46,16 +46,18 @@ import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeyboardAnim
 public class PostProductionHandler
 {
 	public static final String INTERMEDIATE_FILE_FORMAT = "png";
-
+	public static final int FRAME_RATE = 5;
+	public static final String EXPECTED_FILE_EXTENSION = ".cap";
+	public static final boolean DELETE_IMAGES_AFTER_USE = false;
+	
+	
 	private static final String SCRATCH_DIR = "./Scratch/";
 
 	private static Logger logger = Logger.getLogger(PostProductionHandler.class.getName());
 
-	public static final String EXPECTED_FILE_EXTENSION = ".cap";
+	
 
-	public static final boolean DELETE_IMAGES_AFTER_USE = false;
-
-	private static final int FRAME_RATE = 5;
+	
 
 	private static final int RUN_UP_TIME = 5;
 
@@ -161,7 +163,7 @@ public class PostProductionHandler
 			logger.info("Fast forwarding to the appropriate time");
 			fastFowardStreamToTime(inputStream, timeToLookFor); // throws VideoEncodingException if there was a problem prior to the important bits
 
-			String newFilesPrefix = makeFileNameForToolPlugin(specificToolUse.getPluginName(), specificToolUse.getToolName());
+			String newFilesPrefix = makeFileNameForToolPluginMedia(specificToolUse.getPluginName(), specificToolUse.getToolName());
 			logger.info("Beginning the extraction of the frames");
 			createdMediaFilesToReturn = extractDemoVideoToFile(inputStream, newFilesPrefix);
 
@@ -300,14 +302,14 @@ public class PostProductionHandler
 
 	
 
-	public static String makeFileNameForToolPlugin(String pluginName, String toolName)
+	public static String makeFileNameForToolPluginMedia(String pluginName, String toolName)
 	{
 		if (toolName == null)
 		{
 			logger.info("Got a null toolname, recovering with empty string");
 			toolName = "";
 		}
-		return "renderedVideos\\" + pluginName + createNumberForVideoFile(toolName) + ".mkv";
+		return "renderedVideos\\" + pluginName + createNumberForVideoFile(toolName);
 	}
 
 	private static int createNumberForVideoFile(String toolName)

@@ -42,7 +42,7 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 		this.frameRate = frameRate;
 		this.runUpTime = runUpTime;
 		
-		diskWriter = new ThreadedImageDiskWritingStrategy(scratchDirPath, false);
+		diskWriter = new ThreadedImageDiskWritingStrategy(scratchDirPath, PostProductionHandler.DELETE_IMAGES_AFTER_USE);
 		
 	}
 

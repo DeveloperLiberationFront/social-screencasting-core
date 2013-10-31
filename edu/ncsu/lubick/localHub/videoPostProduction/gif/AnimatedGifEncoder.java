@@ -27,6 +27,8 @@ import java.awt.image.*;
 
 public class AnimatedGifEncoder {
 
+	public static final int REPEAT_INDEFINATELY = 0;
+
 	protected int width; // image size
 
 	protected int height;
@@ -260,6 +262,15 @@ public class AnimatedGifEncoder {
 			height = 240;
 		sizeSet = true;
 	}
+	
+	public Dimension getSize()
+	{
+		if (!sizeSet)
+		{
+			return new Dimension();
+		}
+		return new Dimension(width, height);
+	}
 
 	/**
 	 * Initiates GIF file creation on the given stream. The stream is not closed automatically.
@@ -294,6 +305,28 @@ public class AnimatedGifEncoder {
 	 * @return false if open or initial write failed.
 	 */
 	public boolean start(String file)
+	{
+		boolean ok = true;
+		try
+		{
+			out = new BufferedOutputStream(new FileOutputStream(file));
+			ok = start(out);
+			closeStream = true;
+		}
+		catch (IOException e)
+		{
+			ok = false;
+		}
+		return started = ok;
+	}
+	
+	/**
+	 * Initiates writing of a GIF file with the specified name.
+	 * 
+	 * @param file file To Output To
+	 * @return false if open or initial write failed.
+	 */
+	public boolean start(File file)
 	{
 		boolean ok = true;
 		try
