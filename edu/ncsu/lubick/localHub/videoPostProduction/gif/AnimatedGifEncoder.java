@@ -746,7 +746,7 @@ class NeuQuant {
 			/* smallval entry is now in position i */
 			if (smallval != previouscol)
 			{
-				netindex[previouscol] = (startpos + i) >> 1;
+				netindex[previouscol] = (startpos + i) >>> 1;
 				for (j = previouscol + 1; j < smallval; j++)
 					netindex[j] = i;
 				previouscol = smallval;
