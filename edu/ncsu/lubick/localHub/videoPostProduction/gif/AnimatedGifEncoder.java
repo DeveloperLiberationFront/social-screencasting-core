@@ -978,6 +978,7 @@ class NeuQuant {
 				}
 				catch (Exception e)
 				{
+					e.printStackTrace();
 				} // prevents 1.3 miscompilation
 			}
 			if (k > lo)
@@ -991,6 +992,7 @@ class NeuQuant {
 				}
 				catch (Exception e)
 				{
+					e.printStackTrace();
 				}
 			}
 		}
