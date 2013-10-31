@@ -751,7 +751,7 @@ class NeuQuant {
 					netindex[j] = i;
 				previouscol = smallval;
 				startpos = i;
-			}
+			} 
 		}
 		netindex[previouscol] = (startpos + maxnetpos) >> 1;
 		for (j = previouscol + 1; j < 256; j++)
