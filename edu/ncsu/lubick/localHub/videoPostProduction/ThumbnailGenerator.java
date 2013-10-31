@@ -34,18 +34,26 @@ public class ThumbnailGenerator extends AbstractImagesToMediaOutput
 		File fileToCopy = imageFiles[imageFiles.length/2];
 		
 		BufferedImage imageToResize = ImageIO.read(fileToCopy);
+		BufferedImage shrunkImage = shrinkImage(imageToResize);
+		
+		ImageIO.write(shrunkImage, THUMBNAIL_EXTENSION, newGifFile);
+		
+		return newGifFile;
+	}
+
+	public static BufferedImage shrinkImage(BufferedImage imageToResize)
+	{
 		int oldWidth = imageToResize.getWidth();
 		int newWidth = oldWidth/3;
 		
 		int oldHeight = imageToResize.getHeight();
 		int newHeight = oldHeight/3;
 		
-		BufferedImage image = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+		BufferedImage shrunkImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
 		
-		Graphics g = image.getGraphics();
+		Graphics g = shrunkImage.getGraphics();
 		g.drawImage(imageToResize, 0, 0, newWidth, newHeight, 0, 0, oldWidth, oldHeight, null);
-		
-		return newGifFile;
+		return shrunkImage;
 	}
 
 	private File makePngFile(String fileNameMinusExtension) throws IOException

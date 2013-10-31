@@ -16,6 +16,7 @@ import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
+import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToMiniGifOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.ThumbnailGenerator;
@@ -52,6 +53,18 @@ public class TestVideoPostProduction
 	public void testSingleToolUsageExtractionGif() throws Exception
 	{
 		PostProductionHandler handler = makeGifPostProductionHandler();
+		
+		List<File> outputMedia = testARandomToolInAHandler(handler);
+		
+		assertEquals(1, outputMedia.size());
+		verifyGifFileIsCorrectlyMade(outputMedia.get(0));
+		verifyGifNamedProperly(outputMedia.get(0), WHOMBO_TOOL_1);
+	}
+	
+	@Test
+	public void testSingleToolUsageExtractionMiniGif() throws Exception
+	{
+		PostProductionHandler handler = makeMiniGifPostProductionHandler();
 		
 		List<File> outputMedia = testARandomToolInAHandler(handler);
 		
@@ -311,6 +324,13 @@ public class TestVideoPostProduction
 	{
 		PostProductionHandler handler = new PostProductionHandler();
 		handler.addNewMediaOutput(new ImagesToGifOutput(PostProductionHandler.getIntermediateFolderLocation()));
+		return handler;
+	}
+	
+	private PostProductionHandler makeMiniGifPostProductionHandler()
+	{
+		PostProductionHandler handler = new PostProductionHandler();
+		handler.addNewMediaOutput(new ImagesToMiniGifOutput());
 		return handler;
 	}
 	

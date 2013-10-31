@@ -59,7 +59,7 @@ public class ImagesToVideoOutput extends AbstractImagesToMediaOutput
 		StringBuilder builder = new StringBuilder();
 		builder.append("./src/FFMPEGbin/ffmpeg.exe -r 5 -pix_fmt yuv420p -i ");
 		builder.append(scratchDir);
-		builder.append("temp%04d.");
+		builder.append("\\temp%04d.");
 		builder.append(PostProductionHandler.INTERMEDIATE_FILE_FORMAT);
 		builder.append("  -vcodec libx264 ");
 		builder.append(newVideoFile.getPath());

@@ -16,7 +16,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 
 public class ImagesToGifOutput extends AbstractImagesToMediaOutput {
 
-	private static final String GIF_EXTENSION = "gif";
+	public static final String GIF_EXTENSION = "gif";
 	private static Logger logger = Logger.getLogger(ImagesToGifOutput.class.getName());
 	
 	
@@ -36,12 +36,17 @@ public class ImagesToGifOutput extends AbstractImagesToMediaOutput {
 		
 		for(File f:imageFilesToAnimate)
 		{
-			BufferedImage readInImage = ImageIO.read(f);
+			BufferedImage readInImage = readInImage(f);
 			encoder.addFrame(readInImage);
 		}
 		finishUpAnimation(encoder);
 		
 		return newGifFile;
+	}
+
+	protected BufferedImage readInImage(File f) throws IOException
+	{
+		return ImageIO.read(f);
 	}
 
 	private void finishUpAnimation(AnimatedGifEncoder encoder)
@@ -71,7 +76,7 @@ public class ImagesToGifOutput extends AbstractImagesToMediaOutput {
 		return e;
 	}
 
-	private File makeGifFile(String fileNameMinusExtension) throws IOException
+	protected File makeGifFile(String fileNameMinusExtension) throws IOException
 	{
 		File newGifFile = new File(fileNameMinusExtension + "." + GIF_EXTENSION);
 		cleanUpForFile(newGifFile);
