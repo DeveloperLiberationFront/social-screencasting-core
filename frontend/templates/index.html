@@ -6,16 +6,17 @@
   <link rel="stylesheet" href="loading.css" />
 </head>
 <body>
-  <h1 class="debug">Click on the plugin name to see more info</h1>
+  <h1>Click on the plugin name to see more info</h1>
 
-  <table border=1>
-  <tr><th>Name<th>Price
+
   <#list pluginNames as plugin>
-  <tr><td>${plugin}<td><form method="POST" action="index"/>
+  <div class="pluginListing">
+  <form method="POST" action="index"/>
   <input name="thingToDo" type="hidden" value="getToolUsageForPlugin"/>
 	<input name="pluginName" type="submit" value="${plugin}"/>
+	</div>
   </#list>
-</table>
+
 
 <div class="modal"><!-- Place at bottom of page --></div>
 </body>

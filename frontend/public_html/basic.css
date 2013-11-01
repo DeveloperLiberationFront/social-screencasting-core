@@ -45,3 +45,20 @@ td, tr, th{
 .moreInfo a {
 	border: 2px orange;
 }
+
+.pluginListing {
+	text-align:center;
+}
+
+.pluginListing input {
+    padding: 10px 20px;
+    color: #ffa729;
+    background-color: white;
+    font-size: 2.0em;
+	margin:1px;
+}
+
+.pluginListing input:hover {
+    border: 3px solid #ffa729;
+	margin:0;
+}
