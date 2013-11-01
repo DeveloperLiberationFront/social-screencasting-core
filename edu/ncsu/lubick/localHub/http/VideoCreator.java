@@ -14,11 +14,11 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 
 import edu.ncsu.lubick.localHub.WebQueryInterface;
-import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToMiniGifOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.gif.ImagesToGifOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.gif.ImagesToMiniGifOutput;
 
 public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Handler {
 

@@ -1,10 +1,10 @@
-package edu.ncsu.lubick.localHub.videoPostProduction;
+package edu.ncsu.lubick.localHub.videoPostProduction.gif;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-import edu.ncsu.lubick.localHub.videoPostProduction.gif.ImagesToGifOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.ThumbnailGenerator;
 
 public class ImagesToMiniGifOutput extends ImagesToGifOutput
 {
@@ -27,4 +27,9 @@ public class ImagesToMiniGifOutput extends ImagesToGifOutput
 		return newGifFile;
 	}
 
+	@Override
+	public String getMediaTypeInfo()
+	{
+		return super.getMediaTypeInfo()+" (mini)";
+	}
 }

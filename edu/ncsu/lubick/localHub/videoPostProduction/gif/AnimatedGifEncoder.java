@@ -1,8 +1,15 @@
 package edu.ncsu.lubick.localHub.videoPostProduction.gif;
 
-import java.io.*;
-import java.awt.*;
-import java.awt.image.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Class AnimatedGifEncoder - Encodes a GIF file consisting of one or more frames.
@@ -68,6 +75,7 @@ public class AnimatedGifEncoder {
 	protected boolean sizeSet = false; // if false, get size from first frame
 
 	protected int sample = 10; // default sample interval for quantizer
+	
 
 	/**
 	 * Sets the delay time between each frame, or changes it for subsequent frames (applies to last frame added).
@@ -128,25 +136,30 @@ public class AnimatedGifEncoder {
 	 * Invoking <code>finish()</code> flushes all frames. If <code>setSize</code> was not invoked, the size of the first image is used for all subsequent
 	 * frames.
 	 * 
-	 * @param im
+	 * @param frameImage
 	 *            BufferedImage containing frame to write.
 	 * @return true if successful.
 	 */
-	public boolean addFrame(BufferedImage im)
+	public void addFrame(BufferedImage frameImage)
 	{
-		if ((im == null) || !started)
+		if ((frameImage == null) || !started)
 		{
-			return false;
+			return;
 		}
-		boolean ok = true;
+		
+		handleImageFrame(frameImage);
+	}
+
+	protected void handleImageFrame(BufferedImage frameImage)
+	{
 		try
 		{
 			if (!sizeSet)
 			{
 				// use first frame's size
-				setSize(im.getWidth(), im.getHeight());
+				setSize(frameImage.getWidth(), frameImage.getHeight());
 			}
-			image = im;
+			image = frameImage;
 			getImagePixels(); // convert to correct format if necessary
 			analyzePixels(); // build color table & map pixels
 			if (firstFrame)
@@ -170,10 +183,8 @@ public class AnimatedGifEncoder {
 		}
 		catch (IOException e)
 		{
-			ok = false;
 		}
 
-		return ok;
 	}
 
 	/**

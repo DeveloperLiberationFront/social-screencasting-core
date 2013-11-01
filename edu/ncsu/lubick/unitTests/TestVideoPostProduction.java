@@ -16,12 +16,12 @@ import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
-import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToMiniGifOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.ThumbnailGenerator;
 import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.gif.ImagesToGifOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.gif.ImagesToMiniGifOutput;
 
 public class TestVideoPostProduction
 {

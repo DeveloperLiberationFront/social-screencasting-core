@@ -22,6 +22,7 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 
 	private static Logger logger = Logger.getLogger(CornerKeyboardAnimation.class.getName());
 	private static final int TIME_FOR_ACTIVATED_ANIMATION = 2; // in seconds
+	private static final int FRAMES_TO_ACCOUNT_FOR_LAG_TIME = 3;
 
 	private File scratchDir;
 	private int frameRate;
@@ -76,7 +77,7 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 		BufferedImage activatedAnimation = animationSource.makeAnimationForKeyCodes(keyCodes);
 
 		int i = 0;
-		for (; i < frameRate * runUpTime; i++)
+		for (; i < frameRate * runUpTime - FRAMES_TO_ACCOUNT_FOR_LAG_TIME; i++)
 		{
 			File f = imagesToAddAnimationTo[i];
 			addAnimationToImageAndSaveToDisk(unactivatedAnimation, f);
