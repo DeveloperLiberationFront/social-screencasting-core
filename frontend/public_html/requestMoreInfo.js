@@ -3,7 +3,10 @@ $(document).ready(function()
 //handles the first click to see if a video file exists
 	$(".clickMe").on('click',function(){
 		$(".moreInfo").removeClass("hidden");
-		$.post( "makeVideo", { thingToDo: "isVideoAlreadyMade", pluginName: $(this).data("pluginName"), toolName:$(this).data("toolName")}, handleVideoFileExists);
+		$.post( "makeVideo", { 
+		thingToDo: "isVideoAlreadyMade", pluginName: $(this).data("pluginName"), toolName:$(this).data("toolName")},
+
+		handleVideoFileExists);
 	});
 	
 	$(".clickMe").on('mouseenter',function(){
@@ -29,4 +32,20 @@ function addRequestGenerationListeners(){
 		$(".modal").show();
 		$.post( "makeVideo", { thingToDo: "makeVideo", pluginName: $(this).data("pluginName"), toolName:$(this).data("toolName")}, handleVideoFileExists);
 	});
+	
+	$('.fancybox-thumbs').fancybox({
+				prevEffect : 'none',
+				nextEffect : 'none',
+
+				closeBtn  : false,
+				arrows    : false,
+				nextClick : true,
+
+				helpers : {
+					thumbs : {
+						width  : 50,
+						height : 50
+					}
+				}
+			});
 }
