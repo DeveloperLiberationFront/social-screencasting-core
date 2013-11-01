@@ -29,21 +29,24 @@ h1 {
 	margin-left:10%;
 	margin-right:40px;
 	background-color:white;
+	border:3px solid orange;
+	border-spacing:0;
+	text-align:center;
 }
 
 .clickMe{
 	text-decoration:underline;
 	font-size:16px;
 }
-.hoverOver{
+.clickMe:hover{
 	font-style:italic;
 }
 td, tr, th{
 	padding:4px;
 }
 
-.moreInfo a {
-	border: 2px orange;
+.moreInfoTitle{
+	text-align:center;
 }
 
 .pluginListing {

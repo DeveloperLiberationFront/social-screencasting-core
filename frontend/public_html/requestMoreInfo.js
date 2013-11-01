@@ -26,6 +26,7 @@ function handleVideoFileExists( data ) {
   $(".moreInfo").html( data );
   addRequestGenerationListeners();
 }
+//To be called to dynamically allow jquery nodes to be extended.
 function addRequestGenerationListeners(){
 	$(".requestGeneration").on('click',function(){
 		$(".moreInfo").removeClass("hidden");

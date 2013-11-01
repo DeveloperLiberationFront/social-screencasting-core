@@ -1,4 +1,6 @@
-
+<div class="moreInfoTitle">Title of tool Here</div>
 <a class="fancybox-thumbs" data-fancybox-group="thumb" href="Testing1388763334.gif" title="ToolNameGoesHere">
 	<img src="Testing1388763334.mini.gif" alt="" />
 </a>
+<div>This is the space for other metadata</div>
+
