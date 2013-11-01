@@ -1,6 +1,7 @@
 package edu.ncsu.lubick.localHub.videoPostProduction.animation;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -18,8 +19,8 @@ public class AnimatedTextAndKeyboardMaker extends AnimatedKeyboardMaker {
 	{
 		BufferedImage image = super.makeAnimationForKeyCodes(keycodes);
 		
-		g = image.createGraphics();
-		g.drawText...
+		//g = image.createGraphics();
+		//g.drawText...
 		return image;
 	}
 
@@ -30,8 +31,11 @@ public class AnimatedTextAndKeyboardMaker extends AnimatedKeyboardMaker {
 		int height = unActivatedKeyboard.getHeight();
 		BufferedImage img = new BufferedImage(width, height+EXTRA_HEIGHT, BufferedImage.TYPE_INT_ARGB);
 
-		img.getGraphics().setColor(Color.white);
-		copyFromImageToGraphics(img.getGraphics(), unActivatedKeyboard, 0, 0, width, height);
+		Graphics graphics = img.getGraphics();
+		
+		graphics.setColor(Color.white);
+		graphics.fillRect(0, 0, width, height+EXTRA_HEIGHT);
+		copyFromImageToGraphics(graphics, unActivatedKeyboard, 0, 0, width, height);
 		return img;
 	}
 }
