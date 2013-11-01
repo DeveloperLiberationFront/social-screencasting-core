@@ -94,7 +94,7 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 	{
 		if (animationSource == null)
 		{
-			animationSource = new AnimatedTextMaker();
+			animationSource = new AnimatedTextAndKeyboardMaker();
 		}
 	}
 
