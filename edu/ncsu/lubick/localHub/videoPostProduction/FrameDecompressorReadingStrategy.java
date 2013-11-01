@@ -9,8 +9,7 @@ public interface FrameDecompressorReadingStrategy
 {
 
 	/**
-	 * Sets the codec up to continue reading any data necessary at the beginning
-	 * of the file before the frame data begins.
+	 * Sets the codec up to continue reading any data necessary at the beginning of the file before the frame data begins.
 	 * 
 	 * @param inputStream
 	 * @throws IOException

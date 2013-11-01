@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 import org.apache.log4j.Logger;
 
-public class ImagesToVideoOutput extends AbstractImagesToMediaOutput 
+public class ImagesToVideoOutput extends AbstractImagesToMediaOutput
 {
 	public ImagesToVideoOutput()
 	{
@@ -16,13 +16,12 @@ public class ImagesToVideoOutput extends AbstractImagesToMediaOutput
 
 	public static final String VIDEO_EXTENSION = "mkv";
 	private static Logger logger = Logger.getLogger(ImagesToVideoOutput.class.getName());
-	
+
 	@Override
 	public File combineImageFilesToMakeMedia(String fileNameMinusExtension) throws IOException
 	{
 		File newVideoFile = makeVideoFile(fileNameMinusExtension);
-		
-		
+
 		// TODO make this more flexible, not hardcoded. i.e. the user should
 		// specify where their ffmpeg is
 
@@ -42,15 +41,15 @@ public class ImagesToVideoOutput extends AbstractImagesToMediaOutput
 		{
 			logger.error("There was a problem with ffmpeg", e);
 		}
-		
+
 		return newVideoFile;
 	}
-	
+
 	private File makeVideoFile(String fileNameMinusExtension) throws IOException
 	{
 		File newFile = new File(fileNameMinusExtension + "." + VIDEO_EXTENSION);
 		cleanUpForFile(newFile);
-		
+
 		return newFile;
 	}
 

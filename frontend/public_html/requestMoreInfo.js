@@ -23,10 +23,13 @@ $(document).ready(function()
 
 function handleVideoFileExists( data ) {
 	$(".modal").hide();
-  $(".moreInfo").html( data );
+  $(".moreInfo").html( $(data).hide() );
+  
+  $(".moreInfo").children().fadeIn("fast");
   addRequestGenerationListeners();
+  
 }
-//To be called to dynamically allow jquery nodes to be extended.
+//To be called to dynamically allow jquery nodes to be ex
 function addRequestGenerationListeners(){
 	$(".requestGeneration").on('click',function(){
 		$(".moreInfo").removeClass("hidden");

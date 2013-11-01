@@ -62,5 +62,4 @@ public class AnimatedKeyboardMaker implements KeypressAnimationMaker {
 		g.drawImage(img, firstX, firstY, secondX, secondY, firstX, firstY, secondX, secondY, null);
 	}
 
-
 }

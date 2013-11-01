@@ -23,7 +23,7 @@ public abstract class DefaultImageDiskWritingStrategy implements ImageDiskWritin
 		}
 		this.deleteImagesAfterUse = deleteImagesAfterUse;
 
-		//reset();
+		// reset();
 	}
 
 	public abstract Logger getLogger();
@@ -31,7 +31,7 @@ public abstract class DefaultImageDiskWritingStrategy implements ImageDiskWritin
 	protected String getNextFileName()
 	{
 		currentTempImageNumber++;
-		return "temp" + FileUtilities.padIntTo4Digits(currentTempImageNumber) + "."+PostProductionHandler.INTERMEDIATE_FILE_FORMAT;
+		return "temp" + FileUtilities.padIntTo4Digits(currentTempImageNumber) + "." + PostProductionHandler.INTERMEDIATE_FILE_FORMAT;
 	}
 
 	@Override
@@ -50,6 +50,5 @@ public abstract class DefaultImageDiskWritingStrategy implements ImageDiskWritin
 			}
 		}
 	}
-	
 
 }

@@ -11,7 +11,6 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionAnimationStrat
  */
 public class NoAnimationStrategy implements PostProductionAnimationStrategy {
 
-
 	public NoAnimationStrategy()
 	{
 	}

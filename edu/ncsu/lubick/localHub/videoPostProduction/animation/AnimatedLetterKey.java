@@ -5,8 +5,7 @@ import java.awt.Point;
 import java.awt.image.BufferedImage;
 
 /**
- * Represents a block of same-sized keys, like letters (but also used for
- * numbers)
+ * Represents a block of same-sized keys, like letters (but also used for numbers)
  * 
  * @author KevinLubick
  * 

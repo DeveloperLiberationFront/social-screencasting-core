@@ -26,10 +26,8 @@ public abstract class SQLDatabase extends DBAbstraction {
 	private void createRawVideoCapFiles()
 	{
 		/*
-		 * RawVideoCapFiles Schema CREATE TABLE IF NOT EXISTS RawVideoCapFiles (
-		 * file_id INTEGER PRIMARY KEY AUTOINCREMENT file_name TEXT,
-		 * video_start_time INTEGER, //The video's start time is only accurate
-		 * to the nearest second duration INTEGER //This is in seconds
+		 * RawVideoCapFiles Schema CREATE TABLE IF NOT EXISTS RawVideoCapFiles ( file_id INTEGER PRIMARY KEY AUTOINCREMENT file_name TEXT, video_start_time
+		 * INTEGER, //The video's start time is only accurate to the nearest second duration INTEGER //This is in seconds
 		 * 
 		 * )
 		 */
@@ -50,10 +48,8 @@ public abstract class SQLDatabase extends DBAbstraction {
 	private void createToolUsageTable()
 	{
 		/*
-		 * ToolUsage Schema CREATE TABLE IF NOT EXISTS ToolUsages ( use_id
-		 * INTEGER PRIMARY KEY AUTOINCREMENT plugin_name TEXT, usage_timestamp
-		 * INTEGER, tool_name TEXT, tool_key_presses TEXT, class_of_tool TEXT,
-		 * tool_use_duration INTEGER )
+		 * ToolUsage Schema CREATE TABLE IF NOT EXISTS ToolUsages ( use_id INTEGER PRIMARY KEY AUTOINCREMENT plugin_name TEXT, usage_timestamp INTEGER,
+		 * tool_name TEXT, tool_key_presses TEXT, class_of_tool TEXT, tool_use_duration INTEGER )
 		 */
 		// build up the sql
 		StringBuilder sqlTableQueryBuilder = new StringBuilder();
@@ -207,10 +203,8 @@ public abstract class SQLDatabase extends DBAbstraction {
 	}
 
 	/*
-	 * RawVideoCapFiles Schema CREATE TABLE IF NOT EXISTS RawVideoCapFiles (
-	 * file_id INTEGER PRIMARY KEY AUTOINCREMENT file_name TEXT,
-	 * video_start_time INTEGER, //The video's start time is only accurate to
-	 * the nearest second duration INTEGER //This is in seconds
+	 * RawVideoCapFiles Schema CREATE TABLE IF NOT EXISTS RawVideoCapFiles ( file_id INTEGER PRIMARY KEY AUTOINCREMENT file_name TEXT, video_start_time INTEGER,
+	 * //The video's start time is only accurate to the nearest second duration INTEGER //This is in seconds
 	 * 
 	 * )
 	 */

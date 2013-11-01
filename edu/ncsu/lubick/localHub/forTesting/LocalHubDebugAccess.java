@@ -25,8 +25,10 @@ public interface LocalHubDebugAccess {
 
 	void shutDown();
 
-	File extractVideoForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException;
+	List<File> extractVideoForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException;
 
 	List<String> getAllPluginNames();
+
+	void forceVideoOutput();
 
 }

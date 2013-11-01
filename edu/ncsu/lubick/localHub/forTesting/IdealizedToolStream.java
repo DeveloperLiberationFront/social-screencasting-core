@@ -14,13 +14,11 @@ import org.json.JSONObject;
 import edu.ncsu.lubick.localHub.ToolStream;
 
 /**
- * This is an idealized ToolStream producer, like a plugin. Plugins should model
- * the information and the JSON output of this class.
+ * This is an idealized ToolStream producer, like a plugin. Plugins should model the information and the JSON output of this class.
  * 
  * This is used for unit testing
  * 
- * For internal testing, there is an isEquivalent() function that can compare an
- * IdealizedToolStream to the internal representation of the tool stream
+ * For internal testing, there is an isEquivalent() function that can compare an IdealizedToolStream to the internal representation of the tool stream
  * 
  * @author Kevin Lubick
  * 
@@ -87,11 +85,8 @@ public class IdealizedToolStream
 	/**
 	 * This should spit out a jsonArray of json objects.
 	 * 
-	 * Each JsonObject should have a String paired with "Tool_Name", a String
-	 * paired with "Tool_Class", a String paired with "Tool_Key_Presses", a long
-	 * paired with "Tool_Timestamp" (number of milliseconds since epoch), and an
-	 * int paired with "Tool_Duration" Optionally, there can be a JSONObject
-	 * with extraInfo
+	 * Each JsonObject should have a String paired with "Tool_Name", a String paired with "Tool_Class", a String paired with "Tool_Key_Presses", a long paired
+	 * with "Tool_Timestamp" (number of milliseconds since epoch), and an int paired with "Tool_Duration" Optionally, there can be a JSONObject with extraInfo
 	 * 
 	 * @return
 	 */

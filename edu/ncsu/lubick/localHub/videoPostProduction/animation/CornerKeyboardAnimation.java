@@ -17,19 +17,19 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionAnimationStrat
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.ThreadedImageDiskWritingStrategy;
 
-public class CornerKeyboardAnimation implements PostProductionAnimationStrategy 
+public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 {
 
 	private static Logger logger = Logger.getLogger(CornerKeyboardAnimation.class.getName());
-	private static final int TIME_FOR_ACTIVATED_ANIMATION = 2;	//in seconds
-	
+	private static final int TIME_FOR_ACTIVATED_ANIMATION = 2; // in seconds
+
 	private File scratchDir;
 	private int frameRate;
 	private int runUpTime;
-	
-	private KeypressAnimationMaker animationSource = null;  //lazy load
+
+	private KeypressAnimationMaker animationSource = null; // lazy load
 	private ShortcutsToKeyCodesConverter keyCodeReader = new ShortcutsToKeyCodesConverter();
-	
+
 	private ImageDiskWritingStrategy diskWriter = null;
 
 	public CornerKeyboardAnimation(String scratchDirPath, int frameRate, int runUpTime)
@@ -37,13 +37,13 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 		this.scratchDir = new File(scratchDirPath);
 		if (!this.scratchDir.exists() || !this.scratchDir.isDirectory())
 		{
-			logger.fatal("Could not find the scratchDir "+scratchDir.getAbsolutePath());
+			logger.fatal("Could not find the scratchDir " + scratchDir.getAbsolutePath());
 		}
 		this.frameRate = frameRate;
 		this.runUpTime = runUpTime;
-		
+
 		diskWriter = new ThreadedImageDiskWritingStrategy(scratchDirPath, PostProductionHandler.DELETE_IMAGES_AFTER_USE);
-		
+
 	}
 
 	@Override
@@ -51,9 +51,9 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 	{
 		if (toolUsage.getToolKeyPresses().equals("MENU"))
 		{
-			return;	//no animation for menus
+			return; // no animation for menus
 		}
-		
+
 		if (animationSource == null)
 		{
 			animationSource = new AnimatedKeyboardMaker();
@@ -61,7 +61,7 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 		diskWriter.resetWithOutClearingFolder();
 
 		File[] imagesToAddAnimationTo = scratchDir.listFiles(new FileFilter() {
-			
+
 			@Override
 			public boolean accept(File pathname)
 			{
@@ -69,26 +69,25 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 			}
 		});
 		Arrays.sort(imagesToAddAnimationTo);
-		
-		//Make these once and reuse them below
+
+		// Make these once and reuse them below
 		BufferedImage unactivatedAnimation = animationSource.makeUnactivatedAnimation();
 		int[] keyCodes = keyCodeReader.convert(toolUsage.getToolKeyPresses());
 		BufferedImage activatedAnimation = animationSource.makeAnimationForKeyCodes(keyCodes);
-		
-		
+
 		int i = 0;
-		for(;i<frameRate * runUpTime;i++)
+		for (; i < frameRate * runUpTime; i++)
 		{
-			File f = imagesToAddAnimationTo[i];	
+			File f = imagesToAddAnimationTo[i];
 			addAnimationToImageAndSaveToDisk(unactivatedAnimation, f);
 		}
-		
-		for(int j = 0;j<frameRate * TIME_FOR_ACTIVATED_ANIMATION && (i + j) < imagesToAddAnimationTo.length ;j++)
+
+		for (int j = 0; j < frameRate * TIME_FOR_ACTIVATED_ANIMATION && (i + j) < imagesToAddAnimationTo.length; j++)
 		{
-			File f = imagesToAddAnimationTo[i+j];
+			File f = imagesToAddAnimationTo[i + j];
 			addAnimationToImageAndSaveToDisk(activatedAnimation, f);
 		}
-		
+
 		diskWriter.waitUntilDoneWriting();
 	}
 
@@ -96,12 +95,11 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 	{
 		BufferedImage frameImage = ImageIO.read(sourceFile);
 		Graphics2D g = frameImage.createGraphics();
-		
 
 		int x = frameImage.getWidth() - animation.getWidth();
 		int y = frameImage.getHeight() - animation.getHeight();
 		g.drawImage(animation, x, y, animation.getWidth(), animation.getHeight(), null);
-		
+
 		diskWriter.writeImageToDisk(frameImage, sourceFile);
 	}
 

@@ -262,7 +262,7 @@ public class AnimatedGifEncoder {
 			height = 240;
 		sizeSet = true;
 	}
-	
+
 	public Dimension getSize()
 	{
 		if (!sizeSet)
@@ -319,11 +319,12 @@ public class AnimatedGifEncoder {
 		}
 		return started = ok;
 	}
-	
+
 	/**
 	 * Initiates writing of a GIF file with the specified name.
 	 * 
-	 * @param file file To Output To
+	 * @param file
+	 *            file To Output To
 	 * @return false if open or initial write failed.
 	 */
 	public boolean start(File file)
@@ -784,7 +785,7 @@ class NeuQuant {
 					netindex[j] = i;
 				previouscol = smallval;
 				startpos = i;
-			} 
+			}
 		}
 		netindex[previouscol] = (startpos + maxnetpos) >> 1;
 		for (j = previouscol + 1; j < 256; j++)

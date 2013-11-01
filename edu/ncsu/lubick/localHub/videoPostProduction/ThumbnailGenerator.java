@@ -9,9 +9,9 @@ import javax.imageio.ImageIO;
 
 import org.apache.log4j.Logger;
 
-public class ThumbnailGenerator extends AbstractImagesToMediaOutput 
+public class ThumbnailGenerator extends AbstractImagesToMediaOutput
 {
-	
+
 	public static final String THUMBNAIL_EXTENSION = "png";
 
 	public ThumbnailGenerator()
@@ -25,32 +25,32 @@ public class ThumbnailGenerator extends AbstractImagesToMediaOutput
 	public File combineImageFilesToMakeMedia(String fileNameMinusExtension) throws IOException
 	{
 		File newGifFile = makePngFile(fileNameMinusExtension);
-		
+
 		File[] imageFiles = getImageFilesToAnimate();
 		if (imageFiles.length == 0)
 		{
 			throw new IOException("Cannot make a thumbnail from nothing");
 		}
-		File fileToCopy = imageFiles[imageFiles.length/2];
-		
+		File fileToCopy = imageFiles[imageFiles.length / 2];
+
 		BufferedImage imageToResize = ImageIO.read(fileToCopy);
 		BufferedImage shrunkImage = shrinkImage(imageToResize);
-		
+
 		ImageIO.write(shrunkImage, THUMBNAIL_EXTENSION, newGifFile);
-		
+
 		return newGifFile;
 	}
 
 	public static BufferedImage shrinkImage(BufferedImage imageToResize)
 	{
 		int oldWidth = imageToResize.getWidth();
-		int newWidth = oldWidth/3;
-		
+		int newWidth = oldWidth / 3;
+
 		int oldHeight = imageToResize.getHeight();
-		int newHeight = oldHeight/3;
-		
+		int newHeight = oldHeight / 3;
+
 		BufferedImage shrunkImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
-		
+
 		Graphics g = shrunkImage.getGraphics();
 		g.drawImage(imageToResize, 0, 0, newWidth, newHeight, 0, 0, oldWidth, oldHeight, null);
 		return shrunkImage;
@@ -60,8 +60,8 @@ public class ThumbnailGenerator extends AbstractImagesToMediaOutput
 	{
 		File newPngFile = new File(fileNameMinusExtension + "." + THUMBNAIL_EXTENSION);
 		cleanUpForFile(newPngFile);
-		
-		return newPngFile; 
+
+		return newPngFile;
 	}
 
 	@Override

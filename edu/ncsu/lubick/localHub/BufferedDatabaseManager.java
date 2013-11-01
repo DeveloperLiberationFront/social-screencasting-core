@@ -17,12 +17,10 @@ import edu.ncsu.lubick.localHub.database.DBAbstractionException;
 import edu.ncsu.lubick.localHub.database.DBAbstractionFactory;
 
 /**
- * An implementation of a database that prioritizes quick writes at the expenses
- * of blocking on data pulls.
+ * An implementation of a database that prioritizes quick writes at the expenses of blocking on data pulls.
  * 
- * However, this implementation is NOT completely thread safe. Do not try to
- * send stuff to the database while a request from the database is blocking.
- * There is a good chance things will fail
+ * However, this implementation is NOT completely thread safe. Do not try to send stuff to the database while a request from the database is blocking. There is
+ * a good chance things will fail
  * 
  * @author Kevin Lubick
  * 

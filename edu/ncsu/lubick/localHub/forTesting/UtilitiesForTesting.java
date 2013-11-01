@@ -17,8 +17,7 @@ public class UtilitiesForTesting {
 	private static Logger logger = Logger.getLogger(UtilitiesForTesting.class.getName());
 
 	/**
-	 * Creates a file in the given directory with the given fileName and then
-	 * writes the fileContents to disk.
+	 * Creates a file in the given directory with the given fileName and then writes the fileContents to disk.
 	 * 
 	 * If the file already exists, the file will be deleted and overwritten.
 	 * 

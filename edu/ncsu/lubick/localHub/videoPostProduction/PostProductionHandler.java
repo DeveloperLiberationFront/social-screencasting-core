@@ -8,9 +8,11 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -49,15 +51,10 @@ public class PostProductionHandler
 	public static final int FRAME_RATE = 5;
 	public static final String EXPECTED_FILE_EXTENSION = ".cap";
 	public static final boolean DELETE_IMAGES_AFTER_USE = false;
-	
-	
+
 	private static final String SCRATCH_DIR = "./Scratch/";
 
 	private static Logger logger = Logger.getLogger(PostProductionHandler.class.getName());
-
-	
-
-	
 
 	private static final int RUN_UP_TIME = 5;
 
@@ -66,7 +63,7 @@ public class PostProductionHandler
 	private Date capFileStartTime;
 
 	private PostProductionAnimationStrategy postProductionAnimator;
-	
+
 	private Queue<OverloadFile> queueOfOverloadFiles = new LinkedList<>();
 	private List<ImagesToMediaOutput> mediaOutputs = new ArrayList<>();
 
@@ -75,13 +72,13 @@ public class PostProductionHandler
 
 	private double toolDemoInSeconds;
 	private ToolUsage currentToolStream;
-	
+
 	public PostProductionHandler()
 	{
 		this.imageWriter = new ThreadedImageDiskWritingStrategy(SCRATCH_DIR, DELETE_IMAGES_AFTER_USE);
-		
+
 		this.postProductionAnimator = new CornerKeyboardAnimation(SCRATCH_DIR, FRAME_RATE, RUN_UP_TIME);
-		//this.postProductionAnimator = new NoAnimationStrategy();
+		// this.postProductionAnimator = new NoAnimationStrategy();
 	}
 
 	public void loadFile(File capFile)
@@ -149,8 +146,8 @@ public class PostProductionHandler
 		}
 
 		Date timeToLookFor = findStartingTime(specificToolUse);
-		
-		logger.info("The video for "+specificToolUse.toString()+" will start at "+timeToLookFor);
+
+		logger.info("The video for " + specificToolUse.toString() + " will start at " + timeToLookFor);
 
 		this.toolDemoInSeconds = specificToolUse.getDuration() / 1000.0;
 
@@ -192,10 +189,9 @@ public class PostProductionHandler
 		return timeToLookFor;
 	}
 
-
 	private void fastFowardStreamToTime(InputStream inputStream, Date timeToLookFor) throws IOException, VideoEncodingException, ReachedEndOfCapFileException
 	{
-		if (timeToLookFor.equals(capFileStartTime)) // no fast forwarding  required
+		if (timeToLookFor.equals(capFileStartTime)) // no fast forwarding required
 		{
 			return;
 		}
@@ -223,21 +219,21 @@ public class PostProductionHandler
 		logger.info("Adding animation to video");
 		postProductionAnimator.addAnimationToImagesInScratchFolderForToolStream(this.currentToolStream);
 
-//		if (newVideoFile.exists() && !newVideoFile.delete())
-//		{
-//			logger.error("could not establish a temporary video file");
-//			return null;
-//		}
+		// if (newVideoFile.exists() && !newVideoFile.delete())
+		// {
+		// logger.error("could not establish a temporary video file");
+		// return null;
+		// }
 		logger.info("Rendering Media");
-		
+
 		List<File> createdFiles = new ArrayList<>();
-		for(ImagesToMediaOutput mediaOutput : mediaOutputs)
+		for (ImagesToMediaOutput mediaOutput : mediaOutputs)
 		{
-			//combineImageFilesToVideo(newVideoFile);
+			// combineImageFilesToVideo(newVideoFile);
 			createdFiles.add(mediaOutput.combineImageFilesToMakeMedia(fileName));
-			logger.info(mediaOutput.getMediaTypeInfo()+" Rendered");
+			logger.info(mediaOutput.getMediaTypeInfo() + " Rendered");
 		}
-		
+
 		return createdFiles;
 	}
 
@@ -251,7 +247,7 @@ public class PostProductionHandler
 			{
 				framePacket = decompressor.readInNextFrame(inputStream);
 				tempImage = decompressor.createBufferedImageFromDecompressedFramePacket(framePacket);
-				
+
 			}
 			catch (VideoEncodingException e)
 			{
@@ -299,9 +295,6 @@ public class PostProductionHandler
 		}
 	}
 
-
-	
-
 	public static String makeFileNameForToolPluginMedia(String pluginName, String toolName)
 	{
 		if (toolName == null)
@@ -321,8 +314,7 @@ public class PostProductionHandler
 	}
 
 	/**
-	 * Adds an extra file to this handler to use if the wanted toolstream's
-	 * behavior extends over the end of the loaded cap file
+	 * Adds an extra file to this handler to use if the wanted toolstream's behavior extends over the end of the loaded cap file
 	 * 
 	 * @param extraCapFile
 	 * @param extraDate
@@ -367,6 +359,11 @@ public class PostProductionHandler
 	public void addNewMediaOutput(ImagesToMediaOutput newMediaOutput)
 	{
 		this.mediaOutputs.add(newMediaOutput);
+	}
+
+	public Set<ImagesToMediaOutput> getMediaOutputs()
+	{
+		return new HashSet<>(this.mediaOutputs);
 	}
 
 }

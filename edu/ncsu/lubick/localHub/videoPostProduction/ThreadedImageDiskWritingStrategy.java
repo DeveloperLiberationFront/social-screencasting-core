@@ -106,6 +106,5 @@ public class ThreadedImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 		}
 		this.workingThreadPool = Executors.newCachedThreadPool();
 	}
-	
 
 }

@@ -7,9 +7,10 @@ import java.util.Arrays;
 
 import org.apache.log4j.Logger;
 
-public abstract class AbstractImagesToMediaOutput implements ImagesToMediaOutput 
+public abstract class AbstractImagesToMediaOutput implements ImagesToMediaOutput
 {
 	protected File scratchDir;
+
 	public AbstractImagesToMediaOutput(File file)
 	{
 		this.scratchDir = file;
@@ -34,7 +35,7 @@ public abstract class AbstractImagesToMediaOutput implements ImagesToMediaOutput
 	protected File[] getImageFilesToAnimate()
 	{
 		File[] imagesToAnimate = scratchDir.listFiles(new FileFilter() {
-			
+
 			@Override
 			public boolean accept(File pathname)
 			{

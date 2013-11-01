@@ -17,6 +17,7 @@ import edu.ncsu.lubick.localHub.database.DBAbstraction.FileDateStructs;
 import edu.ncsu.lubick.localHub.database.SQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.http.HTTPServer;
+import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToMediaOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
@@ -304,11 +305,15 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	}
 
 	@Override
-	public File extractVideoForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException
+	public void extractMediaForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException
+	{
+		extractMediaForLastUsageOfToolAndReturn(pluginName, toolName); // throw away this list. Clients who are not unit tests are not expecting output
+	}
+
+	public List<File> extractMediaForLastUsageOfToolAndReturn(String pluginName, String toolName) throws VideoEncodingException
 	{
 		setUpPostProductionHandler();
 		ToolUsage lastToolUsage = databaseManager.getLastInstanceOfToolUsage(pluginName, toolName);
-		
 
 		List<FileDateStructs> filesToload = databaseManager.getVideoFilesLinkedToTimePeriod(lastToolUsage);
 
@@ -326,29 +331,13 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 			videoPostProductionHandler.enqueueOverLoadFile(filesToload.get(i).file, filesToload.get(i).startTime);
 		}
 
-		return getOnlyVideoFileFromHandler(lastToolUsage);
+		return videoPostProductionHandler.extractMediaForToolUsage(lastToolUsage);
 	}
 
 	private void setUpPostProductionHandler()
 	{
 		this.videoPostProductionHandler = new PostProductionHandler();
-		this.videoPostProductionHandler.addNewMediaOutput(new ImagesToVideoOutput());
-	}
-	
-	private File getOnlyVideoFileFromHandler(ToolUsage toolUsage) throws VideoEncodingException
-	{
-		
-		List<File> mediaOutputs = videoPostProductionHandler.extractMediaForToolUsage(toolUsage);
-		if (mediaOutputs == null)
-		{
-			return null;
-		}
-		for(File f: mediaOutputs)
-		{
-			if (f.getName().endsWith(ImagesToVideoOutput.VIDEO_EXTENSION))
-				return f;
-		}
-		return null;
+		// this.videoPostProductionHandler.addNewMediaOutput(new ImagesToVideoOutput());
 	}
 
 	public void shutDown()
@@ -441,9 +430,8 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	}
 
 	/**
-	 * A class that allows unit tests to have indirect, controlled access to the
-	 * inner workings of the LocalHub. This can only be created with a static
-	 * method in LocalHub
+	 * A class that allows unit tests to have indirect, controlled access to the inner workings of the LocalHub. This can only be created with a static method
+	 * in LocalHub
 	 * 
 	 * @author kjlubick
 	 * 
@@ -504,15 +492,28 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		}
 
 		@Override
-		public File extractVideoForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException
+		public List<File> extractVideoForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException
 		{
-			return hubToDebug.extractVideoForLastUsageOfTool(pluginName, toolName);
+			return hubToDebug.extractMediaForLastUsageOfToolAndReturn(pluginName, toolName);
 		}
 
 		@Override
 		public List<String> getAllPluginNames()
 		{
 			return hubToDebug.getNamesOfAllPlugins();
+		}
+
+		@Override
+		public void forceVideoOutput()
+		{
+			for (ImagesToMediaOutput m : hubToDebug.videoPostProductionHandler.getMediaOutputs())
+			{
+				if (m instanceof ImagesToVideoOutput)
+				{
+					return;
+				}
+			}
+			hubToDebug.videoPostProductionHandler.addNewMediaOutput(new ImagesToVideoOutput());
 		}
 
 	}

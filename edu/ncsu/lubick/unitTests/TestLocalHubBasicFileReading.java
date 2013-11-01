@@ -27,6 +27,7 @@ import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
 import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
 
 public class TestLocalHubBasicFileReading {
 
@@ -257,6 +258,7 @@ public class TestLocalHubBasicFileReading {
 	public void testDatabasePullAndVideoCreation() throws Exception
 	{
 		assertTrue(localHub.isRunning());
+		localHub.forceVideoOutput();
 		Date currentTime = getFastForwardedDate();
 		Date teeMinusFive = new Date(currentTime.getTime() - 5 * 1000);
 		Date teePlusThirty = new Date(currentTime.getTime() + 30 * 1000);
@@ -282,7 +284,7 @@ public class TestLocalHubBasicFileReading {
 		assertNotNull(allHistoriesOfToolUsages);
 		assertEquals(31, allHistoriesOfToolUsages.size());
 
-		File outputFile = localHub.extractVideoForLastUsageOfTool(getCurrentPluginName(), uniqueToolString);
+		File outputFile = getJustVideoFromLocalHub(uniqueToolString);
 
 		assertNotNull(outputFile);
 		assertTrue(outputFile.exists());
@@ -294,6 +296,21 @@ public class TestLocalHubBasicFileReading {
 													// more than 3Mb
 		assertTrue(outputFile.length() < 3000000);
 
+	}
+
+	public File getJustVideoFromLocalHub(String uniqueToolString) throws VideoEncodingException
+	{
+		List<File> mediaOutputs = localHub.extractVideoForLastUsageOfTool(getCurrentPluginName(), uniqueToolString);
+		if (mediaOutputs == null)
+		{
+			return null;
+		}
+		for (File f : mediaOutputs)
+		{
+			if (f.getName().endsWith(ImagesToVideoOutput.VIDEO_EXTENSION))
+				return f;
+		}
+		return null;
 	}
 
 	/**
@@ -386,9 +403,8 @@ public class TestLocalHubBasicFileReading {
 	}
 
 	/**
-	 * Creates a date that is in the future. The first time this is called, the
-	 * time will be transformed 24 hours into the future, the second time, 48
-	 * hours and so on.
+	 * Creates a date that is in the future. The first time this is called, the time will be transformed 24 hours into the future, the second time, 48 hours and
+	 * so on.
 	 * 
 	 * @return future time as java.util.Date
 	 */

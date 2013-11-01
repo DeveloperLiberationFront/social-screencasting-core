@@ -1,11 +1,9 @@
 package edu.ncsu.lubick.localHub;
 
 /**
- * An event that is triggered when a (probably) toolstream file has been
- * detected.
+ * An event that is triggered when a (probably) toolstream file has been detected.
  * 
- * This is different from when it is being parsed (which happens later), which
- * produces a ParsedFileEvent.
+ * This is different from when it is being parsed (which happens later), which produces a ParsedFileEvent.
  * 
  * @author Kevin Lubick
  * 

@@ -41,54 +41,54 @@ public class TestVideoPostProduction
 	public void testSingleToolUsageExtractionVideo() throws Exception
 	{
 		PostProductionHandler handler = makeVideoPostProductionHandler();
-		
+
 		List<File> outputMedia = testARandomToolInAHandler(handler);
-		
+
 		assertEquals(1, outputMedia.size());
 		verifyVideoFileIsCorrectlyMade(outputMedia.get(0));
 		verifyVideoNamedProperly(outputMedia.get(0), WHOMBO_TOOL_1);
 	}
-	
+
 	@Test
 	public void testSingleToolUsageExtractionGif() throws Exception
 	{
 		PostProductionHandler handler = makeGifPostProductionHandler();
-		
+
 		List<File> outputMedia = testARandomToolInAHandler(handler);
-		
+
 		assertEquals(1, outputMedia.size());
 		verifyGifFileIsCorrectlyMade(outputMedia.get(0));
 		verifyGifNamedProperly(outputMedia.get(0), WHOMBO_TOOL_1);
 	}
-	
+
 	@Test
 	public void testSingleToolUsageExtractionMiniGif() throws Exception
 	{
 		PostProductionHandler handler = makeMiniGifPostProductionHandler();
-		
+
 		List<File> outputMedia = testARandomToolInAHandler(handler);
-		
+
 		assertEquals(1, outputMedia.size());
 		verifyGifFileIsCorrectlyMade(outputMedia.get(0));
 		verifyGifNamedProperly(outputMedia.get(0), WHOMBO_TOOL_1);
 	}
-	
+
 	@Test
 	public void testSingleToolUsageExtractionVideoThumbnailAndGif() throws Exception
 	{
 		PostProductionHandler handler = makeVideoThumbnailAndGifPostProductionHandler();
-		
+
 		List<File> outputMedia = testARandomToolInAHandler(handler);
-		
+
 		assertEquals(3, outputMedia.size());
 		assertNotNull(outputMedia.get(0));
 		verifyVideoFileIsCorrectlyMade(outputMedia.get(0));
 		verifyVideoNamedProperly(outputMedia.get(0), WHOMBO_TOOL_1);
-		
+
 		assertNotNull(outputMedia.get(1));
 		verifyGifFileIsCorrectlyMade(outputMedia.get(1));
 		verifyGifNamedProperly(outputMedia.get(1), WHOMBO_TOOL_1);
-		
+
 		assertNotNull(outputMedia.get(2));
 		verifyThumbnailFileIsCorrectlyMade(outputMedia.get(2));
 		verifyThumbnailNamedProperly(outputMedia.get(2), WHOMBO_TOOL_1);
@@ -103,7 +103,6 @@ public class TestVideoPostProduction
 
 		Date date = UtilitiesForTesting.truncateTimeToMinute(new Date());
 
-		
 		handler.loadFile(capFile);
 
 		handler.setCurrentFileStartTime(date);
@@ -113,12 +112,11 @@ public class TestVideoPostProduction
 																		// seconds
 
 		ToolUsage testToolUsage = makeToolUsage(datePlusFifteen, toolName);
-		
+
 		List<File> mediaOutputs = handler.extractMediaForToolUsage(testToolUsage);
 
 		return mediaOutputs;
 	}
-
 
 	@Test
 	public void testSingleToolUsageExtractionReallyEarly() throws Exception
@@ -169,8 +167,7 @@ public class TestVideoPostProduction
 
 		Date datePlusFiftyFive = new Date(date.getTime() + 55 * 1000); // plus 55 seconds, plenty to over run this file
 
-		ToolUsage testToolUsage = makeToolUsage(datePlusFiftyFive, toolName, 10*1000);
-		
+		ToolUsage testToolUsage = makeToolUsage(datePlusFiftyFive, toolName, 10 * 1000);
 
 		File outputFile = getVideoFromHandler(handler, testToolUsage);
 
@@ -233,7 +230,7 @@ public class TestVideoPostProduction
 	{
 		return makeToolUsage(toolUsageDate, toolUsageName, 2000);
 	}
-	
+
 	private ToolUsage makeToolUsage(Date toolUsageDate, String toolUsageName, int duration)
 	{
 		IdealizedToolStream iToolStream = new IdealizedToolStream(toolUsageDate);
@@ -265,7 +262,7 @@ public class TestVideoPostProduction
 		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
 		assertTrue(outputFile.getPath().endsWith(".gif"));
 	}
-	
+
 	private void verifyGifFileIsCorrectlyMade(File outputFile)
 	{
 		assertNotNull(outputFile);
@@ -273,23 +270,23 @@ public class TestVideoPostProduction
 		assertTrue(outputFile.isFile());
 		assertFalse(outputFile.isHidden());
 		assertTrue(outputFile.length() > 500000);
-		assertTrue(outputFile.length() < 10*1000*1000);
+		assertTrue(outputFile.length() < 10 * 1000 * 1000);
 	}
-	
+
 	private void verifyThumbnailNamedProperly(File outputFile, String toolName)
 	{
 		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
 		assertTrue(outputFile.getPath().endsWith(ThumbnailGenerator.THUMBNAIL_EXTENSION));
 	}
-	
+
 	private void verifyThumbnailFileIsCorrectlyMade(File outputFile)
 	{
 		assertNotNull(outputFile);
 		assertTrue(outputFile.exists());
 		assertTrue(outputFile.isFile());
 		assertFalse(outputFile.isHidden());
-		assertTrue(outputFile.length() > 500); 
-		assertTrue(outputFile.length() < 2*1000*1000);
+		assertTrue(outputFile.length() > 500);
+		assertTrue(outputFile.length() < 2 * 1000 * 1000);
 	}
 
 	private void verifyVideoNamedProperly(File outputFile, String toolName)
@@ -298,14 +295,14 @@ public class TestVideoPostProduction
 		assertTrue(outputFile.getPath().endsWith(ImagesToVideoOutput.VIDEO_EXTENSION));
 	}
 
-	private File getVideoFromHandler(PostProductionHandler handler, ToolUsage testToolUsage) throws VideoEncodingException
+	public static File getVideoFromHandler(PostProductionHandler handler, ToolUsage testToolUsage) throws VideoEncodingException
 	{
 		List<File> mediaOutputs = handler.extractMediaForToolUsage(testToolUsage);
 		if (mediaOutputs == null)
 		{
 			return null;
 		}
-		for(File f: mediaOutputs)
+		for (File f : mediaOutputs)
 		{
 			if (f.getName().endsWith(ImagesToVideoOutput.VIDEO_EXTENSION))
 				return f;
@@ -319,21 +316,21 @@ public class TestVideoPostProduction
 		handler.addNewMediaOutput(new ImagesToVideoOutput());
 		return handler;
 	}
-	
+
 	private PostProductionHandler makeGifPostProductionHandler()
 	{
 		PostProductionHandler handler = new PostProductionHandler();
 		handler.addNewMediaOutput(new ImagesToGifOutput(PostProductionHandler.getIntermediateFolderLocation()));
 		return handler;
 	}
-	
+
 	private PostProductionHandler makeMiniGifPostProductionHandler()
 	{
 		PostProductionHandler handler = new PostProductionHandler();
 		handler.addNewMediaOutput(new ImagesToMiniGifOutput());
 		return handler;
 	}
-	
+
 	private PostProductionHandler makeVideoThumbnailAndGifPostProductionHandler()
 	{
 		PostProductionHandler handler = new PostProductionHandler();

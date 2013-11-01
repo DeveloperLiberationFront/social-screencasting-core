@@ -64,7 +64,7 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		return previousFramePacket;
 
 	}
-	
+
 	public void bypassNextFrame(InputStream inputStream) throws IOException, VideoEncodingException, ReachedEndOfCapFileException
 	{
 		logger.trace("Starting to read in frame");
@@ -75,7 +75,7 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 			throw new ReachedEndOfCapFileException();
 		}
 
-		previousFramePacket = this.fdcs.decodeFramePacket(framePacket);	
+		previousFramePacket = this.fdcs.decodeFramePacket(framePacket);
 
 	}
 
@@ -162,9 +162,8 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 	}
 
 	/**
-	 * The first part in any frame is the time stamp. This attempts to read the
-	 * time stamp, or, if we've reached the end of the file, will return null
-	 * and set reachedEOF to true.
+	 * The first part in any frame is the time stamp. This attempts to read the time stamp, or, if we've reached the end of the file, will return null and set
+	 * reachedEOF to true.
 	 * 
 	 * @param inputStream
 	 * @return

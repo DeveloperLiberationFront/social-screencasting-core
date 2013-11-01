@@ -14,9 +14,11 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 
 import edu.ncsu.lubick.localHub.WebQueryInterface;
+import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToMiniGifOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
+import edu.ncsu.lubick.localHub.videoPostProduction.gif.ImagesToGifOutput;
 
 public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Handler {
 
@@ -29,7 +31,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 	// static initializer
 	static
 	{
-		logger = Logger.getLogger(LookupHandler.class.getName());
+		logger = Logger.getLogger(VideoCreator.class.getName());
 	}
 
 	public VideoCreator(String matchPattern, WebQueryInterface databaseLink)
@@ -85,10 +87,9 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 			return;
 		}
 
-		File madeVideo;
 		try
 		{
-			madeVideo = this.databaseLink.extractVideoForLastUsageOfTool(pluginName, toolName);
+			this.databaseLink.extractMediaForLastUsageOfTool(pluginName, toolName);
 		}
 		catch (VideoEncodingException e)
 		{
@@ -101,7 +102,12 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 			return;
 		}
 
-		response.getWriter().println("<span>This video file has been generated as " + madeVideo.getAbsolutePath() + " </span>");
+		String bigGifRelativeName = getNameForToolFullGif(pluginName, toolName);
+		bigGifRelativeName = bigGifRelativeName.substring(bigGifRelativeName.indexOf('\\'));
+		String miniGifRelativeName = getNameForToolMiniGif(pluginName, toolName);
+		miniGifRelativeName = miniGifRelativeName.substring(miniGifRelativeName.indexOf('\\'));
+
+		respondWithGifsAndMetadata(response, toolName, bigGifRelativeName, miniGifRelativeName);
 		baseRequest.setHandled(true);
 	}
 
@@ -110,24 +116,24 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
 		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
 
-		String expectedVideoFileName = getNameForPluginVideo(pluginName, toolName);
-		File expectedVideoFile = new File(expectedVideoFileName);
+		String expectedBigGifFileName = getNameForToolFullGif(pluginName, toolName);
+		File expectedBigGifFile = new File(expectedBigGifFileName);
 
-		logger.debug("If file existed, it would be called " + expectedVideoFile.getAbsolutePath()+"");
-		if (expectedVideoFile.exists())
+		String expectedMiniGifFileName = getNameForToolFullGif(pluginName, toolName);
+		File expectedMiniGifFile = new File(expectedMiniGifFileName);
+
+		logger.debug("If gif files existed, they would be called " + expectedBigGifFileName + " and " + expectedMiniGifFileName);
+
+		if (expectedBigGifFile.exists() && expectedMiniGifFile.exists())
 		{
+			String bigGifRelativeName = expectedBigGifFile.getName();
+			String miniGifRelativeName = expectedMiniGifFile.getName();
 			logger.debug("It exists!");
-			// response.getWriter().println("<span>This video file has been generated as "+expectedVideoFile.getAbsolutePath()+"</span>");
-			Map<Object, Object> dataModel = new HashMap<Object, Object>();
-			dataModel.put("path", expectedVideoFile.getAbsolutePath());
-			logger.debug("template model: " + dataModel);
-			processTemplate(response, dataModel, "generatedVideo.html.piece");
+			respondWithGifsAndMetadata(response, toolName, bigGifRelativeName, miniGifRelativeName);
 		}
 		else
 		{
 			logger.debug("It does not");
-			// response.getWriter().println("<p>This video file does not exist yet </p>");
-			// response.getWriter().println("<div class='requestGeneration' data-tool-name='"+toolName+"' data-plugin-name='"+pluginName+"'> Click here to generate it</div>");
 
 			Map<Object, Object> dataModel = new HashMap<Object, Object>();
 			dataModel.put("toolName", toolName);
@@ -138,9 +144,30 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 
 	}
 
-	public String getNameForPluginVideo(String pluginName, String toolName)
+	public void respondWithGifsAndMetadata(HttpServletResponse response, String toolName, String bigGifRelativeName, String miniGifRelativeName)
+			throws IOException
 	{
-		return PostProductionHandler.makeFileNameForToolPluginMedia(pluginName, toolName) +"."+ImagesToVideoOutput.VIDEO_EXTENSION;
+		Map<Object, Object> dataModel = new HashMap<Object, Object>();
+		dataModel.put("toolName", toolName);
+		dataModel.put("bigAnimatedGif", bigGifRelativeName);
+		dataModel.put("miniAnimatedGif", miniGifRelativeName);
+		logger.debug("template model: " + dataModel);
+		processTemplate(response, dataModel, "generatedVideo.html.piece");
+	}
+
+	public String getNameForToolVideo(String pluginName, String toolName)
+	{
+		return PostProductionHandler.makeFileNameForToolPluginMedia(pluginName, toolName) + "." + ImagesToVideoOutput.VIDEO_EXTENSION;
+	}
+
+	public String getNameForToolFullGif(String pluginName, String toolName)
+	{
+		return PostProductionHandler.makeFileNameForToolPluginMedia(pluginName, toolName) + "." + ImagesToGifOutput.GIF_EXTENSION;
+	}
+
+	public String getNameForToolMiniGif(String pluginName, String toolName)
+	{
+		return PostProductionHandler.makeFileNameForToolPluginMedia(pluginName, toolName) + "." + ImagesToMiniGifOutput.MINI_GIF_EXTENSION;
 	}
 
 	@Override

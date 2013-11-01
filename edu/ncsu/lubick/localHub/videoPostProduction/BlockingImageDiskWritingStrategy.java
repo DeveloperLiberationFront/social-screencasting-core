@@ -21,7 +21,7 @@ public class BlockingImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 	@Override
 	public void writeImageToDisk(BufferedImage image) throws IOException
 	{
-		File f = new File(workingDir, getNextFileName());	//gets filenames from listener
+		File f = new File(workingDir, getNextFileName()); // gets filenames from listener
 		if (!f.createNewFile())
 		{
 			logger.debug("The image file already exists, going to overwrite");
@@ -57,6 +57,6 @@ public class BlockingImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 	@Override
 	public void resetWithOutClearingFolder()
 	{
-		//Do nothing
+		// Do nothing
 	}
 }

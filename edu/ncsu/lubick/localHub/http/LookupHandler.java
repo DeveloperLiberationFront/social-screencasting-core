@@ -146,8 +146,7 @@ public class LookupHandler extends TemplateHandlerWithDatabaseLink {
 	}
 
 	/*
-	 * implements TemplatehashModel so that in the templates, its fields can be
-	 * accessed via ${toolNameAndCount.toolCount}
+	 * implements TemplatehashModel so that in the templates, its fields can be accessed via ${toolNameAndCount.toolCount}
 	 */
 	private class ToolNameAndCount implements Comparable<ToolNameAndCount>, TemplateHashModel
 	{

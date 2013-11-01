@@ -1,6 +1,5 @@
 package edu.ncsu.lubick.localHub;
 
-import java.io.File;
 import java.util.List;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
@@ -12,6 +11,6 @@ public interface WebQueryInterface {
 
 	List<String> getNamesOfAllPlugins();
 
-	File extractVideoForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException;
+	void extractMediaForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException;
 
 }

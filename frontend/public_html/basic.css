@@ -32,15 +32,14 @@ h1 {
 	border:3px solid orange;
 	border-spacing:0;
 	text-align:center;
-}
-
-.clickMe{
-	text-decoration:underline;
 	font-size:16px;
 }
-.clickMe:hover{
-	font-style:italic;
+
+#resultsTable th{
+	font-size:18px;
 }
+
+
 td, tr, th{
 	padding:4px;
 }
@@ -53,7 +52,7 @@ td, tr, th{
 	text-align:center;
 }
 
-.pluginListing input {
+.pluginListing input, .requestGeneration, .clickMe {
     padding: 10px 20px;
     color: #ffa729;
     background-color: white;
@@ -61,7 +60,15 @@ td, tr, th{
 	margin:1px;
 }
 
-.pluginListing input:hover {
+.requestGeneration{
+	font-size: 1.2em;
+}
+.clickMe{
+	font-size:16px;
+	padding: 5px;10px;
+}
+
+.pluginListing input:hover, .clickMe:hover, .requestGeneration:hover {
     border: 3px solid #ffa729;
 	margin:0;
 }

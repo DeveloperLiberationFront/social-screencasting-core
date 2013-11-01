@@ -14,7 +14,8 @@ public class HandlerManager
 	private static Logger logger = Logger.getLogger(HandlerManager.class.getName());
 
 	private static String[] staticResources = new String[] {
-			"frontend/public_html/"
+			"frontend/public_html/",
+			"renderedVideos/"
 	};
 
 	private HandlerManager()

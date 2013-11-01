@@ -17,8 +17,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 /**
  * This is the Runnable that operates on the background thread.
  * 
- * It constantly monitors the Monitor Folder and if anything is detected, the
- * registered LoadedFileListener is called (This is going to be the local hub)
+ * It constantly monitors the Monitor Folder and if anything is detected, the registered LoadedFileListener is called (This is going to be the local hub)
  * 
  * @author Kevin Lubick
  * 
@@ -28,8 +27,7 @@ public class FileManager implements Runnable {
 	private Set<File> filesFromLastTime = new HashSet<>();
 	private Set<File> filesToIgnore = new HashSet<>();
 	/**
-	 * Maps a string, the name of a plugin, to the queue of as of yet unparsed
-	 * files related to that plugin
+	 * Maps a string, the name of a plugin, to the queue of as of yet unparsed files related to that plugin
 	 */
 	private Map<String, Queue<File>> unparsedFiles = new HashMap<>();
 
@@ -82,8 +80,7 @@ public class FileManager implements Runnable {
 	}
 
 	/**
-	 * Updates the monitorDirectory to be the passed argument. Clears out all
-	 * currently tracked files and reloads everything
+	 * Updates the monitorDirectory to be the passed argument. Clears out all currently tracked files and reloads everything
 	 * 
 	 * @param monitorDirectory
 	 */
@@ -183,8 +180,7 @@ public class FileManager implements Runnable {
 	}
 
 	/**
-	 * Takes a file, parses off the name and the time and begins to parse any
-	 * files older than it
+	 * Takes a file, parses off the name and the time and begins to parse any files older than it
 	 * 
 	 * @param shouldForceParsing
 	 * 
@@ -263,8 +259,7 @@ public class FileManager implements Runnable {
 	}
 
 	/**
-	 * Contacts the listener and asks if the file should be added to the
-	 * tracking list
+	 * Contacts the listener and asks if the file should be added to the tracking list
 	 * 
 	 * @param thisFile
 	 * @param isInitialLoading
@@ -275,11 +270,11 @@ public class FileManager implements Runnable {
 	{
 		String fileContents = "[BINARYDATA]";
 		if (!thisFile.getName().endsWith(PostProductionHandler.EXPECTED_FILE_EXTENSION)) // these
-																								// get
-																								// too
-																								// big
-																								// to
-																								// parse
+																							// get
+																							// too
+																							// big
+																							// to
+																							// parse
 		{
 			fileContents = FileUtilities.readAllFromFile(thisFile);
 		}
