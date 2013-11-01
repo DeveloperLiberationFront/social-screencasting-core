@@ -55,10 +55,7 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 			return; // no animation for menus
 		}
 
-		if (animationSource == null)
-		{
-			animationSource = new AnimatedKeyboardMaker();
-		}
+		lazyLoadOfAnimation();
 		diskWriter.resetWithOutClearingFolder();
 
 		File[] imagesToAddAnimationTo = scratchDir.listFiles(new FileFilter() {
@@ -74,6 +71,7 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 		// Make these once and reuse them below
 		BufferedImage unactivatedAnimation = animationSource.makeUnactivatedAnimation();
 		int[] keyCodes = keyCodeReader.convert(toolUsage.getToolKeyPresses());
+		animationSource.setCurrentKeyPresses(toolUsage.getToolKeyPresses());
 		BufferedImage activatedAnimation = animationSource.makeAnimationForKeyCodes(keyCodes);
 
 		int i = 0;
@@ -90,6 +88,14 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 		}
 
 		diskWriter.waitUntilDoneWriting();
+	}
+
+	private void lazyLoadOfAnimation() throws IOException
+	{
+		if (animationSource == null)
+		{
+			animationSource = new AnimatedTextAndKeyboardMaker();
+		}
 	}
 
 	private void addAnimationToImageAndSaveToDisk(BufferedImage animation, File sourceFile) throws IOException

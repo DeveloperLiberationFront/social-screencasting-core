@@ -1,13 +1,21 @@
 package edu.ncsu.lubick.localHub.videoPostProduction.animation;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public class AnimatedTextAndKeyboardMaker extends AnimatedKeyboardMaker {
 
 	private static final int EXTRA_HEIGHT = 50;
+	
+	//private ShortcutsToKeyCodesConverter stringMaker = new ShortcutsToKeyCodesConverter();
+
+	private String keyPresses = "";
 
 	public AnimatedTextAndKeyboardMaker() throws IOException
 	{
@@ -19,8 +27,24 @@ public class AnimatedTextAndKeyboardMaker extends AnimatedKeyboardMaker {
 	{
 		BufferedImage image = super.makeAnimationForKeyCodes(keycodes);
 		
-		//g = image.createGraphics();
-		//g.drawText...
+		if (keycodes.length == 0)
+		{
+			return image;
+		}
+		//String text = stringMaker.convert(keycodes);
+		
+		Graphics2D g = image.createGraphics();
+		g.setColor(Color.black);
+		Font font = new Font("Serif", Font.BOLD, 32);
+		g.setFont(font);
+		FontRenderContext context = g.getFontRenderContext();
+		
+		Rectangle2D rect = font.getStringBounds(keyPresses, context);
+		
+		int x = image.getWidth()/2 - (int)Math.round(rect.getWidth())/2;
+		
+		
+		g.drawString(keyPresses, x, unActivatedKeyboard.getHeight()+32);
 		return image;
 	}
 
@@ -37,5 +61,11 @@ public class AnimatedTextAndKeyboardMaker extends AnimatedKeyboardMaker {
 		graphics.fillRect(0, 0, width, height+EXTRA_HEIGHT);
 		copyFromImageToGraphics(graphics, unActivatedKeyboard, 0, 0, width, height);
 		return img;
+	}
+	
+	@Override
+	public void setCurrentKeyPresses(String toolKeyPresses)
+	{
+		this.keyPresses = toolKeyPresses;
 	}
 }

@@ -8,4 +8,6 @@ public interface KeypressAnimationMaker {
 
 	BufferedImage makeUnactivatedAnimation();
 
+	void setCurrentKeyPresses(String toolKeyPresses);
+
 }
