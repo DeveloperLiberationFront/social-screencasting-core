@@ -119,7 +119,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		String expectedBigGifFileName = getNameForToolFullGif(pluginName, toolName);
 		File expectedBigGifFile = new File(expectedBigGifFileName);
 
-		String expectedMiniGifFileName = getNameForToolFullGif(pluginName, toolName);
+		String expectedMiniGifFileName = getNameForToolMiniGif(pluginName, toolName);
 		File expectedMiniGifFile = new File(expectedMiniGifFileName);
 
 		logger.debug("If gif files existed, they would be called " + expectedBigGifFileName + " and " + expectedMiniGifFileName);

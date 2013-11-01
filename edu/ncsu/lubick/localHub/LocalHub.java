@@ -18,9 +18,11 @@ import edu.ncsu.lubick.localHub.database.SQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.http.HTTPServer;
 import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToMediaOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToMiniGifOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
+import edu.ncsu.lubick.localHub.videoPostProduction.gif.ImagesToGifOutput;
 
 public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQueryInterface, ParsedFileListener {
 
@@ -338,6 +340,8 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	{
 		this.videoPostProductionHandler = new PostProductionHandler();
 		// this.videoPostProductionHandler.addNewMediaOutput(new ImagesToVideoOutput());
+		this.videoPostProductionHandler.addNewMediaOutput(new ImagesToGifOutput());
+		this.videoPostProductionHandler.addNewMediaOutput(new ImagesToMiniGifOutput());
 	}
 
 	public void shutDown()

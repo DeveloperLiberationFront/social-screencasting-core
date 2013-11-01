@@ -10,11 +10,6 @@ public class ImagesToMiniGifOutput extends ImagesToGifOutput
 {
 	public static final String MINI_GIF_EXTENSION = "mini." + GIF_EXTENSION;
 
-	public ImagesToMiniGifOutput()
-	{
-		super(PostProductionHandler.getIntermediateFolderLocation());
-	}
-
 	@Override
 	protected BufferedImage readInImage(File f) throws IOException
 	{

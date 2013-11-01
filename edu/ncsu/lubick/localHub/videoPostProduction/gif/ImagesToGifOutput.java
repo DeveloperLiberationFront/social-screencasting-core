@@ -19,9 +19,9 @@ public class ImagesToGifOutput extends AbstractImagesToMediaOutput {
 	public static final String GIF_EXTENSION = "gif";
 	private static Logger logger = Logger.getLogger(ImagesToGifOutput.class.getName());
 
-	public ImagesToGifOutput(String scratchDir)
+	public ImagesToGifOutput()
 	{
-		super(new File(scratchDir));
+		super(new File(PostProductionHandler.getIntermediateFolderLocation()));
 	}
 
 	@Override

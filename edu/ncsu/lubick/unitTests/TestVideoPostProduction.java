@@ -320,7 +320,7 @@ public class TestVideoPostProduction
 	private PostProductionHandler makeGifPostProductionHandler()
 	{
 		PostProductionHandler handler = new PostProductionHandler();
-		handler.addNewMediaOutput(new ImagesToGifOutput(PostProductionHandler.getIntermediateFolderLocation()));
+		handler.addNewMediaOutput(new ImagesToGifOutput());
 		return handler;
 	}
 
@@ -335,7 +335,7 @@ public class TestVideoPostProduction
 	{
 		PostProductionHandler handler = new PostProductionHandler();
 		handler.addNewMediaOutput(new ImagesToVideoOutput());
-		handler.addNewMediaOutput(new ImagesToGifOutput(PostProductionHandler.getIntermediateFolderLocation()));
+		handler.addNewMediaOutput(new ImagesToGifOutput());
 		handler.addNewMediaOutput(new ThumbnailGenerator());
 		return handler;
 	}
