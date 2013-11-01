@@ -11,11 +11,11 @@ import java.io.IOException;
 
 public class AnimatedTextAndKeyboardMaker extends AnimatedKeyboardMaker {
 
-	private static final int EXTRA_HEIGHT = 50;
+	protected static final int EXTRA_HEIGHT = 50;
 	
 	//private ShortcutsToKeyCodesConverter stringMaker = new ShortcutsToKeyCodesConverter();
 
-	private String keyPresses = "";
+	protected String keyPresses = "";
 
 	public AnimatedTextAndKeyboardMaker() throws IOException
 	{
@@ -33,6 +33,11 @@ public class AnimatedTextAndKeyboardMaker extends AnimatedKeyboardMaker {
 		}
 		//String text = stringMaker.convert(keycodes);
 		
+		return addTextToImage(image,unActivatedKeyboard.getHeight());
+	}
+
+	protected BufferedImage addTextToImage(BufferedImage image,int yOffset)
+	{
 		Graphics2D g = image.createGraphics();
 		g.setColor(Color.black);
 		Font font = new Font("Serif", Font.BOLD, 32);
@@ -44,7 +49,7 @@ public class AnimatedTextAndKeyboardMaker extends AnimatedKeyboardMaker {
 		int x = image.getWidth()/2 - (int)Math.round(rect.getWidth())/2;
 		
 		
-		g.drawString(keyPresses, x, unActivatedKeyboard.getHeight()+32);
+		g.drawString(keyPresses, x, yOffset+32);
 		return image;
 	}
 
