@@ -9,8 +9,8 @@ import javax.imageio.ImageIO;
 
 public class AnimatedKeyboardMaker implements KeypressAnimationMaker {
 
-	private static BufferedImage unActivatedKeyboard;
-	private static BufferedImage activatedKeyboard;
+	protected static BufferedImage unActivatedKeyboard;
+	protected static BufferedImage activatedKeyboard;
 
 	public AnimatedKeyboardMaker() throws IOException
 	{

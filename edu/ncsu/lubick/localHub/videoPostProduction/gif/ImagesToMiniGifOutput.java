@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.localHub.videoPostProduction.gif;
 
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +15,7 @@ public class ImagesToMiniGifOutput extends ImagesToGifOutput
 	protected BufferedImage readInImage(File f) throws IOException
 	{
 		BufferedImage bigImage = super.readInImage(f);
-		BufferedImage shrunkImage = ThumbnailGenerator.shrinkImage(bigImage);
+		BufferedImage shrunkImage = shrinkImageBGR(bigImage);
 		return shrunkImage;
 	}
 
@@ -31,5 +32,20 @@ public class ImagesToMiniGifOutput extends ImagesToGifOutput
 	public String getMediaTypeInfo()
 	{
 		return super.getMediaTypeInfo()+" (mini)";
+	}
+	
+	public static BufferedImage shrinkImageBGR(BufferedImage imageToResize)
+	{
+		int oldWidth = imageToResize.getWidth();
+		int newWidth = oldWidth / 3;
+
+		int oldHeight = imageToResize.getHeight();
+		int newHeight = oldHeight / 3;
+
+		BufferedImage shrunkImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_3BYTE_BGR);
+
+		Graphics g = shrunkImage.getGraphics();
+		g.drawImage(imageToResize, 0, 0, newWidth, newHeight, 0, 0, oldWidth, oldHeight, null);
+		return shrunkImage;
 	}
 }
