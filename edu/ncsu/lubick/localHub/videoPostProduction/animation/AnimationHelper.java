@@ -21,7 +21,7 @@ public class AnimationHelper extends JPanel implements KeyListener
 	private static final long serialVersionUID = 701852946292219382L;
 
 	private Set<Integer> activatedAnimations = new HashSet<>();
-	private KeypressAnimationMaker animationSource = new AnimatedTextAndKeyboardMaker();
+	private KeypressAnimationMaker animationSource = new AnimatedTextAndKeyboardMaker(); 
 
 	public AnimationHelper() throws IOException
 	{
