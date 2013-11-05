@@ -4,6 +4,7 @@
   <title>Welcome!</title>
   <link rel="stylesheet" href="basic.css" />
   <link rel="stylesheet" href="loading.css" />
+  <link rel="stylesheet" href="playback.css" />
 </head>
 <body>
   <h1>Click on the plugin name to see more info</h1>
@@ -11,13 +12,18 @@
 
   <#list pluginNames as plugin>
   <div class="pluginListing">
-  <form method="POST" action="index"/>
+  <form method="POST" action="index">
   <input name="thingToDo" type="hidden" value="getToolUsageForPlugin"/>
 	<input name="pluginName" type="submit" value="${plugin}"/>
 	</div>
+	</form>
   </#list>
 
+  <button id="experimental">Press Me</button>
+<img id="panel" src="bug8/temp0000.png"></img>
 
 <div class="modal"><!-- Place at bottom of page --></div>
+<script src="jquery.min.js"></script>
+<script src="playback.js"></script>
 </body>
 </html>  

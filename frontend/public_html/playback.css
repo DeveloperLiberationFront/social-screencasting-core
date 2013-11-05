@@ -1,0 +1,7 @@
+#panel{
+	display:none;
+}
+
+#panel:-webkit-full-screen {
+	display:block;
+}
