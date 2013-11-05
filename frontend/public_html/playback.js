@@ -37,6 +37,7 @@ function startAnimation()
 	animationTimer = window.setInterval(function(){
 		$(".animation").eq(currentFrame).hide();
 		currentFrame = (currentFrame + 1) % totalFrames;
+		updateSlider(currentFrame);
 		$(".animation").eq(currentFrame).show();
 	},200);
 }
@@ -63,6 +64,11 @@ function playOrPause()
 	}
 }
 
+function updateSlider(index)
+{
+	$(".slider").slider("value",index);
+}
+
 $(document).ready(function()
 {
 	$(".animation").first().show();	//so the user sees something
@@ -72,14 +78,25 @@ $(document).ready(function()
 	totalFrames = +$("#panel").data("totalFrames");
 	$(".slider").slider({
 		value:0,
-			min: 0,
-			max: totalFrames,
-			step: 1
+		min: 0,
+		max: totalFrames,
+		step: 1,
+		animate:"fast",
+		easing:"linear",
+		slide: sliderMoved
 	});
 	preloadImages();
 	
 	
 });
+
+function sliderMoved( event, ui ) {
+	stopAnimation();
+	$(".animation").eq(currentFrame).hide();
+	currentFrame = ui.value % totalFrames;
+	$(".animation").eq(currentFrame).show();
+	updateSlider(currentFrame);
+}
 
 function getImageForFrameNumber(frameNumber)
 {

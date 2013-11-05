@@ -4,7 +4,6 @@
 #panelAndOverlay{
 	position:relative;  /*allows the overlay to be absolute, relative to this div*/	
 	width:40%;
-	border:1px solid red;
 }
 
 #panel:-webkit-full-screen {
