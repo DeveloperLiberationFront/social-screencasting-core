@@ -20,7 +20,7 @@ function restartAnimation()
 {
 	$(".animation").hide();
 	$(".animation").first().show();
-	var totalFrames = totalFrames = +$("#panel").data("totalFrames");
+	var totalFrames = +$("#panel").data("totalFrames");
 	currentFrame = 0;
 	if (!isPlaying)
 	{
@@ -36,10 +36,16 @@ function restartAnimation()
 $(document).ready(function()
 {
 	$(".animation").first().show();	//so the user sees something
-	$("#panel").on("click","img", goFullScreenAndStartPlaying);
+	$("#overlay").on("click", goFullScreenAndStartPlaying);
+	$("#playPause").on("click",goFullScreenAndStartPlaying);
 	
-	//$("#playPause").draggable();
-	$(".slider").slider();
+	totalFrames = +$("#panel").data("totalFrames");
+	$(".slider").slider({
+		value:0,
+			min: 0,
+			max: totalFrames,
+			step: 1
+	});
 	preloadImages();
 	
 	

@@ -19,10 +19,20 @@
 	</form>
   </#list>
 
-  <div id="panel" data-total-frames=100>
-<img class="animation" src="bug8/temp0000.png"></img>
+  <div id="panelAndOverlay">
+  <div id="overlay"><span>Click for Full Screen</span></div>
+	<div id="panel" data-total-frames=100>
+		
+		<img class="animation" src="bug8/temp0000.png"></img>
+		
+	</div>
+	</div>
+<div id="controlPanel">
+	<button id="playPause"><img src="/images/playback/play.svg" /></button>
+	<div id="staticSliderHolder">
+		<div id="staticSlider" class="slider"></div>
+	</div>
 </div>
-<div id="playPause"><button><img src="/images/playback/play.svg" /></button><div class="slider"></div></div>
 
 <div class="modal"><!-- Place at bottom of page --></div>
 
