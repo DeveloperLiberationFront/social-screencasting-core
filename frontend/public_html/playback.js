@@ -1,5 +1,5 @@
 var isPlaying = false;
-
+var currentFrame = 0;
 function launchFullScreen(element) {  //From davidwalsh.name/fullscreen
   if(element.requestFullScreen) {
     element.requestFullScreen();
@@ -10,44 +10,35 @@ function launchFullScreen(element) {  //From davidwalsh.name/fullscreen
   }
 }
 
-/*function goFullScreenAndStartPlaying()
-{
-	$(".animation").first().addClass("visible");
-	launchFullScreen($("#panel")[0]);
-	
-	var totalFrames = $(".animation").length;
-	var currentFrame = 0;
-	window.setInterval(function(){
-		$(".animation").eq(currentFrame).removeClass("visible");
-		currentFrame = (currentFrame + 1) % totalFrames;
-		$(".animation").eq(currentFrame).addClass("visible");
-		document.webkitFullscreenElement = $(".animation").eq(currentFrame)[0];
-	},500);
-}*/
-
 function goFullScreenAndStartPlaying()
 {
 	launchFullScreen($("#panel")[0]);
 	
-	if (!isPlaying)
-		startAnimation();
+	restartAnimation();
 }
-function startAnimation()
+function restartAnimation()
 {
-	isPlaying = true;
-	var totalFrames = $(".animation").length;
-	var currentFrame = 0;
-	window.setInterval(function(){
-		$(".animation").eq(currentFrame).hide();
-		currentFrame = (currentFrame + 1) % totalFrames;
-		$(".animation").eq(currentFrame).show();
-	},500);
+	$(".animation").hide();
+	$(".animation").first().show();
+	var totalFrames = totalFrames = +$("#panel").data("totalFrames");
+	currentFrame = 0;
+	if (!isPlaying)
+	{
+		isPlaying = true;
+		window.setInterval(function(){
+			$(".animation").eq(currentFrame).hide();
+			currentFrame = (currentFrame + 1) % totalFrames;
+			$(".animation").eq(currentFrame).show();
+		},200);
+	}
 }
 
 $(document).ready(function()
 {
-	$(".animation").first().show();
-	$("#experimental").on("click", goFullScreenAndStartPlaying);
+	$(".animation").first().show();	//so the user sees something
+	$("#panel").on("click","img", goFullScreenAndStartPlaying);
+	
+	$("#playPause").draggable();
 	
 	preloadImages();
 	
