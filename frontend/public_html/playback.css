@@ -63,3 +63,10 @@
 	opacity:0.0;
 }
 
+.playImage.play{
+	display:none;
+}
+
+.pauseImage.pause{
+	display:none;
+}
