@@ -12,8 +12,8 @@ import java.io.IOException;
 public class AnimatedTextAndKeyboardMaker extends AnimatedKeyboardMaker {
 
 	protected static final int EXTRA_HEIGHT = 50;
-	
-	//private ShortcutsToKeyCodesConverter stringMaker = new ShortcutsToKeyCodesConverter();
+
+	// private ShortcutsToKeyCodesConverter stringMaker = new ShortcutsToKeyCodesConverter();
 
 	protected String keyPresses = "";
 
@@ -21,35 +21,34 @@ public class AnimatedTextAndKeyboardMaker extends AnimatedKeyboardMaker {
 	{
 		super();
 	}
-	
+
 	@Override
 	public BufferedImage makeAnimationForKeyCodes(int[] keycodes)
 	{
 		BufferedImage image = super.makeAnimationForKeyCodes(keycodes);
-		
+
 		if (keycodes.length == 0)
 		{
 			return image;
 		}
-		//String text = stringMaker.convert(keycodes);
-		
-		return addTextToImage(image,unActivatedKeyboard.getHeight());
+		// String text = stringMaker.convert(keycodes);
+
+		return addTextToImage(image, unActivatedKeyboard.getHeight());
 	}
 
-	protected BufferedImage addTextToImage(BufferedImage image,int yOffset)
+	protected BufferedImage addTextToImage(BufferedImage image, int yOffset)
 	{
 		Graphics2D g = image.createGraphics();
 		g.setColor(Color.black);
 		Font font = new Font("Serif", Font.BOLD, 32);
 		g.setFont(font);
 		FontRenderContext context = g.getFontRenderContext();
-		
+
 		Rectangle2D rect = font.getStringBounds(keyPresses, context);
-		
-		int x = image.getWidth()/2 - (int)Math.round(rect.getWidth())/2;
-		
-		
-		g.drawString(keyPresses, x, yOffset+32);
+
+		int x = image.getWidth() / 2 - (int) Math.round(rect.getWidth()) / 2;
+
+		g.drawString(keyPresses, x, yOffset + 32);
 		return image;
 	}
 
@@ -58,16 +57,16 @@ public class AnimatedTextAndKeyboardMaker extends AnimatedKeyboardMaker {
 	{
 		int width = unActivatedKeyboard.getWidth();
 		int height = unActivatedKeyboard.getHeight();
-		BufferedImage img = new BufferedImage(width, height+EXTRA_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+		BufferedImage img = new BufferedImage(width, height + EXTRA_HEIGHT, BufferedImage.TYPE_INT_ARGB);
 
 		Graphics graphics = img.getGraphics();
-		
+
 		graphics.setColor(Color.white);
-		graphics.fillRect(0, 0, width, height+EXTRA_HEIGHT);
+		graphics.fillRect(0, 0, width, height + EXTRA_HEIGHT);
 		copyFromImageToGraphics(graphics, unActivatedKeyboard, 0, 0, width, height);
 		return img;
 	}
-	
+
 	@Override
 	public void setCurrentKeyPresses(String toolKeyPresses)
 	{

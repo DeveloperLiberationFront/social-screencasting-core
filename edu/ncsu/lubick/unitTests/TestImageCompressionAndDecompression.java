@@ -676,7 +676,7 @@ public class TestImageCompressionAndDecompression
 		if (outputFile.exists() && !outputFile.delete())
 		{
 			fail("Problem overwriting debugging image");
-			
+
 		}
 		ImageIO.write(bufferedImage, "png", outputFile);
 	}

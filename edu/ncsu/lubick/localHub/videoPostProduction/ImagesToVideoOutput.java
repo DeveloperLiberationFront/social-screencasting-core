@@ -32,7 +32,7 @@ public class ImagesToVideoOutput extends AbstractImagesToMediaOutput
 
 		inheritIO(process.getInputStream(), "Normal Output");
 		inheritIO(process.getErrorStream(), "Error Output");
-		logger.debug("Rendering video");
+		logger.info("Rendering video");
 		try
 		{
 			logger.debug("FFMPEG exited with state " + process.waitFor());

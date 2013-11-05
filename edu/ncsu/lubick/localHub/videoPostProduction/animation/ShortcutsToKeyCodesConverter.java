@@ -132,7 +132,7 @@ public class ShortcutsToKeyCodesConverter
 	public String convert(int[] keycodes)
 	{
 		List<Integer> keyCodeList = new ArrayList<>();
-		for(int i :keycodes)
+		for (int i : keycodes)
 		{
 			keyCodeList.add(i);
 		}
@@ -172,23 +172,23 @@ public class ShortcutsToKeyCodesConverter
 
 		StringBuilder builder = new StringBuilder();
 		boolean usePluses = true;
-		for(int i = 0; i< keyCodeList.size();i++)
+		for (int i = 0; i < keyCodeList.size(); i++)
 		{
 			int keyCode = keyCodeList.get(i);
-			
+
 			if (i != 0)
 			{
 				if (usePluses)
 				{
 					builder.append("+");
 				}
-				else 
+				else
 				{
 					builder.append(", ");
 				}
 			}
 			builder.append(keyCodeToString(keyCode));
-			//we might not use pluses next time if this key was a non-action key (like a letter) and the next one is also non-action
+			// we might not use pluses next time if this key was a non-action key (like a letter) and the next one is also non-action
 			usePluses = usePluses && isActionKey(keyCode);
 		}
 		return builder.toString();
@@ -221,11 +221,11 @@ public class ShortcutsToKeyCodesConverter
 		case VK_ENTER:
 			return "ENTER";
 		}
-		if (keyCode>= VK_F1 && keyCode <= VK_F24)
+		if (keyCode >= VK_F1 && keyCode <= VK_F24)
 		{
-			return "F"+(keyCode-VK_F1+1);
+			return "F" + (keyCode - VK_F1 + 1);
 		}
-		return "" + (char)keyCode;
+		return "" + (char) keyCode;
 	}
 
 }

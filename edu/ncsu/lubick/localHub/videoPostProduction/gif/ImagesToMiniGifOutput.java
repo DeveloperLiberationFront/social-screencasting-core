@@ -5,8 +5,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-import edu.ncsu.lubick.localHub.videoPostProduction.ThumbnailGenerator;
-
 public class ImagesToMiniGifOutput extends ImagesToGifOutput
 {
 	public static final String MINI_GIF_EXTENSION = "mini." + GIF_EXTENSION;
@@ -31,9 +29,9 @@ public class ImagesToMiniGifOutput extends ImagesToGifOutput
 	@Override
 	public String getMediaTypeInfo()
 	{
-		return super.getMediaTypeInfo()+" (mini)";
+		return super.getMediaTypeInfo() + " (mini)";
 	}
-	
+
 	public static BufferedImage shrinkImageBGR(BufferedImage imageToResize)
 	{
 		int oldWidth = imageToResize.getWidth();

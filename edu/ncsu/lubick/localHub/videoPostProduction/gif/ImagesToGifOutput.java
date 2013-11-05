@@ -27,7 +27,7 @@ public class ImagesToGifOutput extends AbstractImagesToMediaOutput {
 	@Override
 	public File combineImageFilesToMakeMedia(String fileNameMinusExtension) throws IOException
 	{
-		logger.debug("Rendering "+getMediaTypeInfo());
+		logger.info("Rendering " + getMediaTypeInfo());
 		File newGifFile = makeGifFile(fileNameMinusExtension);
 
 		AnimatedGifEncoder encoder = makeGifEncoder(newGifFile);

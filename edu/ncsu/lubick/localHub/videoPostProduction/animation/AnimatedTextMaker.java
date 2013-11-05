@@ -10,7 +10,7 @@ public class AnimatedTextMaker extends AnimatedTextAndKeyboardMaker {
 	public AnimatedTextMaker() throws IOException
 	{
 		super();
-		
+
 	}
 
 	@Override
@@ -18,7 +18,7 @@ public class AnimatedTextMaker extends AnimatedTextAndKeyboardMaker {
 	{
 		return addTextToImage(makeUnactivatedAnimation(), 0);
 	}
-	
+
 	@Override
 	public BufferedImage makeUnactivatedAnimation()
 	{
@@ -30,6 +30,5 @@ public class AnimatedTextMaker extends AnimatedTextAndKeyboardMaker {
 		graphics.fillRect(0, 0, width, height);
 		return image;
 	}
-	
 
 }

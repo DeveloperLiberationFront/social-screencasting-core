@@ -75,7 +75,6 @@ public class AnimatedGifEncoder {
 	protected boolean sizeSet = false; // if false, get size from first frame
 
 	protected int sample = 10; // default sample interval for quantizer
-	
 
 	/**
 	 * Sets the delay time between each frame, or changes it for subsequent frames (applies to last frame added).
@@ -146,7 +145,7 @@ public class AnimatedGifEncoder {
 		{
 			return;
 		}
-		
+
 		handleImageFrame(frameImage);
 	}
 

@@ -5,50 +5,48 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
-public class ThreadedAnimatedGifEncoder extends AnimatedGifEncoder 
+public class ThreadedAnimatedGifEncoder extends AnimatedGifEncoder
 {
 	private static Logger logger = Logger.getLogger(ThreadedAnimatedGifEncoder.class.getName());
 	private ExecutorService workingThreadPool;
 	private BlockingQueue<BufferedImage> preconvertedImages = new ArrayBlockingQueue<>(2);
-	
+
 	private Object blockingObject = new Object();
 	private boolean innerLoopContinue = true;
 
 	public ThreadedAnimatedGifEncoder()
 	{
 		throw new RuntimeException("Not implemented yet");
-//		this.workingThreadPool = Executors.newFixedThreadPool(1);
-//		
-//		Thread backThread = new Thread(new Runnable() {
-//			
-//			@Override
-//			public void run()
-//			{
-//				while(innerLoopContinue)
-//				{
-//					try
-//					{
-//						BufferedImage nextImage = preconvertedImages.take();
-//						ThreadedAnimatedGifEncoder.super.handleImageFrame(nextImage);
-//					}
-//					catch (InterruptedException e)
-//					{
-//						logger.fatal("Was interrupted making a GIF");
-//					}
-//					
-//				}
-//			}
-//		});
-//		backThread.setDaemon(true);
-//		backThread.start();
+		// this.workingThreadPool = Executors.newFixedThreadPool(1);
+		//
+		// Thread backThread = new Thread(new Runnable() {
+		//
+		// @Override
+		// public void run()
+		// {
+		// while(innerLoopContinue)
+		// {
+		// try
+		// {
+		// BufferedImage nextImage = preconvertedImages.take();
+		// ThreadedAnimatedGifEncoder.super.handleImageFrame(nextImage);
+		// }
+		// catch (InterruptedException e)
+		// {
+		// logger.fatal("Was interrupted making a GIF");
+		// }
+		//
+		// }
+		// }
+		// });
+		// backThread.setDaemon(true);
+		// backThread.start();
 	}
-	
+
 	@Override
 	public void handleImageFrame(final BufferedImage frameImage)
 	{
@@ -58,7 +56,7 @@ public class ThreadedAnimatedGifEncoder extends AnimatedGifEncoder
 			setSize(frameImage.getWidth(), frameImage.getHeight());
 		}
 		logger.trace("Starting converting Image to BGR");
-		
+
 		workingThreadPool.submit(new Runnable() {
 
 			@Override
@@ -80,14 +78,14 @@ public class ThreadedAnimatedGifEncoder extends AnimatedGifEncoder
 				}
 				logger.trace("converted");
 			}
-			
+
 		});
 	}
-	
+
 	private void waitUntilDoneWriting()
 	{
 		workingThreadPool.shutdown();
-		
+
 		try
 		{
 			workingThreadPool.awaitTermination(60, TimeUnit.SECONDS);
@@ -105,7 +103,7 @@ public class ThreadedAnimatedGifEncoder extends AnimatedGifEncoder
 		}
 		innerLoopContinue = false;
 	}
-	
+
 	@Override
 	public boolean finish()
 	{

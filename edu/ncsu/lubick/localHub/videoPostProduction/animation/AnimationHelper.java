@@ -21,7 +21,7 @@ public class AnimationHelper extends JPanel implements KeyListener
 	private static final long serialVersionUID = 701852946292219382L;
 
 	private Set<Integer> activatedAnimations = new HashSet<>();
-	private transient KeypressAnimationMaker animationSource = new AnimatedTextAndKeyboardMaker(); 
+	private transient KeypressAnimationMaker animationSource = new AnimatedTextAndKeyboardMaker();
 
 	public AnimationHelper() throws IOException
 	{
@@ -51,20 +51,20 @@ public class AnimationHelper extends JPanel implements KeyListener
 	protected void paintComponent(Graphics g)
 	{
 		super.paintComponent(g);
-		
+
 		int[] keycodes = new int[this.activatedAnimations.size()];
 		int index = 0;
-		for(Integer thisInt: this.activatedAnimations)
+		for (Integer thisInt : this.activatedAnimations)
 		{
 			keycodes[index] = thisInt;
 			index++;
 		}
 		BufferedImage animatedImage = animationSource.makeAnimationForKeyCodes(keycodes);
 		g.drawImage(animatedImage, 0, 0, null);
-//		for (AnimatedKeyPress animations : activatedAnimations.values())
-//		{
-//			animations.drawAnimatedSegment(g, activatedKeyboard);
-//		}
+		// for (AnimatedKeyPress animations : activatedAnimations.values())
+		// {
+		// animations.drawAnimatedSegment(g, activatedKeyboard);
+		// }
 	}
 
 	@Override

@@ -63,19 +63,19 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	private ScreenRecordingModule screenRecordingModule;
 	private HTTPServer httpServer;
 
-
-
 	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, boolean wantHTTP, boolean wantScreenRecording)
 	{
 		return startServerAndReturnDebugAccess(monitorLocation, SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION, wantHTTP, wantScreenRecording);
 	}
 
-	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, String databaseLocation, boolean wantHTTP, boolean wantScreenRecording)
+	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, String databaseLocation, boolean wantHTTP,
+			boolean wantScreenRecording)
 	{
 		return startServer(monitorLocation, databaseLocation, wantHTTP, wantScreenRecording, true);
 	}
 
-	public static LocalHubDebugAccess startServer(String monitorLocation, String databaseLocation, boolean wantHTTP, boolean wantScreenRecording, boolean isDebug)
+	public static LocalHubDebugAccess startServer(String monitorLocation, String databaseLocation, boolean wantHTTP, boolean wantScreenRecording,
+			boolean isDebug)
 	{
 		if (!singletonHub.isRunning())
 		{
@@ -346,7 +346,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 
 	private void setUpPostProductionHandler()
 	{
-		if (!isDebug)		//debug callers are expected to add their own handlers
+		if (!isDebug) // debug callers are expected to add their own handlers
 		{
 			// this.videoPostProductionHandler.addNewMediaOutput(new ImagesToVideoOutput());
 			this.videoPostProductionHandler.addNewMediaOutput(new ImagesToGifOutput());
