@@ -1,6 +1,7 @@
 var isPlaying = false;
 var currentFrame = 0;
 var animationTimer;
+var isFullScreen = false;
 
 function launchFullScreen(element) {  //From davidwalsh.name/fullscreen
   if(element.requestFullScreen) {
@@ -10,36 +11,54 @@ function launchFullScreen(element) {  //From davidwalsh.name/fullscreen
   } else if(element.webkitRequestFullScreen) {
     element.webkitRequestFullScreen();
   }
+  isFullScreen = true;
 }
 
 function goFullScreenAndStartPlaying()
 {
 	launchFullScreen($("#panel")[0]);
 	
-	restartAnimation();
+	setFloatingPlaybackControlsVisible(true)
+	startAnimation();
 }
-function restartAnimation()
+
+function setFloatingPlaybackControlsVisible(shouldBeVisible)
+{
+	if (shouldBeVisible)
+	{
+		$( "#moduleControlPanel" ).show();
+	}
+	else
+	{
+		$( "#moduleControlPanel" ).hide();
+	}
+}
+
+/*function restartAnimation()
 {
 	$(".animation").hide();
 	$(".animation").first().show();
-	var totalFrames = +$("#panel").data("totalFrames");
 	currentFrame = 0;
 	if (!isPlaying)
 	{
 		startAnimation();
 	}
-}
+}*/
 
 function startAnimation()
 {
-	$(".playbackCommand").removeClass("pause").addClass("play");
-	isPlaying = true;
-	animationTimer = window.setInterval(function(){
-		$(".animation").eq(currentFrame).hide();
-		currentFrame = (currentFrame + 1) % totalFrames;
-		updateSlider(currentFrame);
-		$(".animation").eq(currentFrame).show();
-	},200);
+	if (!isPlaying)
+	{
+		$(".playbackCommand").removeClass("pause").addClass("play");
+		isPlaying = true;
+		var totalFrames = +$("#panel").data("totalFrames");
+		animationTimer = window.setInterval(function(){
+			$(".animation").eq(currentFrame).hide();
+			currentFrame = (currentFrame + 1) % totalFrames;
+			updateSlider(currentFrame);
+			$(".animation").eq(currentFrame).show();
+		},200);
+	}
 }
 
 function stopAnimation()
@@ -73,7 +92,7 @@ $(document).ready(function()
 {
 	$(".animation").first().show();	//so the user sees something
 	$("#overlay").on("click", goFullScreenAndStartPlaying);
-	$("#playPause").on("click",playOrPause);
+	$(".playPause").on("click",playOrPause);
 	
 	totalFrames = +$("#panel").data("totalFrames");
 	$(".slider").slider({
@@ -85,9 +104,17 @@ $(document).ready(function()
 		easing:"linear",
 		slide: sliderMoved
 	});
+	$( "#moduleControlPanel" ).draggable()
 	preloadImages();
 	
 	
+});
+
+$(document).keyup(function(e) {
+	if (e.keyCode == 27) { //escape was pressed
+		console.log("Escape");
+		setFloatingPlaybackControlsVisible(false);
+	} 
 });
 
 function sliderMoved( event, ui ) {
