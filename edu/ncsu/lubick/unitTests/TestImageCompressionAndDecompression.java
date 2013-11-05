@@ -670,9 +670,15 @@ public class TestImageCompressionAndDecompression
 		debugWriteImageToFile(bufferedImage, outputFile);
 	}
 
-	public static void debugWriteImageToFile(BufferedImage bufferedImage, String outputFile) throws IOException
+	public static void debugWriteImageToFile(BufferedImage bufferedImage, String outputFileName) throws IOException
 	{
-		ImageIO.write(bufferedImage, "png", new File(outputFile));
+		File outputFile = new File(outputFileName);
+		if (outputFile.exists() && !outputFile.delete())
+		{
+			fail("Problem overwriting debugging image");
+			
+		}
+		ImageIO.write(bufferedImage, "png", outputFile);
 	}
 
 	private void verifyCompressedHomogenousImage(byte[] arrayOfDataBytes, byte[] mainPattern, byte[] tailPattern)

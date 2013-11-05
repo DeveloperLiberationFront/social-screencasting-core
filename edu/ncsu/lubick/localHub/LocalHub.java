@@ -29,9 +29,9 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	public static final String LOGGING_FILE_PATH = "./log4j.settings";
 	private static final LocalHub singletonHub;
 	private static final int SCREEN_RECORDING_VIDEO_LENGTH = 60; // 60 seconds
-																	// for every
-																	// minivideo
-																	// recorded
+	// for every
+	// minivideo
+	// recorded
 	private static final String SCREENCASTING_PATH = "Screencasting";
 	private static Logger logger;
 
@@ -51,7 +51,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	private FileManager currentRunnable = null;
 
 	private BufferedDatabaseManager databaseManager = null;
-	private PostProductionHandler videoPostProductionHandler;
+	private PostProductionHandler videoPostProductionHandler = new PostProductionHandler();
 
 	// listeners
 	private Set<LoadedFileListener> loadedFileListeners = new HashSet<>();
@@ -59,16 +59,23 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 
 	private boolean shouldUseHTTPServer;
 	private boolean shouldUseScreenRecording;
+	private boolean isDebug = false;
 	private ScreenRecordingModule screenRecordingModule;
 	private HTTPServer httpServer;
+
+
 
 	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, boolean wantHTTP, boolean wantScreenRecording)
 	{
 		return startServerAndReturnDebugAccess(monitorLocation, SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION, wantHTTP, wantScreenRecording);
 	}
 
-	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, String databaseLocation, boolean wantHTTP,
-			boolean wantScreenRecording)
+	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, String databaseLocation, boolean wantHTTP, boolean wantScreenRecording)
+	{
+		return startServer(monitorLocation, databaseLocation, wantHTTP, wantScreenRecording, true);
+	}
+
+	public static LocalHubDebugAccess startServer(String monitorLocation, String databaseLocation, boolean wantHTTP, boolean wantScreenRecording, boolean isDebug)
 	{
 		if (!singletonHub.isRunning())
 		{
@@ -76,6 +83,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 			singletonHub.enableScreenRecording(wantScreenRecording);
 			singletonHub.setDatabaseManager(databaseLocation);
 			singletonHub.setMonitorLocation(monitorLocation);
+			singletonHub.isDebug = isDebug;
 			singletonHub.start();
 		}
 
@@ -93,7 +101,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 
 	public static void startServerForUse(String monitorLocation, String databaseLocation)
 	{
-		startServerAndReturnDebugAccess(monitorLocation, databaseLocation, true, true);
+		startServer(monitorLocation, databaseLocation, true, true, false);
 	}
 
 	// You need to call a static method to initiate this class. It is a
@@ -338,10 +346,12 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 
 	private void setUpPostProductionHandler()
 	{
-		this.videoPostProductionHandler = new PostProductionHandler();
-		// this.videoPostProductionHandler.addNewMediaOutput(new ImagesToVideoOutput());
-		this.videoPostProductionHandler.addNewMediaOutput(new ImagesToGifOutput());
-		this.videoPostProductionHandler.addNewMediaOutput(new ImagesToMiniGifOutput());
+		if (!isDebug)		//debug callers are expected to add their own handlers
+		{
+			// this.videoPostProductionHandler.addNewMediaOutput(new ImagesToVideoOutput());
+			this.videoPostProductionHandler.addNewMediaOutput(new ImagesToGifOutput());
+			this.videoPostProductionHandler.addNewMediaOutput(new ImagesToMiniGifOutput());
+		}
 	}
 
 	public void shutDown()
