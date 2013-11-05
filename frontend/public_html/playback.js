@@ -54,11 +54,27 @@ $(document).ready(function()
 	
 });
 
+function getImageForFrameNumber(frameNumber)
+{
+	retVal = '<img class="animation" src="bug8/temp';
+	if (frameNumber < 1000)
+		retVal += "0";
+	if (frameNumber < 100)
+		retVal += "0";
+	if (frameNumber < 10)
+		retVal += "0";
+	retVal += frameNumber;
+	retVal += '.png"></img>';
+	return $(retVal);
+}
+
 function preloadImages()
 {
 	var p = $("#panel");
-	$('<img class="animation" src="bug8/temp0001.png"></img>').appendTo(p);
-	$('<img class="animation" src="bug8/temp0002.png"></img>').appendTo(p);
-	$('<img class="animation" src="bug8/temp0003.png"></img>').appendTo(p);
-	$('<img class="animation" src="bug8/temp0004.png"></img>').appendTo(p);
+	var totalFrames = +$("#panel").data("totalFrames");
+	for(var i = 1; i< totalFrames;i++)
+	{
+		getImageForFrameNumber(i).appendTo(p);
+	}
+
 }
