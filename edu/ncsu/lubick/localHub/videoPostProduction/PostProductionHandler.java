@@ -233,7 +233,7 @@ public class PostProductionHandler
 			createdFiles.add(mediaOutput.combineImageFilesToMakeMedia(fileName));
 			logger.info(mediaOutput.getMediaTypeInfo() + " Rendered");
 		}
-
+ 
 		return createdFiles;
 	}
 
