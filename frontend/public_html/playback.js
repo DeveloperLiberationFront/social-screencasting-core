@@ -38,8 +38,8 @@ $(document).ready(function()
 	$(".animation").first().show();	//so the user sees something
 	$("#panel").on("click","img", goFullScreenAndStartPlaying);
 	
-	$("#playPause").draggable();
-	
+	//$("#playPause").draggable();
+	$(".slider").slider();
 	preloadImages();
 	
 	
