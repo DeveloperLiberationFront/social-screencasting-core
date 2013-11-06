@@ -3,6 +3,7 @@ var currentFrame = 0;
 var animationTimer;
 var isFullScreen = false;
 var totalFrames;
+var animationEnabled = false;
 
 function launchFullScreen(element) {  //From davidwalsh.name/fullscreen
     if (element.requestFullScreen) {
@@ -15,12 +16,7 @@ function launchFullScreen(element) {  //From davidwalsh.name/fullscreen
     isFullScreen = true;
 }
 
-function goFullScreenAndStartPlaying() {
-    launchFullScreen($("#panel")[0]);
 
-    setFloatingPlaybackControlsVisible(true);
-    startAnimation();
-}
 
 function setFloatingPlaybackControlsVisible(shouldBeVisible) {
     if (shouldBeVisible) {
@@ -31,6 +27,9 @@ function setFloatingPlaybackControlsVisible(shouldBeVisible) {
     }
 }
 
+function updateSlider(index) {
+    $(".slider").slider("value", index);
+}
 
 function startAnimation() {
     if (!isPlaying) {
@@ -38,10 +37,10 @@ function startAnimation() {
         isPlaying = true;
         var totalFrames = +$("#panel").data("totalFrames");
         animationTimer = window.setInterval(function () {
-            $(".animation").eq(currentFrame).hide();
+            $(".frame").eq(currentFrame).hide();
             currentFrame = (currentFrame + 1) % totalFrames;
             updateSlider(currentFrame);
-            $(".animation").eq(currentFrame).show();
+            $(".frame").eq(currentFrame).show();
         }, 200);
     }
 }
@@ -63,48 +62,16 @@ function playOrPause() {
     }
 }
 
-function updateSlider(index) {
-    $(".slider").slider("value", index);
-}
-
-$(document).ready(function () {
-    $(".animation").first().show();	//so the user sees something
-    $("#overlay").on("click", goFullScreenAndStartPlaying);
-    $(".playPause").on("click", playOrPause);
-
-    totalFrames = +$("#panel").data("totalFrames");
-    $(".slider").slider({
-        value: 0,
-        min: 0,
-        max: totalFrames,
-        step: 1,
-        animate: "fast",
-        easing: "linear",
-        slide: sliderMoved
-    });
-    $("#moduleControlPanel").draggable();
-    preloadImages();
-
-
-});
-
-$(document).keyup(function (e) {
-    if (e.keyCode == 27) { //escape was pressed
-        console.log("Escape");
-        setFloatingPlaybackControlsVisible(false);
-    }
-});
-
 function sliderMoved(event, ui) {
     stopAnimation();
-    $(".animation").eq(currentFrame).hide();
+    $(".frame").eq(currentFrame).hide();
     currentFrame = ui.value % totalFrames;
-    $(".animation").eq(currentFrame).show();
+    $(".frame").eq(currentFrame).show();
     updateSlider(currentFrame);
 }
 
 function getImageForFrameNumber(frameNumber) {
-    var retVal = '<img class="animation" src="bug8/temp';
+    var retVal = '<img class="frame" src="bug8/temp';
     if (frameNumber < 1000) {
         retVal += "0";
     }
@@ -128,3 +95,50 @@ function preloadImages() {
     }
 
 }
+
+$(document).keyup(function (e) {
+    if (e.keyCode == 27) { //escape was pressed
+        console.log("Escape");
+        setFloatingPlaybackControlsVisible(false);
+    }
+});
+
+function setUpSliders() {
+    $(".slider").slider({
+        value: 0,
+        min: 0,
+        max: totalFrames,
+        step: 1,
+        animate: "fast",
+        easing: "linear",
+        slide: sliderMoved	//when the user moves this, call sliderMoved()
+    });
+}
+
+function setUpDraggablePlayControl() {
+    $("#moduleControlPanel").draggable();
+}
+
+function goFullScreenAndStartPlaying() {
+    launchFullScreen($("#panel")[0]);
+
+    setFloatingPlaybackControlsVisible(true);
+    startAnimation();
+}
+
+$(document).ready(function () {
+    $(".frame").first().show();	//so the user sees something
+    $("#overlay").on("click", goFullScreenAndStartPlaying);
+
+    $(".playPause").on("click", playOrPause);
+
+    totalFrames = +$("#panel").data("totalFrames");
+    if ($("#panel").data("type") == "keystroke") {
+        animationEnabled = true;
+    }
+    setUpSliders();
+    setUpDraggablePlayControl();
+    preloadImages();
+
+
+});
