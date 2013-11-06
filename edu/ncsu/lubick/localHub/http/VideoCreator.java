@@ -113,7 +113,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 
 	private void respondToDoesVideoExist(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
-		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
+		/*String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
 		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
 
 		String expectedBigGifFileName = getNameForToolFullGif(pluginName, toolName);
@@ -139,7 +139,10 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 			dataModel.put("toolName", toolName);
 			dataModel.put("pluginName", pluginName);
 			processTemplate(response, dataModel, "videoDoesNotExist.html.piece");
-		}
+		}*/
+		
+		processTemplate(response, new HashMap<Object, Object>(), "playback.html.piece");
+		
 		baseRequest.setHandled(true);
 
 	}

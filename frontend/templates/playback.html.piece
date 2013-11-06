@@ -16,7 +16,7 @@
           <img class="keyAnimation blank" src="bug8/unanimated.png"/>
 
 
-          <img class="frame" src="bug8/temp0000.png" />
+           <img class="frame" src="bug8/temp0000.png" />
       </div>
   </div>
   
@@ -28,4 +28,4 @@
         <div id="staticSliderHolder">
             <div id="staticSlider" class="slider"></div>
         </div>
-    </div>
+    </div> 

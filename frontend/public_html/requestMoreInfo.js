@@ -1,3 +1,4 @@
+/*global renderPlayback,stopFramePlayback*/       //depends on playback.js
 
 function setUpFancyBox() {
     $('.fancybox-thumbs').fancybox({
@@ -26,15 +27,16 @@ function setUpFancyBox() {
 
 function addResponseHTMLToWindow(data) {
     $(".modal").hide();
-    $(".moreInfo").html($(data).hide());
+    $(".moreInfo").html(data);
 
-    $(".moreInfo").children().fadeIn("fast");
+    //$(".moreInfo").children().fadeIn("fast");
     //addRequestGenerationListeners();
-    setUpFancyBox();
-
+    //setUpFancyBox();
+	renderPlayback();
 }
 
 function requestGenerationOfMedia() {
+	stopFramePlayback();
     $(".moreInfo").removeClass("hidden");
     $(".modal").show();
     $.post("makeVideo", {
@@ -46,6 +48,7 @@ function requestGenerationOfMedia() {
 }
 
 function doesVideoExistHuh() {
+	stopFramePlayback();
     $(".moreInfo").removeClass("hidden");
     $.post("makeVideo", {
         thingToDo: "isVideoAlreadyMade",

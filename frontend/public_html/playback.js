@@ -1,9 +1,9 @@
-var isPlaying = false;
-var currentFrame = 0;
+var isPlaying;
+var currentFrame;
 var animationTimer;
-var isFullScreen = false;
+var isFullScreen;
 var totalFrames;
-var animationEnabled = false;
+var animationEnabled;
 var rampUp = 22;	//22 frames of ramp up
 var durationOfAnimation = 10;  //10 frames of showing animation
 
@@ -144,7 +144,12 @@ function goFullScreen() {
 
 }
 
-$(document).ready(function () {
+function renderPlayback() {
+	isPlaying = false;
+	currentFrame = 0;
+	isFullScreen = false;
+	animationEnabled = false;
+	
     $(".frame").first().show();	//so the user sees something
     $("#overlay").on("click", goFullScreen);
 
@@ -160,4 +165,6 @@ $(document).ready(function () {
     preloadImages();
 
 
-});
+}
+
+$(document).ready(renderPlayback);

@@ -3,7 +3,6 @@
 }
 #panelAndOverlay{
 	position:relative;  /*allows the overlay to be absolute, relative to this div*/	
-	width:40%;
 }
 
 #panel:-webkit-full-screen {
@@ -18,17 +17,15 @@
 
 .keyAnimation {
 	position:absolute;
-	bottom:0;
-	right:0;
+	bottom:4px;
+	right:2px;
 	width:35%;
 	opacity: .8;
 	display:none;
 }
 
 
-#controlPanel{
-	width:40%;
-}
+
 
 
 #staticSliderHolder,#dockedSliderHolder {
@@ -82,4 +79,14 @@
 	top: 0;
 	left:0;
 	cursor:move;
+}
+
+#controlPanel{
+	width:100%;
+}
+
+#moduleControlPanel, #controlPanel{
+	background-color: #f8f8f8;
+	border: 2px solid #ffa729;
+	padding: 1px;
 }
