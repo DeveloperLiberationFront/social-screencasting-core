@@ -22,10 +22,9 @@
 	right:0;
 	width:35%;
 	opacity: .8;
-}
-.keyAnimation.full{
 	display:none;
 }
+
 
 #controlPanel{
 	width:40%;

@@ -4,6 +4,8 @@ var animationTimer;
 var isFullScreen = false;
 var totalFrames;
 var animationEnabled = false;
+var rampUp = 22;	//22 frames of ramp up
+var durationOfAnimation = 10;  //10 frames of showing animation
 
 function launchFullScreen(element) {  //From davidwalsh.name/fullscreen
     if (element.requestFullScreen) {
@@ -31,7 +33,20 @@ function updateSlider(index) {
     $(".slider").slider("value", index);
 }
 
-function startAnimation() {
+function handleAnimationForFrame(currentFrame) {
+    if (animationEnabled) {
+        if (currentFrame < rampUp || currentFrame > (rampUp + durationOfAnimation)) {
+            $(".keyAnimation.full").hide();
+            $(".keyAnimation.blank").show();
+        }
+        else {
+            $(".keyAnimation.blank").hide();
+            $(".keyAnimation.full").show();
+        }
+    }
+}
+
+function startFramePlayback() {
     if (!isPlaying) {
         $(".playbackCommand").removeClass("pause").addClass("play");
         isPlaying = true;
@@ -40,12 +55,13 @@ function startAnimation() {
             $(".frame").eq(currentFrame).hide();
             currentFrame = (currentFrame + 1) % totalFrames;
             updateSlider(currentFrame);
+            handleAnimationForFrame(currentFrame);
             $(".frame").eq(currentFrame).show();
         }, 200);
     }
 }
 
-function stopAnimation() {
+function stopFramePlayback() {
     if (isPlaying) {
         $(".playbackCommand").removeClass("play").addClass("pause");
         isPlaying = false;
@@ -55,17 +71,18 @@ function stopAnimation() {
 
 function playOrPause() {
     if (isPlaying) {
-        stopAnimation();
+        stopFramePlayback();
     }
     else {
-        startAnimation();
+        startFramePlayback();
     }
 }
 
 function sliderMoved(event, ui) {
-    stopAnimation();
+    stopFramePlayback();
     $(".frame").eq(currentFrame).hide();
     currentFrame = ui.value % totalFrames;
+    handleAnimationForFrame(currentFrame);
     $(".frame").eq(currentFrame).show();
     updateSlider(currentFrame);
 }
@@ -123,7 +140,7 @@ function goFullScreenAndStartPlaying() {
     launchFullScreen($("#panel")[0]);
 
     setFloatingPlaybackControlsVisible(true);
-    startAnimation();
+    startFramePlayback();
 }
 
 $(document).ready(function () {
@@ -136,6 +153,7 @@ $(document).ready(function () {
     if ($("#panel").data("type") == "keystroke") {
         animationEnabled = true;
     }
+    handleAnimationForFrame(0);
     setUpSliders();
     setUpDraggablePlayControl();
     preloadImages();
