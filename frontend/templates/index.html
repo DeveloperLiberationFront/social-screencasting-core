@@ -1,61 +1,65 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Welcome!</title>
-  <link rel="stylesheet" href="basic.css" />
-  <link rel="stylesheet" href="loading.css" />
-  <link rel="stylesheet" href="playback.css" />
+    <title>Welcome!</title>
+    <link rel="stylesheet" href="basic.css" />
+    <link rel="stylesheet" href="loading.css" />
+    <link rel="stylesheet" href="playback.css" />
 </head>
 <body>
-  <h1>Click on the plugin name to see more info</h1>
+    <h1>Click on the plugin name to see more info</h1>
 
 
-  <#list pluginNames as plugin>
+    <#list pluginNames as plugin>
   <div class="pluginListing">
-  <form method="POST" action="index">
-  <input name="thingToDo" type="hidden" value="getToolUsageForPlugin"/>
-	<input name="pluginName" type="submit" value="${plugin}"/>
-	</div>
-	</form>
-  </#list>
+      <form method="POST" action="index">
+          <input name="thingToDo" type="hidden" value="getToolUsageForPlugin" />
+          <input name="pluginName" type="submit" value="${plugin}" />
+      </form>
+  </div>
+
+    </#list>
 
   <div id="panelAndOverlay">
-	  <div id="overlay"><span>Click for Full Screen</span></div>
-		<div id="panel" data-total-frames=100 data-type="keystroke">
-			
-			<div id="moduleControlPanel" class="ui-widget-content">
-				<button class="playPause">
-					<img class="playbackCommand playImage pause" src="/images/playback/play.svg" />
-					<img class="playbackCommand pauseImage pause" src="/images/playback/pause.svg" />
-				</button>
-				<div id="dockedSliderHolder">
-					<div id="dockedSlider" class="slider"></div>
-				</div>
-			</div>	
-			
-			<img class="keyAnimation full" src="bug8/animation.png"></img>
-			<img class="keyAnimation blank" src="bug8/unanimated.png"></img>
-			
-			<img class="frame" src="bug8/temp0000.png"></img>
-		</div>
-	</div>
-<div id="controlPanel">
-	<button class="playPause">
-	<img class="playbackCommand playImage pause" src="/images/playback/play.svg" />
-	<img class="playbackCommand pauseImage pause" src="/images/playback/pause.svg" />
-	</button>
-	<div id="staticSliderHolder">
-		<div id="staticSlider" class="slider"></div>
-	</div>
-</div>
+      <div id="overlay"><span>Click for Full Screen</span></div>
+      <div id="panel" data-total-frames="100" data-type="keystroke">
+
+          <div id="moduleControlPanel" class="ui-widget-content">
+              <button class="playPause">
+                  <img class="playbackCommand playImage pause" src="/images/playback/play.svg" />
+                  <img class="playbackCommand pauseImage pause" src="/images/playback/pause.svg" />
+              </button>
+              <div id="dockedSliderHolder">
+                  <div id="dockedSlider" class="slider"></div>
+              </div>
+          </div>
+
+          <img class="keyAnimation full" src="bug8/animation.png"/>
+          <img class="keyAnimation blank" src="bug8/unanimated.png"/>
+
+
+          <img class="frame" src="bug8/temp0000.png" />
+      </div>
+  </div>
+    <div id="controlPanel">
+        <button class="playPause">
+            <img class="playbackCommand playImage pause" src="/images/playback/play.svg" />
+            <img class="playbackCommand pauseImage pause" src="/images/playback/pause.svg" />
+        </button>
+        <div id="staticSliderHolder">
+            <div id="staticSlider" class="slider"></div>
+        </div>
+    </div>
 
 
 
-<div class="modal"><!-- Place at bottom of page --></div>
+    <div class="modal">
+        <!-- Place at bottom of page -->
+    </div>
 
-<link rel="stylesheet" href="jquery-ui.min.css">
-<script src="jquery.min.js"></script>
-<script src="jquery-ui.min.js"></script>
-<script src="playback.js"></script>
+    <link rel="stylesheet" href="jquery-ui.min.css">
+    <script src="jquery.min.js"></script>
+    <script src="jquery-ui.min.js"></script>
+    <script src="playback.js"></script>
 </body>
-</html>  
+</html>

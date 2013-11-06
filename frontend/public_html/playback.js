@@ -132,20 +132,21 @@ function setUpSliders() {
     });
 }
 
-function setUpDraggablePlayControl() {
+function setUpDraggableThings() {
     $("#moduleControlPanel").draggable();
+	//$(".animationHolder").draggable();  Not as simple as I hoped.  Abandoning for now
 }
 
-function goFullScreenAndStartPlaying() {
+function goFullScreen() {
     launchFullScreen($("#panel")[0]);
 
     setFloatingPlaybackControlsVisible(true);
-    startFramePlayback();
+
 }
 
 $(document).ready(function () {
     $(".frame").first().show();	//so the user sees something
-    $("#overlay").on("click", goFullScreenAndStartPlaying);
+    $("#overlay").on("click", goFullScreen);
 
     $(".playPause").on("click", playOrPause);
 
@@ -155,7 +156,7 @@ $(document).ready(function () {
     }
     handleAnimationForFrame(0);
     setUpSliders();
-    setUpDraggablePlayControl();
+    setUpDraggableThings();
     preloadImages();
 
 
