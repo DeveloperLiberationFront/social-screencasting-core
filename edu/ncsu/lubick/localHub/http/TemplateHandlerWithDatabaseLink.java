@@ -44,7 +44,7 @@ public abstract class TemplateHandlerWithDatabaseLink extends AbstractHandler {
 	{
 		cfg = new Configuration();
 
-		cfg.setDirectoryForTemplateLoading(new File("./frontend/templates"));
+		cfg.setDirectoryForTemplateLoading(new File("./src/frontend/templates"));
 
 		// Specify how templates will see the data-model. This is an advanced
 		// topic...
