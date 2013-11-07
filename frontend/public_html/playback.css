@@ -104,6 +104,9 @@
 .settings img {
 	width:100%;
 }
+.animationSelection {
+	display:none;
+}
 
 #settingsMenu{
 	display:none;

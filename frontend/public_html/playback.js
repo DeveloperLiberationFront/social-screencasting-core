@@ -4,8 +4,11 @@ var animationTimer;
 var isFullScreen;
 var totalFrames;
 var animationEnabled;
+var currentAnimationChoice;
+var totalAnimationChoices;
 var rampUp = 22;	//22 frames of ramp up
 var durationOfAnimation = 10;  //10 frames of showing animation
+
 
 function launchFullScreen(element) {  //From davidwalsh.name/fullscreen
     if (element.requestFullScreen) {
@@ -146,23 +149,40 @@ function goFullScreen() {
 
 }
 
-function activateSettings(event) {
-    event.preventDefault();
-	
-	$("#settingsMenu").bPopup();
+function handleAnimationChoices(animationSelection) {
+    var fullScreenAnimationChoices, previewAnimationChoices;
+    previewAnimationChoices = $("#controlPanel").find(".animationSelection");
+    fullScreenAnimationChoices = $("#moduleControlPanel").find(".animationSelection");
+
+    fullScreenAnimationChoices.eq(animationSelection).show();
+    previewAnimationChoices.eq(animationSelection).show();
 }
+
+function rotateSettings() {
+
+    $(".animationSelection").hide();	//hide all
+    currentAnimationChoice = (currentAnimationChoice + 1) % totalAnimationChoices;
+
+    handleAnimationChoices(currentAnimationChoice);
+
+}
+
 
 function renderPlayback() {
     isPlaying = false;
     currentFrame = 0;
     isFullScreen = false;
     animationEnabled = false;
-	
+    currentAnimationChoice = 0;
+    totalAnimationChoices = $("#controlPanel").find(".animationSelection").length;
+    console.log(totalAnimationChoices + " total animation choices");
+    handleAnimationChoices(currentAnimationChoice);
+
     $(".frame").first().show();	//so the user sees something
     $("#overlay").on("click", goFullScreen);
 
     $(".playPause").on("click", playOrPause);
-    $(".settings").on("click", activateSettings);
+    $(".settings").on("click", rotateSettings);
 
     totalFrames = +$("#panel").data("totalFrames");
     if ($("#panel").data("type") == "keystroke") {

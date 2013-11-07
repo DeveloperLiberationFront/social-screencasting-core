@@ -3,7 +3,7 @@
   <div id="overlay">
     <span>Click for Full Screen</span>
   </div>
-  <div id="panel" data-total-frames=${"totalFrames"} data-type="keystroke" data-tool-name="${toolName}">
+  <div id="panel" data-total-frames=${totalFrames} data-type="keystroke" data-tool-name="${toolName}">
 
     <div id="moduleControlPanel" class="ui-widget-content">
       <button class="playPause">
@@ -11,7 +11,12 @@
         <img class="playbackCommand pauseImage pause" src="/images/playback/pause.svg" />
       </button>
       <div class="settings" >
-		<img src="/images/playback/gear.svg" />
+		<#if keypress != "MENU">
+    <img class="animationSelection" src="/images/imageOnly.png" />
+	<img class="animationSelection" src="/images/textOnly.png" />
+	<img class="animationSelection" src="/images/imageAndText.png" />
+	</#if>
+	<img class="animationSelection" src="/images/none.png" />
 	  </div>
       <div id="dockedSliderHolder">
         <div id="dockedSlider" class="slider"></div>
@@ -39,7 +44,12 @@
     <img class="playbackCommand pauseImage pause" src="/images/playback/pause.svg" />
   </button>
   <div class="settings" >
-    <img src="/images/playback/gear.svg" />
+  <#if keypress != "MENU">
+    <img class="animationSelection" src="/images/imageOnly.png" />
+	<img class="animationSelection" src="/images/textOnly.png" />
+	<img class="animationSelection" src="/images/imageAndText.png" />
+	</#if>
+	<img class="animationSelection" src="/images/none.png" />
   </div>
   <div id="staticSliderHolder">
     <div id="staticSlider" class="slider"></div>
