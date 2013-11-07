@@ -1,9 +1,9 @@
-<div class="moreInfoTitle">Some Tool name</div>
+<div class="moreInfoTitle">${toolName}</div>
 <div id="panelAndOverlay">
   <div id="overlay">
     <span>Click for Full Screen</span>
   </div>
-  <div id="panel" data-total-frames="100" data-type="keystroke">
+  <div id="panel" data-total-frames="100" data-type="keystroke" data-tool-name="${toolName}">
 
     <div id="moduleControlPanel" class="ui-widget-content">
       <button class="playPause">
@@ -15,11 +15,11 @@
       </div>
     </div>
 
-    <img class="keyAnimation full" src="bug8/animation.png"/>
-    <img class="keyAnimation blank" src="bug8/unanimated.png"/>
+    <img class="keyAnimation full" src="${toolName}/animation.png"/>
+    <img class="keyAnimation blank" src="${toolName}/unanimated.png"/>
 
 
-    <img class="frame" src="bug8/temp0000.png" />
+    <img class="frame" src="${toolName}/temp0000.png" />
   </div>
 </div>
 

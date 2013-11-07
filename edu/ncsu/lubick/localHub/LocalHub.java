@@ -348,9 +348,8 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	{
 		if (!isDebug) // debug callers are expected to add their own handlers
 		{
-			// this.videoPostProductionHandler.addNewMediaOutput(new ImagesToVideoOutput());
-			this.videoPostProductionHandler.addNewMediaOutput(new ImagesToGifOutput());
-			this.videoPostProductionHandler.addNewMediaOutput(new ImagesToMiniGifOutput());
+			this.videoPostProductionHandler.addNewPostAnimationMediaOutput(new ImagesToGifOutput());
+			this.videoPostProductionHandler.addNewPostAnimationMediaOutput(new ImagesToMiniGifOutput());
 		}
 	}
 
@@ -520,14 +519,14 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		@Override
 		public void forceVideoOutput()
 		{
-			for (ImagesToMediaOutput m : hubToDebug.videoPostProductionHandler.getMediaOutputs())
+			for (ImagesToMediaOutput m : hubToDebug.videoPostProductionHandler.getPostAnimationMediaOutputs())
 			{
 				if (m instanceof ImagesToVideoOutput)
 				{
 					return;
 				}
 			}
-			hubToDebug.videoPostProductionHandler.addNewMediaOutput(new ImagesToVideoOutput());
+			hubToDebug.videoPostProductionHandler.addNewPostAnimationMediaOutput(new ImagesToVideoOutput());
 		}
 
 	}

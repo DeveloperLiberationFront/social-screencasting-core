@@ -67,8 +67,7 @@ public class ImagesToVideoOutput extends AbstractImagesToMediaOutput
 
 	private static void inheritIO(final InputStream src, final String identifer)
 	{
-		// used to spy on a process's output, similar to what ProcessBuilder
-		// does
+		// used to spy on a process's output, similar to what ProcessBuilder does
 		new Thread(new Runnable() {
 			public void run()
 			{

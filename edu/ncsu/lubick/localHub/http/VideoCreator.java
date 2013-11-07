@@ -1,6 +1,5 @@
 package edu.ncsu.lubick.localHub.http;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -113,36 +112,28 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 
 	private void respondToDoesVideoExist(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
-		/*String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
-		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
+		/*
+		 * String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME); String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
+		 * 
+		 * String expectedBigGifFileName = getNameForToolFullGif(pluginName, toolName); File expectedBigGifFile = new File(expectedBigGifFileName);
+		 * 
+		 * String expectedMiniGifFileName = getNameForToolMiniGif(pluginName, toolName); File expectedMiniGifFile = new File(expectedMiniGifFileName);
+		 * 
+		 * logger.debug("If gif files existed, they would be called " + expectedBigGifFileName + " and " + expectedMiniGifFileName);
+		 * 
+		 * if (expectedBigGifFile.exists() && expectedMiniGifFile.exists()) { String bigGifRelativeName = expectedBigGifFile.getName(); String
+		 * miniGifRelativeName = expectedMiniGifFile.getName(); logger.debug("It exists!"); respondWithGifsAndMetadata(response, toolName, bigGifRelativeName,
+		 * miniGifRelativeName); } else { logger.debug("It does not");
+		 * 
+		 * Map<Object, Object> dataModel = new HashMap<Object, Object>(); dataModel.put("toolName", toolName); dataModel.put("pluginName", pluginName);
+		 * processTemplate(response, dataModel, "videoDoesNotExist.html.piece"); }
+		 */
 
-		String expectedBigGifFileName = getNameForToolFullGif(pluginName, toolName);
-		File expectedBigGifFile = new File(expectedBigGifFileName);
+		HashMap<Object, Object> templateData = new HashMap<Object, Object>();
+		templateData.put("toolName", "bug8");
 
-		String expectedMiniGifFileName = getNameForToolMiniGif(pluginName, toolName);
-		File expectedMiniGifFile = new File(expectedMiniGifFileName);
+		processTemplate(response, templateData, "playback.html.piece");
 
-		logger.debug("If gif files existed, they would be called " + expectedBigGifFileName + " and " + expectedMiniGifFileName);
-
-		if (expectedBigGifFile.exists() && expectedMiniGifFile.exists())
-		{
-			String bigGifRelativeName = expectedBigGifFile.getName();
-			String miniGifRelativeName = expectedMiniGifFile.getName();
-			logger.debug("It exists!");
-			respondWithGifsAndMetadata(response, toolName, bigGifRelativeName, miniGifRelativeName);
-		}
-		else
-		{
-			logger.debug("It does not");
-
-			Map<Object, Object> dataModel = new HashMap<Object, Object>();
-			dataModel.put("toolName", toolName);
-			dataModel.put("pluginName", pluginName);
-			processTemplate(response, dataModel, "videoDoesNotExist.html.piece");
-		}*/
-		
-		processTemplate(response, new HashMap<Object, Object>(), "playback.html.piece");
-		
 		baseRequest.setHandled(true);
 
 	}

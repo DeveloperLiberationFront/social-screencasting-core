@@ -10,4 +10,6 @@ public interface KeypressAnimationMaker {
 
 	void setCurrentKeyPresses(String toolKeyPresses);
 
+	String getAnimationName();
+
 }

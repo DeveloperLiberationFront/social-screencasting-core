@@ -30,5 +30,11 @@ public class AnimatedTextMaker extends AnimatedTextAndKeyboardMaker {
 		graphics.fillRect(0, 0, width, height);
 		return image;
 	}
+	
+	@Override
+	public String getAnimationName()
+	{
+		return "text";
+	}
 
 }

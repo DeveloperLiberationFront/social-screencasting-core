@@ -68,4 +68,10 @@ public class AnimatedKeyboardMaker implements KeypressAnimationMaker {
 
 	}
 
+	@Override
+	public String getAnimationName()
+	{
+		return "image";
+	}
+
 }

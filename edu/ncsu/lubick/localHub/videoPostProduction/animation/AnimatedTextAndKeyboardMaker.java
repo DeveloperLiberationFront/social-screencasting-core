@@ -72,4 +72,10 @@ public class AnimatedTextAndKeyboardMaker extends AnimatedKeyboardMaker {
 	{
 		this.keyPresses = toolKeyPresses;
 	}
+	
+	@Override
+	public String getAnimationName()
+	{
+		return "image_text";
+	}
 }

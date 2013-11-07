@@ -65,7 +65,8 @@ public class PostProductionHandler
 	private PostProductionAnimationStrategy postProductionAnimator;
 
 	private Queue<OverloadFile> queueOfOverloadFiles = new LinkedList<>();
-	private List<ImagesToMediaOutput> mediaOutputs = new ArrayList<>();
+	private List<ImagesToMediaOutput> postAnimationMediaOutputs = new ArrayList<>();
+	private List<PreAnimationImagesToMediaOutput> preAnimationMediaOutputs = new ArrayList<>();
 
 	private FrameDecompressor decompressor = new FrameDecompressor();
 	private ImageDiskWritingStrategy imageWriter;
@@ -209,6 +210,7 @@ public class PostProductionHandler
 	private List<File> extractDemoVideoToFile(InputStream inputStream, String fileName) throws IOException
 	{
 		imageWriter.reset();
+		List<File> createdFiles = new ArrayList<>();
 
 		logger.debug("starting extraction");
 		extractImagesForTimePeriodToScratchFolder(inputStream);
@@ -216,25 +218,36 @@ public class PostProductionHandler
 		logger.debug("waiting until all the images are done extracting");
 		imageWriter.waitUntilDoneWriting();
 
-		logger.info("Adding animation to video");
+		for (PreAnimationImagesToMediaOutput mediaOutput : preAnimationMediaOutputs)
+		{
+			createdFiles.add(mediaOutput.combineImageFilesToMakeMedia(fileName, this.currentToolStream));
+			logger.info(mediaOutput.getMediaTypeInfo() + " Rendered");
+		}
+
+		if (postAnimationMediaOutputs.size() > 0)
+		{
+			logger.info("Adding animation to video");
+			handleAnimationPostProduction(fileName, createdFiles);
+		}
+		else
+		{
+			logger.info("Skipping animation step because no media outputs");
+		}
+
+		return createdFiles;
+	}
+
+	public void handleAnimationPostProduction(String fileName, List<File> createdFiles) throws IOException
+	{
 		postProductionAnimator.addAnimationToImagesInScratchFolderForToolStream(this.currentToolStream);
 
-		// if (newVideoFile.exists() && !newVideoFile.delete())
-		// {
-		// logger.error("could not establish a temporary video file");
-		// return null;
-		// }
 		logger.info("Rendering Media");
 
-		List<File> createdFiles = new ArrayList<>();
-		for (ImagesToMediaOutput mediaOutput : mediaOutputs)
+		for (ImagesToMediaOutput mediaOutput : postAnimationMediaOutputs)
 		{
-			// combineImageFilesToVideo(newVideoFile);
 			createdFiles.add(mediaOutput.combineImageFilesToMakeMedia(fileName));
 			logger.info(mediaOutput.getMediaTypeInfo() + " Rendered");
 		}
- 
-		return createdFiles;
 	}
 
 	private void extractImagesForTimePeriodToScratchFolder(InputStream inputStream) throws IOException
@@ -356,14 +369,24 @@ public class PostProductionHandler
 		return SCRATCH_DIR;
 	}
 
-	public void addNewMediaOutput(ImagesToMediaOutput newMediaOutput)
+	public void addNewPostAnimationMediaOutput(ImagesToMediaOutput newMediaOutput)
 	{
-		this.mediaOutputs.add(newMediaOutput);
+		this.postAnimationMediaOutputs.add(newMediaOutput);
 	}
 
-	public Set<ImagesToMediaOutput> getMediaOutputs()
+	public Set<ImagesToMediaOutput> getPostAnimationMediaOutputs()
 	{
-		return new HashSet<>(this.mediaOutputs);
+		return new HashSet<>(this.postAnimationMediaOutputs);
+	}
+
+	public void addNewPreAnimationMediaOutput(PreAnimationImagesToMediaOutput newMediaOutput)
+	{
+		this.preAnimationMediaOutputs.add(newMediaOutput);
+	}
+
+	public Set<PreAnimationImagesToMediaOutput> getPreAnimationMediaOutputs()
+	{
+		return new HashSet<>(this.preAnimationMediaOutputs);
 	}
 
 }

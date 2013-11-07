@@ -313,30 +313,30 @@ public class TestVideoPostProduction
 	private PostProductionHandler makeVideoPostProductionHandler()
 	{
 		PostProductionHandler handler = new PostProductionHandler();
-		handler.addNewMediaOutput(new ImagesToVideoOutput());
+		handler.addNewPostAnimationMediaOutput(new ImagesToVideoOutput());
 		return handler;
 	}
 
 	private PostProductionHandler makeGifPostProductionHandler()
 	{
 		PostProductionHandler handler = new PostProductionHandler();
-		handler.addNewMediaOutput(new ImagesToGifOutput());
+		handler.addNewPostAnimationMediaOutput(new ImagesToGifOutput());
 		return handler;
 	}
 
 	private PostProductionHandler makeMiniGifPostProductionHandler()
 	{
 		PostProductionHandler handler = new PostProductionHandler();
-		handler.addNewMediaOutput(new ImagesToMiniGifOutput());
+		handler.addNewPostAnimationMediaOutput(new ImagesToMiniGifOutput());
 		return handler;
 	}
 
 	private PostProductionHandler makeVideoThumbnailAndGifPostProductionHandler()
 	{
 		PostProductionHandler handler = new PostProductionHandler();
-		handler.addNewMediaOutput(new ImagesToVideoOutput());
-		handler.addNewMediaOutput(new ImagesToGifOutput());
-		handler.addNewMediaOutput(new ThumbnailGenerator());
+		handler.addNewPostAnimationMediaOutput(new ImagesToVideoOutput());
+		handler.addNewPostAnimationMediaOutput(new ImagesToGifOutput());
+		handler.addNewPostAnimationMediaOutput(new ThumbnailGenerator());
 		return handler;
 	}
 

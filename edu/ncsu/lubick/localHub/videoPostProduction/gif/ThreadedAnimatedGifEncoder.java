@@ -16,7 +16,8 @@ public class ThreadedAnimatedGifEncoder extends AnimatedGifEncoder
 	private BlockingQueue<BufferedImage> preconvertedImages = new ArrayBlockingQueue<>(2);
 
 	private Object blockingObject = new Object();
-	private boolean innerLoopContinue = true;
+
+	// private boolean innerLoopContinue = true;
 
 	public ThreadedAnimatedGifEncoder()
 	{
@@ -101,7 +102,7 @@ public class ThreadedAnimatedGifEncoder extends AnimatedGifEncoder
 				logger.error("Thread pool was interrupted, and not all the tasks finished", e);
 			}
 		}
-		innerLoopContinue = false;
+		// innerLoopContinue = false;
 	}
 
 	@Override
