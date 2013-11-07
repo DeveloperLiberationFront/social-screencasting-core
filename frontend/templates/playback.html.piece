@@ -24,14 +24,14 @@
     </div>
 
     <#if keypress != "MENU">
-      <img class="keyAnimation full" src="${toolName}/image.png"/>
-      <img class="keyAnimation blank" src="${toolName}/image_un.png"/>
+      <img class="keyAnimation full image" src="${toolName}/image.png"/>
+      <img class="keyAnimation blank image" src="${toolName}/image_un.png"/>
 
-      <img class="keyAnimation" src="${toolName}/text.png"/>
-      <img class="keyAnimation" src="${toolName}/text_un.png"/>
+      <img class="keyAnimation full text" src="${toolName}/text.png"/>
+      <img class="keyAnimation blank text" src="${toolName}/text_un.png"/>
 
-      <img class="keyAnimation" src="${toolName}/image_text.png"/>
-      <img class="keyAnimation" src="${toolName}/image_text_un.png"/>
+      <img class="keyAnimation full imageText" src="${toolName}/image_text.png"/>
+      <img class="keyAnimation blank imageText" src="${toolName}/image_text_un.png"/>
     </#if>
 
     <img class="frame" src="${toolName}/frame0000.png" />

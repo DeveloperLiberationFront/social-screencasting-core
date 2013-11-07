@@ -1,6 +1,6 @@
 var isPlaying;
 var currentFrame;
-var animationTimer;
+var frameAnimationTimer;
 var isFullScreen;
 var totalFrames;
 var animationEnabled;
@@ -36,15 +36,33 @@ function updateSlider(index) {
     $(".slider").slider("value", index);
 }
 
-function handleAnimationForFrame(currentFrame) {
-    if (animationEnabled) {
+function handleAnimationForCurrentFrame() {
+    $(".keyAnimation").hide();
+    if (totalAnimationChoices == 1 ||
+        (totalAnimationChoices - 1) == currentAnimationChoice) {
+        //if none is selected, or we don't have any animation options, do nothing
+        return;
+    }
+    if (currentAnimationChoice === 0) {
         if (currentFrame < rampUp || currentFrame > (rampUp + durationOfAnimation)) {
-            $(".keyAnimation.full").hide();
-            $(".keyAnimation.blank").show();
+            $(".keyAnimation.blank.image").show();
         }
         else {
-            $(".keyAnimation.blank").hide();
-            $(".keyAnimation.full").show();
+            $(".keyAnimation.full.image").show();
+        }
+    } else if (currentAnimationChoice === 1) {
+        if (currentFrame < rampUp || currentFrame > (rampUp + durationOfAnimation)) {
+            $(".keyAnimation.blank.text").show();
+        }
+        else {
+            $(".keyAnimation.full.text").show();
+        }
+    } else if (currentAnimationChoice === 2) {
+        if (currentFrame < rampUp || currentFrame > (rampUp + durationOfAnimation)) {
+            $(".keyAnimation.blank.imageText").show();
+        }
+        else {
+            $(".keyAnimation.full.imageText").show();
         }
     }
 }
@@ -54,11 +72,11 @@ function startFramePlayback() {
         $(".playbackCommand").removeClass("pause").addClass("play");
         isPlaying = true;
         var totalFrames = +$("#panel").data("totalFrames");
-        animationTimer = window.setInterval(function () {
+        frameAnimationTimer = window.setInterval(function () {
             $(".frame").eq(currentFrame).hide();
             currentFrame = (currentFrame + 1) % totalFrames;
             updateSlider(currentFrame);
-            handleAnimationForFrame(currentFrame);
+            handleAnimationForCurrentFrame();
             $(".frame").eq(currentFrame).show();
         }, 200);
     }
@@ -68,7 +86,7 @@ function stopFramePlayback() {
     if (isPlaying) {
         $(".playbackCommand").removeClass("play").addClass("pause");
         isPlaying = false;
-        clearInterval(animationTimer);
+        clearInterval(frameAnimationTimer);
     }
 }
 
@@ -85,7 +103,7 @@ function sliderMoved(event, ui) {
     stopFramePlayback();
     $(".frame").eq(currentFrame).hide();
     currentFrame = ui.value % totalFrames;
-    handleAnimationForFrame(currentFrame);
+    handleAnimationForCurrentFrame();
     $(".frame").eq(currentFrame).show();
     updateSlider(currentFrame);
 }
@@ -149,22 +167,23 @@ function goFullScreen() {
 
 }
 
-function handleAnimationChoices(animationSelection) {
+function setAnimationOverlaysTo(animationSelection) {
     var fullScreenAnimationChoices, previewAnimationChoices;
     previewAnimationChoices = $("#controlPanel").find(".animationSelection");
     fullScreenAnimationChoices = $("#moduleControlPanel").find(".animationSelection");
 
     fullScreenAnimationChoices.eq(animationSelection).show();
     previewAnimationChoices.eq(animationSelection).show();
+
 }
 
-function rotateSettings() {
+function rotateAnimationSettings() {
 
     $(".animationSelection").hide();	//hide all
     currentAnimationChoice = (currentAnimationChoice + 1) % totalAnimationChoices;
 
-    handleAnimationChoices(currentAnimationChoice);
-
+    setAnimationOverlaysTo(currentAnimationChoice);
+	handleAnimationForCurrentFrame();
 }
 
 
@@ -176,19 +195,19 @@ function renderPlayback() {
     currentAnimationChoice = 0;
     totalAnimationChoices = $("#controlPanel").find(".animationSelection").length;
     console.log(totalAnimationChoices + " total animation choices");
-    handleAnimationChoices(currentAnimationChoice);
+    setAnimationOverlaysTo(currentAnimationChoice);
 
     $(".frame").first().show();	//so the user sees something
     $("#overlay").on("click", goFullScreen);
 
     $(".playPause").on("click", playOrPause);
-    $(".settings").on("click", rotateSettings);
+    $(".settings").on("click", rotateAnimationSettings);
 
     totalFrames = +$("#panel").data("totalFrames");
     if ($("#panel").data("type") == "keystroke") {
         animationEnabled = true;
     }
-    handleAnimationForFrame(0);
+    handleAnimationForCurrentFrame();
     setUpSliders();
     setUpDraggableThings();
     preloadImages();
