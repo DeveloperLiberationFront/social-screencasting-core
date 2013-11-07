@@ -15,9 +15,10 @@
       </div>
     </div>
 
-    <img class="keyAnimation full" src="${toolName}/animation.png"/>
-    <img class="keyAnimation blank" src="${toolName}/unanimated.png"/>
-
+	<#if keypress != "MENU">
+		<img class="keyAnimation full" src="${toolName}/animation.png"/>
+		<img class="keyAnimation blank" src="${toolName}/unanimated.png"/>
+	</#if>
 
     <img class="frame" src="${toolName}/temp0000.png" />
   </div>

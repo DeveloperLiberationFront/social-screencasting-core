@@ -13,6 +13,7 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 
 import edu.ncsu.lubick.localHub.WebQueryInterface;
+import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
@@ -86,9 +87,11 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 			return;
 		}
 
+		ToolUsage lastToolUsage = null;
+		
 		try
 		{
-			this.databaseLink.extractMediaForLastUsageOfTool(pluginName, toolName);
+			lastToolUsage = this.databaseLink.extractMediaForLastUsageOfTool(pluginName, toolName);
 		}
 		catch (VideoEncodingException e)
 		{
@@ -101,12 +104,14 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 			return;
 		}
 
-		String bigGifRelativeName = getNameForToolFullGif(pluginName, toolName);
-		bigGifRelativeName = bigGifRelativeName.substring(bigGifRelativeName.indexOf('\\'));
-		String miniGifRelativeName = getNameForToolMiniGif(pluginName, toolName);
-		miniGifRelativeName = miniGifRelativeName.substring(miniGifRelativeName.indexOf('\\'));
+		//String bigGifRelativeName = getNameForToolFullGif(pluginName, toolName);
+		//bigGifRelativeName = bigGifRelativeName.substring(bigGifRelativeName.indexOf('\\'));
+		//String miniGifRelativeName = getNameForToolMiniGif(pluginName, toolName);
+		//miniGifRelativeName = miniGifRelativeName.substring(miniGifRelativeName.indexOf('\\'));
 
-		respondWithGifsAndMetadata(response, toolName, bigGifRelativeName, miniGifRelativeName);
+		//respondWithGifsAndMetadata(response, toolName, bigGifRelativeName, miniGifRelativeName);
+		
+		processTemplateWithNameAndKeys(response, lastToolUsage.getToolKeyPresses(), toolName);
 		baseRequest.setHandled(true);
 	}
 
@@ -128,14 +133,22 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		 * Map<Object, Object> dataModel = new HashMap<Object, Object>(); dataModel.put("toolName", toolName); dataModel.put("pluginName", pluginName);
 		 * processTemplate(response, dataModel, "videoDoesNotExist.html.piece"); }
 		 */
-
-		HashMap<Object, Object> templateData = new HashMap<Object, Object>();
-		templateData.put("toolName", "bug8");
-
-		processTemplate(response, templateData, "playback.html.piece");
+		String keypress = "MENU";
+		String toolName = "bug8";
+		processTemplateWithNameAndKeys(response, keypress, toolName);
 
 		baseRequest.setHandled(true);
 
+	}
+
+	public void processTemplateWithNameAndKeys(HttpServletResponse response, String keypress, String toolName) throws IOException
+	{
+		HashMap<Object, Object> templateData = new HashMap<Object, Object>();
+		
+		templateData.put("toolName", toolName);
+		
+		templateData.put("keypress", keypress);
+		processTemplate(response, templateData, "playback.html.piece");
 	}
 
 	public void respondWithGifsAndMetadata(HttpServletResponse response, String toolName, String bigGifRelativeName, String miniGifRelativeName)

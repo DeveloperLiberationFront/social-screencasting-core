@@ -315,9 +315,15 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	}
 
 	@Override
-	public void extractMediaForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException
+	public ToolUsage extractMediaForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException
 	{
-		extractMediaForLastUsageOfToolAndReturn(pluginName, toolName); // throw away this list. Clients who are not unit tests are not expecting output
+		setUpPostProductionHandler();
+		ToolUsage lastToolUsage = databaseManager.getLastInstanceOfToolUsage(pluginName, toolName);
+		
+		makeMediaForToolUsage(lastToolUsage);	//thow away list.  Clients of DatabaseQueryInterface don't need the files made
+		
+		return lastToolUsage;
+		
 	}
 
 	public List<File> extractMediaForLastUsageOfToolAndReturn(String pluginName, String toolName) throws VideoEncodingException
@@ -325,7 +331,12 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		setUpPostProductionHandler();
 		ToolUsage lastToolUsage = databaseManager.getLastInstanceOfToolUsage(pluginName, toolName);
 
-		List<FileDateStructs> filesToload = databaseManager.getVideoFilesLinkedToTimePeriod(lastToolUsage);
+		return makeMediaForToolUsage(lastToolUsage);
+	}
+
+	public List<File> makeMediaForToolUsage(ToolUsage toolUsage) throws VideoEncodingException
+	{
+		List<FileDateStructs> filesToload = databaseManager.getVideoFilesLinkedToTimePeriod(toolUsage);
 
 		logger.debug("Loading files " + filesToload);
 		if (filesToload == null || filesToload.size() == 0)
@@ -341,7 +352,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 			videoPostProductionHandler.enqueueOverLoadFile(filesToload.get(i).file, filesToload.get(i).startTime);
 		}
 
-		return videoPostProductionHandler.extractMediaForToolUsage(lastToolUsage);
+		return videoPostProductionHandler.extractMediaForToolUsage(toolUsage);
 	}
 
 	private void setUpPostProductionHandler()

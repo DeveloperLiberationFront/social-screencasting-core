@@ -16,6 +16,7 @@ import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
+import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToBrowserAnimatedPackage;
 import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.ThumbnailGenerator;
@@ -42,7 +43,7 @@ public class TestVideoPostProduction
 	{
 		PostProductionHandler handler = makeVideoPostProductionHandler();
 
-		List<File> outputMedia = testARandomToolInAHandler(handler);
+		List<File> outputMedia = testARandomToolInAPostAnimationHandler(handler);
 
 		assertEquals(1, outputMedia.size());
 		verifyVideoFileIsCorrectlyMade(outputMedia.get(0));
@@ -54,7 +55,7 @@ public class TestVideoPostProduction
 	{
 		PostProductionHandler handler = makeGifPostProductionHandler();
 
-		List<File> outputMedia = testARandomToolInAHandler(handler);
+		List<File> outputMedia = testARandomToolInAPostAnimationHandler(handler);
 
 		assertEquals(1, outputMedia.size());
 		verifyGifFileIsCorrectlyMade(outputMedia.get(0));
@@ -66,11 +67,23 @@ public class TestVideoPostProduction
 	{
 		PostProductionHandler handler = makeMiniGifPostProductionHandler();
 
-		List<File> outputMedia = testARandomToolInAHandler(handler);
+		List<File> outputMedia = testARandomToolInAPostAnimationHandler(handler);
 
 		assertEquals(1, outputMedia.size());
 		verifyGifFileIsCorrectlyMade(outputMedia.get(0));
 		verifyGifNamedProperly(outputMedia.get(0), WHOMBO_TOOL_1);
+	}
+	
+	@Test
+	public void testSingleToolUsageExtractionBrowserMedia() throws Exception
+	{
+		PostProductionHandler handler = makeBrowserMediaPostProductionHandler();
+
+		List<File> outputMedia = testARandomToolInAPostAnimationHandler(handler);
+
+		assertEquals(1, outputMedia.size());
+		verifyBrowserMediaOutputIsCorrectlyMade(outputMedia.get(0));
+		verifyBrowserMediaOutputNamedProperly(outputMedia.get(0), WHOMBO_TOOL_1);
 	}
 
 	@Test
@@ -78,7 +91,7 @@ public class TestVideoPostProduction
 	{
 		PostProductionHandler handler = makeVideoThumbnailAndGifPostProductionHandler();
 
-		List<File> outputMedia = testARandomToolInAHandler(handler);
+		List<File> outputMedia = testARandomToolInAPostAnimationHandler(handler);
 
 		assertEquals(3, outputMedia.size());
 		assertNotNull(outputMedia.get(0));
@@ -94,7 +107,7 @@ public class TestVideoPostProduction
 		verifyThumbnailNamedProperly(outputMedia.get(2), WHOMBO_TOOL_1);
 	}
 
-	private List<File> testARandomToolInAHandler(PostProductionHandler handler) throws VideoEncodingException
+	private List<File> testARandomToolInAPostAnimationHandler(PostProductionHandler handler) throws VideoEncodingException
 	{
 		File capFile = new File("./src/ForTesting/oneMinuteCap.cap");
 		String toolName = WHOMBO_TOOL_1;
@@ -117,6 +130,8 @@ public class TestVideoPostProduction
 
 		return mediaOutputs;
 	}
+	
+	
 
 	@Test
 	public void testSingleToolUsageExtractionReallyEarly() throws Exception
@@ -337,6 +352,13 @@ public class TestVideoPostProduction
 		handler.addNewPostAnimationMediaOutput(new ImagesToVideoOutput());
 		handler.addNewPostAnimationMediaOutput(new ImagesToGifOutput());
 		handler.addNewPostAnimationMediaOutput(new ThumbnailGenerator());
+		return handler;
+	}
+	
+	private PostProductionHandler makeBrowserMediaPostProductionHandler()
+	{
+		PostProductionHandler handler = new PostProductionHandler();
+		handler.addNewPreAnimationMediaOutput(new ImagesToBrowserAnimatedPackage());
 		return handler;
 	}
 
