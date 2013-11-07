@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -77,15 +79,33 @@ public class TestVideoPostProduction
 	@Test
 	public void testSingleToolUsageExtractionBrowserMedia() throws Exception
 	{
+		String mediaDirName = PostProductionHandler.makeFileNameForToolPluginMedia(TEST_PLUGIN_NAME, WHOMBO_TOOL_1);
+		File expectedOutputDir = new File(mediaDirName);
+		if (expectedOutputDir.exists())
+		{
+			assertTrue(expectedOutputDir.isDirectory());
+			assertTrue(UtilitiesForTesting.clearOutDirectory(expectedOutputDir));
+			assertTrue(expectedOutputDir.delete());
+			assertFalse(expectedOutputDir.exists());
+		}
+		
+		
 		PostProductionHandler handler = makeBrowserMediaPostProductionHandler();
 
 		List<File> outputMedia = testARandomToolInAPostAnimationHandler(handler);
 
 		assertEquals(1, outputMedia.size());
-		//verifyBrowserMediaOutputIsCorrectlyMade(outputMedia.get(0));
-		//verifyBrowserMediaOutputNamedProperly(outputMedia.get(0), WHOMBO_TOOL_1);
-		
-		fail("Stuff");
+		assertEquals(expectedOutputDir, outputMedia.get(0));
+		List<String> listOfFileNames = Arrays.asList(expectedOutputDir.list());
+		assertTrue(listOfFileNames.size()>30);		//as of 11/7/13 this number was precisely 41, but this may change
+															// if the rendering procedure changes.
+		assertTrue(listOfFileNames.contains("image.png"));
+		assertTrue(listOfFileNames.contains("image_un.png"));
+		assertTrue(listOfFileNames.contains("image_text.png"));
+		assertTrue(listOfFileNames.contains("image_text_un.png"));
+		assertTrue(listOfFileNames.contains("text.png"));
+		assertTrue(listOfFileNames.contains("text_un.png"));
+		assertTrue(listOfFileNames.contains("frame0000.png"));
 	}
 
 	@Test

@@ -144,7 +144,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		 * Map<Object, Object> dataModel = new HashMap<Object, Object>(); dataModel.put("toolName", toolName); dataModel.put("pluginName", pluginName);
 		 * processTemplate(response, dataModel, "videoDoesNotExist.html.piece"); }
 		 */
-		String keypress = "Ctrl+5";
+		String keypress = "MENU";
 		String toolName = "Testing1388763334";
 		String folderName = PostProductionHandler.makeFileNameForToolPluginMedia("Testing", "WhomboTool #1");
 		File mediaDir = new File(folderName);
