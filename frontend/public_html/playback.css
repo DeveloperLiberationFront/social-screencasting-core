@@ -24,18 +24,11 @@
 	display:none;
 }
 
-#staticSliderHolder{
+#staticSliderHolder, #dockedSliderHolder {
 	margin-left:7px;
 	display:inline-block;
 	width:84%;
-}
-
-
-
-#dockedSliderHolder {
-	margin-left:7px;
-	display:inline-block;
-	width:84%;
+	cursor:default;
 }
 
 .playPause{

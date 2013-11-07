@@ -100,6 +100,7 @@ function playOrPause() {
 }
 
 function sliderMoved(event, ui) {
+	event.preventDefault();
     stopFramePlayback();
     $(".frame").eq(currentFrame).hide();
     currentFrame = ui.value % totalFrames;
@@ -147,7 +148,7 @@ function setUpSliders() {
     $(".slider").slider({
         value: 0,
         min: 0,
-        max: totalFrames,
+        max: totalFrames-1,	//minus 1 because we start at 0
         step: 1,
         animate: "fast",
         easing: "linear",

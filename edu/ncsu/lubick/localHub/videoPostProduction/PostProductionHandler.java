@@ -143,7 +143,12 @@ public class PostProductionHandler
 		if (this.currentCapFile == null || this.capFileStartTime == null)
 		{
 			logger.error("PostProductionVideo object needed to have a file to load and a start time");
-			return null;
+			throw new VideoEncodingException("PostProductionVideo object needed to have a file to load and a start time");
+		}
+		if (this.postAnimationMediaOutputs.size() == 0 && this.preAnimationMediaOutputs.size() == 0)
+		{
+			logger.info("No media outputs, so nothing was done");
+			return new ArrayList<>();
 		}
 
 		Date timeToLookFor = findStartingTime(specificToolUse);

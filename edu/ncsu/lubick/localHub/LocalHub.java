@@ -17,12 +17,11 @@ import edu.ncsu.lubick.localHub.database.DBAbstraction.FileDateStructs;
 import edu.ncsu.lubick.localHub.database.SQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.http.HTTPServer;
+import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToBrowserAnimatedPackage;
 import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToMediaOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
-import edu.ncsu.lubick.localHub.videoPostProduction.gif.ImagesToGifOutput;
-import edu.ncsu.lubick.localHub.videoPostProduction.gif.ImagesToMiniGifOutput;
 
 public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQueryInterface, ParsedFileListener {
 
@@ -365,8 +364,9 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	{
 		if (!isDebug) // debug callers are expected to add their own handlers
 		{
-			this.videoPostProductionHandler.addNewPostAnimationMediaOutput(new ImagesToGifOutput());
-			this.videoPostProductionHandler.addNewPostAnimationMediaOutput(new ImagesToMiniGifOutput());
+			//this.videoPostProductionHandler.addNewPostAnimationMediaOutput(new ImagesToGifOutput());
+			//this.videoPostProductionHandler.addNewPostAnimationMediaOutput(new ImagesToMiniGifOutput());
+			this.videoPostProductionHandler.addNewPreAnimationMediaOutput(new ImagesToBrowserAnimatedPackage());
 		}
 	}
 

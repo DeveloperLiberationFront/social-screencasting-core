@@ -110,7 +110,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		}
 		int numFrames = countNumFrames(mediaDir);
 		
-		processTemplateWithNameKeysAndNumFrames(response, lastToolUsage.getToolKeyPresses(), toolName, numFrames);
+		processTemplateWithNameKeysAndNumFrames(response, lastToolUsage.getToolKeyPresses(), mediaDir.getName(), numFrames);
 		baseRequest.setHandled(true);
 	}
 
@@ -146,7 +146,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 			}
 			int numFrames = countNumFrames(mediaDir);
 			ToolUsage lastToolUsage = databaseLink.getLastInstanceOfToolUsage(pluginName, toolName);
-			processTemplateWithNameKeysAndNumFrames(response, lastToolUsage.getToolKeyPresses(), toolName, numFrames);
+			processTemplateWithNameKeysAndNumFrames(response, lastToolUsage.getToolKeyPresses(), mediaDir.getName(), numFrames);
 		}
 		else if (mediaDir.exists() && !mediaDir.isDirectory())
 		{
