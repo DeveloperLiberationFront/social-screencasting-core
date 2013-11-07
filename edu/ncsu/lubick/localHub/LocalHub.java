@@ -318,7 +318,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	public ToolUsage extractMediaForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException
 	{
 		setUpPostProductionHandler();
-		ToolUsage lastToolUsage = databaseManager.getLastInstanceOfToolUsage(pluginName, toolName);
+		ToolUsage lastToolUsage = getLastInstanceOfToolUsage(pluginName, toolName);
 		
 		makeMediaForToolUsage(lastToolUsage);	//thow away list.  Clients of DatabaseQueryInterface don't need the files made
 		
@@ -326,10 +326,16 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		
 	}
 
+	@Override
+	public ToolUsage getLastInstanceOfToolUsage(String pluginName, String toolName)
+	{
+		return databaseManager.getLastInstanceOfToolUsage(pluginName, toolName);
+	}
+
 	public List<File> extractMediaForLastUsageOfToolAndReturn(String pluginName, String toolName) throws VideoEncodingException
 	{
 		setUpPostProductionHandler();
-		ToolUsage lastToolUsage = databaseManager.getLastInstanceOfToolUsage(pluginName, toolName);
+		ToolUsage lastToolUsage = getLastInstanceOfToolUsage(pluginName, toolName);
 
 		return makeMediaForToolUsage(lastToolUsage);
 	}

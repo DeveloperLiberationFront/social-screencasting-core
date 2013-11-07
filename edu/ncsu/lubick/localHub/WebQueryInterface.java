@@ -13,4 +13,6 @@ public interface WebQueryInterface {
 
 	ToolUsage extractMediaForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException;
 
+	ToolUsage getLastInstanceOfToolUsage(String pluginName, String toolName);
+
 }

@@ -13,8 +13,8 @@ import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 
-import edu.ncsu.lubick.localHub.WebQueryInterface;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.WebQueryInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
@@ -96,21 +96,9 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		}
 		catch (VideoEncodingException e)
 		{
-			logger.fatal("Error caught when video making requested: ", e);
-			response.getWriter().println("<span>Internal Video Creation Error. </span>");
-			response.getWriter().println("<div>");
-			response.getWriter().print(e.getLocalizedMessage());
-			response.getWriter().println("</div>");
-			baseRequest.setHandled(true);
+			respondWithError(baseRequest, response, e);
 			return;
 		}
-
-		//String bigGifRelativeName = getNameForToolFullGif(pluginName, toolName);
-		//bigGifRelativeName = bigGifRelativeName.substring(bigGifRelativeName.indexOf('\\'));
-		//String miniGifRelativeName = getNameForToolMiniGif(pluginName, toolName);
-		//miniGifRelativeName = miniGifRelativeName.substring(miniGifRelativeName.indexOf('\\'));
-
-		//respondWithGifsAndMetadata(response, toolName, bigGifRelativeName, miniGifRelativeName);
 		
 		String folderName = PostProductionHandler.makeFileNameForToolPluginMedia(pluginName, toolName);
 		File mediaDir = new File(folderName);
@@ -126,36 +114,60 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		baseRequest.setHandled(true);
 	}
 
+	public void respondWithError(Request baseRequest, HttpServletResponse response, VideoEncodingException e) throws IOException
+	{
+		logger.fatal("Error caught when video making requested: ", e);
+		response.getWriter().println("<span>Internal Video Creation Error. </span>");
+		response.getWriter().println("<div>");
+		response.getWriter().print(e.getLocalizedMessage());
+		response.getWriter().println("</div>");
+		baseRequest.setHandled(true);
+		return;
+	}
+
 	private void respondToDoesVideoExist(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
-		/*
-		 * String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME); String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
-		 * 
-		 * String expectedBigGifFileName = getNameForToolFullGif(pluginName, toolName); File expectedBigGifFile = new File(expectedBigGifFileName);
-		 * 
-		 * String expectedMiniGifFileName = getNameForToolMiniGif(pluginName, toolName); File expectedMiniGifFile = new File(expectedMiniGifFileName);
-		 * 
-		 * logger.debug("If gif files existed, they would be called " + expectedBigGifFileName + " and " + expectedMiniGifFileName);
-		 * 
-		 * if (expectedBigGifFile.exists() && expectedMiniGifFile.exists()) { String bigGifRelativeName = expectedBigGifFile.getName(); String
-		 * miniGifRelativeName = expectedMiniGifFile.getName(); logger.debug("It exists!"); respondWithGifsAndMetadata(response, toolName, bigGifRelativeName,
-		 * miniGifRelativeName); } else { logger.debug("It does not");
-		 * 
-		 * Map<Object, Object> dataModel = new HashMap<Object, Object>(); dataModel.put("toolName", toolName); dataModel.put("pluginName", pluginName);
-		 * processTemplate(response, dataModel, "videoDoesNotExist.html.piece"); }
-		 */
-		String keypress = "MENU";
-		String toolName = "Testing1388763334";
-		String folderName = PostProductionHandler.makeFileNameForToolPluginMedia("Testing", "WhomboTool #1");
+		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
+		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
+		
+		String folderName = PostProductionHandler.makeFileNameForToolPluginMedia(pluginName, toolName);
 		File mediaDir = new File(folderName);
-		if (!mediaDir.exists() || !mediaDir.isDirectory())
+
+		logger.debug("If media folder existed, it would be called "+mediaDir);
+
+		if (mediaDir.exists() && mediaDir.isDirectory())
 		{
-			logger.error("problem with media dir "+mediaDir);
-			baseRequest.setHandled(true);
+			
+			if (!mediaDir.exists() || !mediaDir.isDirectory())
+			{
+				logger.error("problem with media dir "+mediaDir);
+				baseRequest.setHandled(true);
+				return;
+			}
+			int numFrames = countNumFrames(mediaDir);
+			ToolUsage lastToolUsage = databaseLink.getLastInstanceOfToolUsage(pluginName, toolName);
+			processTemplateWithNameKeysAndNumFrames(response, lastToolUsage.getToolKeyPresses(), toolName, numFrames);
+		}
+		else if (mediaDir.exists() && !mediaDir.isDirectory())
+		{
+			respondWithError(baseRequest, response, new VideoEncodingException("mediaDir was not directory: "+mediaDir));
 			return;
 		}
-		int numFrames = countNumFrames(mediaDir);
-		processTemplateWithNameKeysAndNumFrames(response, keypress, toolName, numFrames);
+		else
+		{
+			logger.debug("It does not");
+
+			Map<Object, Object> dataModel = new HashMap<Object, Object>();
+			dataModel.put("toolName", toolName);
+			dataModel.put("pluginName", pluginName);
+			processTemplate(response, dataModel, "videoDoesNotExist.html.piece");
+		}
+		
+		
+	//	String keypress = "MENU";
+	//	String toolName = "Testing1388763334";
+	//	String folderName = PostProductionHandler.makeFileNameForToolPluginMedia("Testing", "WhomboTool #1");
+		
 
 		baseRequest.setHandled(true);
 
