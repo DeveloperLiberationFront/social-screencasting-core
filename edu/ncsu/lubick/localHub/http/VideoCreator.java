@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.localHub.http;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -111,7 +112,17 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 
 		//respondWithGifsAndMetadata(response, toolName, bigGifRelativeName, miniGifRelativeName);
 		
-		processTemplateWithNameAndKeys(response, lastToolUsage.getToolKeyPresses(), toolName);
+		String folderName = PostProductionHandler.makeFileNameForToolPluginMedia(pluginName, toolName);
+		File mediaDir = new File(folderName);
+		if (!mediaDir.exists() || !mediaDir.isDirectory())
+		{
+			logger.error("problem with media dir "+mediaDir);
+			baseRequest.setHandled(true);
+			return;
+		}
+		int numFrames = countNumFrames(mediaDir);
+		
+		processTemplateWithNameKeysAndNumFrames(response, lastToolUsage.getToolKeyPresses(), toolName, numFrames);
 		baseRequest.setHandled(true);
 	}
 
@@ -133,21 +144,44 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		 * Map<Object, Object> dataModel = new HashMap<Object, Object>(); dataModel.put("toolName", toolName); dataModel.put("pluginName", pluginName);
 		 * processTemplate(response, dataModel, "videoDoesNotExist.html.piece"); }
 		 */
-		String keypress = "MENU";
-		String toolName = "bug8";
-		processTemplateWithNameAndKeys(response, keypress, toolName);
+		String keypress = "Ctrl+5";
+		String toolName = "Testing1388763334";
+		String folderName = PostProductionHandler.makeFileNameForToolPluginMedia("Testing", "WhomboTool #1");
+		File mediaDir = new File(folderName);
+		if (!mediaDir.exists() || !mediaDir.isDirectory())
+		{
+			logger.error("problem with media dir "+mediaDir);
+			baseRequest.setHandled(true);
+			return;
+		}
+		int numFrames = countNumFrames(mediaDir);
+		processTemplateWithNameKeysAndNumFrames(response, keypress, toolName, numFrames);
 
 		baseRequest.setHandled(true);
 
 	}
 
-	public void processTemplateWithNameAndKeys(HttpServletResponse response, String keypress, String toolName) throws IOException
+	private int countNumFrames(File mediaDir)
+	{
+		int count = 0;
+		String[] fileNames = mediaDir.list();
+		for(String fileName:fileNames)
+		{
+			if (fileName.startsWith("frame"))
+			{
+				count++;
+			}
+		}
+		return count;
+	}
+
+	public void processTemplateWithNameKeysAndNumFrames(HttpServletResponse response, String keypress, String toolName, int numFrames) throws IOException
 	{
 		HashMap<Object, Object> templateData = new HashMap<Object, Object>();
 		
 		templateData.put("toolName", toolName);
-		
 		templateData.put("keypress", keypress);
+		templateData.put("totalFrames", numFrames);
 		processTemplate(response, templateData, "playback.html.piece");
 	}
 

@@ -82,8 +82,10 @@ public class TestVideoPostProduction
 		List<File> outputMedia = testARandomToolInAPostAnimationHandler(handler);
 
 		assertEquals(1, outputMedia.size());
-		verifyBrowserMediaOutputIsCorrectlyMade(outputMedia.get(0));
-		verifyBrowserMediaOutputNamedProperly(outputMedia.get(0), WHOMBO_TOOL_1);
+		//verifyBrowserMediaOutputIsCorrectlyMade(outputMedia.get(0));
+		//verifyBrowserMediaOutputNamedProperly(outputMedia.get(0), WHOMBO_TOOL_1);
+		
+		fail("Stuff");
 	}
 
 	@Test

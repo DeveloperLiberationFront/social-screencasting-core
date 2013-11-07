@@ -3,24 +3,33 @@
   <div id="overlay">
     <span>Click for Full Screen</span>
   </div>
-  <div id="panel" data-total-frames="100" data-type="keystroke" data-tool-name="${toolName}">
+  <div id="panel" data-total-frames=${"totalFrames"} data-type="keystroke" data-tool-name="${toolName}">
 
     <div id="moduleControlPanel" class="ui-widget-content">
       <button class="playPause">
         <img class="playbackCommand playImage pause" src="/images/playback/play.svg" />
         <img class="playbackCommand pauseImage pause" src="/images/playback/pause.svg" />
       </button>
+      <div class="settings" >
+		<img src="/images/playback/gear.svg" />
+	  </div>
       <div id="dockedSliderHolder">
         <div id="dockedSlider" class="slider"></div>
       </div>
     </div>
 
-	<#if keypress != "MENU">
-		<img class="keyAnimation full" src="${toolName}/animation.png"/>
-		<img class="keyAnimation blank" src="${toolName}/unanimated.png"/>
-	</#if>
+    <#if keypress != "MENU">
+      <img class="keyAnimation full" src="${toolName}/image.png"/>
+      <img class="keyAnimation blank" src="${toolName}/image_un.png"/>
 
-    <img class="frame" src="${toolName}/temp0000.png" />
+      <img class="keyAnimation" src="${toolName}/text.png"/>
+      <img class="keyAnimation" src="${toolName}/text_un.png"/>
+
+      <img class="keyAnimation" src="${toolName}/image_text.png"/>
+      <img class="keyAnimation" src="${toolName}/image_text_un.png"/>
+    </#if>
+
+    <img class="frame" src="${toolName}/frame0000.png" />
   </div>
 </div>
 
@@ -29,9 +38,14 @@
     <img class="playbackCommand playImage pause" src="/images/playback/play.svg" />
     <img class="playbackCommand pauseImage pause" src="/images/playback/pause.svg" />
   </button>
+  <div class="settings" >
+    <img src="/images/playback/gear.svg" />
+  </div>
   <div id="staticSliderHolder">
     <div id="staticSlider" class="slider"></div>
   </div>
 </div>
+
+<div id="settingsMenu" >Hello world</div>
 
 <div>This is the space for other metadata</div>

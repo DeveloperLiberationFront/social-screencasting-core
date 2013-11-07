@@ -89,8 +89,8 @@ function sliderMoved(event, ui) {
 
 function getImageForFrameNumber(frameNumber) {
     var retVal = '<img class="frame" src="';
-	retVal += $("#panel").data("toolName");
-	retVal += '/temp';
+    retVal += $("#panel").data("toolName");
+    retVal += '/frame';
     if (frameNumber < 1000) {
         retVal += "0";
     }
@@ -136,7 +136,7 @@ function setUpSliders() {
 
 function setUpDraggableThings() {
     $("#moduleControlPanel").draggable();
-	//$(".animationHolder").draggable();  Not as simple as I hoped.  Abandoning for now
+    //$(".animationHolder").draggable();  Not as simple as I hoped.  Abandoning for now
 }
 
 function goFullScreen() {
@@ -146,16 +146,23 @@ function goFullScreen() {
 
 }
 
+function activateSettings(event) {
+    event.preventDefault();
+	
+	$("#settingsMenu").bPopup();
+}
+
 function renderPlayback() {
-	isPlaying = false;
-	currentFrame = 0;
-	isFullScreen = false;
-	animationEnabled = false;
+    isPlaying = false;
+    currentFrame = 0;
+    isFullScreen = false;
+    animationEnabled = false;
 	
     $(".frame").first().show();	//so the user sees something
     $("#overlay").on("click", goFullScreen);
 
     $(".playPause").on("click", playOrPause);
+    $(".settings").on("click", activateSettings);
 
     totalFrames = +$("#panel").data("totalFrames");
     if ($("#panel").data("type") == "keystroke") {
