@@ -108,3 +108,11 @@
 	height:200px;
 	background-color:white;
 }
+
+.startLabel {
+	position: relative;
+	width: 40px; 
+	height: 40px;
+	top: -20px;
+	background-color: green;
+}

@@ -71,7 +71,7 @@ function startFramePlayback() {
     if (!isPlaying) {
         $(".playbackCommand").removeClass("pause").addClass("play");
         isPlaying = true;
-        var totalFrames = +$("#panel").data("totalFrames");
+
         frameAnimationTimer = window.setInterval(function () {
             $(".frame").eq(currentFrame).hide();
             currentFrame = (currentFrame + 1) % totalFrames;
@@ -100,7 +100,7 @@ function playOrPause() {
 }
 
 function sliderMoved(event, ui) {
-	event.preventDefault();
+    event.preventDefault();
     stopFramePlayback();
     $(".frame").eq(currentFrame).hide();
     currentFrame = ui.value % totalFrames;
@@ -130,7 +130,6 @@ function getImageForFrameNumber(frameNumber) {
 function preloadImages() {
     var p, i;
     p = $("#panel");
-    totalFrames = +$("#panel").data("totalFrames");
     for (i = 1; i < totalFrames; i++) {
         getImageForFrameNumber(i).appendTo(p);
     }
@@ -148,7 +147,7 @@ function setUpSliders() {
     $(".slider").slider({
         value: 0,
         min: 0,
-        max: totalFrames-1,	//minus 1 because we start at 0
+        max: totalFrames - 1,	//minus 1 because we start at 0
         step: 1,
         animate: "fast",
         easing: "linear",
@@ -184,7 +183,7 @@ function rotateAnimationSettings() {
     currentAnimationChoice = (currentAnimationChoice + 1) % totalAnimationChoices;
 
     setAnimationOverlaysTo(currentAnimationChoice);
-	handleAnimationForCurrentFrame();
+    handleAnimationForCurrentFrame();
 }
 
 
@@ -195,7 +194,7 @@ function renderPlayback() {
     animationEnabled = false;
     currentAnimationChoice = 0;
     totalAnimationChoices = $("#controlPanel").find(".animationSelection").length;
-    console.log(totalAnimationChoices + " total animation choices");
+    //console.log(totalAnimationChoices + " total animation choices");
     setAnimationOverlaysTo(currentAnimationChoice);
 
     $(".frame").first().show();	//so the user sees something
@@ -208,6 +207,8 @@ function renderPlayback() {
     if ($("#panel").data("type") == "keystroke") {
         animationEnabled = true;
     }
+
+    $(".startLabel").css('left', rampUp*100 / totalFrames + '%');
     handleAnimationForCurrentFrame();
     setUpSliders();
     setUpDraggableThings();

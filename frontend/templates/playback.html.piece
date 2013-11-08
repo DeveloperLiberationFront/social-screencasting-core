@@ -19,7 +19,9 @@
 	<img class="animationSelection" src="/images/none.png" />
 	  </div>
       <div id="dockedSliderHolder">
-        <div id="dockedSlider" class="slider"></div>
+        <div id="dockedSlider" class="slider">
+			<label class="startLabel" title="The tool gets used here">&nbsp;</label>
+		</div>
       </div>
     </div>
 
@@ -52,7 +54,9 @@
 	<img class="animationSelection" src="/images/none.png" />
   </div>
   <div id="staticSliderHolder">
-    <div id="staticSlider" class="slider"></div>
+    <div id="staticSlider" class="slider">
+		<label class="startLabel" title="The tool gets used here">&nbsp;</label>
+	</div>
   </div>
 </div>
 
