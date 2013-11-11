@@ -36,7 +36,7 @@ function updateSlider(index) {
     $(".slider").slider("value", index);
 }
 
-function handleAnimationForCurrentFrame() {
+function handleAnimationOptionsForCurrentFrame() {
     $(".keyAnimation").hide();
     if (totalAnimationChoices == 1 ||
         (totalAnimationChoices - 1) == currentAnimationChoice) {
@@ -76,7 +76,7 @@ function startFramePlayback() {
             $(".frame").eq(currentFrame).hide();
             currentFrame = (currentFrame + 1) % totalFrames;
             updateSlider(currentFrame);
-            handleAnimationForCurrentFrame();
+            handleAnimationOptionsForCurrentFrame();
             $(".frame").eq(currentFrame).show();
         }, 200);
     }
@@ -104,7 +104,7 @@ function sliderMoved(event, ui) {
     stopFramePlayback();
     $(".frame").eq(currentFrame).hide();
     currentFrame = ui.value % totalFrames;
-    handleAnimationForCurrentFrame();
+    handleAnimationOptionsForCurrentFrame();
     $(".frame").eq(currentFrame).show();
     updateSlider(currentFrame);
 }
@@ -172,6 +172,11 @@ function setAnimationOverlaysTo(animationSelection) {
     previewAnimationChoices = $("#controlPanel").find(".animationSelection");
     fullScreenAnimationChoices = $("#moduleControlPanel").find(".animationSelection");
 
+    if (totalAnimationChoices > 1)		//leave out "no animation" interference
+    {
+        localStorage.setItem("defaultAnimationSetting", animationSelection);
+    }
+
     fullScreenAnimationChoices.eq(animationSelection).show();
     previewAnimationChoices.eq(animationSelection).show();
 
@@ -183,7 +188,7 @@ function rotateAnimationSettings() {
     currentAnimationChoice = (currentAnimationChoice + 1) % totalAnimationChoices;
 
     setAnimationOverlaysTo(currentAnimationChoice);
-    handleAnimationForCurrentFrame();
+    handleAnimationOptionsForCurrentFrame();
 }
 
 
@@ -194,7 +199,13 @@ function renderPlayback() {
     animationEnabled = false;
     currentAnimationChoice = 0;
     totalAnimationChoices = $("#controlPanel").find(".animationSelection").length;
-    //console.log(totalAnimationChoices + " total animation choices");
+
+    var defaultAnimationChoice = +localStorage.getItem("defaultAnimationSetting");
+    if (defaultAnimationChoice !== null &&
+        defaultAnimationChoice <= (totalAnimationChoices - 1)) {
+        currentAnimationChoice = defaultAnimationChoice;
+    }
+
     setAnimationOverlaysTo(currentAnimationChoice);
 
     $(".frame").first().show();	//so the user sees something
@@ -208,8 +219,8 @@ function renderPlayback() {
         animationEnabled = true;
     }
 
-    $(".startLabel").css('left', rampUp*100 / totalFrames + '%');
-    handleAnimationForCurrentFrame();
+    $(".startLabel").css('left', rampUp * 100 / totalFrames + '%');
+    handleAnimationOptionsForCurrentFrame();
     setUpSliders();
     setUpDraggableThings();
     preloadImages();
