@@ -93,11 +93,11 @@ function showUniqueTools(event)
 		classToFind = "."+$(this).data("toolName");
 		if (otherTable.find(classToFind).length>0)
 		{
-			$(this).show();
+			$(this).hide();
 		}
 		else
 		{
-			$(this).hide();
+			$(this).show();
 		}
 	});
 }
