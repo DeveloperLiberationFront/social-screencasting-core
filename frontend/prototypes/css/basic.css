@@ -45,9 +45,9 @@ td, tr, th{
 	padding:4px;
 }
 
-.clickMe:hover{
+.rowHover{
 	border: 5px solid #e48600;
-	background-color: #fff4e4;
+	background-color: #ffedd3;
 }
 
 .moreInfoTitle{

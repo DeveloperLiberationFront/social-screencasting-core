@@ -1,5 +1,7 @@
 /*global renderPlayback,stopFramePlayback*/       //depends on playback.js
 
+var peoplesNames;
+var peoplesNamesIndex;
 
 function addResponseHTMLToWindow(data) {
     $(".modal").hide();
@@ -31,9 +33,52 @@ function doesVideoExistHuh() {
     //or some html prompting the user to make the media
 }
 
+function handleMouseEnter()
+{
+	var highlightedToolName = $(this).data("toolName");
+	$(".clickMe").each(function(){
+		if ($(this).data("toolName") == highlightedToolName)
+		{
+			$(this).addClass("rowHover");
+		}
+	});
+	
+}
+
+function handleMouseLeave()
+{
+	var highlightedToolName = $(this).data("toolName");
+	$(".clickMe").each(function(){
+		if ($(this).data("toolName") == highlightedToolName)
+		{
+			$(this).removeClass("rowHover");
+		}
+	});
+}
+
+function rotatePeoplesNamesAndTools(){
+	peoplesNamesIndex++;
+	peoplesNamesIndex = peoplesNamesIndex % peoplesNames.length;
+	$("#otherPeoplesTools").text(peoplesNames[peoplesNamesIndex] +"'s Tools");
+	
+	$(".otherPersonsTable")
+	
+}
+
 $(document).ready(function () {
     //handles the click on the view buttons to see if a video file exists
     $(".clickMe").on('click', doesVideoExistHuh);
+	
+	$(".clickMe").on('mouseenter', handleMouseEnter);
+	
+	$(".clickMe").on('mouseleave', handleMouseLeave);
 
     $(".moreInfo").on('click', '.requestGeneration', requestGenerationOfMedia);
+	
+	$(".changeName").on('click',rotatePeoplesNamesAndTools);
+	
+	peoplesNamesIndex = -1;
+	peoplesNames = $("#otherPeoplesTools").data("names");
+	rotatePeoplesNamesAndTools();
+	
 });
