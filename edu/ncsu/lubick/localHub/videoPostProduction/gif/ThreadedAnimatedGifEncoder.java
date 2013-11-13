@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
@@ -21,31 +22,31 @@ public class ThreadedAnimatedGifEncoder extends AnimatedGifEncoder
 
 	public ThreadedAnimatedGifEncoder()
 	{
-		throw new RuntimeException("Not implemented yet");
-		// this.workingThreadPool = Executors.newFixedThreadPool(1);
-		//
-		// Thread backThread = new Thread(new Runnable() {
-		//
-		// @Override
-		// public void run()
-		// {
-		// while(innerLoopContinue)
-		// {
-		// try
-		// {
-		// BufferedImage nextImage = preconvertedImages.take();
-		// ThreadedAnimatedGifEncoder.super.handleImageFrame(nextImage);
-		// }
-		// catch (InterruptedException e)
-		// {
-		// logger.fatal("Was interrupted making a GIF");
-		// }
-		//
-		// }
-		// }
-		// });
-		// backThread.setDaemon(true);
-		// backThread.start();
+		//throw new RuntimeException("Not implemented yet");
+		this.workingThreadPool = Executors.newFixedThreadPool(1);
+
+		Thread backThread = new Thread(new Runnable() {
+
+			@Override
+			public void run()
+			{
+				while(true)
+				{
+					try
+					{
+						BufferedImage nextImage = preconvertedImages.take();
+						ThreadedAnimatedGifEncoder.super.handleImageFrame(nextImage);
+					}
+					catch (InterruptedException e)
+					{
+						logger.fatal("Was interrupted making a GIF");
+					}
+
+				}
+			}
+		});
+		backThread.setDaemon(true);
+		backThread.start();
 	}
 
 	@Override
