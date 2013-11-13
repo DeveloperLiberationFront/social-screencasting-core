@@ -71,7 +71,19 @@ td, tr, th{
 }
 .clickMe{
 	font-size:16px;
-	padding: 5px;10px;
+	padding: 5px;
+}
+
+.showAll, .showUnique{
+	display:block;
+	color: #ffa729;
+    background-color: white;
+	font-size: 17px;
+	margin:3px auto;
+}
+
+.showAll{
+	display:none;
 }
 
 .pluginListing input:hover, .requestGeneration:hover {

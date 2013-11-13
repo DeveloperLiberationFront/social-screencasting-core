@@ -71,6 +71,49 @@ function rotatePeoplesNamesAndTools(){
 	
 }
 
+function showUniqueTools(event)
+{
+	var parentTable, otherTable;
+	
+	event.preventDefault();
+	parentTable = $(this).closest("table");
+	
+	if (parentTable.hasClass("myTools"))
+	{
+		otherTable = $("table.otherPersonsTable");
+	}
+	else
+	{
+		otherTable = $("table.myTools");
+	}
+	$(this).hide();
+	parentTable.find(".showAll").show();
+	
+	parentTable.find(".clickMe").each(function(){
+		classToFind = "."+$(this).data("toolName");
+		if (otherTable.find(classToFind).length>0)
+		{
+			$(this).show();
+		}
+		else
+		{
+			$(this).hide();
+		}
+	});
+}
+
+function showAllTools(event)
+{
+	var parentTable;
+	
+	event.preventDefault();
+	parentTable = $(this).closest("table");
+	$(this).hide();
+	parentTable.find(".showUnique").show();
+	//now just show everything
+	parentTable.find(".clickMe").show();
+}
+
 $(document).ready(function () {
     //handles the click on the view buttons to see if a video file exists
     $(".clickMe").on('click', doesVideoExistHuh);
@@ -86,5 +129,8 @@ $(document).ready(function () {
 	peoplesNamesIndex = -1;
 	peoplesNames = $("#otherPeoplesTools").data("names");
 	rotatePeoplesNamesAndTools();
+	
+	$(".showUnique").on("click", showUniqueTools);
+	$(".showAll").on("click", showAllTools);
 	
 });
