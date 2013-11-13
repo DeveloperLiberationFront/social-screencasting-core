@@ -61,7 +61,13 @@ function rotatePeoplesNamesAndTools(){
 	peoplesNamesIndex = peoplesNamesIndex % peoplesNames.length;
 	$("#otherPeoplesTools").text(peoplesNames[peoplesNamesIndex] +"'s Tools");
 	
-	$(".otherPersonsTable")
+	$(".otherPersonsTable").find(".clickMe").show();
+	$(".otherPersonsTable").find(".clickMe").each(function(){
+		if (Math.random() > .9)
+		{
+			$(this).hide();
+		}
+	});
 	
 }
 
