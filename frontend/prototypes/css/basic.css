@@ -1,0 +1,80 @@
+.debug {
+	color:red;
+}
+
+body {
+	background-color:#F0F0F0;
+}
+
+h1 {
+   color:#ffa729;
+   font-size:2.2em;
+}
+
+.hidden{
+	display:none;
+}
+
+.moreInfo{
+	border: 1px solid black;
+	padding: 10px 20px;
+	float:right;
+	margin-right: 5%;
+	background-color:#ffdfb1;
+	width:40%;
+}
+
+.resultsTable{
+	display:block;
+	float:left;
+	margin-left:3%;
+	background-color:white;
+	border:3px solid orange;
+	border-spacing:0;
+	text-align:center;
+	font-size:16px;
+	width:20%;
+}
+
+.resultsTable th{
+	font-size:18px;
+}
+
+
+td, tr, th{
+	padding:4px;
+}
+
+.clickMe:hover{
+	border: 5px solid #e48600;
+	background-color: #fff4e4;
+}
+
+.moreInfoTitle{
+	text-align:center;
+}
+
+.pluginListing {
+	text-align:center;
+}
+
+.pluginListing input, .requestGeneration {
+    padding: 10px 20px;
+    color: #ffa729;
+    background-color: white;
+    font-size: 2.0em;
+	margin:1px;
+}
+
+.requestGeneration{
+	font-size: 1.2em;
+}
+.clickMe{
+	font-size:16px;
+	padding: 5px;10px;
+}
+
+.pluginListing input:hover, .requestGeneration:hover {
+    border: 3px solid #ffa729;
+	margin:0;
+}
