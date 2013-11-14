@@ -7,21 +7,13 @@ public class AnimatedKeyboardMaker extends AbstractKeypressAnimationMaker {
 
 	public AnimatedKeyboardMaker() throws IOException
 	{
-		conditionallyLoadImages();
+		super();
 	}
 
 	@Override
 	public BufferedImage makeNewAnimationForKeyPresses(int[] keycodes, String toolKeyPresses)
 	{
-		BufferedImage img = makeUnactivatedAnimation();
-
-		for (int keyCode : keycodes)
-		{
-			KeyPressAnimation animation = KeyPressAnimationFactory.makeKeyPressAnimation(keyCode);
-			animation.drawAnimatedSegment(img.getGraphics(), activatedKeyboard);
-		}
-
-		return img;
+		return makeAnimatedKeyboardForKeycodes(keycodes);
 
 	}
 

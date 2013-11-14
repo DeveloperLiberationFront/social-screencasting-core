@@ -59,7 +59,7 @@ public abstract class AbstractKeypressAnimationMaker implements KeypressAnimatio
 		return image;
 	}
 
-	protected BufferedImage makeAnimatedKeyboardForKeycodes(int[] keycodes)
+	public BufferedImage makeAnimatedKeyboardForKeycodes(int[] keycodes)		//public for use in unit tests
 	{
 		BufferedImage img = makeUnactivatedAnimation();
 	

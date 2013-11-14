@@ -9,7 +9,6 @@ import java.awt.image.BufferedImage;
 import org.junit.Test;
 
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedKeyboardMaker;
-import edu.ncsu.lubick.localHub.videoPostProduction.animation.KeypressAnimationMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.ShortcutsToKeyCodesConverter;
 
 public class TestKeypressAnimationGeneration {
@@ -107,12 +106,12 @@ public class TestKeypressAnimationGeneration {
 	@Test
 	public void testKeyboardCreation() throws Exception
 	{
-		KeypressAnimationMaker akm = new AnimatedKeyboardMaker();
+		AnimatedKeyboardMaker akm = new AnimatedKeyboardMaker();
 		ShortcutsToKeyCodesConverter converter = new ShortcutsToKeyCodesConverter();
 
 		int[] keycodes = converter.convert("Alt+Shift+X, T");
 
-		BufferedImage img = akm.makeAnimationForKeyCodes(keycodes);
+		BufferedImage img = akm.makeAnimatedKeyboardForKeycodes(keycodes);
 		assertNotNull(img);
 
 		debugWriteImageToFile(img, "test.png");
