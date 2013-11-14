@@ -1,4 +1,4 @@
-package edu.ncsu.lubick.localHub.videoPostProduction;
+package edu.ncsu.lubick.localHub.videoPostProduction.outputs;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -13,28 +13,25 @@ import javax.imageio.ImageIO;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.videoPostProduction.AbstractImagesToMediaOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedKeyboardMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextAndKeyboardMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.KeypressAnimationMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.ShortcutsToKeyCodesConverter;
 
-public class ImagesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput implements PreAnimationImagesToMediaOutput
+public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput implements PreAnimationImagesToMediaOutput
 {
 
-	private static Logger logger = Logger.getLogger(ImagesToBrowserAnimatedPackage.class.getName());
+	private static Logger logger = Logger.getLogger(PreAnimationImagesToBrowserAnimatedPackage.class.getName());
 	private ShortcutsToKeyCodesConverter keyCodeReader = new ShortcutsToKeyCodesConverter();
 	private List<KeypressAnimationMaker> animationSources = new ArrayList<>();
 
-	public ImagesToBrowserAnimatedPackage()
+	public PreAnimationImagesToBrowserAnimatedPackage()
 	{
 		super(new File(PostProductionHandler.getIntermediateFolderLocation()));
-	}
-
-	@Override
-	public File combineImageFilesToMakeMedia(String fileNameMinusExtension) throws IOException
-	{
-		return combineImageFilesToMakeMedia(fileNameMinusExtension, null);
 	}
 
 	@Override
@@ -50,28 +47,21 @@ public class ImagesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 	}
 
 	@Override
-	public File combineImageFilesToMakeMedia(String fileNameMinusExtension, ToolUsage currentToolStream) throws IOException
+	public File combineImageFilesToMakeMedia(String folderName, ToolUsage currentToolStream) throws MediaEncodingException
 	{
-		File newDir = new File(fileNameMinusExtension);
-		if (newDir.exists() && newDir.isDirectory())
+		File newDir = super.makeDirectoryIfClear(folderName);
+		try
 		{
-			logger.error("Not creating new media because folder already exists");
+			this.copyImagesToFolder(newDir);
+
+			this.lazyLoadAnimationSources();
+			this.createAnimationImagesForToolStream(newDir, currentToolStream);
 			return newDir;
 		}
-		else if (newDir.exists() && !newDir.isDirectory())
+		catch (IOException e)
 		{
-			logger.fatal("Not creating new media because a non-directory exists where this should be");
-			return null;
+			throw new MediaEncodingException(e);
 		}
-		else if (!newDir.exists() && !newDir.mkdir()) // makes the dir
-		{
-			logger.error("Could not create media folder");
-			return null;
-		}
-		lazyLoadAnimationSources();
-		copyImagesToFolder(newDir);
-		createAnimationImagesForToolStream(newDir, currentToolStream);
-		return newDir;
 	}
 
 	private void lazyLoadAnimationSources() throws IOException
@@ -82,7 +72,7 @@ public class ImagesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 			animationSources.add(new AnimatedTextAndKeyboardMaker());
 			animationSources.add(new AnimatedTextMaker());
 		}
-		
+
 	}
 
 	private void createAnimationImagesForToolStream(File newDir, ToolUsage toolUsage) throws IOException
@@ -98,7 +88,7 @@ public class ImagesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 			int[] keyCodes = keyCodeReader.convert(toolUsage.getToolKeyPresses());
 			animationSource.setCurrentKeyPresses(toolUsage.getToolKeyPresses());
 			BufferedImage activatedAnimation = animationSource.makeAnimationForKeyCodes(keyCodes);
-			
+
 			String animationPrefix = animationSource.getAnimationName();
 			File unactivatedAnimationFile = new File(newDir,animationPrefix+"_un.png");
 			File activatedAnimationFile = new File(newDir, animationPrefix+".png");

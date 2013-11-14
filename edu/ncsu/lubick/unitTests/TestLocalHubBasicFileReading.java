@@ -26,8 +26,8 @@ import edu.ncsu.lubick.localHub.database.SQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
-import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput;
-import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
+import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
+import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToVideoOutput;
 
 public class TestLocalHubBasicFileReading {
 
@@ -290,7 +290,7 @@ public class TestLocalHubBasicFileReading {
 		assertTrue(outputFile.exists());
 		assertTrue(outputFile.isFile());
 		assertFalse(outputFile.isHidden());
-		assertTrue(outputFile.getName().endsWith(ImagesToVideoOutput.VIDEO_EXTENSION));
+		assertTrue(outputFile.getName().endsWith(ImagesWithAnimationToVideoOutput.VIDEO_EXTENSION));
 		assertTrue(outputFile.length() > 100000); // I expect the file size to
 													// be at least 100k and no
 													// more than 3Mb
@@ -298,7 +298,7 @@ public class TestLocalHubBasicFileReading {
 
 	}
 
-	public File getJustVideoFromLocalHub(String uniqueToolString) throws VideoEncodingException
+	public File getJustVideoFromLocalHub(String uniqueToolString) throws MediaEncodingException
 	{
 		List<File> mediaOutputs = localHub.extractVideoForLastUsageOfTool(getCurrentPluginName(), uniqueToolString);
 		if (mediaOutputs == null)
@@ -307,7 +307,7 @@ public class TestLocalHubBasicFileReading {
 		}
 		for (File f : mediaOutputs)
 		{
-			if (f.getName().endsWith(ImagesToVideoOutput.VIDEO_EXTENSION))
+			if (f.getName().endsWith(ImagesWithAnimationToVideoOutput.VIDEO_EXTENSION))
 				return f;
 		}
 		return null;

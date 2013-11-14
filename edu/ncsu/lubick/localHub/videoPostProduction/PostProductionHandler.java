@@ -18,6 +18,8 @@ import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeyboardAnimation;
+import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToMediaOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToMediaOutput;
 
 /* Some parts of this (the decoding aspect) have the following license:
  * 
@@ -65,7 +67,7 @@ public class PostProductionHandler
 	private PostProductionAnimationStrategy postProductionAnimator;
 
 	private Queue<OverloadFile> queueOfOverloadFiles = new LinkedList<>();
-	private List<ImagesToMediaOutput> postAnimationMediaOutputs = new ArrayList<>();
+	private List<ImagesWithAnimationToMediaOutput> postAnimationMediaOutputs = new ArrayList<>();
 	private List<PreAnimationImagesToMediaOutput> preAnimationMediaOutputs = new ArrayList<>();
 
 	private FrameDecompressor decompressor = new FrameDecompressor();
@@ -138,12 +140,12 @@ public class PostProductionHandler
 		decompressor.setFrameZeroTime(capFileStartTime);
 	}
 
-	public List<File> extractMediaForToolUsage(ToolUsage specificToolUse) throws VideoEncodingException
+	public List<File> extractMediaForToolUsage(ToolUsage specificToolUse) throws MediaEncodingException
 	{
 		if (this.currentCapFile == null || this.capFileStartTime == null)
 		{
 			logger.error("PostProductionVideo object needed to have a file to load and a start time");
-			throw new VideoEncodingException("PostProductionVideo object needed to have a file to load and a start time");
+			throw new MediaEncodingException("PostProductionVideo object needed to have a file to load and a start time");
 		}
 		if (this.postAnimationMediaOutputs.size() == 0 && this.preAnimationMediaOutputs.size() == 0)
 		{
@@ -166,20 +168,25 @@ public class PostProductionHandler
 			logger.info("Fast forwarding to the appropriate time");
 			fastFowardStreamToTime(inputStream, timeToLookFor); // throws VideoEncodingException if there was a problem prior to the important bits
 
-			String newFilesPrefix = makeFileNameForToolPluginMedia(specificToolUse.getPluginName(), specificToolUse.getToolName());
+			String newFileNameStem = makeFileNameStemForToolPluginMedia(specificToolUse.getPluginName(), specificToolUse.getToolName());
 			logger.info("Beginning the extraction of the frames");
-			createdMediaFilesToReturn = extractDemoVideoToFile(inputStream, newFilesPrefix);
+			createdMediaFilesToReturn = extractDemoVideoToFile(inputStream, newFileNameStem);
 
 		}
 		catch (IOException e)
 		{
 			logger.error("There was a problem extracting the video", e);
+			throw new MediaEncodingException("There was a problem extracting the video", e);
 		}
 		catch (ReachedEndOfCapFileException e)
 		{
 			logger.error("Unexpectedly hit the end of the cap file when seeking to start of tool usage");
-			throw new VideoEncodingException(
+			throw new MediaEncodingException(
 					"Unexpectedly hit the end of the cap file when seeking to start of tool usage", e);
+		}
+		catch (PostProductionAnimationException e)
+		{
+			throw new MediaEncodingException("problem with the animation production", e);
 		}
 
 		return createdMediaFilesToReturn;
@@ -195,7 +202,7 @@ public class PostProductionHandler
 		return timeToLookFor;
 	}
 
-	private void fastFowardStreamToTime(InputStream inputStream, Date timeToLookFor) throws IOException, VideoEncodingException, ReachedEndOfCapFileException
+	private void fastFowardStreamToTime(InputStream inputStream, Date timeToLookFor) throws IOException, MediaEncodingException, ReachedEndOfCapFileException
 	{
 		if (timeToLookFor.equals(capFileStartTime)) // no fast forwarding required
 		{
@@ -212,27 +219,23 @@ public class PostProductionHandler
 		}
 	}
 
-	private List<File> extractDemoVideoToFile(InputStream inputStream, String fileName) throws IOException
+	private List<File> extractDemoVideoToFile(InputStream inputStream, String fileNameStem) throws IOException, MediaEncodingException, PostProductionAnimationException
 	{
 		imageWriter.reset();
 		List<File> createdFiles = new ArrayList<>();
 
-		logger.debug("starting extraction");
 		extractImagesForTimePeriodToScratchFolder(inputStream);
 
 		logger.debug("waiting until all the images are done extracting");
 		imageWriter.waitUntilDoneWriting();
 
-		for (PreAnimationImagesToMediaOutput mediaOutput : preAnimationMediaOutputs)
-		{
-			createdFiles.add(mediaOutput.combineImageFilesToMakeMedia(fileName, this.currentToolStream));
-			logger.info(mediaOutput.getMediaTypeInfo() + " Rendered");
-		}
+		createdFiles.addAll(handlePreAnimationMediaOutput(fileNameStem));
 
 		if (postAnimationMediaOutputs.size() > 0)
 		{
-			logger.info("Adding animation to video");
-			handleAnimationPostProduction(fileName, createdFiles);
+			addAnimationToImagesInScratchFolder();
+			
+			createdFiles.addAll(handleAnimationPostProduction(fileNameStem));
 		}
 		else
 		{
@@ -242,21 +245,47 @@ public class PostProductionHandler
 		return createdFiles;
 	}
 
-	public void handleAnimationPostProduction(String fileName, List<File> createdFiles) throws IOException
+	private List<File> handlePreAnimationMediaOutput(String fileNameStem) throws MediaEncodingException
 	{
-		postProductionAnimator.addAnimationToImagesInScratchFolderForToolStream(this.currentToolStream);
+		List<File> createdFiles = new ArrayList<>();
+		for (PreAnimationImagesToMediaOutput mediaOutput : preAnimationMediaOutputs)
+		{
+			createdFiles.add(mediaOutput.combineImageFilesToMakeMedia(fileNameStem, this.currentToolStream));
+			logger.info(mediaOutput.getMediaTypeInfo() + " Rendered");
+		}
+		return createdFiles;
+	}
+
+	private void addAnimationToImagesInScratchFolder() throws PostProductionAnimationException
+	{
+		logger.info("Adding animation to video");
+		try
+		{
+			postProductionAnimator.addAnimationToImagesInScratchFolderForToolStream(this.currentToolStream);
+		}
+		catch (IOException e)
+		{
+			throw new PostProductionAnimationException(e);
+		}
+	}
+
+	public List<File> handleAnimationPostProduction(String fileName) throws MediaEncodingException
+	{
+		List<File> createdFiles = new ArrayList<>();
 
 		logger.info("Rendering Media");
 
-		for (ImagesToMediaOutput mediaOutput : postAnimationMediaOutputs)
+		for (ImagesWithAnimationToMediaOutput mediaOutput : postAnimationMediaOutputs)
 		{
-			createdFiles.add(mediaOutput.combineImageFilesToMakeMedia(fileName));
+			createdFiles.add(mediaOutput.combineImageFilesToMakeMedia(fileName));		//throws MediaEncodingException if any problem
 			logger.info(mediaOutput.getMediaTypeInfo() + " Rendered");
 		}
+		return createdFiles;
 	}
 
 	private void extractImagesForTimePeriodToScratchFolder(InputStream inputStream) throws IOException
 	{
+		logger.debug("starting extraction");
 		for (int i = 0; i < FRAME_RATE * (RUN_UP_TIME + toolDemoInSeconds); i++)
 		{
 			BufferedImage tempImage = null;
@@ -267,7 +296,7 @@ public class PostProductionHandler
 				tempImage = decompressor.createBufferedImageFromDecompressedFramePacket(framePacket);
 
 			}
-			catch (VideoEncodingException e)
+			catch (MediaEncodingException e)
 			{
 				logger.error("There was a problem making the video frames.  Attempting to make a video from what I've got", e);
 				break;
@@ -299,7 +328,7 @@ public class PostProductionHandler
 				DecompressionFramePacket framePacket = decompressor.readInNextFrame(inputStream);
 				tempImage = decompressor.createBufferedImageFromDecompressedFramePacket(framePacket);
 			}
-			catch (VideoEncodingException e)
+			catch (MediaEncodingException e)
 			{
 				logger.error("There was a problem making the video frames. Stopping extraction...", e);
 				break;
@@ -313,7 +342,7 @@ public class PostProductionHandler
 		}
 	}
 
-	public static String makeFileNameForToolPluginMedia(String pluginName, String toolName)
+	public static String makeFileNameStemForToolPluginMedia(String pluginName, String toolName)
 	{
 		if (toolName == null)
 		{
@@ -374,12 +403,12 @@ public class PostProductionHandler
 		return SCRATCH_DIR;
 	}
 
-	public void addNewPostAnimationMediaOutput(ImagesToMediaOutput newMediaOutput)
+	public void addNewPostAnimationMediaOutput(ImagesWithAnimationToMediaOutput newMediaOutput)
 	{
 		this.postAnimationMediaOutputs.add(newMediaOutput);
 	}
 
-	public Set<ImagesToMediaOutput> getPostAnimationMediaOutputs()
+	public Set<ImagesWithAnimationToMediaOutput> getPostAnimationMediaOutputs()
 	{
 		return new HashSet<>(this.postAnimationMediaOutputs);
 	}

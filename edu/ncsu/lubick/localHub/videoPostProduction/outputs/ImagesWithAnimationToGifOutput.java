@@ -1,4 +1,4 @@
-package edu.ncsu.lubick.localHub.videoPostProduction.gif;
+package edu.ncsu.lubick.localHub.videoPostProduction.outputs;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -12,36 +12,45 @@ import javax.imageio.ImageIO;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.videoPostProduction.AbstractImagesToMediaOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
+import edu.ncsu.lubick.localHub.videoPostProduction.gif.AnimatedGifEncoder;
 
-public class ImagesToGifOutput extends AbstractImagesToMediaOutput {
+public class ImagesWithAnimationToGifOutput extends AbstractImagesToMediaOutput implements ImagesWithAnimationToMediaOutput {
 
 	public static final String GIF_EXTENSION = "gif";
-	private static Logger logger = Logger.getLogger(ImagesToGifOutput.class.getName());
+	private static Logger logger = Logger.getLogger(ImagesWithAnimationToGifOutput.class.getName());
 
-	public ImagesToGifOutput()
+	public ImagesWithAnimationToGifOutput()
 	{
 		super(new File(PostProductionHandler.getIntermediateFolderLocation()));
 	}
 
 	@Override
-	public File combineImageFilesToMakeMedia(String fileNameMinusExtension) throws IOException
+	public File combineImageFilesToMakeMedia(String fileNameMinusExtension) throws MediaEncodingException
 	{
-		logger.info("Rendering " + getMediaTypeInfo());
-		File newGifFile = makeGifFile(fileNameMinusExtension);
-
-		AnimatedGifEncoder encoder = makeGifEncoder(newGifFile);
-
-		File[] imageFilesToAnimate = getImageFilesToAnimate();
-
-		for (File f : imageFilesToAnimate)
+		try
 		{
-			BufferedImage readInImage = readInImage(f);
-			encoder.addFrame(readInImage);
-		}
-		finishUpAnimation(encoder);
+			logger.info("Rendering " + getMediaTypeInfo());
+			File newGifFile = makeGifFile(fileNameMinusExtension);
 
-		return newGifFile;
+			AnimatedGifEncoder encoder = makeGifEncoder(newGifFile);
+
+			File[] imageFilesToAnimate = getImageFilesToAnimate();
+
+			for (File f : imageFilesToAnimate)
+			{
+				BufferedImage readInImage = readInImage(f);
+				encoder.addFrame(readInImage);
+			}
+			finishUpAnimation(encoder);
+
+			return newGifFile;
+		}
+		catch (IOException e)
+		{
+			throw new MediaEncodingException(e);
+		}
 	}
 
 	protected BufferedImage readInImage(File f) throws IOException
@@ -76,7 +85,7 @@ public class ImagesToGifOutput extends AbstractImagesToMediaOutput {
 		return e;
 	}
 
-	protected File makeGifFile(String fileNameMinusExtension) throws IOException
+	protected File makeGifFile(String fileNameMinusExtension) throws MediaEncodingException
 	{
 		File newGifFile = new File(fileNameMinusExtension + "." + GIF_EXTENSION);
 		cleanUpForFile(newGifFile);

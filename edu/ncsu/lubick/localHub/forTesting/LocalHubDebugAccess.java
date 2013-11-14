@@ -6,7 +6,7 @@ import java.util.List;
 import edu.ncsu.lubick.localHub.LoadedFileListener;
 import edu.ncsu.lubick.localHub.ParsedFileListener;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
-import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
+import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 
 public interface LocalHubDebugAccess {
 
@@ -25,7 +25,7 @@ public interface LocalHubDebugAccess {
 
 	void shutDown();
 
-	List<File> extractVideoForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException;
+	List<File> extractVideoForLastUsageOfTool(String pluginName, String toolName) throws MediaEncodingException;
 
 	List<String> getAllPluginNames();
 

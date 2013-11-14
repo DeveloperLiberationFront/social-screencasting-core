@@ -1,4 +1,4 @@
-package edu.ncsu.lubick.localHub.videoPostProduction;
+package edu.ncsu.lubick.localHub.videoPostProduction.outputs;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -9,36 +9,47 @@ import javax.imageio.ImageIO;
 
 import org.apache.log4j.Logger;
 
-public class ThumbnailGenerator extends AbstractImagesToMediaOutput
+import edu.ncsu.lubick.localHub.videoPostProduction.AbstractImagesToMediaOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
+
+public class ImagesWithAnimationToThumbnailOutput extends AbstractImagesToMediaOutput implements ImagesWithAnimationToMediaOutput
 {
 
 	public static final String THUMBNAIL_EXTENSION = "png";
 
-	public ThumbnailGenerator()
+	public ImagesWithAnimationToThumbnailOutput()
 	{
 		super(new File(PostProductionHandler.getIntermediateFolderLocation()));
 	}
 
-	private static Logger logger = Logger.getLogger(ThumbnailGenerator.class.getName());
+	private static Logger logger = Logger.getLogger(ImagesWithAnimationToThumbnailOutput.class.getName());
 
 	@Override
-	public File combineImageFilesToMakeMedia(String fileNameMinusExtension) throws IOException
+	public File combineImageFilesToMakeMedia(String fileNameMinusExtension) throws MediaEncodingException
 	{
 		File newGifFile = makePngFile(fileNameMinusExtension);
 
 		File[] imageFiles = getImageFilesToAnimate();
 		if (imageFiles.length == 0)
 		{
-			throw new IOException("Cannot make a thumbnail from nothing");
+			throw new MediaEncodingException("Cannot make a thumbnail from nothing");
 		}
 		File fileToCopy = imageFiles[imageFiles.length / 2];
 
+		try
+		{
 		BufferedImage imageToResize = ImageIO.read(fileToCopy);
 		BufferedImage shrunkImage = shrinkImage(imageToResize);
 
 		ImageIO.write(shrunkImage, THUMBNAIL_EXTENSION, newGifFile);
 
 		return newGifFile;
+		}
+		catch (IOException e)
+		{
+			throw new MediaEncodingException(e);
+		}
 	}
 
 	public static BufferedImage shrinkImage(BufferedImage imageToResize)
@@ -56,7 +67,7 @@ public class ThumbnailGenerator extends AbstractImagesToMediaOutput
 		return shrunkImage;
 	}
 
-	private File makePngFile(String fileNameMinusExtension) throws IOException
+	private File makePngFile(String fileNameMinusExtension) throws MediaEncodingException
 	{
 		File newPngFile = new File(fileNameMinusExtension + "." + THUMBNAIL_EXTENSION);
 		cleanUpForFile(newPngFile);

@@ -17,13 +17,13 @@ import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
-import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToBrowserAnimatedPackage;
-import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
-import edu.ncsu.lubick.localHub.videoPostProduction.ThumbnailGenerator;
-import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
-import edu.ncsu.lubick.localHub.videoPostProduction.gif.ImagesToGifOutput;
-import edu.ncsu.lubick.localHub.videoPostProduction.gif.ImagesToMiniGifOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
+import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToBrowserAnimatedPackage;
+import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToGifOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToMiniGifOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToVideoOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToThumbnailOutput;
 
 public class TestVideoPostProduction
 {
@@ -78,7 +78,7 @@ public class TestVideoPostProduction
 	@Test
 	public void testSingleToolUsageExtractionBrowserMedia() throws Exception
 	{
-		String mediaDirName = PostProductionHandler.makeFileNameForToolPluginMedia(TEST_PLUGIN_NAME, WHOMBO_TOOL_1);
+		String mediaDirName = PostProductionHandler.makeFileNameStemForToolPluginMedia(TEST_PLUGIN_NAME, WHOMBO_TOOL_1);
 		File expectedOutputDir = new File(mediaDirName);
 		if (expectedOutputDir.exists())
 		{
@@ -128,7 +128,7 @@ public class TestVideoPostProduction
 		verifyThumbnailNamedProperly(outputMedia.get(2), WHOMBO_TOOL_1);
 	}
 
-	private List<File> testARandomToolInAPostAnimationHandler(PostProductionHandler handler) throws VideoEncodingException
+	private List<File> testARandomToolInAPostAnimationHandler(PostProductionHandler handler) throws MediaEncodingException
 	{
 		File capFile = new File("./src/ForTesting/oneMinuteCap.cap");
 		String toolName = WHOMBO_TOOL_1;
@@ -252,7 +252,7 @@ public class TestVideoPostProduction
 			outputFile = getVideoFromHandler(handler, toolStream.getAsList().get(0));
 			// throws an exception if there was a problem
 		}
-		catch (VideoEncodingException e)
+		catch (MediaEncodingException e)
 		{
 			e.printStackTrace();
 			fail("Should not have caught an exception here");
@@ -286,7 +286,7 @@ public class TestVideoPostProduction
 		assertTrue(outputFile.exists());
 		assertTrue(outputFile.isFile());
 		assertFalse(outputFile.isHidden());
-		assertTrue(outputFile.getName().endsWith(ImagesToVideoOutput.VIDEO_EXTENSION));
+		assertTrue(outputFile.getName().endsWith(ImagesWithAnimationToVideoOutput.VIDEO_EXTENSION));
 		assertTrue(outputFile.length() > 500000); // I expect the file size to
 													// be at least 1 Mb and no
 													// more than 2Mb
@@ -295,7 +295,7 @@ public class TestVideoPostProduction
 
 	private void verifyGifNamedProperly(File outputFile, String toolName)
 	{
-		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
+		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameStemForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
 		assertTrue(outputFile.getPath().endsWith(".gif"));
 	}
 
@@ -311,8 +311,8 @@ public class TestVideoPostProduction
 
 	private void verifyThumbnailNamedProperly(File outputFile, String toolName)
 	{
-		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
-		assertTrue(outputFile.getPath().endsWith(ThumbnailGenerator.THUMBNAIL_EXTENSION));
+		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameStemForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
+		assertTrue(outputFile.getPath().endsWith(ImagesWithAnimationToThumbnailOutput.THUMBNAIL_EXTENSION));
 	}
 
 	private void verifyThumbnailFileIsCorrectlyMade(File outputFile)
@@ -327,11 +327,11 @@ public class TestVideoPostProduction
 
 	private void verifyVideoNamedProperly(File outputFile, String toolName)
 	{
-		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
-		assertTrue(outputFile.getPath().endsWith(ImagesToVideoOutput.VIDEO_EXTENSION));
+		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameStemForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
+		assertTrue(outputFile.getPath().endsWith(ImagesWithAnimationToVideoOutput.VIDEO_EXTENSION));
 	}
 
-	public static File getVideoFromHandler(PostProductionHandler handler, ToolUsage testToolUsage) throws VideoEncodingException
+	public static File getVideoFromHandler(PostProductionHandler handler, ToolUsage testToolUsage) throws MediaEncodingException
 	{
 		List<File> mediaOutputs = handler.extractMediaForToolUsage(testToolUsage);
 		if (mediaOutputs == null)
@@ -340,7 +340,7 @@ public class TestVideoPostProduction
 		}
 		for (File f : mediaOutputs)
 		{
-			if (f.getName().endsWith(ImagesToVideoOutput.VIDEO_EXTENSION))
+			if (f.getName().endsWith(ImagesWithAnimationToVideoOutput.VIDEO_EXTENSION))
 				return f;
 		}
 		return null;
@@ -349,37 +349,37 @@ public class TestVideoPostProduction
 	private PostProductionHandler makeVideoPostProductionHandler()
 	{
 		PostProductionHandler handler = new PostProductionHandler();
-		handler.addNewPostAnimationMediaOutput(new ImagesToVideoOutput());
+		handler.addNewPostAnimationMediaOutput(new ImagesWithAnimationToVideoOutput());
 		return handler;
 	}
 
 	private PostProductionHandler makeGifPostProductionHandler()
 	{
 		PostProductionHandler handler = new PostProductionHandler();
-		handler.addNewPostAnimationMediaOutput(new ImagesToGifOutput());
+		handler.addNewPostAnimationMediaOutput(new ImagesWithAnimationToGifOutput());
 		return handler;
 	}
 
 	private PostProductionHandler makeMiniGifPostProductionHandler()
 	{
 		PostProductionHandler handler = new PostProductionHandler();
-		handler.addNewPostAnimationMediaOutput(new ImagesToMiniGifOutput());
+		handler.addNewPostAnimationMediaOutput(new ImagesWithAnimationToMiniGifOutput());
 		return handler;
 	}
 
 	private PostProductionHandler makeVideoThumbnailAndGifPostProductionHandler()
 	{
 		PostProductionHandler handler = new PostProductionHandler();
-		handler.addNewPostAnimationMediaOutput(new ImagesToVideoOutput());
-		handler.addNewPostAnimationMediaOutput(new ImagesToGifOutput());
-		handler.addNewPostAnimationMediaOutput(new ThumbnailGenerator());
+		handler.addNewPostAnimationMediaOutput(new ImagesWithAnimationToVideoOutput());
+		handler.addNewPostAnimationMediaOutput(new ImagesWithAnimationToGifOutput());
+		handler.addNewPostAnimationMediaOutput(new ImagesWithAnimationToThumbnailOutput());
 		return handler;
 	}
 	
 	private PostProductionHandler makeBrowserMediaPostProductionHandler()
 	{
 		PostProductionHandler handler = new PostProductionHandler();
-		handler.addNewPreAnimationMediaOutput(new ImagesToBrowserAnimatedPackage());
+		handler.addNewPreAnimationMediaOutput(new PreAnimationImagesToBrowserAnimatedPackage());
 		return handler;
 	}
 

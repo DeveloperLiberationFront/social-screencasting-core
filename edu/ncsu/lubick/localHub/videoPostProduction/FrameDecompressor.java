@@ -51,7 +51,7 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		this.fdrs = fdrs;
 	}
 
-	public DecompressionFramePacket readInNextFrame(InputStream inputStream) throws IOException, VideoEncodingException, ReachedEndOfCapFileException
+	public DecompressionFramePacket readInNextFrame(InputStream inputStream) throws IOException, MediaEncodingException, ReachedEndOfCapFileException
 	{
 		logger.trace("Starting to read in frame");
 		DecompressionFramePacket framePacket = unpackNextFrame(inputStream);
@@ -65,7 +65,7 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 
 	}
 
-	public void bypassNextFrame(InputStream inputStream) throws IOException, VideoEncodingException, ReachedEndOfCapFileException
+	public void bypassNextFrame(InputStream inputStream) throws IOException, MediaEncodingException, ReachedEndOfCapFileException
 	{
 		logger.trace("Starting to read in frame");
 		DecompressionFramePacket framePacket = unpackNextFrame(inputStream);
@@ -79,7 +79,7 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 
 	}
 
-	private DecompressionFramePacket unpackNextFrame(InputStream inputStream) throws IOException, VideoEncodingException, ReachedEndOfCapFileException
+	private DecompressionFramePacket unpackNextFrame(InputStream inputStream) throws IOException, MediaEncodingException, ReachedEndOfCapFileException
 	{
 
 		DecompressionFramePacket frame = new DecompressionFramePacket(currentFrameRect);
@@ -118,7 +118,7 @@ public class FrameDecompressor implements FrameDecompressorCodecStrategy, FrameD
 		catch (RuntimeException e)
 		{
 			logger.error("Probably a malformed screencapture packet", e);
-			throw new VideoEncodingException(e);
+			throw new MediaEncodingException(e);
 		}
 
 		return frame;

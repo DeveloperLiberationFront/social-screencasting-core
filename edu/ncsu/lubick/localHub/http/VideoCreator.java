@@ -15,11 +15,11 @@ import org.eclipse.jetty.server.Request;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
-import edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
-import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
-import edu.ncsu.lubick.localHub.videoPostProduction.gif.ImagesToGifOutput;
-import edu.ncsu.lubick.localHub.videoPostProduction.gif.ImagesToMiniGifOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
+import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToGifOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToMiniGifOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToVideoOutput;
 
 public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Handler {
 
@@ -94,13 +94,13 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		{
 			lastToolUsage = this.databaseLink.extractMediaForLastUsageOfTool(pluginName, toolName);
 		}
-		catch (VideoEncodingException e)
+		catch (MediaEncodingException e)
 		{
 			respondWithError(baseRequest, response, e);
 			return;
 		}
 		
-		String folderName = PostProductionHandler.makeFileNameForToolPluginMedia(pluginName, toolName);
+		String folderName = PostProductionHandler.makeFileNameStemForToolPluginMedia(pluginName, toolName);
 		File mediaDir = new File(folderName);
 		if (!mediaDir.exists() || !mediaDir.isDirectory())
 		{
@@ -114,7 +114,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		baseRequest.setHandled(true);
 	}
 
-	public void respondWithError(Request baseRequest, HttpServletResponse response, VideoEncodingException e) throws IOException
+	public void respondWithError(Request baseRequest, HttpServletResponse response, MediaEncodingException e) throws IOException
 	{
 		logger.fatal("Error caught when video making requested: ", e);
 		response.getWriter().println("<span>Internal Video Creation Error. </span>");
@@ -130,7 +130,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
 		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
 		
-		String folderName = PostProductionHandler.makeFileNameForToolPluginMedia(pluginName, toolName);
+		String folderName = PostProductionHandler.makeFileNameStemForToolPluginMedia(pluginName, toolName);
 		File mediaDir = new File(folderName);
 
 		logger.debug("If media folder existed, it would be called "+mediaDir);
@@ -150,7 +150,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		}
 		else if (mediaDir.exists() && !mediaDir.isDirectory())
 		{
-			respondWithError(baseRequest, response, new VideoEncodingException("mediaDir was not directory: "+mediaDir));
+			respondWithError(baseRequest, response, new MediaEncodingException("mediaDir was not directory: "+mediaDir));
 			return;
 		}
 		else
@@ -210,17 +210,17 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 
 	public String getNameForToolVideo(String pluginName, String toolName)
 	{
-		return PostProductionHandler.makeFileNameForToolPluginMedia(pluginName, toolName) + "." + ImagesToVideoOutput.VIDEO_EXTENSION;
+		return PostProductionHandler.makeFileNameStemForToolPluginMedia(pluginName, toolName) + "." + ImagesWithAnimationToVideoOutput.VIDEO_EXTENSION;
 	}
 
 	public String getNameForToolFullGif(String pluginName, String toolName)
 	{
-		return PostProductionHandler.makeFileNameForToolPluginMedia(pluginName, toolName) + "." + ImagesToGifOutput.GIF_EXTENSION;
+		return PostProductionHandler.makeFileNameStemForToolPluginMedia(pluginName, toolName) + "." + ImagesWithAnimationToGifOutput.GIF_EXTENSION;
 	}
 
 	public String getNameForToolMiniGif(String pluginName, String toolName)
 	{
-		return PostProductionHandler.makeFileNameForToolPluginMedia(pluginName, toolName) + "." + ImagesToMiniGifOutput.MINI_GIF_EXTENSION;
+		return PostProductionHandler.makeFileNameStemForToolPluginMedia(pluginName, toolName) + "." + ImagesWithAnimationToMiniGifOutput.MINI_GIF_EXTENSION;
 	}
 
 	@Override

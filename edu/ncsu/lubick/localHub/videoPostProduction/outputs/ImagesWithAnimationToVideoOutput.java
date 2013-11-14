@@ -1,4 +1,4 @@
-package edu.ncsu.lubick.localHub.videoPostProduction;
+package edu.ncsu.lubick.localHub.videoPostProduction.outputs;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,45 +7,63 @@ import java.util.Scanner;
 
 import org.apache.log4j.Logger;
 
-public class ImagesToVideoOutput extends AbstractImagesToMediaOutput
+import edu.ncsu.lubick.localHub.videoPostProduction.AbstractImagesToMediaOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
+
+public class ImagesWithAnimationToVideoOutput extends AbstractImagesToMediaOutput implements ImagesWithAnimationToMediaOutput
 {
-	public ImagesToVideoOutput()
+	public ImagesWithAnimationToVideoOutput()
 	{
 		super(new File(PostProductionHandler.getIntermediateFolderLocation()));
 	}
 
 	public static final String VIDEO_EXTENSION = "mkv";
-	private static Logger logger = Logger.getLogger(ImagesToVideoOutput.class.getName());
+	private static Logger logger = Logger.getLogger(ImagesWithAnimationToVideoOutput.class.getName());
 
 	@Override
-	public File combineImageFilesToMakeMedia(String fileNameMinusExtension) throws IOException
+	public File combineImageFilesToMakeMedia(String fileNameMinusExtension) throws MediaEncodingException
 	{
-		File newVideoFile = makeVideoFile(fileNameMinusExtension);
+		try
+		{
+			File newVideoFile = makeVideoFile(fileNameMinusExtension);
 
-		// TODO make this more flexible, not hardcoded. i.e. the user should
-		// specify where their ffmpeg is
+			String executableString = compileExecutableString(newVideoFile);
 
-		String executableString = compileExecutableString(newVideoFile);
+			// Using Runtime.exec() because I couldn't get ProcessBuilder to handle the arguments on ffempeg well.
+			Process process = Runtime.getRuntime().exec(executableString);
 
-		// Using Runtime.exec() because I couldn't get ProcessBuilder to handle the arguments on ffempeg well.
-		Process process = Runtime.getRuntime().exec(executableString);
+			setUpLoggingForProcess(process);
 
+			return newVideoFile;
+		}
+		catch (IOException e)
+		{
+			throw new MediaEncodingException(e);
+		}
+	}
+
+	protected void setUpLoggingForProcess(Process process)
+	{
 		inheritIO(process.getInputStream(), "Normal Output");
 		inheritIO(process.getErrorStream(), "Error Output");
 		logger.info("Rendering video");
 		try
 		{
-			logger.debug("FFMPEG exited with state " + process.waitFor());
+			int processReturnValue = process.waitFor();
+			logger.debug("FFMPEG exited with state " + processReturnValue);
+			if (processReturnValue != 0)
+			{
+				logger.info("Non zero return value from FFMPEG: "+processReturnValue);
+			}
 		}
 		catch (InterruptedException e)
 		{
 			logger.error("There was a problem with ffmpeg", e);
 		}
-
-		return newVideoFile;
 	}
 
-	private File makeVideoFile(String fileNameMinusExtension) throws IOException
+	private File makeVideoFile(String fileNameMinusExtension) throws MediaEncodingException
 	{
 		File newFile = new File(fileNameMinusExtension + "." + VIDEO_EXTENSION);
 		cleanUpForFile(newFile);
@@ -55,6 +73,8 @@ public class ImagesToVideoOutput extends AbstractImagesToMediaOutput
 
 	private String compileExecutableString(File newVideoFile)
 	{
+		// TODO make this more flexible, not hardcoded. i.e. the user should
+		// specify where their ffmpeg is
 		StringBuilder builder = new StringBuilder();
 		builder.append("./src/FFMPEGbin/ffmpeg.exe -r 5 -pix_fmt yuv420p -i ");
 		builder.append(scratchDir);

@@ -1,11 +1,13 @@
-package edu.ncsu.lubick.localHub.videoPostProduction.gif;
+package edu.ncsu.lubick.localHub.videoPostProduction.outputs;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class ImagesToMiniGifOutput extends ImagesToGifOutput
+import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
+
+public class ImagesWithAnimationToMiniGifOutput extends ImagesWithAnimationToGifOutput
 {
 	public static final String MINI_GIF_EXTENSION = "mini." + GIF_EXTENSION;
 
@@ -18,7 +20,7 @@ public class ImagesToMiniGifOutput extends ImagesToGifOutput
 	}
 
 	@Override
-	protected File makeGifFile(String fileNameMinusExtension) throws IOException
+	protected File makeGifFile(String fileNameMinusExtension) throws MediaEncodingException
 	{
 		File newGifFile = new File(fileNameMinusExtension + "." + MINI_GIF_EXTENSION);
 		cleanUpForFile(newGifFile);

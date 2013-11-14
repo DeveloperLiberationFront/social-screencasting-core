@@ -3,7 +3,7 @@ package edu.ncsu.lubick.localHub;
 import java.util.List;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
-import edu.ncsu.lubick.localHub.videoPostProduction.VideoEncodingException;
+import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 
 public interface WebQueryInterface {
 
@@ -11,7 +11,7 @@ public interface WebQueryInterface {
 
 	List<String> getNamesOfAllPlugins();
 
-	ToolUsage extractMediaForLastUsageOfTool(String pluginName, String toolName) throws VideoEncodingException;
+	ToolUsage extractMediaForLastUsageOfTool(String pluginName, String toolName) throws MediaEncodingException;
 
 	ToolUsage getLastInstanceOfToolUsage(String pluginName, String toolName);
 
