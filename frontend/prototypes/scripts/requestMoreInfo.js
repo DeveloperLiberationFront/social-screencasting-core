@@ -56,10 +56,11 @@ function handleMouseLeave()
 	});
 }
 
+
 function rotatePeoplesNamesAndTools(){
 	peoplesNamesIndex++;
 	peoplesNamesIndex = peoplesNamesIndex % peoplesNames.length;
-	$("#otherPeoplesTools").text(peoplesNames[peoplesNamesIndex] +"'s Tools");
+	$("#otherPeoplesTools").find(".placeHolder").text(peoplesNames[peoplesNamesIndex] +"'s Tools");
 	
 	$(".otherPersonsTable").find(".clickMe").show();
 	$(".otherPersonsTable").find(".clickMe").each(function(){
@@ -124,7 +125,7 @@ $(document).ready(function () {
 
     $(".moreInfo").on('click', '.requestGeneration', requestGenerationOfMedia);
 	
-	$(".changeName").on('click',rotatePeoplesNamesAndTools);
+	$(".changeName").on('click','.placeHolder',rotatePeoplesNamesAndTools);
 	
 	peoplesNamesIndex = -1;
 	peoplesNames = $("#otherPeoplesTools").data("names");
