@@ -17,7 +17,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
-import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedKeypressMaker;
+import edu.ncsu.lubick.localHub.videoPostProduction.animation.KeypressAnimationMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextAndKeyboardMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeypressAnimation;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToMediaOutput;
@@ -82,7 +82,7 @@ public class PostProductionHandler
 	{
 		this.imageWriter = new ThreadedImageDiskWritingStrategy(SCRATCH_DIR, DELETE_IMAGES_AFTER_USE);
 
-		AnimatedKeypressMaker animationSource = null;
+		KeypressAnimationMaker animationSource = null;
 		try
 		{
 			animationSource = new AnimatedTextAndKeyboardMaker();

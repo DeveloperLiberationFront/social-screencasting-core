@@ -2,13 +2,11 @@ package edu.ncsu.lubick.localHub.videoPostProduction.animation;
 
 import java.awt.image.BufferedImage;
 
-public interface AnimatedKeypressMaker {
-
-	BufferedImage makeAnimationForKeyCodes(int[] keycodes);
+public interface KeypressAnimationMaker {
 
 	BufferedImage makeUnactivatedAnimation();
-
-	void setCurrentKeyPresses(String toolKeyPresses);
+	
+	BufferedImage makeNewAnimationForKeyPresses(int[] keycodes, String toolKeyPresses);
 
 	String getAnimationTypeName();
 

@@ -1,38 +1,17 @@
 package edu.ncsu.lubick.localHub.videoPostProduction.animation;
 
-import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 
-import javax.imageio.ImageIO;
-
-public class AnimatedKeyboardMaker implements AnimatedKeypressMaker {
-
-	protected static BufferedImage unActivatedKeyboard;
-	protected static BufferedImage activatedKeyboard;
+public class AnimatedKeyboardMaker extends AbstractKeypressAnimationMaker {
 
 	public AnimatedKeyboardMaker() throws IOException
 	{
 		conditionallyLoadImages();
 	}
 
-	private static void conditionallyLoadImages() throws IOException
-	{
-		if (unActivatedKeyboard == null)
-		{
-			File unactivatedKeyboardPath = new File("bin/imageAssets/QWERTY_keyboard_small.png");
-			unActivatedKeyboard = ImageIO.read(unactivatedKeyboardPath);
-		}
-		if (activatedKeyboard == null)
-		{
-			File activatedKeyboardPath = new File("bin/imageAssets/QWERTY_keyboard_pressed_small.png");
-			activatedKeyboard = ImageIO.read(activatedKeyboardPath);
-		}
-	}
-
 	@Override
-	public BufferedImage makeAnimationForKeyCodes(int[] keycodes)
+	public BufferedImage makeNewAnimationForKeyPresses(int[] keycodes, String toolKeyPresses)
 	{
 		BufferedImage img = makeUnactivatedAnimation();
 
@@ -57,21 +36,13 @@ public class AnimatedKeyboardMaker implements AnimatedKeypressMaker {
 		return img;
 	}
 
-	public static void copyFromImageToGraphics(Graphics g, BufferedImage img, int firstX, int firstY, int secondX, int secondY)
-	{
-		g.drawImage(img, firstX, firstY, secondX, secondY, firstX, firstY, secondX, secondY, null);
-	}
-
-	@Override
-	public void setCurrentKeyPresses(String toolKeyPresses)
-	{
-
-	}
 
 	@Override
 	public String getAnimationTypeName()
 	{
 		return "image";
 	}
+
+
 
 }

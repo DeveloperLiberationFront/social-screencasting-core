@@ -5,7 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-public class AnimatedTextMaker extends AnimatedTextAndKeyboardMaker {
+public class AnimatedTextMaker extends AbstractKeypressAnimationMaker {
 
 	public AnimatedTextMaker() throws IOException
 	{
@@ -14,9 +14,9 @@ public class AnimatedTextMaker extends AnimatedTextAndKeyboardMaker {
 	}
 
 	@Override
-	public BufferedImage makeAnimationForKeyCodes(int[] keycodes)
+	public BufferedImage makeNewAnimationForKeyPresses(int[] keycodes, String toolKeyPresses)
 	{
-		return addTextToImage(makeUnactivatedAnimation(), 0);
+		return addTextToImage(makeUnactivatedAnimation(), 0, toolKeyPresses);
 	}
 
 	@Override

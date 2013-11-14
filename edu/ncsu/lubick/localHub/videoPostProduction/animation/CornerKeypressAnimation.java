@@ -33,12 +33,12 @@ public class CornerKeypressAnimation implements PostProductionAnimationStrategy
 	private int frameRate;
 	private int runUpTime;
 
-	private AnimatedKeypressMaker animationSource = null;
+	private KeypressAnimationMaker animationSource = null;
 	private ShortcutsToKeyCodesConverter keyCodeReader = new ShortcutsToKeyCodesConverter();
 
 	private ImageDiskWritingStrategy animatedImageOutput = null;
 
-	public CornerKeypressAnimation(String scratchDirPath, int frameRate, int runUpTime, AnimatedKeypressMaker animationSource)
+	public CornerKeypressAnimation(String scratchDirPath, int frameRate, int runUpTime, KeypressAnimationMaker animationSource)
 	{
 		this.scratchDir = new File(scratchDirPath);
 		if (!this.scratchDir.exists() || !this.scratchDir.isDirectory())
@@ -67,7 +67,7 @@ public class CornerKeypressAnimation implements PostProductionAnimationStrategy
 	{
 		if (toolUsage.getToolKeyPresses().equals("MENU") || animationSource == null)
 		{
-			return; // no animation for menus, or if the 
+			return; // no animation for menus, or if the animationSource happens to be null
 		}
 
 		animatedImageOutput.resetWithOutClearingFolder();
@@ -85,9 +85,9 @@ public class CornerKeypressAnimation implements PostProductionAnimationStrategy
 		// Make these once and reuse them below
 		BufferedImage unactivatedAnimation = animationSource.makeUnactivatedAnimation();
 		int[] keyCodes = keyCodeReader.convert(toolUsage.getToolKeyPresses());
-		animationSource.setCurrentKeyPresses(toolUsage.getToolKeyPresses());
-		BufferedImage activatedAnimation = animationSource.makeAnimationForKeyCodes(keyCodes);
-
+		
+		BufferedImage activatedAnimation = animationSource.makeNewAnimationForKeyPresses(keyCodes, toolUsage.getToolKeyPresses());
+		
 		int i = 0;
 		for (; i < frameRate * runUpTime - FRAMES_TO_ACCOUNT_FOR_LAG_TIME; i++)
 		{

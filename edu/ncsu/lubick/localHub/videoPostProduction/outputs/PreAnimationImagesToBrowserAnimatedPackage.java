@@ -19,7 +19,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedKeyboardMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextAndKeyboardMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextMaker;
-import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedKeypressMaker;
+import edu.ncsu.lubick.localHub.videoPostProduction.animation.KeypressAnimationMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.ShortcutsToKeyCodesConverter;
 
 public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput implements PreAnimationImagesToMediaOutput
@@ -27,7 +27,7 @@ public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesTo
 
 	private static Logger logger = Logger.getLogger(PreAnimationImagesToBrowserAnimatedPackage.class.getName());
 	private ShortcutsToKeyCodesConverter keyCodeReader = new ShortcutsToKeyCodesConverter();
-	private List<AnimatedKeypressMaker> animationSources = new ArrayList<>();
+	private List<KeypressAnimationMaker> animationSources = new ArrayList<>();
 
 	public PreAnimationImagesToBrowserAnimatedPackage()
 	{
@@ -82,7 +82,7 @@ public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesTo
 			return; // no animation for menus
 		}
 
-		for (AnimatedKeypressMaker animationSource : animationSources)
+		for (KeypressAnimationMaker animationSource : animationSources)
 		{
 			BufferedImage unactivatedAnimation = animationSource.makeUnactivatedAnimation();
 			int[] keyCodes = keyCodeReader.convert(toolUsage.getToolKeyPresses());

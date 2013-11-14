@@ -7,6 +7,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,7 +27,7 @@ class PrototypeAnimationHelper extends JPanel implements KeyListener
 	private static final long serialVersionUID = 701852946292219382L;
 
 	private Set<Integer> activatedAnimations = new HashSet<>();
-	private transient AnimatedKeypressMaker animationSource = new AnimatedTextAndKeyboardMaker();
+	private transient KeypressAnimationMaker animationSource = new AnimatedTextAndKeyboardMaker();
 
 	public PrototypeAnimationHelper() throws IOException
 	{
@@ -65,7 +66,7 @@ class PrototypeAnimationHelper extends JPanel implements KeyListener
 			keycodes[index] = thisInt;
 			index++;
 		}
-		BufferedImage animatedImage = animationSource.makeAnimationForKeyCodes(keycodes);
+		BufferedImage animatedImage = animationSource.makeNewAnimationForKeyPresses(keycodes, Arrays.toString(keycodes));
 		g.drawImage(animatedImage, 0, 0, null);
 		// for (AnimatedKeyPress animations : activatedAnimations.values())
 		// {
