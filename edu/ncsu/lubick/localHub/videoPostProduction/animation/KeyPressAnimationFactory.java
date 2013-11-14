@@ -6,7 +6,7 @@ import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 
-public class AnimatedKeyPressFactory
+public class KeyPressAnimationFactory
 {
 	private static int[] functionRow = new int[] { VK_ESCAPE, VK_F1, VK_F2, VK_F3, VK_F4, VK_F5, VK_F6, VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12,
 			VK_PRINTSCREEN, VK_SCROLL_LOCK, VK_PAUSE };
@@ -16,19 +16,13 @@ public class AnimatedKeyPressFactory
 	private static int[] asdfRow = new int[] { VK_A, VK_S, VK_D, VK_F, VK_G, VK_H, VK_J, VK_K, VK_L, VK_SEMICOLON, VK_QUOTE };
 	private static int[] zxcvRow = new int[] { VK_Z, VK_X, VK_C, VK_V, VK_B, VK_N, VK_M, VK_COMMA, VK_PERIOD, VK_SLASH };
 
-	private static AnimatedKeyPress offscreen = new AnimatedKeyPress() {
+	private static KeyPressAnimation offscreen = new DefaultNoKeypress();
 
-		@Override
-		public void drawAnimatedSegment(Graphics g, BufferedImage img)
-		{
-		} // do nothing
-	};
-
-	private AnimatedKeyPressFactory()
+	private KeyPressAnimationFactory()
 	{
 	}
 
-	public static AnimatedKeyPress makeAnimatedKeyPress(int keyCode)
+	public static KeyPressAnimation makeKeyPressAnimation(int keyCode)
 	{
 		if (getIndexInArray(qwertyRow, keyCode) != -1)
 		{
@@ -75,13 +69,13 @@ public class AnimatedKeyPressFactory
 		return getOffScreen();
 	}
 
-	public static AnimatedKeyPress makeAnimatedKeyPress(KeyEvent ke)
+	public static KeyPressAnimation makeAnimatedKeyPress(KeyEvent ke)
 	{
 		int keyCode = ke.getKeyCode();
-		return makeAnimatedKeyPress(keyCode);
+		return makeKeyPressAnimation(keyCode);
 	}
 
-	public static AnimatedKeyPress getOffScreen()
+	public static KeyPressAnimation getOffScreen()
 	{
 		return offscreen;
 	}
@@ -96,6 +90,13 @@ public class AnimatedKeyPressFactory
 			}
 		}
 		return -1;
+	}
+
+	private static final class DefaultNoKeypress implements KeyPressAnimation {
+		@Override
+		public void drawAnimatedSegment(Graphics g, BufferedImage img)
+		{// do nothing
+		} 
 	}
 
 }

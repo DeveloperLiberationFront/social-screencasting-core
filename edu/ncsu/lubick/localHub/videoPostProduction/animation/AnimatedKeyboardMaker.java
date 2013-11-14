@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class AnimatedKeyboardMaker implements KeypressAnimationMaker {
+public class AnimatedKeyboardMaker implements AnimatedKeypressMaker {
 
 	protected static BufferedImage unActivatedKeyboard;
 	protected static BufferedImage activatedKeyboard;
@@ -38,7 +38,7 @@ public class AnimatedKeyboardMaker implements KeypressAnimationMaker {
 
 		for (int keyCode : keycodes)
 		{
-			AnimatedKeyPress animation = AnimatedKeyPressFactory.makeAnimatedKeyPress(keyCode);
+			KeyPressAnimation animation = KeyPressAnimationFactory.makeKeyPressAnimation(keyCode);
 			animation.drawAnimatedSegment(img.getGraphics(), activatedKeyboard);
 		}
 
@@ -69,7 +69,7 @@ public class AnimatedKeyboardMaker implements KeypressAnimationMaker {
 	}
 
 	@Override
-	public String getAnimationName()
+	public String getAnimationTypeName()
 	{
 		return "image";
 	}

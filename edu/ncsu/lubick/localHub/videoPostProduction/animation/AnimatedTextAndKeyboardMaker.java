@@ -74,7 +74,7 @@ public class AnimatedTextAndKeyboardMaker extends AnimatedKeyboardMaker {
 	}
 	
 	@Override
-	public String getAnimationName()
+	public String getAnimationTypeName()
 	{
 		return "image_text";
 	}

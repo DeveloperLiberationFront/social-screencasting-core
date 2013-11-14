@@ -10,14 +10,14 @@ import java.awt.image.BufferedImage;
  * @author KevinLubick
  * 
  */
-public abstract class AnimatedLetterKey implements AnimatedKeyPress
+public abstract class LetterKeyAnimation implements KeyPressAnimation
 {
 
 	final double widthOfSquare = 27.6;
 
 	private int column;
 
-	public AnimatedLetterKey(int column)
+	public LetterKeyAnimation(int column)
 	{
 		this.column = column;
 	}
@@ -39,7 +39,7 @@ public abstract class AnimatedLetterKey implements AnimatedKeyPress
 
 }
 
-class QRowLetterKey extends AnimatedLetterKey
+class QRowLetterKey extends LetterKeyAnimation
 {
 	final Point Q_START = new Point(47, 67);
 	final int Q_HEIGHT = 24;
@@ -63,7 +63,7 @@ class QRowLetterKey extends AnimatedLetterKey
 
 }
 
-class ARowLetterKey extends AnimatedLetterKey
+class ARowLetterKey extends LetterKeyAnimation
 {
 	final Point A_START = new Point(56, 91);
 	final int A_HEIGHT = 23;
@@ -87,7 +87,7 @@ class ARowLetterKey extends AnimatedLetterKey
 
 }
 
-class ZRowLetterKey extends AnimatedLetterKey
+class ZRowLetterKey extends LetterKeyAnimation
 {
 	final Point Z_START = new Point(65, 114);
 	final int Z_HEIGHT = 23;
@@ -111,7 +111,7 @@ class ZRowLetterKey extends AnimatedLetterKey
 
 }
 
-class NumberRowLetterKey extends AnimatedLetterKey
+class NumberRowLetterKey extends LetterKeyAnimation
 {
 	final Point BACKTICK_START = new Point(3, 43);
 	final int BACKTICK_HEIGHT = 24;

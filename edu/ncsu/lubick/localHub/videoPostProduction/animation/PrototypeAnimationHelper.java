@@ -13,7 +13,12 @@ import java.util.Set;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class AnimationHelper extends JPanel implements KeyListener
+/**
+ * Used in development only to quickly prototype what the animations look like
+ * @author KevinLubick
+ *
+ */
+class PrototypeAnimationHelper extends JPanel implements KeyListener
 {
 	/**
 	 * 
@@ -21,19 +26,20 @@ public class AnimationHelper extends JPanel implements KeyListener
 	private static final long serialVersionUID = 701852946292219382L;
 
 	private Set<Integer> activatedAnimations = new HashSet<>();
-	private transient KeypressAnimationMaker animationSource = new AnimatedTextAndKeyboardMaker();
+	private transient AnimatedKeypressMaker animationSource = new AnimatedTextAndKeyboardMaker();
 
-	public AnimationHelper() throws IOException
+	public PrototypeAnimationHelper() throws IOException
 	{
 	}
 
+	
 	public static void main(String[] args) throws IOException
 	{
 		JFrame outerFrame = new JFrame("test");
 		outerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		outerFrame.setBounds(0, 0, 560, 300);
 
-		AnimationHelper innerPanel = new AnimationHelper();
+		PrototypeAnimationHelper innerPanel = new PrototypeAnimationHelper();
 		innerPanel.setSize(800, 600);
 		outerFrame.add(innerPanel);
 		outerFrame.addKeyListener(innerPanel);

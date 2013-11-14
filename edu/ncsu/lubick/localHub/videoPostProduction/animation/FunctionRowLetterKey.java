@@ -4,7 +4,7 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 
-public class FunctionRowLetterKey implements AnimatedKeyPress
+public class FunctionRowLetterKey implements KeyPressAnimation
 {
 	final Point ESC_START = new Point(3, 5);
 	final int ESC_HEIGHT = 25;

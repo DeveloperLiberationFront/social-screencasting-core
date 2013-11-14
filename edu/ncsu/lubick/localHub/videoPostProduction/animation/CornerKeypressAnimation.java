@@ -17,10 +17,15 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionAnimationStrat
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.ThreadedImageDiskWritingStrategy;
 
-public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
+/**
+ * Adds a keyboard animation to the corner of all the images
+ * @author KevinLubick
+ *
+ */
+public class CornerKeypressAnimation implements PostProductionAnimationStrategy
 {
 
-	private static Logger logger = Logger.getLogger(CornerKeyboardAnimation.class.getName());
+	private static Logger logger = Logger.getLogger(CornerKeypressAnimation.class.getName());
 	private static final int TIME_FOR_ACTIVATED_ANIMATION = 2; // in seconds
 	private static final int FRAMES_TO_ACCOUNT_FOR_LAG_TIME = 3;
 
@@ -28,12 +33,12 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 	private int frameRate;
 	private int runUpTime;
 
-	private KeypressAnimationMaker animationSource = null; // lazy load
+	private AnimatedKeypressMaker animationSource = null;
 	private ShortcutsToKeyCodesConverter keyCodeReader = new ShortcutsToKeyCodesConverter();
 
-	private ImageDiskWritingStrategy diskWriter = null;
+	private ImageDiskWritingStrategy animatedImageOutput = null;
 
-	public CornerKeyboardAnimation(String scratchDirPath, int frameRate, int runUpTime)
+	public CornerKeypressAnimation(String scratchDirPath, int frameRate, int runUpTime, AnimatedKeypressMaker animationSource)
 	{
 		this.scratchDir = new File(scratchDirPath);
 		if (!this.scratchDir.exists() || !this.scratchDir.isDirectory())
@@ -43,20 +48,29 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 		this.frameRate = frameRate;
 		this.runUpTime = runUpTime;
 
-		diskWriter = new ThreadedImageDiskWritingStrategy(scratchDirPath, PostProductionHandler.DELETE_IMAGES_AFTER_USE);
+		animatedImageOutput = new ThreadedImageDiskWritingStrategy(scratchDirPath, PostProductionHandler.DELETE_IMAGES_AFTER_USE);
 
+		this.animationSource = animationSource;
+	}
+	
+	/**
+	 *  Makes an object that will add 0 animation to any of the images
+	 */
+	public CornerKeypressAnimation(String scratchDirPath, int frameRate, int runUpTime)
+	{
+		this(scratchDirPath,frameRate,runUpTime, null);
+		logger.info("Warning: No animation was given to "+this.getClass()+" so, no animations will be added.");
 	}
 
 	@Override
 	public void addAnimationToImagesInScratchFolderForToolStream(ToolUsage toolUsage) throws IOException
 	{
-		if (toolUsage.getToolKeyPresses().equals("MENU"))
+		if (toolUsage.getToolKeyPresses().equals("MENU") || animationSource == null)
 		{
-			return; // no animation for menus
+			return; // no animation for menus, or if the 
 		}
 
-		lazyLoadOfAnimation();
-		diskWriter.resetWithOutClearingFolder();
+		animatedImageOutput.resetWithOutClearingFolder();
 
 		File[] imagesToAddAnimationTo = scratchDir.listFiles(new FileFilter() {
 
@@ -87,16 +101,9 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 			addAnimationToImageAndSaveToDisk(activatedAnimation, f);
 		}
 
-		diskWriter.waitUntilDoneWriting();
+		animatedImageOutput.waitUntilDoneWriting();
 	}
 
-	private void lazyLoadOfAnimation() throws IOException
-	{
-		if (animationSource == null)
-		{
-			animationSource = new AnimatedTextAndKeyboardMaker();
-		}
-	}
 
 	private void addAnimationToImageAndSaveToDisk(BufferedImage animation, File sourceFile) throws IOException
 	{
@@ -107,7 +114,7 @@ public class CornerKeyboardAnimation implements PostProductionAnimationStrategy
 		int y = frameImage.getHeight() - animation.getHeight();
 		g.drawImage(animation, x, y, animation.getWidth(), animation.getHeight(), null);
 
-		diskWriter.writeImageToDisk(frameImage, sourceFile);
+		animatedImageOutput.writeImageToDisk(frameImage, sourceFile);
 	}
 
 }

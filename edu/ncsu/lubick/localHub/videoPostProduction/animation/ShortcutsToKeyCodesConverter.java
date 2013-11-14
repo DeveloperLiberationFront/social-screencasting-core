@@ -10,10 +10,7 @@ import java.util.List;
 public class ShortcutsToKeyCodesConverter
 {
 	// private static final String KEY_SEPERATORS = "[^,+]+([,+])[^,+]+";
-	private static final String KEY_SEPERATORS = "[,+]"; // works in all but the
-	// cases like Ctrl+,
-	// (previous
-	// selection)
+	private static final String KEY_SEPERATORS = "[,+]"; // works in all but the cases like Ctrl+, (previous selection)
 	private static final String REGEX_FUNCTION_KEYS = "F[0-9]+";
 	private static final String SHIFT = "SHIFT";
 	private static final String CONTROL = "CTRL";

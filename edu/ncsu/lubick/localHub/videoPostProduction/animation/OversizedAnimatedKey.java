@@ -6,7 +6,7 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
-public abstract class OversizedAnimatedKey implements AnimatedKeyPress {
+public abstract class OversizedAnimatedKey implements KeyPressAnimation {
 
 	protected abstract Rectangle getRegion();
 

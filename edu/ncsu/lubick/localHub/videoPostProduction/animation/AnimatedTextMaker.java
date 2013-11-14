@@ -32,7 +32,7 @@ public class AnimatedTextMaker extends AnimatedTextAndKeyboardMaker {
 	}
 	
 	@Override
-	public String getAnimationName()
+	public String getAnimationTypeName()
 	{
 		return "text";
 	}

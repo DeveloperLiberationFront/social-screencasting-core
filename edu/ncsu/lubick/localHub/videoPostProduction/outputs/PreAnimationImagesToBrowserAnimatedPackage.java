@@ -19,7 +19,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedKeyboardMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextAndKeyboardMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextMaker;
-import edu.ncsu.lubick.localHub.videoPostProduction.animation.KeypressAnimationMaker;
+import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedKeypressMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.ShortcutsToKeyCodesConverter;
 
 public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput implements PreAnimationImagesToMediaOutput
@@ -27,7 +27,7 @@ public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesTo
 
 	private static Logger logger = Logger.getLogger(PreAnimationImagesToBrowserAnimatedPackage.class.getName());
 	private ShortcutsToKeyCodesConverter keyCodeReader = new ShortcutsToKeyCodesConverter();
-	private List<KeypressAnimationMaker> animationSources = new ArrayList<>();
+	private List<AnimatedKeypressMaker> animationSources = new ArrayList<>();
 
 	public PreAnimationImagesToBrowserAnimatedPackage()
 	{
@@ -47,7 +47,7 @@ public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesTo
 	}
 
 	@Override
-	public File combineImageFilesToMakeMedia(String folderName, ToolUsage currentToolStream) throws MediaEncodingException
+	public File combineImageFilesToMakeMedia(String folderName, ToolUsage toolUsage) throws MediaEncodingException
 	{
 		File newDir = super.makeDirectoryIfClear(folderName);
 		try
@@ -55,7 +55,7 @@ public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesTo
 			this.copyImagesToFolder(newDir);
 
 			this.lazyLoadAnimationSources();
-			this.createAnimationImagesForToolStream(newDir, currentToolStream);
+			this.createAnimationImagesForToolStream(newDir, toolUsage);
 			return newDir;
 		}
 		catch (IOException e)
@@ -77,19 +77,19 @@ public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesTo
 
 	private void createAnimationImagesForToolStream(File newDir, ToolUsage toolUsage) throws IOException
 	{
-		if (toolUsage.getToolKeyPresses().equals("MENU"))
+		if (toolUsage == null || toolUsage.getToolKeyPresses().equals("MENU"))
 		{
 			return; // no animation for menus
 		}
 
-		for (KeypressAnimationMaker animationSource : animationSources)
+		for (AnimatedKeypressMaker animationSource : animationSources)
 		{
 			BufferedImage unactivatedAnimation = animationSource.makeUnactivatedAnimation();
 			int[] keyCodes = keyCodeReader.convert(toolUsage.getToolKeyPresses());
 			animationSource.setCurrentKeyPresses(toolUsage.getToolKeyPresses());
 			BufferedImage activatedAnimation = animationSource.makeAnimationForKeyCodes(keyCodes);
 
-			String animationPrefix = animationSource.getAnimationName();
+			String animationPrefix = animationSource.getAnimationTypeName();
 			File unactivatedAnimationFile = new File(newDir,animationPrefix+"_un.png");
 			File activatedAnimationFile = new File(newDir, animationPrefix+".png");
 			ImageIO.write(unactivatedAnimation, "png", unactivatedAnimationFile);

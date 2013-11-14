@@ -17,7 +17,9 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
-import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeyboardAnimation;
+import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedKeypressMaker;
+import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextAndKeyboardMaker;
+import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeypressAnimation;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToMediaOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToMediaOutput;
 
@@ -80,8 +82,16 @@ public class PostProductionHandler
 	{
 		this.imageWriter = new ThreadedImageDiskWritingStrategy(SCRATCH_DIR, DELETE_IMAGES_AFTER_USE);
 
-		this.postProductionAnimator = new CornerKeyboardAnimation(SCRATCH_DIR, FRAME_RATE, RUN_UP_TIME);
-		// this.postProductionAnimator = new NoAnimationStrategy();
+		AnimatedKeypressMaker animationSource = null;
+		try
+		{
+			animationSource = new AnimatedTextAndKeyboardMaker();
+		}
+		catch (IOException e)
+		{
+			logger.info("Problem with the animations", e);
+		}
+		this.postProductionAnimator = new CornerKeypressAnimation(SCRATCH_DIR, FRAME_RATE, RUN_UP_TIME, animationSource);
 	}
 
 	public void loadFile(File capFile)
