@@ -1,37 +1,10 @@
 /*global renderPlayback,stopFramePlayback*/       //depends on playback.js
 
-function setUpFancyBox() {
-    $('.fancybox-thumbs').fancybox({
-        prevEffect: 'none',
-        nextEffect: 'none',
-
-        closeBtn: false,
-        arrows: false,
-        nextClick: true,
-
-        helpers: {
-            thumbs: {
-                width: 50,
-                height: 50
-            }
-        }
-    });
-}
-
-//To be called to dynamically allow jquery nodes to be patched into
-/*function addRequestGenerationListeners() {
-    $(".requestGeneration").on('click', requestGenerationOfMedia);
-
-    setUpFancyBox();
-}*/
 
 function addResponseHTMLToWindow(data) {
     $(".modal").hide();
     $(".moreInfo").html(data);
 
-    //$(".moreInfo").children().fadeIn("fast");
-    //addRequestGenerationListeners();
-    //setUpFancyBox();
 	renderPlayback();
 }
 
@@ -62,13 +35,6 @@ function doesVideoExistHuh() {
 $(document).ready(function () {
     //handles the click on the view buttons to see if a video file exists
     $(".clickMe").on('click', doesVideoExistHuh);
-
-    $(".clickMe").on('mouseenter', function () {
-        $(this).addClass("hoverOver");
-    });
-    $(".clickMe").on('mouseleave', function () {
-        $(this).removeClass("hoverOver");
-    });
 
     $(".moreInfo").on('click', '.requestGeneration', requestGenerationOfMedia);
 });
