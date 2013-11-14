@@ -69,6 +69,7 @@ public class ImagesToVideoOutput extends AbstractImagesToMediaOutput
 	{
 		// used to spy on a process's output, similar to what ProcessBuilder does
 		new Thread(new Runnable() {
+			@Override
 			public void run()
 			{
 				try (Scanner sc = new Scanner(src);)

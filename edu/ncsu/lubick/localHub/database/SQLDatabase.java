@@ -209,6 +209,7 @@ public abstract class SQLDatabase extends DBAbstraction {
 	 * )
 	 */
 
+	@Override
 	public List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int duration)
 	{
 		List<FileDateStructs> retVal = new ArrayList<>();

@@ -428,11 +428,13 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		return associatedDate;
 	}
 
+	@Override
 	public List<String> getNamesOfAllPlugins()
 	{
 		return databaseManager.getNamesOfAllPlugins();
 	}
 
+	@Override
 	public List<ToolUsage> getAllToolUsagesForPlugin(String pluginName)
 	{
 		return databaseManager.getAllToolUsageHistoriesForPlugin(pluginName);
