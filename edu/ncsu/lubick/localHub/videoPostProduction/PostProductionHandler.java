@@ -22,6 +22,8 @@ import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextAndKey
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeypressAnimation;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToMediaOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToMediaOutput;
+import edu.ncsu.lubick.util.ImageDiskWritingStrategy;
+import edu.ncsu.lubick.util.ThreadedImageDiskWritingStrategy;
 
 /* Some parts of this (the decoding aspect) have the following license:
  * 

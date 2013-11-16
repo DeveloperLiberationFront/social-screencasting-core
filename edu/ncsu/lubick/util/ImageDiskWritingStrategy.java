@@ -1,4 +1,4 @@
-package edu.ncsu.lubick.localHub.videoPostProduction;
+package edu.ncsu.lubick.util;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

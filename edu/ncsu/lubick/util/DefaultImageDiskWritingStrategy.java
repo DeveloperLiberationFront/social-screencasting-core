@@ -1,10 +1,11 @@
-package edu.ncsu.lubick.localHub.videoPostProduction;
+package edu.ncsu.lubick.util;
 
 import java.io.File;
 
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.FileUtilities;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 
 public abstract class DefaultImageDiskWritingStrategy implements ImageDiskWritingStrategy {
 

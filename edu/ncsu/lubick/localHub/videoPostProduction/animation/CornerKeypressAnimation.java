@@ -12,10 +12,10 @@ import javax.imageio.ImageIO;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
-import edu.ncsu.lubick.localHub.videoPostProduction.ImageDiskWritingStrategy;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionAnimationStrategy;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
-import edu.ncsu.lubick.localHub.videoPostProduction.ThreadedImageDiskWritingStrategy;
+import edu.ncsu.lubick.util.ImageDiskWritingStrategy;
+import edu.ncsu.lubick.util.ThreadedImageDiskWritingStrategy;
 
 /**
  * Adds a keyboard animation to the corner of all the images

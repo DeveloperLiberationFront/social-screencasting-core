@@ -1,4 +1,4 @@
-package edu.ncsu.lubick.localHub.videoPostProduction;
+package edu.ncsu.lubick.util;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -7,6 +7,8 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import org.apache.log4j.Logger;
+
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 
 public class BlockingImageDiskWritingStrategy extends DefaultImageDiskWritingStrategy
 {
