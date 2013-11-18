@@ -19,8 +19,9 @@ import edu.ncsu.lubick.util.ThreadedImageDiskWritingStrategy;
 
 /**
  * Adds a keyboard animation to the corner of all the images
+ * 
  * @author KevinLubick
- *
+ * 
  */
 public class CornerKeypressAnimation implements PostProductionAnimationStrategy
 {
@@ -52,14 +53,14 @@ public class CornerKeypressAnimation implements PostProductionAnimationStrategy
 
 		this.animationSource = animationSource;
 	}
-	
+
 	/**
-	 *  Makes an object that will add 0 animation to any of the images
+	 * Makes an object that will add 0 animation to any of the images
 	 */
 	public CornerKeypressAnimation(String scratchDirPath, int frameRate, int runUpTime)
 	{
-		this(scratchDirPath,frameRate,runUpTime, null);
-		logger.info("Warning: No animation was given to "+this.getClass()+" so, no animations will be added.");
+		this(scratchDirPath, frameRate, runUpTime, null);
+		logger.info("Warning: No animation was given to " + this.getClass() + " so, no animations will be added.");
 	}
 
 	@Override
@@ -85,9 +86,9 @@ public class CornerKeypressAnimation implements PostProductionAnimationStrategy
 		// Make these once and reuse them below
 		BufferedImage unactivatedAnimation = animationSource.makeUnactivatedAnimation();
 		int[] keyCodes = keyCodeReader.convert(toolUsage.getToolKeyPresses());
-		
+
 		BufferedImage activatedAnimation = animationSource.makeNewAnimationForKeyPresses(keyCodes, toolUsage.getToolKeyPresses());
-		
+
 		int i = 0;
 		for (; i < frameRate * runUpTime - FRAMES_TO_ACCOUNT_FOR_LAG_TIME; i++)
 		{
@@ -103,7 +104,6 @@ public class CornerKeypressAnimation implements PostProductionAnimationStrategy
 
 		animatedImageOutput.waitUntilDoneWriting();
 	}
-
 
 	private void addAnimationToImageAndSaveToDisk(BufferedImage animation, File sourceFile) throws IOException
 	{

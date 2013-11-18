@@ -16,8 +16,9 @@ import javax.swing.JPanel;
 
 /**
  * Used in development only to quickly prototype what the animations look like
+ * 
  * @author KevinLubick
- *
+ * 
  */
 class PrototypeAnimationHelper extends JPanel implements KeyListener
 {
@@ -33,7 +34,6 @@ class PrototypeAnimationHelper extends JPanel implements KeyListener
 	{
 	}
 
-	
 	public static void main(String[] args) throws IOException
 	{
 		JFrame outerFrame = new JFrame("test");

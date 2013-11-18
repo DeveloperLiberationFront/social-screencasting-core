@@ -145,9 +145,9 @@ public class BufferedDatabaseManager
 		return retval;
 	}
 
-	private List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int duration)
+	private List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int durationInSeconds)
 	{
-		if (duration > 120)
+		if (durationInSeconds > 120)
 		{
 			logger.info("WARNING: Duration of Screencast longer than 2 minutes.  Are you sure that you converted milliseconds to seconds?");
 		}
@@ -155,9 +155,9 @@ public class BufferedDatabaseManager
 		List<FileDateStructs> retVal = null;
 		try
 		{
-			logger.debug("Searching for a time frame starting at " + timeStamp + "and going " + duration + " seconds");
+			logger.debug("Searching for a time frame starting at " + timeStamp + "and going " + durationInSeconds + " seconds");
 
-			retVal = dbAbstraction.getVideoFilesLinkedToTimePeriod(timeStamp, duration);
+			retVal = dbAbstraction.getVideoFilesLinkedToTimePeriod(timeStamp, durationInSeconds);
 		}
 		catch (DBAbstractionException e)
 		{

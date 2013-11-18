@@ -74,7 +74,7 @@ public class TestVideoPostProduction
 		verifyGifFileIsCorrectlyMade(outputMedia.get(0));
 		verifyGifNamedProperly(outputMedia.get(0), WHOMBO_TOOL_1);
 	}
-	
+
 	@Test
 	public void testSingleToolUsageExtractionBrowserMedia() throws Exception
 	{
@@ -87,8 +87,7 @@ public class TestVideoPostProduction
 			assertTrue(expectedOutputDir.delete());
 			assertFalse(expectedOutputDir.exists());
 		}
-		
-		
+
 		PostProductionHandler handler = makeBrowserMediaPostProductionHandler();
 
 		List<File> outputMedia = testARandomToolInAPostAnimationHandler(handler);
@@ -96,8 +95,8 @@ public class TestVideoPostProduction
 		assertEquals(1, outputMedia.size());
 		assertEquals(expectedOutputDir, outputMedia.get(0));
 		List<String> listOfFileNames = Arrays.asList(expectedOutputDir.list());
-		assertTrue(listOfFileNames.size()>30);		//as of 11/7/13 this number was precisely 41, but this may change
-															// if the rendering procedure changes.
+		assertTrue(listOfFileNames.size() > 30); // as of 11/7/13 this number was precisely 41, but this may change
+													// if the rendering procedure changes.
 		assertTrue(listOfFileNames.contains("image.png"));
 		assertTrue(listOfFileNames.contains("image_un.png"));
 		assertTrue(listOfFileNames.contains("image_text.png"));
@@ -151,8 +150,6 @@ public class TestVideoPostProduction
 
 		return mediaOutputs;
 	}
-	
-	
 
 	@Test
 	public void testSingleToolUsageExtractionReallyEarly() throws Exception
@@ -375,7 +372,7 @@ public class TestVideoPostProduction
 		handler.addNewPostAnimationMediaOutput(new ImagesWithAnimationToThumbnailOutput());
 		return handler;
 	}
-	
+
 	private PostProductionHandler makeBrowserMediaPostProductionHandler()
 	{
 		PostProductionHandler handler = new PostProductionHandler();

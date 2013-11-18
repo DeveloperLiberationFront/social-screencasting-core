@@ -210,7 +210,7 @@ public abstract class SQLDatabase extends DBAbstraction {
 	 */
 
 	@Override
-	public List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int duration)
+	public List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int durationInSeconds)
 	{
 		List<FileDateStructs> retVal = new ArrayList<>();
 
@@ -221,9 +221,9 @@ public abstract class SQLDatabase extends DBAbstraction {
 		sqlQueryBuilder.append(" AND video_start_time+duration>");
 		sqlQueryBuilder.append(timeStamp.getTime() / 1000);
 		sqlQueryBuilder.append(") OR ( video_start_time<");
-		sqlQueryBuilder.append((timeStamp.getTime() + duration * 2L) / 1000);
+		sqlQueryBuilder.append(timeStamp.getTime() / 1000L + durationInSeconds);
 		sqlQueryBuilder.append(" AND video_start_time+duration>");
-		sqlQueryBuilder.append((timeStamp.getTime() + duration * 2L) / 1000);
+		sqlQueryBuilder.append(timeStamp.getTime() / 1000L + durationInSeconds);
 		sqlQueryBuilder.append(") ORDER BY video_start_time");
 
 		try (ResultSet results = executeWithResults(sqlQueryBuilder.toString());)

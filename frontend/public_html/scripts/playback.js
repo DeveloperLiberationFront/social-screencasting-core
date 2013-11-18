@@ -111,7 +111,7 @@ function sliderMoved(event, ui) {
 
 function getImageForFrameNumber(frameNumber) {
     var retVal = '<img class="frame" src="';
-    retVal += $("#panel").data("toolName");
+    retVal += $("#panel").data("toolId");
     retVal += '/frame';
     if (frameNumber < 1000) {
         retVal += "0";

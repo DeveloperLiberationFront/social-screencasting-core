@@ -318,11 +318,11 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	{
 		setUpPostProductionHandler();
 		ToolUsage lastToolUsage = getLastInstanceOfToolUsage(pluginName, toolName);
-		
-		makeMediaForToolUsage(lastToolUsage);	//thow away list.  Clients of DatabaseQueryInterface don't need the files made
-		
+
+		makeMediaForToolUsage(lastToolUsage); // thow away list. Clients of DatabaseQueryInterface don't need the files made
+
 		return lastToolUsage;
-		
+
 	}
 
 	@Override
@@ -364,8 +364,8 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	{
 		if (!isDebug) // debug callers are expected to add their own handlers
 		{
-			//this.videoPostProductionHandler.addNewPostAnimationMediaOutput(new ImagesToGifOutput());
-			//this.videoPostProductionHandler.addNewPostAnimationMediaOutput(new ImagesToMiniGifOutput());
+			// this.videoPostProductionHandler.addNewPostAnimationMediaOutput(new ImagesToGifOutput());
+			// this.videoPostProductionHandler.addNewPostAnimationMediaOutput(new ImagesToMiniGifOutput());
 			this.videoPostProductionHandler.addNewPreAnimationMediaOutput(new PreAnimationImagesToBrowserAnimatedPackage());
 		}
 	}

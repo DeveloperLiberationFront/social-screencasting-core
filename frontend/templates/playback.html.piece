@@ -3,7 +3,7 @@
   <div id="overlay">
     <span>Click for Full Screen</span>
   </div>
-  <div id="panel" data-total-frames=${totalFrames} data-type="keystroke" data-tool-name="${toolName}">
+  <div id="panel" data-total-frames=${totalFrames} data-type="keystroke" data-tool-id="${toolId}">
 
     <div id="moduleControlPanel" class="ui-widget-content">
       <button class="playPause">
@@ -26,17 +26,17 @@
     </div>
 
     <#if keypress != "MENU">
-      <img class="keyAnimation full image" src="${toolName}/image.png"/>
-      <img class="keyAnimation blank image" src="${toolName}/image_un.png"/>
+      <img class="keyAnimation full image" src="${toolId}/image.png"/>
+      <img class="keyAnimation blank image" src="${toolId}/image_un.png"/>
 
-      <img class="keyAnimation full text" src="${toolName}/text.png"/>
-      <img class="keyAnimation blank text" src="${toolName}/text_un.png"/>
+      <img class="keyAnimation full text" src="${toolId}/text.png"/>
+      <img class="keyAnimation blank text" src="${toolId}/text_un.png"/>
 
-      <img class="keyAnimation full imageText" src="${toolName}/image_text.png"/>
-      <img class="keyAnimation blank imageText" src="${toolName}/image_text_un.png"/>
+      <img class="keyAnimation full imageText" src="${toolId}/image_text.png"/>
+      <img class="keyAnimation blank imageText" src="${toolId}/image_text_un.png"/>
     </#if>
 
-    <img class="frame" src="${toolName}/frame0000.png" />
+    <img class="frame" src="${toolId}/frame0000.png" />
   </div>
 </div>
 

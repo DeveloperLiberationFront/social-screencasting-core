@@ -90,8 +90,8 @@ public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesTo
 			BufferedImage activatedAnimation = animationSource.makeNewAnimationForKeyPresses(keyCodes, toolUsage.getToolKeyPresses());
 
 			String animationPrefix = animationSource.getAnimationTypeName();
-			File unactivatedAnimationFile = new File(newDir,animationPrefix+"_un.png");
-			File activatedAnimationFile = new File(newDir, animationPrefix+".png");
+			File unactivatedAnimationFile = new File(newDir, animationPrefix + "_un.png");
+			File activatedAnimationFile = new File(newDir, animationPrefix + ".png");
 			ImageIO.write(unactivatedAnimation, "png", unactivatedAnimationFile);
 			ImageIO.write(activatedAnimation, "png", activatedAnimationFile);
 		}

@@ -22,7 +22,7 @@ public class ThreadedAnimatedGifEncoder extends AnimatedGifEncoder
 
 	public ThreadedAnimatedGifEncoder()
 	{
-		//throw new RuntimeException("Not implemented yet");
+		// throw new RuntimeException("Not implemented yet");
 		this.workingThreadPool = Executors.newFixedThreadPool(1);
 
 		Thread backThread = new Thread(new Runnable() {
@@ -30,7 +30,7 @@ public class ThreadedAnimatedGifEncoder extends AnimatedGifEncoder
 			@Override
 			public void run()
 			{
-				while(true)
+				while (true)
 				{
 					try
 					{

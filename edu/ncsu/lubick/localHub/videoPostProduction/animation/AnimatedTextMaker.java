@@ -30,7 +30,7 @@ public class AnimatedTextMaker extends AbstractKeypressAnimationMaker {
 		graphics.fillRect(0, 0, width, height);
 		return image;
 	}
-	
+
 	@Override
 	public String getAnimationTypeName()
 	{

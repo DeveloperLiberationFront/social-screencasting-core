@@ -96,7 +96,7 @@ public class KeyPressAnimationFactory
 		@Override
 		public void drawAnimatedSegment(Graphics g, BufferedImage img)
 		{// do nothing
-		} 
+		}
 	}
 
 }

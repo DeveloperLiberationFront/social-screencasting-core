@@ -231,7 +231,8 @@ public class PostProductionHandler
 		}
 	}
 
-	private List<File> extractDemoVideoToFile(InputStream inputStream, String fileNameStem) throws IOException, MediaEncodingException, PostProductionAnimationException
+	private List<File> extractDemoVideoToFile(InputStream inputStream, String fileNameStem) throws IOException, MediaEncodingException,
+			PostProductionAnimationException
 	{
 		imageWriter.reset();
 		List<File> createdFiles = new ArrayList<>();
@@ -246,7 +247,7 @@ public class PostProductionHandler
 		if (postAnimationMediaOutputs.size() > 0)
 		{
 			addAnimationToImagesInScratchFolder();
-			
+
 			createdFiles.addAll(handleAnimationPostProduction(fileNameStem));
 		}
 		else
@@ -289,7 +290,7 @@ public class PostProductionHandler
 
 		for (ImagesWithAnimationToMediaOutput mediaOutput : postAnimationMediaOutputs)
 		{
-			createdFiles.add(mediaOutput.combineImageFilesToMakeMedia(fileName));		//throws MediaEncodingException if any problem
+			createdFiles.add(mediaOutput.combineImageFilesToMakeMedia(fileName)); // throws MediaEncodingException if any problem
 			logger.info(mediaOutput.getMediaTypeInfo() + " Rendered");
 		}
 		return createdFiles;

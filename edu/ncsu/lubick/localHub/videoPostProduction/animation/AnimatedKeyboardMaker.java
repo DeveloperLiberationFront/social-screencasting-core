@@ -28,13 +28,10 @@ public class AnimatedKeyboardMaker extends AbstractKeypressAnimationMaker {
 		return img;
 	}
 
-
 	@Override
 	public String getAnimationTypeName()
 	{
 		return "image";
 	}
-
-
 
 }

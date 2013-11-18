@@ -54,7 +54,7 @@ public class ImagesWithAnimationToVideoOutput extends AbstractImagesToMediaOutpu
 			logger.debug("FFMPEG exited with state " + processReturnValue);
 			if (processReturnValue != 0)
 			{
-				logger.info("Non zero return value from FFMPEG: "+processReturnValue);
+				logger.info("Non zero return value from FFMPEG: " + processReturnValue);
 			}
 		}
 		catch (InterruptedException e)

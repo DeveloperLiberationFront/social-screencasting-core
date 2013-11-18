@@ -89,7 +89,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		}
 
 		ToolUsage lastToolUsage = null;
-		
+
 		try
 		{
 			lastToolUsage = this.databaseLink.extractMediaForLastUsageOfTool(pluginName, toolName);
@@ -99,18 +99,18 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 			respondWithError(baseRequest, response, e);
 			return;
 		}
-		
+
 		String folderName = PostProductionHandler.makeFileNameStemForToolPluginMedia(pluginName, toolName);
 		File mediaDir = new File(folderName);
 		if (!mediaDir.exists() || !mediaDir.isDirectory())
 		{
-			logger.error("problem with media dir "+mediaDir);
+			logger.error("problem with media dir " + mediaDir);
 			baseRequest.setHandled(true);
 			return;
 		}
 		int numFrames = countNumFrames(mediaDir);
-		
-		processTemplateWithNameKeysAndNumFrames(response, lastToolUsage.getToolKeyPresses(), mediaDir.getName(), numFrames);
+
+		processTemplateWithNameKeysAndNumFrames(response, lastToolUsage.getToolKeyPresses(), mediaDir.getName(), toolName, numFrames);
 		baseRequest.setHandled(true);
 	}
 
@@ -129,28 +129,28 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 	{
 		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
 		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
-		
+
 		String folderName = PostProductionHandler.makeFileNameStemForToolPluginMedia(pluginName, toolName);
 		File mediaDir = new File(folderName);
 
-		logger.debug("If media folder existed, it would be called "+mediaDir);
+		logger.debug("If media folder existed, it would be called " + mediaDir);
 
 		if (mediaDir.exists() && mediaDir.isDirectory())
 		{
-			
+
 			if (!mediaDir.exists() || !mediaDir.isDirectory())
 			{
-				logger.error("problem with media dir "+mediaDir);
+				logger.error("problem with media dir " + mediaDir);
 				baseRequest.setHandled(true);
 				return;
 			}
 			int numFrames = countNumFrames(mediaDir);
 			ToolUsage lastToolUsage = databaseLink.getLastInstanceOfToolUsage(pluginName, toolName);
-			processTemplateWithNameKeysAndNumFrames(response, lastToolUsage.getToolKeyPresses(), mediaDir.getName(), numFrames);
+			processTemplateWithNameKeysAndNumFrames(response, lastToolUsage.getToolKeyPresses(), mediaDir.getName(), toolName, numFrames);
 		}
 		else if (mediaDir.exists() && !mediaDir.isDirectory())
 		{
-			respondWithError(baseRequest, response, new MediaEncodingException("mediaDir was not directory: "+mediaDir));
+			respondWithError(baseRequest, response, new MediaEncodingException("mediaDir was not directory: " + mediaDir));
 			return;
 		}
 		else
@@ -162,12 +162,6 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 			dataModel.put("pluginName", pluginName);
 			processTemplate(response, dataModel, "videoDoesNotExist.html.piece");
 		}
-		
-		
-	//	String keypress = "MENU";
-	//	String toolName = "Testing1388763334";
-	//	String folderName = PostProductionHandler.makeFileNameForToolPluginMedia("Testing", "WhomboTool #1");
-		
 
 		baseRequest.setHandled(true);
 
@@ -177,7 +171,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 	{
 		int count = 0;
 		String[] fileNames = mediaDir.list();
-		for(String fileName:fileNames)
+		for (String fileName : fileNames)
 		{
 			if (fileName.startsWith("frame"))
 			{
@@ -187,10 +181,12 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		return count;
 	}
 
-	public void processTemplateWithNameKeysAndNumFrames(HttpServletResponse response, String keypress, String toolName, int numFrames) throws IOException
+	public void processTemplateWithNameKeysAndNumFrames(HttpServletResponse response, String keypress, String internalToolId, String toolName, int numFrames)
+			throws IOException
 	{
 		HashMap<Object, Object> templateData = new HashMap<Object, Object>();
-		
+
+		templateData.put("toolId", internalToolId);
 		templateData.put("toolName", toolName);
 		templateData.put("keypress", keypress);
 		templateData.put("totalFrames", numFrames);

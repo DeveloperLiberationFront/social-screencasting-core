@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ShortcutsToKeyCodesConverter
 {
-	private static final String KEY_SEPERATORS = "[,+]"; 
+	private static final String KEY_SEPERATORS = "[,+]";
 	private static final String REGEX_FUNCTION_KEYS = "F[0-9]+";
 	private static final String SHIFT = "SHIFT";
 	private static final String CONTROL = "CTRL";
@@ -18,7 +18,6 @@ public class ShortcutsToKeyCodesConverter
 	public int[] convert(String keyCommandString)
 	{
 		String uppercaseString = keyCommandString.toUpperCase().trim();
-		
 
 		String[] individualKeys = splitOutCommands(uppercaseString);
 
@@ -30,8 +29,6 @@ public class ShortcutsToKeyCodesConverter
 		}
 		return retVal;
 	}
-
-
 
 	// Can't do a simple split because of things like CTRL+,
 	// So, we will go one by one through each slot, checking to see if the

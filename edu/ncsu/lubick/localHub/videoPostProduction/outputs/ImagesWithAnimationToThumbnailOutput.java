@@ -39,12 +39,12 @@ public class ImagesWithAnimationToThumbnailOutput extends AbstractImagesToMediaO
 
 		try
 		{
-		BufferedImage imageToResize = ImageIO.read(fileToCopy);
-		BufferedImage shrunkImage = shrinkImage(imageToResize);
+			BufferedImage imageToResize = ImageIO.read(fileToCopy);
+			BufferedImage shrunkImage = shrinkImage(imageToResize);
 
-		ImageIO.write(shrunkImage, THUMBNAIL_EXTENSION, newGifFile);
+			ImageIO.write(shrunkImage, THUMBNAIL_EXTENSION, newGifFile);
 
-		return newGifFile;
+			return newGifFile;
 		}
 		catch (IOException e)
 		{

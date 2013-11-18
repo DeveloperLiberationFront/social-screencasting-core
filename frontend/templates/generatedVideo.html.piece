@@ -1,6 +1,0 @@
-<div class="moreInfoTitle">${toolName}</div>
-<a class="fancybox-thumbs" data-fancybox-group="thumb" href="${bigAnimatedGif}" title="${toolName}">
-	<img src="${miniAnimatedGif}" alt="" />
-</a>
-<div>This is the space for other metadata</div>
-
