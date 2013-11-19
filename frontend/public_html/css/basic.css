@@ -73,3 +73,7 @@ td, tr, th{
     border: 3px solid #ffa729;
 	margin:0;
 }
+
+#tabs{
+	display:none;
+}

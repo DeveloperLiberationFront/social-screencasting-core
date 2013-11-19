@@ -34,6 +34,7 @@ function doesVideoExistHuh() {
 }
 
 $(document).ready(function () {
+	$( "#tabs" ).tabs();
     //handles the click on the view buttons to see if a video file exists
     $(".clickMe").on('click', doesVideoExistHuh);
 

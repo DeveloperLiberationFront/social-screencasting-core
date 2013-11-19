@@ -60,6 +60,12 @@
   </div>
 </div>
 
-<div id="settingsMenu" >Hello world</div>
-
-<div>This is the space for other metadata</div>
+<div></div>
+<div>
+<#if viewMoreOptions??>
+</br>View More Usages</br>
+	<#list viewMoreOptions as option>
+		<button class="viewOther ${option.additionalClass}" data-display-option="${option.number}">${option.text}</button>
+	</#list>
+</#if>
+</div>

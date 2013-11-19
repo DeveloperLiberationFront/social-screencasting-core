@@ -102,12 +102,6 @@
 	cursor:pointer;
 }
 
-#settingsMenu{
-	display:none;
-	width:200px;
-	height:200px;
-	background-color:white;
-}
 
 .startLabel {
 	position: relative;
@@ -115,4 +109,22 @@
 	height: 40px;
 	top: -20px;
 	background-color: green;
+}
+
+.viewOther{
+    color: #ffa729;
+    background-color: white;
+	margin:1px;
+	font-size:16px;
+	padding: 5px;
+}
+
+.viewOther:hover{
+	border: 3px solid #ffa729;
+	margin:0;
+}
+
+.viewOther:active, .viewOther.activated{
+	border: 3px solid black;
+	margin:0;
 }

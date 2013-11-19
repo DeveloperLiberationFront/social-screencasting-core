@@ -1,32 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Results for plugin query</title>
-  <link rel="stylesheet" href="css/basic.css" />
-  <link rel="stylesheet" href="css/loading.css" />
-  <link rel="stylesheet" href="css/playback.css" />
+    <title>Results for plugin query</title>
+    <link rel="stylesheet" href="css/basic.css" />
+    <link rel="stylesheet" href="css/loading.css" />
+    <link rel="stylesheet" href="css/playback.css" />
 </head>
 <body>
-  <h1>The following tool usages are for plugin "${plugin}"</h1>
+    <h1>The following tool usages are for plugin "${plugin}"</h1>
 
-  <table border=1 id="resultsTable">
-  <tr><th>Tool Name<th>Number of Occurrences<th>View More Info
+    <table border="1" id="resultsTable">
+        <tr>
+            <th>
+            Tool Name<th>
+            Number of Occurrences<th>
+            View More Info
   <#list toolsAndCounts as thisToolCount>
-  <tr><td>${thisToolCount.toolName}<td>${thisToolCount.toolCount}<td><button class="clickMe" data-tool-name= "${thisToolCount.toolName}" data-plugin-name="${plugin}" > click to view
+  <tr>
+      <td>
+      ${thisToolCount.toolName}<td>
+      ${thisToolCount.toolCount}<td>
+          <button class="clickMe" data-tool-name="${thisToolCount.toolName}" data-plugin-name="${plugin}">
+          click to view
   </#list>
-</table>
-<div id="moreInfo">
-Select a tool for more info.
-</div>
+    </table>
+    <div id="moreInfo">
+        Select a tool for more info.
+    </div>
+	
 
-<div class="modal"><!-- Place at bottom of page --></div>
+    <div class="modal">
+        <!-- Place at bottom of page -->
+    </div>
 
-<script src="jquery/jquery.min.js"></script>
-<script src="scripts/requestMoreInfo.js"></script>
+    <script src="jquery/jquery.min.js"></script>
+    <script src="scripts/requestMoreInfo.js"></script>
 
-<link rel="stylesheet" href="jquery/jquery-ui.min.css">
-<script src="jquery/jquery-ui.min.js"></script>
-<script src="scripts/playback.js"></script>
+    <link rel="stylesheet" href="jquery/jquery-ui.min.css">
+    <script src="jquery/jquery-ui.min.js"></script>
+    <script src="scripts/playback.js"></script>
 
 </body>
-</html>  
+</html>

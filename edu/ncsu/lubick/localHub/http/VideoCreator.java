@@ -2,7 +2,9 @@ package edu.ncsu.lubick.localHub.http;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -15,11 +17,16 @@ import org.eclipse.jetty.server.Request;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
-import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToGifOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToMiniGifOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToVideoOutput;
+import freemarker.template.SimpleNumber;
+import freemarker.template.SimpleScalar;
+import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
 
 public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Handler {
 
@@ -43,7 +50,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 	@Override
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException
-	{
+			{
 		if (!checkIfWeHandleThisRequest(target))
 		{
 			return;
@@ -60,7 +67,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 			logger.info("I don't know how to handle a GET like this");
 		}
 
-	}
+			}
 
 	private void respondToPost(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
@@ -114,7 +121,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		baseRequest.setHandled(true);
 	}
 
-	public void respondWithError(Request baseRequest, HttpServletResponse response, MediaEncodingException e) throws IOException
+	private void respondWithError(Request baseRequest, HttpServletResponse response, MediaEncodingException e) throws IOException
 	{
 		logger.fatal("Error caught when video making requested: ", e);
 		response.getWriter().println("<span>Internal Video Creation Error. </span>");
@@ -181,8 +188,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		return count;
 	}
 
-	public void processTemplateWithNameKeysAndNumFrames(HttpServletResponse response, String keypress, String internalToolId, String toolName, int numFrames)
-			throws IOException
+	private void processTemplateWithNameKeysAndNumFrames(HttpServletResponse response, String keypress, String internalToolId, String toolName, int numFrames) throws IOException
 	{
 		HashMap<Object, Object> templateData = new HashMap<Object, Object>();
 
@@ -190,11 +196,17 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		templateData.put("toolName", toolName);
 		templateData.put("keypress", keypress);
 		templateData.put("totalFrames", numFrames);
+
+		List<DisplayOtherMediaOption> otherOptions = new ArrayList<>();
+		otherOptions.add(new DisplayOtherMediaOption(true,1,"Most Recent"));
+		otherOptions.add(new DisplayOtherMediaOption(false,2, "2nd Most Recent"));
+
+		templateData.put("viewMoreOptions", otherOptions);
 		processTemplate(response, templateData, "playback.html.piece");
 	}
 
-	public void respondWithGifsAndMetadata(HttpServletResponse response, String toolName, String bigGifRelativeName, String miniGifRelativeName)
-			throws IOException
+	@Deprecated
+	private void respondWithGifsAndMetadata(HttpServletResponse response, String toolName, String bigGifRelativeName, String miniGifRelativeName) throws IOException
 	{
 		Map<Object, Object> dataModel = new HashMap<Object, Object>();
 		dataModel.put("toolName", toolName);
@@ -204,17 +216,20 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		processTemplate(response, dataModel, "generatedVideo.html.piece");
 	}
 
-	public String getNameForToolVideo(String pluginName, String toolName)
+	@Deprecated
+	private String getNameForToolVideo(String pluginName, String toolName)
 	{
 		return PostProductionHandler.makeFileNameStemForToolPluginMedia(pluginName, toolName) + "." + ImagesWithAnimationToVideoOutput.VIDEO_EXTENSION;
 	}
 
-	public String getNameForToolFullGif(String pluginName, String toolName)
+	@Deprecated
+	private String getNameForToolFullGif(String pluginName, String toolName)
 	{
 		return PostProductionHandler.makeFileNameStemForToolPluginMedia(pluginName, toolName) + "." + ImagesWithAnimationToGifOutput.GIF_EXTENSION;
 	}
 
-	public String getNameForToolMiniGif(String pluginName, String toolName)
+	@Deprecated
+	private String getNameForToolMiniGif(String pluginName, String toolName)
 	{
 		return PostProductionHandler.makeFileNameStemForToolPluginMedia(pluginName, toolName) + "." + ImagesWithAnimationToMiniGifOutput.MINI_GIF_EXTENSION;
 	}
@@ -223,6 +238,47 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 	protected Logger getLogger()
 	{
 		return logger;
+	}
+
+	private class DisplayOtherMediaOption implements TemplateHashModel
+	{
+		boolean isActivated;
+		int number;
+		String text;
+
+
+		public DisplayOtherMediaOption(boolean isActivated, int number, String text)
+		{
+			this.isActivated = isActivated;
+			this.number = number;
+			this.text = text;
+		}
+
+		@Override
+		public TemplateModel get(String queryItem) throws TemplateModelException
+		{
+			switch (queryItem)
+			{
+			case "additionalClass":
+				if (isActivated)
+				{
+					return new SimpleScalar("activated");
+				}
+				return new SimpleScalar("");
+			case "number":
+				return new SimpleNumber(number);
+			case "text":
+				return new SimpleScalar(text);
+			}
+			return null;
+		}
+
+		@Override
+		public boolean isEmpty() throws TemplateModelException
+		{
+			return false;
+		}
+
 	}
 
 }
