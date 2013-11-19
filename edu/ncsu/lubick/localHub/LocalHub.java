@@ -313,6 +313,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		}
 	}
 
+	@Deprecated
 	@Override
 	public ToolUsage extractMediaForLastUsageOfTool(String pluginName, String toolName) throws MediaEncodingException
 	{
@@ -325,21 +326,44 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 
 	}
 
+	@Deprecated
 	@Override
 	public ToolUsage getLastInstanceOfToolUsage(String pluginName, String toolName)
 	{
 		return databaseManager.getLastInstanceOfToolUsage(pluginName, toolName);
 	}
 
-	public List<File> extractMediaForLastUsageOfToolAndReturn(String pluginName, String toolName) throws MediaEncodingException
+	@Override
+	public List<ToolUsage> getLastNInstancesOfToolUsage(int n, String pluginName, String toolName)
+	{
+		return databaseManager.getLastNInstancesOfToolUsage(n, pluginName, toolName);
+	}
+
+	@Override
+	public List<ToolUsage> extractMediaForLastNUsagesOfTool(int n, String pluginName, String toolName) throws MediaEncodingException
+	{
+		setUpPostProductionHandler();
+		List<ToolUsage> toolUsages = getLastNInstancesOfToolUsage(n, pluginName, toolName);
+
+		for (ToolUsage tu:toolUsages)
+		{
+			makeMediaForToolUsage(tu); // thow away list. Clients of DatabaseQueryInterface don't need the files made
+		}
+
+		return toolUsages;
+	}
+
+	//for testing
+	protected List<File> extractMediaForLastUsageOfToolAndReturnFiles(String pluginName, String toolName) throws MediaEncodingException
 	{
 		setUpPostProductionHandler();
 		ToolUsage lastToolUsage = getLastInstanceOfToolUsage(pluginName, toolName);
 
 		return makeMediaForToolUsage(lastToolUsage);
 	}
+	
 
-	public List<File> makeMediaForToolUsage(ToolUsage toolUsage) throws MediaEncodingException
+	private List<File> makeMediaForToolUsage(ToolUsage toolUsage) throws MediaEncodingException
 	{
 		List<FileDateStructs> filesToload = databaseManager.getVideoFilesLinkedToTimePeriod(toolUsage);
 
@@ -349,6 +373,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 			logger.error("There were no video files that match the tool usage");
 			throw new MediaEncodingException("There were no video files that match the tool usage");
 		}
+		videoPostProductionHandler.reset();
 		videoPostProductionHandler.loadFile(filesToload.get(0).file);
 		videoPostProductionHandler.setCurrentFileStartTime(filesToload.get(0).startTime);
 
@@ -526,7 +551,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		@Override
 		public List<File> extractVideoForLastUsageOfTool(String pluginName, String toolName) throws MediaEncodingException
 		{
-			return hubToDebug.extractMediaForLastUsageOfToolAndReturn(pluginName, toolName);
+			return hubToDebug.extractMediaForLastUsageOfToolAndReturnFiles(pluginName, toolName);
 		}
 
 		@Override

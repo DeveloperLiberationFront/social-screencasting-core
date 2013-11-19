@@ -15,7 +15,10 @@ public abstract class DBAbstraction
 
 	public abstract void close();
 
+	@Deprecated
 	public abstract ToolUsage getLastInstanceOfToolUsage(String pluginName, String toolName);
+
+	public abstract List<ToolUsage> getLastNInstancesOfToolUsage(int n, String pluginName, String toolName);
 
 	public abstract void storeVideoFile(File newVideoFile, Date videoStartTime, int durationOfClip);
 

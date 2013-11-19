@@ -180,7 +180,7 @@ public class PostProductionHandler
 			logger.info("Fast forwarding to the appropriate time");
 			fastFowardStreamToTime(inputStream, timeToLookFor); // throws VideoEncodingException if there was a problem prior to the important bits
 
-			String newFileNameStem = makeFileNameStemForToolPluginMedia(specificToolUse.getPluginName(), specificToolUse.getToolName());
+			String newFileNameStem = makeFileNameStemNoDateForToolPluginMedia(specificToolUse);
 			logger.info("Beginning the extraction of the frames");
 			createdMediaFilesToReturn = extractDemoVideoToFile(inputStream, newFileNameStem);
 
@@ -362,7 +362,34 @@ public class PostProductionHandler
 			logger.info("Got a null toolname, recovering with empty string");
 			toolName = "";
 		}
-		return "renderedVideos\\" + pluginName + createNumberForVideoFile(toolName);
+		return "renderedVideos\\" + pluginName + createNumberForVideoFile(toolName) + "_";
+	}
+
+	@Deprecated
+	public static String makeFileNameStemForToolPluginMedia(String pluginName, String toolName, Date toolTime)
+	{
+		if (toolName == null)
+		{
+			logger.info("Got a null toolname, recovering with empty string");
+			toolName = "";
+		}
+		return "renderedVideos\\" + pluginName + createNumberForVideoFile(toolName) + "_"+ toolTime.getTime();
+	}
+	
+	public static String makeFileNameStemNoDateForToolPluginMedia(ToolUsage tu)
+	{
+		if (tu == null)
+		{
+			logger.info("Got a null toolusage, recovering with empty string");
+			return "renderedVideos\\";
+		}
+		return "renderedVideos\\" + tu.getPluginName() + createNumberForVideoFile(tu);
+	}
+
+	private static String createNumberForVideoFile(ToolUsage tu)
+	{
+		int startingPoint = createNumberForVideoFile(tu.getToolName());
+		return ""+startingPoint +"_"+tu.getTimeStamp().getTime();
 	}
 
 	private static int createNumberForVideoFile(String toolName)
@@ -434,6 +461,14 @@ public class PostProductionHandler
 	public Set<PreAnimationImagesToMediaOutput> getPreAnimationMediaOutputs()
 	{
 		return new HashSet<>(this.preAnimationMediaOutputs);
+	}
+
+	public void reset()
+	{
+		this.currentCapFile = null;
+		this.queueOfOverloadFiles.clear();
+		this.capFileStartTime = null;
+		
 	}
 
 }

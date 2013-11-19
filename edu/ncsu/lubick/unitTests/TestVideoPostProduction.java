@@ -78,7 +78,7 @@ public class TestVideoPostProduction
 	@Test
 	public void testSingleToolUsageExtractionBrowserMedia() throws Exception
 	{
-		String mediaDirName = PostProductionHandler.makeFileNameStemForToolPluginMedia(TEST_PLUGIN_NAME, WHOMBO_TOOL_1);
+		String mediaDirName = PostProductionHandler.makeFileNameStemForToolPluginMedia(TEST_PLUGIN_NAME, WHOMBO_TOOL_1, new Date());
 		File expectedOutputDir = new File(mediaDirName);
 		if (expectedOutputDir.exists())
 		{

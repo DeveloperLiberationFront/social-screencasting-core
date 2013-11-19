@@ -3,6 +3,8 @@ package edu.ncsu.lubick.localHub.http;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,11 +29,16 @@ import freemarker.template.TemplateModelException;
 
 public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Handler {
 
+	private static final String POST_COMMAND_NTH_USAGE = "nthUsage";
 	private static final String POST_COMMAND_PLUGIN_NAME = "pluginName";
 	private static final String POST_COMMAND_IS_VIDEO_MADE_FOR_TOOL_USAGE = "isVideoAlreadyMade";
 	private static final String POST_COMMAND_MAKE_VIDEO_FOR_TOOL_STREAM = "makeVideo";
 	private static final String POST_COMMAND_TOOL_NAME = "toolName";
+	private static final String POST_COMMAND_SWAP_MEDIA = "changeToOtherSource";
 	private static Logger logger;
+	
+	private static final File MEDIA_OUTPUT_FOLDER = new File("renderedVideos");
+	
 
 	// static initializer
 	static
@@ -45,9 +52,8 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 	}
 
 	@Override
-	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-			throws IOException, ServletException
-			{
+	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+	{
 		if (!checkIfWeHandleThisRequest(target))
 		{
 			return;
@@ -64,7 +70,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 			logger.info("I don't know how to handle a GET like this");
 		}
 
-			}
+	}
 
 	private void respondToPost(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
@@ -79,6 +85,21 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		{
 			makeVideo(baseRequest, request, response);
 		}
+		else if (request.getParameter("thingToDo").equals(POST_COMMAND_SWAP_MEDIA))
+		{
+			respondToSwapMedia(baseRequest, request, response);
+		}
+	}
+
+	private void respondToSwapMedia(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
+	{
+		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
+		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
+		Integer nthUsage = Integer.valueOf(request.getParameter(POST_COMMAND_NTH_USAGE));
+
+		serveUpNthUsageOfMediaIfExists(response, new InternalToolRepresentation(toolName, pluginName, null, nthUsage));
+		
+		baseRequest.setHandled(true);
 	}
 
 	private void makeVideo(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
@@ -92,11 +113,9 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 			return;
 		}
 
-		ToolUsage lastToolUsage = null;
-
 		try
 		{
-			lastToolUsage = this.databaseLink.extractMediaForLastUsageOfTool(pluginName, toolName);
+			this.databaseLink.extractMediaForLastNUsagesOfTool(3, pluginName, toolName);
 		}
 		catch (MediaEncodingException e)
 		{
@@ -104,23 +123,11 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 			return;
 		}
 
-		String folderName = PostProductionHandler.makeFileNameStemForToolPluginMedia(pluginName, toolName);
-		File mediaDir = new File(folderName);
-		if (!mediaDir.exists() || !mediaDir.isDirectory())
-		{
-			logger.error("problem with media dir " + mediaDir);
-			baseRequest.setHandled(true);
-			return;
-		}
-		int numFrames = countNumFrames(mediaDir);
-		
-		InternalToolRepresentation itr = new InternalToolRepresentation(toolName, 1, mediaDir.getName());
-
-		processTemplateWithNameKeysAndNumFrames(response, lastToolUsage.getToolKeyPresses(), itr, numFrames);
+		serveUpNthUsageOfMediaIfExists(response, new InternalToolRepresentation(toolName, pluginName, null, 0));
 		baseRequest.setHandled(true);
 	}
 
-	private void respondWithError(Request baseRequest, HttpServletResponse response, MediaEncodingException e) throws IOException
+	private void respondWithError(Request baseRequest, HttpServletResponse response, Exception e) throws IOException
 	{
 		logger.fatal("Error caught when video making requested: ", e);
 		response.getWriter().println("<span>Internal Video Creation Error. </span>");
@@ -136,43 +143,67 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
 		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
 
+		serveUpNthUsageOfMediaIfExists(response, new InternalToolRepresentation(toolName, pluginName, null, 0));
+
+		baseRequest.setHandled(true);
+
+	}
+
+	private void serveUpNthUsageOfMediaIfExists(HttpServletResponse response, InternalToolRepresentation itr) throws IOException
+	{
+		
+		String pluginName = itr.humanPluginName;
+		String toolName = itr.humanToolName;
 		String folderName = PostProductionHandler.makeFileNameStemForToolPluginMedia(pluginName, toolName);
-		File mediaDir = new File(folderName);
-
-		logger.debug("If media folder existed, it would be called " + mediaDir);
-
-		if (mediaDir.exists() && mediaDir.isDirectory())
+		
+		List<File> mediaFolders = getFoldersPrefixedWith(folderName);
+		
+		if (itr.nthMostRecent >= mediaFolders.size())
 		{
-			if (!mediaDir.exists() || !mediaDir.isDirectory())
-			{
-				logger.error("problem with media dir " + mediaDir);
-				baseRequest.setHandled(true);
-				return;
-			}
-			int numFrames = countNumFrames(mediaDir);
-			ToolUsage lastToolUsage = databaseLink.getLastInstanceOfToolUsage(pluginName, toolName);
-			
-			InternalToolRepresentation itr = new InternalToolRepresentation(toolName, 1, mediaDir.getName());
-			
-			processTemplateWithNameKeysAndNumFrames(response, lastToolUsage.getToolKeyPresses(), itr, numFrames);
+			itr.nthMostRecent = mediaFolders.size() - 1;
 		}
-		else if (mediaDir.exists() && !mediaDir.isDirectory())
+		
+		if (mediaFolders.size() > 0)
 		{
-			respondWithError(baseRequest, response, new MediaEncodingException("mediaDir was not directory: " + mediaDir));
-			return;
+			File nthMediaDir = mediaFolders.get(itr.nthMostRecent);	
+			int numFrames = countNumFrames(nthMediaDir);
+			List<ToolUsage> toolUsages = databaseLink.getLastNInstancesOfToolUsage(mediaFolders.size(), pluginName, toolName);
+					
+			itr.directory = nthMediaDir.getName();
+			processTemplateWithNameKeysAndNumFrames(response, toolUsages.get(itr.nthMostRecent).getToolKeyPresses(), itr, numFrames);
 		}
 		else
 		{
-			logger.debug("It does not");
+			logger.debug("No generated media found");
 
 			Map<Object, Object> dataModel = new HashMap<Object, Object>();
 			dataModel.put("toolName", toolName);
 			dataModel.put("pluginName", pluginName);
 			processTemplate(response, dataModel, "videoDoesNotExist.html.piece");
 		}
+	}
 
-		baseRequest.setHandled(true);
+	private List<File> getFoldersPrefixedWith(String folderName)
+	{
+		File[] outputMediaTypes = MEDIA_OUTPUT_FOLDER.listFiles();
+		Arrays.sort(outputMediaTypes, new Comparator<File>() {
 
+			@Override
+			public int compare(File o1, File o2)
+			{
+				return o2.getName().compareTo(o1.getName());		//sort it backwards so that the bigger numbers (most recent dates)
+																	//come first
+			}
+		});
+		List<File> files = new ArrayList<>();
+		for(File f: outputMediaTypes)
+		{
+			if (f.isDirectory() && f.getName().startsWith(folderName))
+			{
+				files.add(f);
+			}
+		}
+		return files;
 	}
 
 	private int countNumFrames(File mediaDir)
@@ -216,20 +247,20 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 	public List<DisplayOtherMediaOption> makeMoreOptions(int currentlySelected, int totalMediaOptions)
 	{
 		List<DisplayOtherMediaOption> otherOptions = new ArrayList<>();
-		otherOptions.add(new DisplayOtherMediaOption(currentlySelected == 1, 1, "Most Recent"));
+		otherOptions.add(new DisplayOtherMediaOption(currentlySelected == 0, 0, "Most Recent"));
+		if (totalMediaOptions > 1)
+		{
+			otherOptions.add(new DisplayOtherMediaOption(currentlySelected == 1 ,1, "2nd Most Recent"));
+		}
 		if (totalMediaOptions > 2)
 		{
-			otherOptions.add(new DisplayOtherMediaOption(currentlySelected == 2 ,2, "2nd Most Recent"));
+			otherOptions.add(new DisplayOtherMediaOption(currentlySelected == 2 ,2, "3rd Most Recent"));
 		}
 		if (totalMediaOptions > 3)
 		{
-			otherOptions.add(new DisplayOtherMediaOption(currentlySelected == 3 ,3, "3rd Most Recent"));
-		}
-		if (totalMediaOptions > 4)
-		{
-			for (int i = 4;i<totalMediaOptions;i++)
+			for (int i = 3;i<totalMediaOptions;i++)
 			{
-				otherOptions.add(new DisplayOtherMediaOption(currentlySelected == i ,i, ""+i+"th"));
+				otherOptions.add(new DisplayOtherMediaOption(currentlySelected == i ,i, ""+(i+1)+"th"));
 			}
 		}
 		return otherOptions;
@@ -290,12 +321,14 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		private String humanToolName;
 		private int nthMostRecent;
 		private String directory;
+		private String humanPluginName;
 
-		public InternalToolRepresentation(String toolName, int nthMostRecent, String directory)
+		public InternalToolRepresentation(String toolName, String pluginName, String directory, int nthMostRecent)
 		{
 			this.humanToolName = toolName;
 			this.nthMostRecent = nthMostRecent;
 			this.directory = directory;
+			this.humanPluginName = pluginName;
 		}
 		
 		@Override
