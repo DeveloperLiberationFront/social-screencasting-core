@@ -143,7 +143,6 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 
 		if (mediaDir.exists() && mediaDir.isDirectory())
 		{
-
 			if (!mediaDir.exists() || !mediaDir.isDirectory())
 			{
 				logger.error("problem with media dir " + mediaDir);

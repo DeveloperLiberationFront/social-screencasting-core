@@ -33,6 +33,18 @@ function doesVideoExistHuh() {
     //or some html prompting the user to make the media
 }
 
+function swapMediaPlayback() {
+	stopFramePlayback();
+    $("#moreInfo").removeClass("hidden");
+    $.post("makeVideo", {
+        thingToDo: "changeToOtherSource",
+        pluginName: $(this).data("pluginName"),
+        toolName: $(this).data("toolName"),
+		nthUsage: $(this).data("displayOption")
+    }, addResponseHTMLToWindow);
+    //this will return the html to view the media
+}
+
 $(document).ready(function () {
 	$( "#tabs" ).tabs();
     //handles the click on the view buttons to see if a video file exists
@@ -40,16 +52,10 @@ $(document).ready(function () {
 
     $("#moreInfo").on('click', '.requestGeneration', requestGenerationOfMedia);
 	
-	//figure out where it would be normally
+	$("#moreInfo").on('click', '.viewOther', swapMediaPlayback);
+	
+	//figure out where the more info panel would be normally
 	elementPosition = $('#moreInfo').offset();
 	//fix it there for scrolling
 	$('#moreInfo').css('position','fixed').css('top',elementPosition.top).css('left',elementPosition.left);
 });
-
-/*$(window).scroll(function(){
-        if($(window).scrollTop() > elementPosition.top){
-            $('#moreInfo').css('position','fixed').css('top',elementPosition.top).css('left',elementPosition.left);
-        } else {
-            $('#moreInfo').css('position','static');
-        }    
-});*/

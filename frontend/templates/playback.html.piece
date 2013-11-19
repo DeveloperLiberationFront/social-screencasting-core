@@ -11,17 +11,17 @@
         <img class="playbackCommand pauseImage pause" src="/images/playback/pause.svg" />
       </button>
       <div class="settings" >
-		<#if keypress != "MENU">
-    <img class="animationSelection" src="/images/imageOnly.png" />
-	<img class="animationSelection" src="/images/textOnly.png" />
-	<img class="animationSelection" src="/images/imageAndText.png" />
-	</#if>
-	<img class="animationSelection" src="/images/none.png" />
-	  </div>
+        <#if keypress != "MENU">
+          <img class="animationSelection" src="/images/imageOnly.png" />
+          <img class="animationSelection" src="/images/textOnly.png" />
+          <img class="animationSelection" src="/images/imageAndText.png" />
+        </#if>
+        <img class="animationSelection" src="/images/none.png" />
+      </div>
       <div id="dockedSliderHolder">
         <div id="dockedSlider" class="slider">
-			<label class="startLabel" title="The tool gets used here">&nbsp;</label>
-		</div>
+          <label class="startLabel" title="The tool gets used here">&nbsp;</label>
+        </div>
       </div>
     </div>
 
@@ -46,26 +46,26 @@
     <img class="playbackCommand pauseImage pause" src="/images/playback/pause.svg" />
   </button>
   <div class="settings" >
-  <#if keypress != "MENU">
-    <img class="animationSelection" src="/images/imageOnly.png" />
-	<img class="animationSelection" src="/images/textOnly.png" />
-	<img class="animationSelection" src="/images/imageAndText.png" />
-	</#if>
-	<img class="animationSelection" src="/images/none.png" />
+    <#if keypress != "MENU">
+      <img class="animationSelection" src="/images/imageOnly.png" />
+      <img class="animationSelection" src="/images/textOnly.png" />
+      <img class="animationSelection" src="/images/imageAndText.png" />
+    </#if>
+    <img class="animationSelection" src="/images/none.png" />
   </div>
   <div id="staticSliderHolder">
     <div id="staticSlider" class="slider">
-		<label class="startLabel" title="The tool gets used here">&nbsp;</label>
-	</div>
+      <label class="startLabel" title="The tool gets used here">&nbsp;</label>
+    </div>
   </div>
 </div>
 
 <div></div>
 <div>
-<#if viewMoreOptions??>
-</br>View More Usages</br>
-	<#list viewMoreOptions as option>
-		<button class="viewOther ${option.additionalClass}" data-display-option="${option.number}">${option.text}</button>
-	</#list>
-</#if>
+  <#if viewMoreOptions??>
+    </br>View More Usages</br>
+    <#list viewMoreOptions as option>
+      <button class="viewOther ${option.additionalClass}" data-display-option="${option.number} data-tool-name='${toolName}' data-plugin-name='${pluginName}'">${option.text}</button>
+    </#list>
+  </#if>
 </div>
