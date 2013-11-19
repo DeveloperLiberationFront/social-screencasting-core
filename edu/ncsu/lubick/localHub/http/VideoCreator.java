@@ -19,9 +19,6 @@ import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
-import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToGifOutput;
-import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToMiniGifOutput;
-import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToVideoOutput;
 import freemarker.template.SimpleNumber;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateHashModel;
@@ -116,8 +113,10 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 			return;
 		}
 		int numFrames = countNumFrames(mediaDir);
+		
+		InternalToolRepresentation itr = new InternalToolRepresentation(toolName, 1, mediaDir.getName());
 
-		processTemplateWithNameKeysAndNumFrames(response, lastToolUsage.getToolKeyPresses(), mediaDir.getName(), toolName, numFrames);
+		processTemplateWithNameKeysAndNumFrames(response, lastToolUsage.getToolKeyPresses(), itr, numFrames);
 		baseRequest.setHandled(true);
 	}
 
@@ -153,7 +152,10 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 			}
 			int numFrames = countNumFrames(mediaDir);
 			ToolUsage lastToolUsage = databaseLink.getLastInstanceOfToolUsage(pluginName, toolName);
-			processTemplateWithNameKeysAndNumFrames(response, lastToolUsage.getToolKeyPresses(), mediaDir.getName(), toolName, numFrames);
+			
+			InternalToolRepresentation itr = new InternalToolRepresentation(toolName, 1, mediaDir.getName());
+			
+			processTemplateWithNameKeysAndNumFrames(response, lastToolUsage.getToolKeyPresses(), itr, numFrames);
 		}
 		else if (mediaDir.exists() && !mediaDir.isDirectory())
 		{
@@ -188,51 +190,53 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		return count;
 	}
 
-	private void processTemplateWithNameKeysAndNumFrames(HttpServletResponse response, String keypress, String internalToolId, String toolName, int numFrames) throws IOException
+	private void processTemplateWithNameKeysAndNumFrames(HttpServletResponse response, String keypress, InternalToolRepresentation itr, int numFrames) throws IOException
+	{
+		processTemplateWithNameKeysAndNumFrames(response, keypress, itr, numFrames, 1);
+	}
+	
+	private void processTemplateWithNameKeysAndNumFrames(HttpServletResponse response, String keypress, InternalToolRepresentation itr, int numFrames, int totalMediaOptions) throws IOException
 	{
 		HashMap<Object, Object> templateData = new HashMap<Object, Object>();
 
-		templateData.put("toolId", internalToolId);
-		templateData.put("toolName", toolName);
+		templateData.put("playbackDirectory", itr.directory);
+		templateData.put("toolName", itr.humanToolName);
 		templateData.put("keypress", keypress);
 		templateData.put("totalFrames", numFrames);
 
-		List<DisplayOtherMediaOption> otherOptions = new ArrayList<>();
-		otherOptions.add(new DisplayOtherMediaOption(true,1,"Most Recent"));
-		otherOptions.add(new DisplayOtherMediaOption(false,2, "2nd Most Recent"));
+		if (totalMediaOptions > 1)	//if we only have 1 option, don't give more options
+		{
+			List<DisplayOtherMediaOption> otherOptions = makeMoreOptions(itr.nthMostRecent, totalMediaOptions);
 
-		templateData.put("viewMoreOptions", otherOptions);
+			templateData.put("viewMoreOptions", otherOptions);
+		}
+		
 		processTemplate(response, templateData, "playback.html.piece");
 	}
 
-	@Deprecated
-	private void respondWithGifsAndMetadata(HttpServletResponse response, String toolName, String bigGifRelativeName, String miniGifRelativeName) throws IOException
+	public List<DisplayOtherMediaOption> makeMoreOptions(int currentlySelected, int totalMediaOptions)
 	{
-		Map<Object, Object> dataModel = new HashMap<Object, Object>();
-		dataModel.put("toolName", toolName);
-		dataModel.put("bigAnimatedGif", bigGifRelativeName);
-		dataModel.put("miniAnimatedGif", miniGifRelativeName);
-		logger.debug("template model: " + dataModel);
-		processTemplate(response, dataModel, "generatedVideo.html.piece");
+		List<DisplayOtherMediaOption> otherOptions = new ArrayList<>();
+		otherOptions.add(new DisplayOtherMediaOption(currentlySelected == 1, 1, "Most Recent"));
+		if (totalMediaOptions > 2)
+		{
+			otherOptions.add(new DisplayOtherMediaOption(currentlySelected == 2 ,2, "2nd Most Recent"));
+		}
+		if (totalMediaOptions > 3)
+		{
+			otherOptions.add(new DisplayOtherMediaOption(currentlySelected == 3 ,3, "3rd Most Recent"));
+		}
+		if (totalMediaOptions > 4)
+		{
+			for (int i = 4;i<totalMediaOptions;i++)
+			{
+				otherOptions.add(new DisplayOtherMediaOption(currentlySelected == i ,i, ""+i+"th"));
+			}
+		}
+		return otherOptions;
 	}
+	
 
-	@Deprecated
-	private String getNameForToolVideo(String pluginName, String toolName)
-	{
-		return PostProductionHandler.makeFileNameStemForToolPluginMedia(pluginName, toolName) + "." + ImagesWithAnimationToVideoOutput.VIDEO_EXTENSION;
-	}
-
-	@Deprecated
-	private String getNameForToolFullGif(String pluginName, String toolName)
-	{
-		return PostProductionHandler.makeFileNameStemForToolPluginMedia(pluginName, toolName) + "." + ImagesWithAnimationToGifOutput.GIF_EXTENSION;
-	}
-
-	@Deprecated
-	private String getNameForToolMiniGif(String pluginName, String toolName)
-	{
-		return PostProductionHandler.makeFileNameStemForToolPluginMedia(pluginName, toolName) + "." + ImagesWithAnimationToMiniGifOutput.MINI_GIF_EXTENSION;
-	}
 
 	@Override
 	protected Logger getLogger()
@@ -279,6 +283,27 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 			return false;
 		}
 
+	}
+	
+	private class InternalToolRepresentation
+	{
+		
+		private String humanToolName;
+		private int nthMostRecent;
+		private String directory;
+
+		public InternalToolRepresentation(String toolName, int nthMostRecent, String directory)
+		{
+			this.humanToolName = toolName;
+			this.nthMostRecent = nthMostRecent;
+			this.directory = directory;
+		}
+		
+		@Override
+		public String toString()
+		{
+			return "The "+nthMostRecent+"th most recent usage of "+humanToolName;
+		}
 	}
 
 }
