@@ -154,7 +154,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		
 		String pluginName = itr.humanPluginName;
 		String toolName = itr.humanToolName;
-		String folderName = PostProductionHandler.makeFileNameStemForToolPluginMedia(pluginName, toolName);
+		String folderName = PostProductionHandler.makeFileNameStemNoDateForToolPluginMedia(pluginName, toolName);
 		
 		List<File> mediaFolders = getFoldersPrefixedWith(folderName);
 		
@@ -170,7 +170,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 			List<ToolUsage> toolUsages = databaseLink.getLastNInstancesOfToolUsage(mediaFolders.size(), pluginName, toolName);
 					
 			itr.directory = nthMediaDir.getName();
-			processTemplateWithNameKeysAndNumFrames(response, toolUsages.get(itr.nthMostRecent).getToolKeyPresses(), itr, numFrames);
+			processTemplateWithNameKeysAndNumFrames(response, toolUsages.get(itr.nthMostRecent).getToolKeyPresses(), itr, numFrames, mediaFolders.size());
 		}
 		else
 		{
@@ -195,10 +195,11 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 																	//come first
 			}
 		});
+		logger.debug("checking to see if "+Arrays.toString(outputMediaTypes)+" starts with "+folderName);
 		List<File> files = new ArrayList<>();
 		for(File f: outputMediaTypes)
 		{
-			if (f.isDirectory() && f.getName().startsWith(folderName))
+			if (f.isDirectory() && f.getPath().startsWith(folderName))
 			{
 				files.add(f);
 			}
@@ -220,6 +221,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		return count;
 	}
 
+	@Deprecated
 	private void processTemplateWithNameKeysAndNumFrames(HttpServletResponse response, String keypress, InternalToolRepresentation itr, int numFrames) throws IOException
 	{
 		processTemplateWithNameKeysAndNumFrames(response, keypress, itr, numFrames, 1);
@@ -231,6 +233,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 
 		templateData.put("playbackDirectory", itr.directory);
 		templateData.put("toolName", itr.humanToolName);
+		templateData.put("pluginName", itr.humanPluginName);
 		templateData.put("keypress", keypress);
 		templateData.put("totalFrames", numFrames);
 

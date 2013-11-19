@@ -180,7 +180,7 @@ public class PostProductionHandler
 			logger.info("Fast forwarding to the appropriate time");
 			fastFowardStreamToTime(inputStream, timeToLookFor); // throws VideoEncodingException if there was a problem prior to the important bits
 
-			String newFileNameStem = makeFileNameStemNoDateForToolPluginMedia(specificToolUse);
+			String newFileNameStem = makeFileNameStemForToolPluginMedia(specificToolUse);
 			logger.info("Beginning the extraction of the frames");
 			createdMediaFilesToReturn = extractDemoVideoToFile(inputStream, newFileNameStem);
 
@@ -355,7 +355,7 @@ public class PostProductionHandler
 		}
 	}
 
-	public static String makeFileNameStemForToolPluginMedia(String pluginName, String toolName)
+	public static String makeFileNameStemNoDateForToolPluginMedia(String pluginName, String toolName)
 	{
 		if (toolName == null)
 		{
@@ -376,7 +376,7 @@ public class PostProductionHandler
 		return "renderedVideos\\" + pluginName + createNumberForVideoFile(toolName) + "_"+ toolTime.getTime();
 	}
 	
-	public static String makeFileNameStemNoDateForToolPluginMedia(ToolUsage tu)
+	public static String makeFileNameStemForToolPluginMedia(ToolUsage tu)
 	{
 		if (tu == null)
 		{

@@ -292,7 +292,7 @@ public class TestVideoPostProduction
 
 	private void verifyGifNamedProperly(File outputFile, String toolName)
 	{
-		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameStemForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
+		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameStemNoDateForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
 		assertTrue(outputFile.getPath().endsWith(".gif"));
 	}
 
@@ -308,7 +308,7 @@ public class TestVideoPostProduction
 
 	private void verifyThumbnailNamedProperly(File outputFile, String toolName)
 	{
-		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameStemForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
+		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameStemNoDateForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
 		assertTrue(outputFile.getPath().endsWith(ImagesWithAnimationToThumbnailOutput.THUMBNAIL_EXTENSION));
 	}
 
@@ -324,7 +324,7 @@ public class TestVideoPostProduction
 
 	private void verifyVideoNamedProperly(File outputFile, String toolName)
 	{
-		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameStemForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
+		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameStemNoDateForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
 		assertTrue(outputFile.getPath().endsWith(ImagesWithAnimationToVideoOutput.VIDEO_EXTENSION));
 	}
 
