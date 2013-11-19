@@ -69,7 +69,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 
 		if (request.getParameter("thingToDo").equals(POST_COMMAND_IS_VIDEO_MADE_FOR_TOOL_USAGE))
 		{
-			respondToDoesVideoExist(baseRequest, request, response);
+			respondToDoesMediaExist(baseRequest, request, response);
 		}
 		else if (request.getParameter("thingToDo").equals(POST_COMMAND_MAKE_VIDEO_FOR_TOOL_STREAM))
 		{
@@ -125,7 +125,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		return;
 	}
 
-	private void respondToDoesVideoExist(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
+	private void respondToDoesMediaExist(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
 		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);

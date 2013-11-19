@@ -1,5 +1,8 @@
 package edu.ncsu.lubick.localHub.videoPostProduction.outputs;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +15,7 @@ import javax.imageio.ImageIO;
 
 import org.apache.log4j.Logger;
 
+import edu.ncsu.lubick.localHub.FileUtilities;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.videoPostProduction.AbstractImagesToMediaOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
@@ -28,6 +32,8 @@ public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesTo
 	private static Logger logger = Logger.getLogger(PreAnimationImagesToBrowserAnimatedPackage.class.getName());
 	private ShortcutsToKeyCodesConverter keyCodeReader = new ShortcutsToKeyCodesConverter();
 	private List<KeypressAnimationMaker> animationSources = new ArrayList<>();
+	private Dimension size;
+	private File newDir;
 
 	public PreAnimationImagesToBrowserAnimatedPackage()
 	{
@@ -49,19 +55,52 @@ public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesTo
 	@Override
 	public File combineImageFilesToMakeMedia(String folderName, ToolUsage toolUsage) throws MediaEncodingException
 	{
-		File newDir = super.makeDirectoryIfClear(folderName);
+		this.newDir = super.makeDirectoryIfClear(folderName);
 		try
 		{
-			this.copyImagesToFolder(newDir);
+			BufferedImage lastFrame = this.copyImagesToFolderAndReturnLast();
+			int frameCounter = duplicateLastFrame5Times(lastFrame);
+			add5FramesOfBlack(frameCounter);
 
 			this.lazyLoadAnimationSources();
-			this.createAnimationImagesForToolStream(newDir, toolUsage);
+			this.createAnimationImagesForToolStream(toolUsage);
 			return newDir;
 		}
 		catch (IOException e)
 		{
 			throw new MediaEncodingException(e);
 		}
+	}
+
+	private void add5FramesOfBlack(int frameCounter) throws IOException
+	{
+		BufferedImage image = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g = image.createGraphics();
+
+		g.setBackground(Color.black);
+		
+		for(int i = frameCounter;i<frameCounter+5;i++)
+		{
+			String newFileName = "frame" + FileUtilities.padIntTo4Digits(i) + "." + PostProductionHandler.INTERMEDIATE_FILE_FORMAT;
+			File newFile = new File(newDir, newFileName);
+			ImageIO.write(image, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, newFile);
+		}
+		
+	}
+
+	private int duplicateLastFrame5Times(BufferedImage lastFrame) throws IOException
+	{
+		int numFramesSoFar = getImageFilesToAnimate().length;
+		this.size = new Dimension(lastFrame.getWidth(), lastFrame.getHeight());
+		for(int i = numFramesSoFar;i<numFramesSoFar+5;i++)
+		{
+			String newFileName = "frame" + FileUtilities.padIntTo4Digits(i) + "." + PostProductionHandler.INTERMEDIATE_FILE_FORMAT;
+			File newFile = new File(newDir, newFileName);
+			ImageIO.write(lastFrame, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, newFile);
+		}
+		
+		return numFramesSoFar + 5;
+		
 	}
 
 	private void lazyLoadAnimationSources() throws IOException
@@ -75,7 +114,7 @@ public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesTo
 
 	}
 
-	private void createAnimationImagesForToolStream(File newDir, ToolUsage toolUsage) throws IOException
+	private void createAnimationImagesForToolStream(ToolUsage toolUsage) throws IOException
 	{
 		if (toolUsage == null || toolUsage.getToolKeyPresses().equals("MENU"))
 		{
@@ -98,17 +137,25 @@ public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesTo
 
 	}
 
-	private void copyImagesToFolder(File newDir) throws IOException
+	private BufferedImage copyImagesToFolderAndReturnLast() throws IOException
 	{
 		File[] imageFilesToAnimate = getImageFilesToAnimate();
-		for (File origin : imageFilesToAnimate)
+		
+		if (imageFilesToAnimate == null  || imageFilesToAnimate.length == 0)
 		{
-			String destinationFileNumberAndExtension = origin.getName().substring("temp".length());
+			throw new IOException("Empty Temporary Folder");
+		}
+		
+		for (File originalImageFile : imageFilesToAnimate)
+		{
+			String destinationFileNumberAndExtension = originalImageFile.getName().substring("temp".length());
 			String destinationFileName = "frame" + destinationFileNumberAndExtension;
 			File destination = new File(newDir, destinationFileName);
-			Files.copy(origin.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(originalImageFile.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		}
 
+		BufferedImage lastFrame = ImageIO.read(imageFilesToAnimate[imageFilesToAnimate.length-1]);
+		return lastFrame;
 	}
 
 }
