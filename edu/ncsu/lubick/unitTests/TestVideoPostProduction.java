@@ -75,6 +75,7 @@ public class TestVideoPostProduction
 		verifyGifNamedProperly(outputMedia.get(0), WHOMBO_TOOL_1);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testSingleToolUsageExtractionBrowserMedia() throws Exception
 	{

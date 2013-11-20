@@ -61,6 +61,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	private boolean isDebug = false;
 	private ScreenRecordingModule screenRecordingModule;
 	private HTTPServer httpServer;
+	private boolean hasSetUpPostProduction = false;
 
 	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, boolean wantHTTP, boolean wantScreenRecording)
 	{
@@ -313,26 +314,6 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		}
 	}
 
-	@Deprecated
-	@Override
-	public ToolUsage extractMediaForLastUsageOfTool(String pluginName, String toolName) throws MediaEncodingException
-	{
-		setUpPostProductionHandler();
-		ToolUsage lastToolUsage = getLastInstanceOfToolUsage(pluginName, toolName);
-
-		makeMediaForToolUsage(lastToolUsage); // thow away list. Clients of DatabaseQueryInterface don't need the files made
-
-		return lastToolUsage;
-
-	}
-
-	@Deprecated
-	@Override
-	public ToolUsage getLastInstanceOfToolUsage(String pluginName, String toolName)
-	{
-		return databaseManager.getLastInstanceOfToolUsage(pluginName, toolName);
-	}
-
 	@Override
 	public List<ToolUsage> getLastNInstancesOfToolUsage(int n, String pluginName, String toolName)
 	{
@@ -340,24 +321,31 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	}
 
 	@Override
-	public List<ToolUsage> extractMediaForLastNUsagesOfTool(int n, String pluginName, String toolName) throws MediaEncodingException
+	public List<ToolUsage> extractMediaForLastNUsagesOfTool(int n, String pluginName, String toolName)
 	{
 		setUpPostProductionHandler();
 		List<ToolUsage> toolUsages = getLastNInstancesOfToolUsage(n, pluginName, toolName);
 
 		for (ToolUsage tu:toolUsages)
 		{
-			makeMediaForToolUsage(tu); // thow away list. Clients of DatabaseQueryInterface don't need the files made
+			try
+			{
+				makeMediaForToolUsage(tu);// thow away list. Clients of DatabaseQueryInterface don't need the files made
+			}
+			catch (MediaEncodingException e)
+			{
+				logger.error("Problem while extracting Media");
+			} 
 		}
 
 		return toolUsages;
 	}
 
 	//for testing
-	protected List<File> extractMediaForLastUsageOfToolAndReturnFiles(String pluginName, String toolName) throws MediaEncodingException
+	private List<File> extractMediaForLastUsageOfToolAndReturnFiles(String pluginName, String toolName) throws MediaEncodingException
 	{
 		setUpPostProductionHandler();
-		ToolUsage lastToolUsage = getLastInstanceOfToolUsage(pluginName, toolName);
+		ToolUsage lastToolUsage = getLastNInstancesOfToolUsage(1, pluginName, toolName).get(0);
 
 		return makeMediaForToolUsage(lastToolUsage);
 	}
@@ -387,10 +375,9 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 
 	private void setUpPostProductionHandler()
 	{
-		if (!isDebug) // debug callers are expected to add their own handlers
+		if (!isDebug && !hasSetUpPostProduction) // debug callers are expected to add their own handlers
 		{
-			// this.videoPostProductionHandler.addNewPostAnimationMediaOutput(new ImagesToGifOutput());
-			// this.videoPostProductionHandler.addNewPostAnimationMediaOutput(new ImagesToMiniGifOutput());
+			hasSetUpPostProduction = true;
 			this.videoPostProductionHandler.addNewPreAnimationMediaOutput(new PreAnimationImagesToBrowserAnimatedPackage());
 		}
 	}

@@ -163,45 +163,6 @@ public abstract class SQLDatabase extends DBAbstraction {
 
 	}
 
-	@Deprecated
-	@Override
-	public ToolUsage getLastInstanceOfToolUsage(String pluginName, String toolName)
-	{
-		ToolUsage toolUsage = null;
-		StringBuilder sqlQueryBuilder = new StringBuilder();
-		sqlQueryBuilder.append("SELECT * FROM ToolUsages ");
-		sqlQueryBuilder.append("WHERE plugin_name='");
-		sqlQueryBuilder.append(pluginName);
-		sqlQueryBuilder.append("' AND tool_name='");
-		sqlQueryBuilder.append(toolName);
-		sqlQueryBuilder.append("' ORDER BY usage_timestamp DESC");
-
-		try (ResultSet results = executeWithResults(sqlQueryBuilder.toString());)
-		{
-			// perform the query
-			if (results.next())
-			{
-				Date timestamp = new Date(results.getLong("usage_timestamp"));
-				String toolClass = results.getString("class_of_tool");
-
-				String keyPresses = results.getString("tool_key_presses");
-				int duration = results.getInt("tool_use_duration");
-
-				toolUsage = new ToolUsage(toolName, toolClass, keyPresses, pluginName, timestamp, duration);
-			}
-
-		}
-		catch (SQLException ex)
-		{
-			throw new DBAbstractionException(ex);
-		}
-		finally
-		{
-			cleanUpAfterQuery();
-		}
-
-		return toolUsage;
-	}
 	
 	@Override
 	public List<ToolUsage> getLastNInstancesOfToolUsage(int n, String pluginName, String toolName)

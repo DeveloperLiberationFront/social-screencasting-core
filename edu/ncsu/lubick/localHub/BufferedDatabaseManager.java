@@ -179,27 +179,6 @@ public class BufferedDatabaseManager
 		return getVideoFilesLinkedToTimePeriod(tu.getTimeStamp(), durationInSecondsRoundedUp);
 	}
 
-	@Deprecated
-	public ToolUsage getLastInstanceOfToolUsage(String pluginName, String toolName)
-	{
-		waitForThreadPool();
-		ToolUsage retVal = null;
-		try
-		{
-			retVal = dbAbstraction.getLastInstanceOfToolUsage(pluginName, toolName);
-		}
-		catch (DBAbstractionException e)
-		{
-			logger.error("There was a problem in the database query", e);
-		}
-		finally
-		{
-			resetThreadPool();
-		}
-
-		return retVal;
-	}
-
 	public List<ToolUsage> getLastNInstancesOfToolUsage(int n, String pluginName, String toolName)
 	{
 		waitForThreadPool();

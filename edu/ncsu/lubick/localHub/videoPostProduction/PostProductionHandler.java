@@ -71,8 +71,8 @@ public class PostProductionHandler
 	private PostProductionAnimationStrategy postProductionAnimator;
 
 	private Queue<OverloadFile> queueOfOverloadFiles = new LinkedList<>();
-	private List<ImagesWithAnimationToMediaOutput> postAnimationMediaOutputs = new ArrayList<>();
-	private List<PreAnimationImagesToMediaOutput> preAnimationMediaOutputs = new ArrayList<>();
+	private Set<ImagesWithAnimationToMediaOutput> postAnimationMediaOutputs = new HashSet<>();
+	private Set<PreAnimationImagesToMediaOutput> preAnimationMediaOutputs = new HashSet<>();
 
 	private FrameDecompressor decompressor = new FrameDecompressor();
 	private ImageDiskWritingStrategy imageWriter;
