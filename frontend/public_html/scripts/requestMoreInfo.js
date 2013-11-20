@@ -6,11 +6,11 @@ function addResponseHTMLToWindow(data) {
     $(".modal").hide();
     $("#moreInfo").html(data);
 
-	renderPlayback();
+    renderPlayback();
 }
 
 function requestGenerationOfMedia() {
-	stopFramePlayback();
+    stopFramePlayback();
     $("#moreInfo").removeClass("hidden");
     $(".modal").show();
     $.post("makeVideo", {
@@ -22,7 +22,7 @@ function requestGenerationOfMedia() {
 }
 
 function doesVideoExistHuh() {
-	stopFramePlayback();
+    stopFramePlayback();
     $("#moreInfo").removeClass("hidden");
     $.post("makeVideo", {
         thingToDo: "isVideoAlreadyMade",
@@ -34,28 +34,28 @@ function doesVideoExistHuh() {
 }
 
 function swapMediaPlayback() {
-	stopFramePlayback();
+    stopFramePlayback();
     $("#moreInfo").removeClass("hidden");
     $.post("makeVideo", {
         thingToDo: "changeToOtherSource",
         pluginName: $(this).data("pluginName"),
         toolName: $(this).data("toolName"),
-		nthUsage: $(this).data("displayOption")
+        nthUsage: $(this).data("displayOption")
     }, addResponseHTMLToWindow);
     //this will return the html to view the media
 }
 
 $(document).ready(function () {
-	$( "#tabs" ).tabs();
+    //$("#tabs").tabs();
     //handles the click on the view buttons to see if a video file exists
     $(".clickMe").on('click', doesVideoExistHuh);
 
     $("#moreInfo").on('click', '.requestGeneration', requestGenerationOfMedia);
-	
-	$("#moreInfo").on('click', '.viewOther', swapMediaPlayback);
-	
-	//figure out where the more info panel would be normally
-	elementPosition = $('#moreInfo').offset();
-	//fix it there for scrolling
-	$('#moreInfo').css('position','fixed').css('top',elementPosition.top).css('left',elementPosition.left);
+
+    $("#moreInfo").on('click', '.viewOther', swapMediaPlayback);
+
+    //figure out where the more info panel would be normally
+    elementPosition = $('#moreInfo').offset();
+    //fix it there for scrolling
+    $('#moreInfo').css('position', 'fixed').css('top', elementPosition.top).css('left', elementPosition.left);
 });

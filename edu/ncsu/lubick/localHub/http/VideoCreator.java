@@ -220,12 +220,6 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 		}
 		return count;
 	}
-
-	@Deprecated
-	private void processTemplateWithNameKeysAndNumFrames(HttpServletResponse response, String keypress, InternalToolRepresentation itr, int numFrames) throws IOException
-	{
-		processTemplateWithNameKeysAndNumFrames(response, keypress, itr, numFrames, 1);
-	}
 	
 	private void processTemplateWithNameKeysAndNumFrames(HttpServletResponse response, String keypress, InternalToolRepresentation itr, int numFrames, int totalMediaOptions) throws IOException
 	{
