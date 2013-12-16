@@ -10,7 +10,6 @@ import org.apache.log4j.Logger;
 
 public class SQLiteDatabase extends SQLDatabase
 {
-
 	private static Logger logger = Logger.getLogger(SQLiteDatabase.class.getName());
 	private static final String DB_EXTENSION_NAME = ".sqlite";
 	private String pathToFile;
