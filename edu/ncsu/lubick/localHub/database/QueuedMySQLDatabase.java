@@ -99,7 +99,7 @@ public class QueuedMySQLDatabase extends SQLDatabase {
 	{
 		try
 		{
-			return connection != null || connection.isValid(1);
+			return connection != null && connection.isValid(1);
 		}
 		catch (SQLException e)
 		{
