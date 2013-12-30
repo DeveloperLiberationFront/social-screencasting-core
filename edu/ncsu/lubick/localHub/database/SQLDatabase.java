@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.List;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
-import freemarker.log.Logger;
 
 public abstract class SQLDatabase extends DBAbstraction {
 
@@ -147,7 +146,7 @@ public abstract class SQLDatabase extends DBAbstraction {
 		sqlQueryBuilder.append("INSERT INTO RawVideoCapFiles ( ");
 		sqlQueryBuilder.append("file_name, ");
 		sqlQueryBuilder.append("video_start_time, ");
-		sqlQueryBuilder.append("duration ) VALUES (?,?,?)'");
+		sqlQueryBuilder.append("duration ) VALUES (?,?,?)");
 		
 		PreparedStatement statement = makePreparedStatement(sqlQueryBuilder.toString());
 		try

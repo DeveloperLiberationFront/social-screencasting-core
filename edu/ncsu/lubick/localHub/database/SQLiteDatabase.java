@@ -145,22 +145,46 @@ public class SQLiteDatabase extends SQLDatabase
 	@Override
 	protected PreparedStatement makePreparedStatement(String statementQuery)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		try
+		{
+			return connection.prepareStatement(statementQuery);
+		}
+		catch (SQLException e)
+		{
+			throw new DBAbstractionException("Problem compiling SQL to preparedStatement",e);
+		}
 	}
 
 	@Override
 	protected void executeStatementWithNoResults(PreparedStatement statement)
 	{
-		// TODO Auto-generated method stub
+		try
+		{
+			statement.execute();
+			statement.close();
+		}
+		catch (SQLException e)
+		{
+			throw new DBAbstractionException("Problem executing statement",e);
+		}
 		
 	}
 
 	@Override
 	protected ResultSet executeWithResults(PreparedStatement statement)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		ResultSet retVal = null;
+		try
+		{
+			retVal = statement.executeQuery();
+			//statement.closeOnCompletion();  //Not supported by current version of JDBC
+		}
+		catch (SQLException e)
+		{
+			throw new DBAbstractionException("Problem with query", e);
+		}
+		return retVal;
+		
 	}
 
 }

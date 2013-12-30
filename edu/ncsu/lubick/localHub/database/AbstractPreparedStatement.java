@@ -678,6 +678,7 @@ public class AbstractPreparedStatement implements PreparedStatement {
 
 	}
 
+	@SuppressWarnings("deprecation")
 	@Deprecated
 	@Override
 	public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException, NotImplementedException

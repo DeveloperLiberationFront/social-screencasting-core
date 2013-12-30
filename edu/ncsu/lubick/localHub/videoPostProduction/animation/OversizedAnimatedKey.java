@@ -1,6 +1,6 @@
 package edu.ncsu.lubick.localHub.videoPostProduction.animation;
 
-import static edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedKeyboardMaker.*;
+import static edu.ncsu.lubick.localHub.videoPostProduction.animation.AbstractKeypressAnimationMaker.*;
 
 import java.awt.Graphics;
 import java.awt.Rectangle;
