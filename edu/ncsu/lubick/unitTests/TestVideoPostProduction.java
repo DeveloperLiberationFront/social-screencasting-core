@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
@@ -27,6 +28,8 @@ import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesTo
 
 public class TestVideoPostProduction
 {
+	private static Logger logger = Logger.getLogger(TestVideoPostProduction.class.getName());
+	
 	private static final String WHOMBO_TOOL_1 = "WhomboTool #1";
 	private static final String TEST_PLUGIN_NAME = "Testing";
 	private static final String DEFAULT_TESTING_KEYPRESS = "Ctrl+5";
@@ -303,7 +306,8 @@ public class TestVideoPostProduction
 		assertTrue(outputFile.exists());
 		assertTrue(outputFile.isFile());
 		assertFalse(outputFile.isHidden());
-		assertTrue(outputFile.length() > 500000);
+		logger.debug("Output File has length "+outputFile.length());
+		assertTrue(outputFile.length() > 50000);
 		assertTrue(outputFile.length() < 10 * 1000 * 1000);
 	}
 

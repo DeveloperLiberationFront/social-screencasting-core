@@ -77,7 +77,7 @@ public abstract class SQLDatabase extends DBAbstraction {
 		sqlQueryBuilder.append("tool_name, ");
 		sqlQueryBuilder.append("tool_key_presses, ");
 		sqlQueryBuilder.append("class_of_tool, ");
-		sqlQueryBuilder.append("tool_use_duration ) VALUES (?,?,?,?,?,?)'");
+		sqlQueryBuilder.append("tool_use_duration ) VALUES (?,?,?,?,?,?)");
 		
 		PreparedStatement statement = makePreparedStatement(sqlQueryBuilder.toString());
 		try
