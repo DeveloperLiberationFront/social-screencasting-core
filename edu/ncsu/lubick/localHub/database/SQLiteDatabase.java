@@ -2,6 +2,7 @@ package edu.ncsu.lubick.localHub.database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -75,7 +76,7 @@ public class SQLiteDatabase extends SQLDatabase
 	}
 
 	// helpers to perform queries
-	@Override
+	@Deprecated
 	protected void executeWithNoResults(String sql)
 	{
 		logger.debug("Executing sql query (no results expected): " + sql);
@@ -98,7 +99,7 @@ public class SQLiteDatabase extends SQLDatabase
 		}
 	}
 
-	@Override
+	@Deprecated
 	protected ResultSet executeWithResults(String sql)
 	{
 		logger.debug("Executing sql query for results: " + sql);
@@ -127,7 +128,7 @@ public class SQLiteDatabase extends SQLDatabase
 		return results;
 	}
 
-	@Override
+	@Deprecated
 	protected void cleanUpAfterQuery()
 	{
 		if (previouslyExecutedStatement != null)
@@ -139,6 +140,27 @@ public class SQLiteDatabase extends SQLDatabase
 			{
 				logger.error("Problem closing statement", e);
 			}
+	}
+
+	@Override
+	protected PreparedStatement makePreparedStatement(String statementQuery)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected void executeStatementWithNoResults(PreparedStatement statement)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected ResultSet executeWithResults(PreparedStatement statement)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

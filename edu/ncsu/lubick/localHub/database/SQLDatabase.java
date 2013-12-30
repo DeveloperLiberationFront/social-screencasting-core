@@ -1,6 +1,7 @@
 package edu.ncsu.lubick.localHub.database;
 
 import java.io.File;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -8,14 +9,13 @@ import java.util.Date;
 import java.util.List;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import freemarker.log.Logger;
 
 public abstract class SQLDatabase extends DBAbstraction {
 
-	protected abstract void executeWithNoResults(String string);
-
-	protected abstract ResultSet executeWithResults(String sql);
-
-	protected abstract void cleanUpAfterQuery();
+	protected abstract PreparedStatement makePreparedStatement(String statementQuery);
+	protected abstract void executeStatementWithNoResults(PreparedStatement statement);
+	protected abstract ResultSet executeWithResults(PreparedStatement statement);
 
 	protected void createTables()
 	{
@@ -41,8 +41,8 @@ public abstract class SQLDatabase extends DBAbstraction {
 		sqlTableQueryBuilder.append(") ");
 
 		// execute the query
-		executeWithNoResults(sqlTableQueryBuilder.toString());
-		cleanUpAfterQuery();
+		PreparedStatement statement = makePreparedStatement(sqlTableQueryBuilder.toString());
+		executeStatementWithNoResults(statement);
 	}
 
 	private void createToolUsageTable()
@@ -64,8 +64,8 @@ public abstract class SQLDatabase extends DBAbstraction {
 		sqlTableQueryBuilder.append(") ");
 
 		// execute the query
-		executeWithNoResults(sqlTableQueryBuilder.toString());
-		cleanUpAfterQuery();
+		PreparedStatement statement = makePreparedStatement(sqlTableQueryBuilder.toString());
+		executeStatementWithNoResults(statement);
 	}
 
 	@Override
@@ -78,22 +78,24 @@ public abstract class SQLDatabase extends DBAbstraction {
 		sqlQueryBuilder.append("tool_name, ");
 		sqlQueryBuilder.append("tool_key_presses, ");
 		sqlQueryBuilder.append("class_of_tool, ");
-		sqlQueryBuilder.append("tool_use_duration ) VALUES ('");
-		sqlQueryBuilder.append(associatedPlugin);
-		sqlQueryBuilder.append("',");
-		sqlQueryBuilder.append(tu.getTimeStamp().getTime());
-		sqlQueryBuilder.append(",'");
-		sqlQueryBuilder.append(tu.getToolName());
-		sqlQueryBuilder.append("', '");
-		sqlQueryBuilder.append(tu.getToolKeyPresses());
-		sqlQueryBuilder.append("', '");
-		sqlQueryBuilder.append(tu.getToolClass());
-		sqlQueryBuilder.append("', ");
-		sqlQueryBuilder.append(tu.getDuration());
-		sqlQueryBuilder.append(")");
-
-		executeWithNoResults(sqlQueryBuilder.toString());
-		cleanUpAfterQuery();
+		sqlQueryBuilder.append("tool_use_duration ) VALUES (?,?,?,?,?,?)'");
+		
+		PreparedStatement statement = makePreparedStatement(sqlQueryBuilder.toString());
+		try
+		{
+			statement.setString(1, associatedPlugin);
+			statement.setLong(2, tu.getTimeStamp().getTime());
+			statement.setString(3, tu.getToolName());
+			statement.setString(4, tu.getToolKeyPresses());
+			statement.setString(5, tu.getToolClass());
+			statement.setInt(6, tu.getDuration());
+			executeStatementWithNoResults(statement);
+		}
+		catch (SQLException e)
+		{
+			throw new DBAbstractionException("There was a problem of the params in storeToolUsage()", e);
+		}
+		
 	}
 
 	@Override
@@ -103,14 +105,20 @@ public abstract class SQLDatabase extends DBAbstraction {
 		List<ToolUsage> toolUsages = new ArrayList<>();
 		StringBuilder sqlQueryBuilder = new StringBuilder();
 		sqlQueryBuilder.append("SELECT * FROM ToolUsages ");
-		sqlQueryBuilder.append("WHERE plugin_name='");
-		sqlQueryBuilder.append(currentPluginName);
-		sqlQueryBuilder.append("'");
-
-		try (ResultSet results = executeWithResults(sqlQueryBuilder.toString());)
+		sqlQueryBuilder.append("WHERE plugin_name=?");
+		PreparedStatement statement = makePreparedStatement(sqlQueryBuilder.toString());
+		try
 		{
-			// perform the query
+			statement.setString(1, currentPluginName);
+		}
+		catch (SQLException e)
+		{
+			throw new DBAbstractionException("There was a problem of the params in getAllToolUsageHistoriesForPlugin()", e);
+		}
+		
 
+		try (ResultSet results = executeWithResults(statement);)
+		{
 			while (results.next())
 			{
 				String toolName = results.getString("tool_name");
@@ -128,10 +136,6 @@ public abstract class SQLDatabase extends DBAbstraction {
 		{
 			throw new DBAbstractionException(ex);
 		}
-		finally
-		{
-			cleanUpAfterQuery();
-		}
 
 		return toolUsages;
 	}
@@ -143,23 +147,21 @@ public abstract class SQLDatabase extends DBAbstraction {
 		sqlQueryBuilder.append("INSERT INTO RawVideoCapFiles ( ");
 		sqlQueryBuilder.append("file_name, ");
 		sqlQueryBuilder.append("video_start_time, ");
-		sqlQueryBuilder.append("duration ) VALUES ('");
-		sqlQueryBuilder.append(newVideoFile.getAbsolutePath());
-		sqlQueryBuilder.append("',");
-		sqlQueryBuilder.append(videoStartTime.getTime() / 1000); // The video's
-																	// start
-																	// time is
-																	// only
-																	// accurate
-																	// to the
-																	// nearest
-																	// second
-		sqlQueryBuilder.append(",");
-		sqlQueryBuilder.append(durationOfClip); // This is in seconds
-		sqlQueryBuilder.append(")");
+		sqlQueryBuilder.append("duration ) VALUES (?,?,?)'");
+		
+		PreparedStatement statement = makePreparedStatement(sqlQueryBuilder.toString());
+		try
+		{
+			statement.setString(1, newVideoFile.getAbsolutePath());
+			statement.setLong(2, videoStartTime.getTime() / 1000);
+			statement.setInt(3, durationOfClip);
+		}
+		catch (SQLException e)
+		{
+			throw new DBAbstractionException("There was a problem of the params in storeVideoFile()", e);
+		}
 
-		executeWithNoResults(sqlQueryBuilder.toString());
-		cleanUpAfterQuery();
+		executeStatementWithNoResults(statement);
 
 	}
 
@@ -171,14 +173,22 @@ public abstract class SQLDatabase extends DBAbstraction {
 		
 		StringBuilder sqlQueryBuilder = new StringBuilder();
 		sqlQueryBuilder.append("SELECT * FROM ToolUsages ");
-		sqlQueryBuilder.append("WHERE plugin_name='");
-		sqlQueryBuilder.append(pluginName);
-		sqlQueryBuilder.append("' AND tool_name='");
-		sqlQueryBuilder.append(toolName);
-		sqlQueryBuilder.append("' ORDER BY usage_timestamp DESC");
+		sqlQueryBuilder.append("WHERE plugin_name=? AND tool_name=? ORDER BY usage_timestamp DESC");
 		sqlQueryBuilder.append(" LIMIT "+n);
 
-		try (ResultSet results = executeWithResults(sqlQueryBuilder.toString());)
+		PreparedStatement statement = makePreparedStatement(sqlQueryBuilder.toString());
+		try
+		{
+			statement.setString(1, pluginName);
+			statement.setString(2, toolName);
+		}
+		catch (SQLException e)
+		{
+			throw new DBAbstractionException("There was a problem of the params in getLastNInstancesOfToolUsage()", e);
+		}
+		
+		
+		try (ResultSet results = executeWithResults(statement);)
 		{
 			// perform the query
 			while (results.next())
@@ -196,10 +206,6 @@ public abstract class SQLDatabase extends DBAbstraction {
 		catch (SQLException ex)
 		{
 			throw new DBAbstractionException(ex);
-		}
-		finally
-		{
-			cleanUpAfterQuery();
 		}
 
 		return toolUsages;
@@ -228,21 +234,17 @@ public abstract class SQLDatabase extends DBAbstraction {
 		sqlQueryBuilder.append(" AND video_start_time+duration>");
 		sqlQueryBuilder.append(timeStamp.getTime() / 1000L + durationInSeconds);
 		sqlQueryBuilder.append(") ORDER BY video_start_time");
+		
+		PreparedStatement statement = makePreparedStatement(sqlQueryBuilder.toString());	//no need to add params
+																							//we trust this data
 
-		try (ResultSet results = executeWithResults(sqlQueryBuilder.toString());)
+		try (ResultSet results = executeWithResults(statement);)
 		{
 			// perform the query
 			while (results.next())
 			{
-				Date videoTimestamp = new Date(results.getLong("video_start_time") * 1000); // multiply
-																							// by
-																							// 1000
-																							// to
-																							// convert
-																							// from
-																							// seconds
-																							// to
-																							// millis
+				Date videoTimestamp = new Date(results.getLong("video_start_time") * 1000); // multiply by 1000 to
+																							// convert from seconds to millis
 				File file = new File(results.getString("file_name"));
 
 				FileDateStructs newResult = new FileDateStructs(file, videoTimestamp);
@@ -255,10 +257,6 @@ public abstract class SQLDatabase extends DBAbstraction {
 		{
 			throw new DBAbstractionException(ex);
 		}
-		finally
-		{
-			cleanUpAfterQuery();
-		}
 
 		return retVal;
 	}
@@ -266,11 +264,12 @@ public abstract class SQLDatabase extends DBAbstraction {
 	@Override
 	public List<String> getNamesOfAllPlugins()
 	{
-		String sqlQuery = "SELECT DISTINCT plugin_name FROM ToolUsages";
-
 		List<String> retVal = new ArrayList<String>();
+		
+		String sqlQuery = "SELECT DISTINCT plugin_name FROM ToolUsages";
+		PreparedStatement statement = makePreparedStatement(sqlQuery);
 
-		try (ResultSet results = executeWithResults(sqlQuery);)
+		try (ResultSet results = executeWithResults(statement);)
 		{
 			// perform the query
 			while (results.next())
@@ -284,10 +283,6 @@ public abstract class SQLDatabase extends DBAbstraction {
 		catch (SQLException ex)
 		{
 			throw new DBAbstractionException(ex);
-		}
-		finally
-		{
-			cleanUpAfterQuery();
 		}
 		return retVal;
 	}
