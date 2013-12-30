@@ -5,6 +5,11 @@ import java.io.Serializable;
 public class SerializablePreparedStatement extends AbstractPreparedStatement implements Serializable 
 {
 
+	public SerializablePreparedStatement(String statementQuery)
+	{
+		// TODO Auto-generated constructor stub
+	}
+
 	/**
 	 * 
 	 */

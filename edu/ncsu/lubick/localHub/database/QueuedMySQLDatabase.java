@@ -5,13 +5,16 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 
 import org.apache.log4j.Logger;
 
 public class QueuedMySQLDatabase extends SQLDatabase {
 
+	private static final long TIME_BETWEEN_RECONNECTS = 30*1000;	//30 seconds for reconnects
 	private static Logger logger = Logger.getLogger(QueuedMySQLDatabase.class.getName());
 	private Connection connection;
+	private Date lastConnectionAttemptTime;
 
 	public QueuedMySQLDatabase()
 	{
@@ -24,7 +27,7 @@ public class QueuedMySQLDatabase extends SQLDatabase {
 			logger.fatal("Could not find driver for MySQLDatabase");
 			throw new DBAbstractionException("Could not find driver for MySQLDatabase", e);
 		}
-		openRemoteConnection();
+		maybeTryConnectionReset();
 	}
 
 	private void loadDatabaseDriver() throws ClassNotFoundException
@@ -32,11 +35,11 @@ public class QueuedMySQLDatabase extends SQLDatabase {
 		Class.forName("com.mysql.jdbc.Driver");
 	}
 
-	private void openRemoteConnection()
+	private boolean openRemoteConnection()
 	{
 		if (this.connection != null)
 		{
-			return;
+			return false;
 		}
 		Connection newConnection = null;
 		try
@@ -51,7 +54,9 @@ public class QueuedMySQLDatabase extends SQLDatabase {
 		if (newConnection != null)
 		{
 			this.connection = newConnection;
+			return true;
 		}
+		return false;
 	}
 
 
@@ -91,8 +96,31 @@ public class QueuedMySQLDatabase extends SQLDatabase {
 				throw new DBAbstractionException(e);
 			}
 		}
-		// TODO Auto-generated method stub
-		return null;
+		if (maybeTryConnectionReset())
+		{
+			return makePreparedStatement(statementQuery);
+		}
+		return new SerializablePreparedStatement(statementQuery);
+	}
+
+
+	private boolean maybeTryConnectionReset()
+	{
+		if (lastConnectionAttemptTime == null)
+		{
+			lastConnectionAttemptTime = new Date();
+			return false;
+		}
+		if ((lastConnectionAttemptTime.getTime() - new Date().getTime()) > TIME_BETWEEN_RECONNECTS)
+		{
+			if (openRemoteConnection())
+			{
+				lastConnectionAttemptTime = null;	//successful connection
+				return true;
+			}
+			lastConnectionAttemptTime = new Date();
+		}
+		return false;
 	}
 
 	private boolean checkDatabaseConnection()
