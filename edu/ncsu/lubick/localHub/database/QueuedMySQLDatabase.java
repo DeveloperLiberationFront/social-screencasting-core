@@ -111,7 +111,7 @@ public class QueuedMySQLDatabase extends SQLDatabase {
 			lastConnectionAttemptTime = new Date();
 			return false;
 		}
-		if ((lastConnectionAttemptTime.getTime() - new Date().getTime()) > TIME_BETWEEN_RECONNECTS)
+		if ((new Date().getTime() - lastConnectionAttemptTime.getTime()) > TIME_BETWEEN_RECONNECTS)
 		{
 			if (openRemoteConnection())
 			{
