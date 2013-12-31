@@ -127,7 +127,12 @@ public class QueuedMySQLDatabase extends SQLDatabase {
 	{
 		try
 		{
-			return connection != null && connection.isValid(1);
+			if (connection != null && connection.isValid(1))
+			{
+				return true;
+			}
+			connection = null;
+			return false;
 		}
 		catch (SQLException e)
 		{
@@ -146,8 +151,39 @@ public class QueuedMySQLDatabase extends SQLDatabase {
 	@Override
 	protected ResultSet executeWithResults(PreparedStatement statement)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		if (this.connection == null)
+		{
+			return null;
+		}
+		
+		if (statement instanceof SerializablePreparedStatement)
+		{
+			if (checkDatabaseConnection())
+			{
+				return handleQueryWhileConnected((SerializablePreparedStatement)statement);
+			}
+			throw new DBAbstractionException("Can't perform queries when disconnected");
+		}
+		
+		return handleQueryWhileConnected(statement);
+		
+	}
+
+	private ResultSet handleQueryWhileConnected(PreparedStatement statement)
+	{
+		try
+		{
+			return statement.executeQuery();
+		}
+		catch (SQLException e)
+		{
+			throw new DBAbstractionException("Error processing connected query",e);
+		}
+	}
+	
+	private ResultSet handleQueryWhileConnected(SerializablePreparedStatement statement)
+	{
+		return statement.executeQuery(this.connection);
 	}
 
 }
