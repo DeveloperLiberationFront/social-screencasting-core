@@ -27,10 +27,10 @@ public class QueuedMySQLDatabase extends RemoteSQLDatabase{
 	
 	private Queue<SerializablePreparedStatement> queuedStatements = new LinkedList<>();
 	private File serializedStatementsFile;
-	private String userId;
 
 	public QueuedMySQLDatabase(String userId)
 	{
+		super(userId);
 		try
 		{
 			loadDatabaseDriver();
@@ -40,7 +40,6 @@ public class QueuedMySQLDatabase extends RemoteSQLDatabase{
 			logger.fatal("Could not find driver for MySQLDatabase");
 			throw new DBAbstractionException("Could not find driver for MySQLDatabase", e);
 		}
-		this.userId=userId;
 		loadQueuedStatements();
 		maybeTryConnectionReset();
 	}
