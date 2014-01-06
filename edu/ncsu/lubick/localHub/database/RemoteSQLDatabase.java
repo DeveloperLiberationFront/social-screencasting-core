@@ -21,10 +21,7 @@ public abstract class RemoteSQLDatabase implements RemoteDBAbstraction {
 		this.userId = userId;
 	}
 	
-	public RemoteSQLDatabase()
-	{
-	}
-	
+	@Override
 	public String registerNewUser(String newUserEmail, String newUserName)
 	{
 		String newUserId = UUID.randomUUID().toString();

@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.localHub.database;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -23,7 +24,7 @@ public class QueuedMySQLDatabase extends RemoteSQLDatabase{
 	private static final long TIME_BETWEEN_RECONNECTS = 30*1000;	//30 seconds for reconnects
 	private static Logger logger = Logger.getLogger(QueuedMySQLDatabase.class.getName());
 	private Connection connection;
-	private Date lastConnectionAttemptTime;
+	private Date lastConnectionAttemptTime = new Date(0);
 	
 	private Queue<SerializablePreparedStatement> queuedStatements = new LinkedList<>();
 	private File serializedStatementsFile;
@@ -65,9 +66,17 @@ public class QueuedMySQLDatabase extends RemoteSQLDatabase{
 		{
 			setupSerializedStatementsFile();
 		}
+		catch (EOFException e)
+		{
+			logger.info("Empty queued MySQL");
+		}
 		catch (IOException|ClassNotFoundException e)
 		{
 			throw new DBAbstractionException("Problem with the Serialized Statements File",e);
+		}
+		if (!this.serializedStatementsFile.delete())
+		{
+			logger.error("problem deleting the serialized statements file");
 		}
 
 	}
@@ -167,7 +176,7 @@ public class QueuedMySQLDatabase extends RemoteSQLDatabase{
 		{
 			if (openRemoteConnection())
 			{
-				lastConnectionAttemptTime = null;	//successful connection
+				lastConnectionAttemptTime = new Date(0);	//successful connection
 				return true;
 			}
 			lastConnectionAttemptTime = new Date();

@@ -9,4 +9,6 @@ public interface RemoteDBAbstraction {
 
 	void storeToolUsage(ToolUsage tu, String associatedPlugin);
 
+	String registerNewUser(String newUserEmail, String newUserName);
+
 }
