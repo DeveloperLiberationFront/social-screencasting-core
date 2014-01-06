@@ -13,8 +13,8 @@ import org.apache.log4j.PropertyConfigurator;
 
 import edu.ncsu.lubick.ScreenRecordingModule;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
-import edu.ncsu.lubick.localHub.database.DBAbstraction.FileDateStructs;
-import edu.ncsu.lubick.localHub.database.SQLDatabaseFactory;
+import edu.ncsu.lubick.localHub.database.LocalDBAbstraction.FileDateStructs;
+import edu.ncsu.lubick.localHub.database.LocalSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.http.HTTPServer;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
@@ -65,7 +65,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 
 	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, boolean wantHTTP, boolean wantScreenRecording)
 	{
-		return startServerAndReturnDebugAccess(monitorLocation, SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION, wantHTTP, wantScreenRecording);
+		return startServerAndReturnDebugAccess(monitorLocation, LocalSQLDatabaseFactory.DEFAULT_SQLITE_LOCATION, wantHTTP, wantScreenRecording);
 	}
 
 	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, String databaseLocation, boolean wantHTTP,
@@ -96,7 +96,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	public static void startServerForUse(String monitorLocation)
 	{
 		//
-		startServerForUse(monitorLocation, SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
+		startServerForUse(monitorLocation, LocalSQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
 	}
 
 	public static void startServerForUse(String monitorLocation, String databaseLocation)

@@ -22,7 +22,7 @@ import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ParsedFileEvent;
 import edu.ncsu.lubick.localHub.ParsedFileListener;
 import edu.ncsu.lubick.localHub.ToolStream;
-import edu.ncsu.lubick.localHub.database.SQLDatabaseFactory;
+import edu.ncsu.lubick.localHub.database.LocalSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
@@ -423,7 +423,7 @@ public class TestLocalHubBasicFileReading {
 
 	private static void startLocalHubWithClearDatabase()
 	{
-		File databaseFile = new File(SQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
+		File databaseFile = new File(LocalSQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
 		if (databaseFile.exists())
 		{
 			assertTrue(databaseFile.delete());

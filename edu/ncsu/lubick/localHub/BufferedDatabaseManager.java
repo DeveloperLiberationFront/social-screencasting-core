@@ -11,8 +11,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
-import edu.ncsu.lubick.localHub.database.DBAbstraction;
-import edu.ncsu.lubick.localHub.database.DBAbstraction.FileDateStructs;
+import edu.ncsu.lubick.localHub.database.LocalDBAbstraction;
+import edu.ncsu.lubick.localHub.database.LocalDBAbstraction.FileDateStructs;
 import edu.ncsu.lubick.localHub.database.DBAbstractionException;
 import edu.ncsu.lubick.localHub.database.DBAbstractionFactory;
 
@@ -28,7 +28,7 @@ import edu.ncsu.lubick.localHub.database.DBAbstractionFactory;
 public class BufferedDatabaseManager
 {
 
-	private DBAbstraction dbAbstraction = null;
+	private LocalDBAbstraction dbAbstraction = null;
 	private ExecutorService threadPool;
 	private static BufferedDatabaseManager singletonBufferedDatabaseManager = null;
 

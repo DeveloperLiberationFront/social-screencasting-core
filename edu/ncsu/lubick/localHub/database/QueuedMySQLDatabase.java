@@ -18,7 +18,7 @@ import java.util.Queue;
 
 import org.apache.log4j.Logger;
 
-public class QueuedMySQLDatabase extends SQLDatabase {
+public class QueuedMySQLDatabase extends RemoteSQLDatabase{
 
 	private static final long TIME_BETWEEN_RECONNECTS = 30*1000;	//30 seconds for reconnects
 	private static Logger logger = Logger.getLogger(QueuedMySQLDatabase.class.getName());
@@ -27,8 +27,9 @@ public class QueuedMySQLDatabase extends SQLDatabase {
 	
 	private Queue<SerializablePreparedStatement> queuedStatements = new LinkedList<>();
 	private File serializedStatementsFile;
+	private String userId;
 
-	public QueuedMySQLDatabase()
+	public QueuedMySQLDatabase(String userId)
 	{
 		try
 		{
@@ -39,6 +40,7 @@ public class QueuedMySQLDatabase extends SQLDatabase {
 			logger.fatal("Could not find driver for MySQLDatabase");
 			throw new DBAbstractionException("Could not find driver for MySQLDatabase", e);
 		}
+		this.userId=userId;
 		loadQueuedStatements();
 		maybeTryConnectionReset();
 	}
@@ -146,12 +148,6 @@ public class QueuedMySQLDatabase extends SQLDatabase {
 			logger.fatal("Could not save Execution Queue to Disk", e);
 		}
 		
-	}
-
-	@Override
-	protected void createTables()
-	{
-		//we shouldn't make the tables in the MySQL because they are remotely managed
 	}
 
 	@Override

@@ -25,6 +25,11 @@ public class SerializablePreparedStatement extends AbstractPreparedStatement imp
 		this.queryStatement = statementQuery;
 	}
 
+	@Override
+	public void close() throws SQLException, NotImplementedException
+	{
+		//Because there are no DB resources tied up, nothing need be done
+	}
 	
 	@Override
 	public ResultSet executeQuery() throws SQLException, NotImplementedException

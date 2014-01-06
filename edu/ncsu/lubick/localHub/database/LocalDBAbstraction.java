@@ -6,7 +6,7 @@ import java.util.List;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 
-public abstract class DBAbstraction
+public abstract class LocalDBAbstraction
 {
 
 	public abstract List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName);

@@ -9,15 +9,15 @@ import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
-public class SQLiteDatabase extends SQLDatabase
+public class LocalSQLiteDatabase extends LocalSQLDatabase
 {
-	private static Logger logger = Logger.getLogger(SQLiteDatabase.class.getName());
+	private static Logger logger = Logger.getLogger(LocalSQLiteDatabase.class.getName());
 	private static final String DB_EXTENSION_NAME = ".sqlite";
 	private String pathToFile;
 	private Connection connection;
 	private Statement previouslyExecutedStatement;
 
-	public SQLiteDatabase(String databaseLocation)
+	public LocalSQLiteDatabase(String databaseLocation)
 	{
 		// check the filename has the right extension
 		if (databaseLocation.endsWith(DB_EXTENSION_NAME))

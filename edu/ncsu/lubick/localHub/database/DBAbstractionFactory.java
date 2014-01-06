@@ -4,11 +4,11 @@ public class DBAbstractionFactory {
 
 	public static final int SQL_IMPLEMENTATION = 1;
 
-	public static DBAbstraction createAndInitializeDatabase(String databaseLocation, int implementation)
+	public static LocalDBAbstraction createAndInitializeDatabase(String databaseLocation, int implementation)
 	{
 		if (implementation == SQL_IMPLEMENTATION)
 		{
-			return SQLDatabaseFactory.createDatabase(databaseLocation, SQLDatabaseFactory.SQLITE_IMPLEMENTATION);
+			return LocalSQLDatabaseFactory.createDatabase(databaseLocation, LocalSQLDatabaseFactory.SQLITE_IMPLEMENTATION);
 		}
 		return null;
 	}
