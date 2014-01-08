@@ -3,7 +3,8 @@ package edu.ncsu.lubick.localHub.database;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.UUID;
+
+import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 
@@ -13,7 +14,8 @@ public abstract class RemoteSQLDatabase implements RemoteDBAbstraction {
 	protected abstract PreparedStatement makePreparedStatement(String statementQuery);
 	protected abstract void executeStatementWithNoResults(PreparedStatement statement);
 	protected abstract ResultSet executeWithResults(PreparedStatement statement);
-
+	protected abstract Logger getLogger();
+	
 	private String userId;
 	
 	public RemoteSQLDatabase(String userId)
@@ -26,10 +28,9 @@ public abstract class RemoteSQLDatabase implements RemoteDBAbstraction {
 	}
 	
 	@Override
-	public String registerNewUser(String newUserEmail, String newUserName)
-	{
-		String newUserId = UUID.randomUUID().toString();
-		
+	public void registerNewUser(String newUserEmail, String newUserName, String newUserId)
+	{	
+		getLogger().debug("Making new user "+newUserEmail+", "+newUserName+", "+newUserId);
 		String sql = "INSERT INTO user_table (user_id, email, name) VALUES(?,?,?)";
 		
 		try (PreparedStatement statement = makePreparedStatement(sql);)
@@ -44,8 +45,6 @@ public abstract class RemoteSQLDatabase implements RemoteDBAbstraction {
 		{
 			throw new DBAbstractionException("There was a problem in registerNewUser()", e);
 		}
-		
-		return newUserId;
 	}
 	
 	@Override
@@ -79,4 +78,5 @@ public abstract class RemoteSQLDatabase implements RemoteDBAbstraction {
 	{
 		return userId;
 	}
+	
 }

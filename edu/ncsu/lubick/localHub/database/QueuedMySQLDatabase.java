@@ -269,5 +269,11 @@ public class QueuedMySQLDatabase extends RemoteSQLDatabase{
 	{
 		return checkDatabaseConnection();
 	}
+	
+	@Override
+	protected Logger getLogger()
+	{
+		return logger;
+	}
 
 }

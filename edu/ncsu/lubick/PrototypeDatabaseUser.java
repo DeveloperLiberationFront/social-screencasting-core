@@ -1,5 +1,7 @@
 package edu.ncsu.lubick;
 
+import java.util.UUID;
+
 import org.apache.log4j.PropertyConfigurator;
 
 import edu.ncsu.lubick.localHub.LocalHub;
@@ -13,7 +15,9 @@ public class PrototypeDatabaseUser {
 		PropertyConfigurator.configure(LocalHub.LOGGING_FILE_PATH);
 		RemoteDBAbstraction db = RemoteSQLDatabaseFactory.createMySQLDatabaseUsingUserFile();
 		
-		System.out.println(db.registerNewUser("kjlubick@ncsu.edu", "Kevin Lubick"));
+		String newID = UUID.randomUUID().toString();
+		db.registerNewUser("kjlubick@ncsu.edu", "Kevin Lubick", newID);
+		System.out.println(newID);
 		
 		db.close();
 	}

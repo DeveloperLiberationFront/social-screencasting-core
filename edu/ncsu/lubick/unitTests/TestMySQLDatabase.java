@@ -7,11 +7,13 @@ import java.io.FileOutputStream;
 import java.util.Scanner;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.database.QueuedMySQLDatabase;
 import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 
@@ -23,6 +25,7 @@ public class TestMySQLDatabase
 	@BeforeClass
 	public static void setUpClass() throws Exception
 	{
+		PropertyConfigurator.configure(LocalHub.LOGGING_FILE_PATH);
 		RemoteSQLDatabaseFactory.setTestingMode(true);
 
 	}
@@ -109,7 +112,7 @@ public class TestMySQLDatabase
 	}
 
 
-	private void writeOutUserFile(File file, UserNameIDStruct userStruct) throws Exception
+	private static void writeOutUserFile(File file, UserNameIDStruct userStruct) throws Exception
 	{
 		try (FileOutputStream fos = new FileOutputStream(file);)
 		{
