@@ -29,7 +29,7 @@ public class QueuedMySQLDatabase extends RemoteSQLDatabase{
 	private Queue<SerializablePreparedStatement> queuedStatements = new LinkedList<>();
 	private File serializedStatementsFile;
 
-	public QueuedMySQLDatabase(String userId)
+	QueuedMySQLDatabase(String userId)
 	{
 		super(userId);
 		try
@@ -47,15 +47,18 @@ public class QueuedMySQLDatabase extends RemoteSQLDatabase{
 
 	private void loadDatabaseDriver() throws ClassNotFoundException
 	{
+		logger.debug("Loading driver");
 		Class.forName("com.mysql.jdbc.Driver");
 	}
 	
 	private void loadQueuedStatements()
 	{
+		logger.debug("Loading previously queued files");
 		this.serializedStatementsFile = new File("./dbStatic.sql");
 		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(serializedStatementsFile));)
 		{
 			Object supposedQueue = ois.readObject();
+			if (logger.isTraceEnabled()) logger.trace(supposedQueue);
 			if (supposedQueue == null || !(supposedQueue instanceof Queue<?>))
 			{
 				return;
@@ -64,6 +67,7 @@ public class QueuedMySQLDatabase extends RemoteSQLDatabase{
 		}
 		catch (FileNotFoundException e)
 		{
+			logger.debug(this.serializedStatementsFile + " did not exist");
 			setupSerializedStatementsFile();
 		}
 		catch (EOFException e)
@@ -167,20 +171,19 @@ public class QueuedMySQLDatabase extends RemoteSQLDatabase{
 
 	private boolean maybeTryConnectionReset()
 	{
-		if (lastConnectionAttemptTime == null)
-		{
-			lastConnectionAttemptTime = new Date();
-			return false;
-		}
 		if ((new Date().getTime() - lastConnectionAttemptTime.getTime()) > TIME_BETWEEN_RECONNECTS)
 		{
 			if (openRemoteConnection())
 			{
+				logger.info("Connection to MySQL succeeded");
 				lastConnectionAttemptTime = new Date(0);	//successful connection
 				return true;
 			}
 			lastConnectionAttemptTime = new Date();
+			logger.info("Connection to MySQL failed");
+			return false;
 		}
+		logger.debug("Not attempting reconnect because the time isn't right yet");
 		return false;
 	}
 
@@ -208,7 +211,7 @@ public class QueuedMySQLDatabase extends RemoteSQLDatabase{
 		if (statement instanceof SerializablePreparedStatement)
 		{
 			addToExecutionQueue((SerializablePreparedStatement) statement);
-			if (checkDatabaseConnection())
+			if (checkDatabaseConnection() || maybeTryConnectionReset())
 			{
 				emptyExectutionQueue();
 			}
@@ -260,6 +263,11 @@ public class QueuedMySQLDatabase extends RemoteSQLDatabase{
 	{
 		statement.executeUpdate(this.connection);
 		
+	}
+
+	public boolean isConnected()
+	{
+		return checkDatabaseConnection();
 	}
 
 }
