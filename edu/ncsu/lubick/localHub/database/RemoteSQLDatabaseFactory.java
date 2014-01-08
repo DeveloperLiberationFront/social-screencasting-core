@@ -6,7 +6,7 @@ public final class RemoteSQLDatabaseFactory
 {
 
 	private static final String PATH_TO_USER_FILE = "./username.txt";
-	private static final String TEST_PATH_TO_USER_FILE = "./test_username.txt";
+	public static final String TEST_PATH_TO_USER_FILE = "./test_username.txt";
 	
 	private static File expectedUserNameAndFile = new File(PATH_TO_USER_FILE);
 	public static void setTestingMode(boolean b)

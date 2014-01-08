@@ -18,6 +18,10 @@ public abstract class RemoteSQLDatabase implements RemoteDBAbstraction {
 	
 	public RemoteSQLDatabase(String userId)
 	{
+		if (userId == null)
+		{
+			throw new RuntimeException("User ID Cannot be null!");
+		}
 		this.userId = userId;
 	}
 	
