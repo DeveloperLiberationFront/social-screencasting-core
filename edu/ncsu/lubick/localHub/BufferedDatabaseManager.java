@@ -15,6 +15,8 @@ import edu.ncsu.lubick.localHub.database.LocalDBAbstraction;
 import edu.ncsu.lubick.localHub.database.LocalDBAbstraction.FileDateStructs;
 import edu.ncsu.lubick.localHub.database.DBAbstractionException;
 import edu.ncsu.lubick.localHub.database.DBAbstractionFactory;
+import edu.ncsu.lubick.localHub.database.RemoteDBAbstraction;
+import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 
 /**
  * An implementation of a database that prioritizes quick writes at the expenses of blocking on data pulls.
@@ -28,31 +30,35 @@ import edu.ncsu.lubick.localHub.database.DBAbstractionFactory;
 public class BufferedDatabaseManager
 {
 
-	private LocalDBAbstraction dbAbstraction = null;
-	private ExecutorService threadPool;
+	private LocalDBAbstraction localDB = null;
+	private RemoteDBAbstraction remoteDB = null;
+	
+	private ExecutorService localThreadPool;
+	private ExecutorService remoteThreadPool;
 	private static BufferedDatabaseManager singletonBufferedDatabaseManager = null;
 
 	private static Logger logger = Logger.getLogger(BufferedDatabaseManager.class.getName());
 
-	public BufferedDatabaseManager(String databaseLocation)
+	private BufferedDatabaseManager(String databaseLocation)
 	{
-		this.dbAbstraction = DBAbstractionFactory.createAndInitializeDatabase(databaseLocation, DBAbstractionFactory.SQL_IMPLEMENTATION);
-
-		resetThreadPool();
+		this.localDB = DBAbstractionFactory.createAndInitializeDatabase(databaseLocation, DBAbstractionFactory.SQL_IMPLEMENTATION);
+		this.remoteDB = RemoteSQLDatabaseFactory.createMySQLDatabaseUsingUserFile();
+		
+		resetThreadPools();
 	}
 
 	// This is synchronized to appease FindBugs. I doubt this will ever be
 	// called from a multi thread environment, but
 	// this is a bit more bullet proof. It's not time critical, so we should be
-	// alright.
-	public static synchronized BufferedDatabaseManager createBufferedDatabasemanager(String databaseLocation)
+	// all right.
+	public static synchronized BufferedDatabaseManager createBufferedDatabasemanager(String localDatabaseLocation)
 	{
 		if (singletonBufferedDatabaseManager != null)
 		{
 			return singletonBufferedDatabaseManager;
 		}
 
-		singletonBufferedDatabaseManager = new BufferedDatabaseManager(databaseLocation);
+		singletonBufferedDatabaseManager = new BufferedDatabaseManager(localDatabaseLocation);
 
 		return singletonBufferedDatabaseManager;
 	}
@@ -62,14 +68,12 @@ public class BufferedDatabaseManager
 		for (final ToolUsage tu : ts.getAsList())
 		{
 			logger.debug("Queueing up tool usage store");
-			threadPool.execute(new Runnable() {
+			localThreadPool.execute(new Runnable() {
 
 				@Override
 				public void run()
 				{
-
-					dbAbstraction.storeToolUsage(tu, ts.getAssociatedPlugin());
-
+					localDB.storeToolUsage(tu, ts.getAssociatedPlugin());
 				}
 			});
 
@@ -80,25 +84,23 @@ public class BufferedDatabaseManager
 	public void addVideoFile(final File newVideoFile, final Date videoStartTime, final int durationOfClip)
 	{
 		logger.debug("Adding new video file that starts on " + videoStartTime + "and goes " + durationOfClip + " seconds");
-		threadPool.execute(new Runnable() {
+		localThreadPool.execute(new Runnable() {
 
 			@Override
 			public void run()
 			{
-
-				dbAbstraction.storeVideoFile(newVideoFile, videoStartTime, durationOfClip);
-
+				localDB.storeVideoFile(newVideoFile, videoStartTime, durationOfClip);
 			}
 		});
 	}
 
-	private void waitForThreadPool()
+	private void waitForLocalThreadPool()
 	{
-		threadPool.shutdown();
+		localThreadPool.shutdown();
 		logger.debug("Waiting for the threadpool to finish tabulating");
 		try
 		{
-			threadPool.awaitTermination(30, TimeUnit.SECONDS);
+			localThreadPool.awaitTermination(30, TimeUnit.SECONDS);
 		}
 		catch (InterruptedException e)
 		{
@@ -106,25 +108,28 @@ public class BufferedDatabaseManager
 		}
 	}
 
-	private void resetThreadPool()
+	private void resetThreadPools()
 	{
-		this.threadPool = Executors.newSingleThreadExecutor();
-
+		this.localThreadPool = Executors.newSingleThreadExecutor();
+		this.remoteThreadPool = Executors.newSingleThreadExecutor();
 	}
 
 	public void shutDown()
 	{
-		threadPool.shutdown();
+		localThreadPool.shutdown();
+		remoteThreadPool.shutdown();
 		try
 		{
-			threadPool.awaitTermination(30, TimeUnit.SECONDS);
+			localThreadPool.awaitTermination(30, TimeUnit.SECONDS);
+			remoteThreadPool.awaitTermination(30, TimeUnit.SECONDS);
 		}
 		catch (InterruptedException e)
 		{
-			logger.error("was interrupted trying to wait for the threadpool to close");
+			logger.error("was interrupted trying to wait for the threadpools to close");
 		}
 
-		dbAbstraction.close();
+		localDB.close();
+		remoteDB.close();
 		reset();
 	}
 
@@ -136,11 +141,11 @@ public class BufferedDatabaseManager
 
 	public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName)
 	{
-		waitForThreadPool();
+		waitForLocalThreadPool();
 
-		List<ToolUsage> retval = dbAbstraction.getAllToolUsageHistoriesForPlugin(currentPluginName);
+		List<ToolUsage> retval = localDB.getAllToolUsageHistoriesForPlugin(currentPluginName);
 
-		resetThreadPool();
+		resetThreadPools();
 
 		return retval;
 	}
@@ -151,13 +156,13 @@ public class BufferedDatabaseManager
 		{
 			logger.info("WARNING: Duration of Screencast longer than 2 minutes.  Are you sure that you converted milliseconds to seconds?");
 		}
-		waitForThreadPool();
+		waitForLocalThreadPool();
 		List<FileDateStructs> retVal = null;
 		try
 		{
 			logger.debug("Searching for a time frame starting at " + timeStamp + "and going " + durationInSeconds + " seconds");
 
-			retVal = dbAbstraction.getVideoFilesLinkedToTimePeriod(timeStamp, durationInSeconds);
+			retVal = localDB.getVideoFilesLinkedToTimePeriod(timeStamp, durationInSeconds);
 		}
 		catch (DBAbstractionException e)
 		{
@@ -165,7 +170,7 @@ public class BufferedDatabaseManager
 		}
 		finally
 		{
-			resetThreadPool();
+			resetThreadPools();
 		}
 
 		return retVal;
@@ -181,11 +186,11 @@ public class BufferedDatabaseManager
 
 	public List<ToolUsage> getLastNInstancesOfToolUsage(int n, String pluginName, String toolName)
 	{
-		waitForThreadPool();
+		waitForLocalThreadPool();
 		List<ToolUsage> retVal = null;
 		try
 		{
-			retVal = dbAbstraction.getLastNInstancesOfToolUsage(n, pluginName, toolName);
+			retVal = localDB.getLastNInstancesOfToolUsage(n, pluginName, toolName);
 		}
 		catch (DBAbstractionException e)
 		{
@@ -193,7 +198,7 @@ public class BufferedDatabaseManager
 		}
 		finally
 		{
-			resetThreadPool();
+			resetThreadPools();
 		}
 
 		return retVal;
@@ -201,14 +206,14 @@ public class BufferedDatabaseManager
 
 	public List<String> getNamesOfAllPlugins()
 	{
-		waitForThreadPool();
+		waitForLocalThreadPool();
 		List<String> retVal = Collections.emptyList(); // avoids the template
 														// from crashing if the
 														// query runs into
 														// trouble
 		try
 		{
-			retVal = dbAbstraction.getNamesOfAllPlugins();
+			retVal = localDB.getNamesOfAllPlugins();
 		}
 		catch (DBAbstractionException e)
 		{
@@ -216,7 +221,7 @@ public class BufferedDatabaseManager
 		}
 		finally
 		{
-			resetThreadPool();
+			resetThreadPools();
 		}
 		return retVal;
 	}
