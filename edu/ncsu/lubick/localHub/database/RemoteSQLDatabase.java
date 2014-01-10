@@ -50,8 +50,10 @@ public abstract class RemoteSQLDatabase implements RemoteDBAbstraction {
 	@Override
 	public void storeToolUsage(ToolUsage tu, String associatedPlugin)
 	{
+		getLogger().debug("Storing tool usage to Remote Database "+tu);
+		
 		String sql ="INSERT INTO tool_info_by_user (user_id, plugin_name, " 
-					+"tool_name, usage_timestamp, tool_key_presses, class_of_tool, "
+					+"tool_name, usage_timestamp, tool_keypress, class_of_tool, "
 					+"tool_use_duration ) VALUES (?,?,?,?,?,?,?)";
 
 		
