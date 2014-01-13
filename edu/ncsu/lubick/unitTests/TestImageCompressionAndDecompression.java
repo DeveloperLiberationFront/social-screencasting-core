@@ -28,6 +28,7 @@ import com.wet.wired.jsr.recorder.compression.FrameDataPack;
 
 import edu.ncsu.lubick.BasicCapFileManager;
 import edu.ncsu.lubick.ScreenRecordingModule;
+import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
 import edu.ncsu.lubick.localHub.videoPostProduction.DecompressionFramePacket;
 import edu.ncsu.lubick.localHub.videoPostProduction.FrameDecompressor;
@@ -87,12 +88,13 @@ public class TestImageCompressionAndDecompression
 	static
 	{
 		PropertyConfigurator.configure(ScreenRecordingModule.LOGGING_FILE_PATH);
+		
 	}
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception
 	{
-
+		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
 	}
 
 	@Before

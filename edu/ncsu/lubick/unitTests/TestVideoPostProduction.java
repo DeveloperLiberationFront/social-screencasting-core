@@ -16,6 +16,7 @@ import edu.ncsu.lubick.localHub.FileUtilities;
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
@@ -40,6 +41,7 @@ public class TestVideoPostProduction
 	static
 	{
 		PropertyConfigurator.configure(LocalHub.LOGGING_FILE_PATH);
+		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
 	}
 
 	@Test

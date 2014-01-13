@@ -6,12 +6,20 @@ import static org.junit.Assert.*;
 
 import java.awt.image.BufferedImage;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedKeyboardMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.ShortcutsToKeyCodesConverter;
 
 public class TestKeypressAnimationGeneration {
+	
+	@BeforeClass
+	public static void setUpBeforeAll()
+	{
+		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
+	}
 
 	@Test
 	public void testCopy()

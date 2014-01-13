@@ -23,6 +23,7 @@ import edu.ncsu.lubick.localHub.ParsedFileEvent;
 import edu.ncsu.lubick.localHub.ParsedFileListener;
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.database.LocalSQLDatabaseFactory;
+import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
@@ -75,6 +76,7 @@ public class TestLocalHubBasicFileReading {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception
 	{
+		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
 		// Clear out the testing monitor location
 		assertTrue(UtilitiesForTesting.clearOutDirectory(LOCAL_HUB_MONITOR_LOCATION));
 		startLocalHubWithClearDatabase();

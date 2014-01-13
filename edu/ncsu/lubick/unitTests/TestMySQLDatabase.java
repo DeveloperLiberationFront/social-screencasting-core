@@ -26,8 +26,8 @@ public class TestMySQLDatabase
 	public static void setUpClass() throws Exception
 	{
 		PropertyConfigurator.configure(LocalHub.LOGGING_FILE_PATH);
-		RemoteSQLDatabaseFactory.setTestingMode(true);
-
+		RemoteSQLDatabaseFactory.setUpToUseTestUserFile(true);
+		RemoteSQLDatabaseFactory.setUpToUseMockDB(false);
 	}
 
 

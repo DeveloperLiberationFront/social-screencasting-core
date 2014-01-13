@@ -5,8 +5,14 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Scanner;
 import java.util.UUID;
+
+import org.apache.log4j.Logger;
+
+import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 
 public final class RemoteSQLDatabaseFactory
 {
@@ -14,16 +20,17 @@ public final class RemoteSQLDatabaseFactory
 	private static final String PATH_TO_USER_FILE = "./username.txt";
 	public static final String TEST_PATH_TO_USER_FILE = "./test_username.txt";
 
-	private static boolean isTesting = false;
+	private static boolean isUsingTestUserFile = false;
+	private static boolean blockAllActualConnections = false;
 	
 	private static UserNameIDStruct userToCreate = null;
 
 	private static File expectedUserNameAndFile = new File(PATH_TO_USER_FILE);
 
-	public static void setTestingMode(boolean b)
+	public static void setUpToUseTestUserFile(boolean b)
 	{
-		isTesting = b;
-		if (b)
+		isUsingTestUserFile = b;
+		if (isUsingTestUserFile)
 		{
 			expectedUserNameAndFile = new File(TEST_PATH_TO_USER_FILE);
 		}
@@ -33,10 +40,28 @@ public final class RemoteSQLDatabaseFactory
 		}
 
 	}
+	
+	public static void setUpToUseMockDB(boolean b)
+	{
+		blockAllActualConnections = b;
+	}
 
 	public static RemoteSQLDatabase createMySQLDatabaseUsingUserFile()
 	{
+		if (blockAllActualConnections)
+		{
+			return handleMockDB();
+		}
+		return handleNormalDB();
+	}
 
+	private static RemoteSQLDatabase handleMockDB()
+	{
+		return new MockRemoteSQLDatabase();
+	}
+
+	private static RemoteSQLDatabase handleNormalDB()
+	{
 		String userId;
 		if (expectedUserNameAndFile.exists())
 		{
@@ -59,7 +84,7 @@ public final class RemoteSQLDatabaseFactory
 	private static String createDummyUser()
 	{
 		UserNameIDStruct struct = new UserNameIDStruct();
-		if (!isTesting)
+		if (!isUsingTestUserFile)
 		{
 			struct.userName = "USER NAME";
 			struct.email = "USER EMAIL";
@@ -154,4 +179,54 @@ public final class RemoteSQLDatabaseFactory
 		String userName, email, id;
 	}
 
+	
+	private static class MockRemoteSQLDatabase extends RemoteSQLDatabase
+	{
+
+		public MockRemoteSQLDatabase()
+		{
+			super("[MOCK]");
+		}
+
+		@Override
+		public void close()
+		{}
+
+		@Override
+		public String getUserId()
+		{
+			return "[MOCK]";
+		}
+
+		@Override
+		public void storeToolUsage(ToolUsage tu, String associatedPlugin)
+		{}
+
+		@Override
+		public void registerNewUser(String newUserEmail, String newUserName, String newUserId)
+		{}
+
+		@Override
+		protected PreparedStatement makePreparedStatement(String statementQuery)
+		{
+			return null;
+		}
+
+		@Override
+		protected void executeStatementWithNoResults(PreparedStatement statement)
+		{}
+
+		@Override
+		protected ResultSet executeWithResults(PreparedStatement statement)
+		{
+			return null;
+		}
+
+		@Override
+		protected Logger getLogger()
+		{
+			return null;
+		}
+		
+	}
 }
