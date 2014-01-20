@@ -17,13 +17,14 @@ import edu.ncsu.lubick.localHub.database.LocalDBAbstraction.FileDateStructs;
 import edu.ncsu.lubick.localHub.database.LocalSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.http.HTTPServer;
+import edu.ncsu.lubick.localHub.http.WebToolReportingInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToMediaOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToBrowserAnimatedPackage;
 
-public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQueryInterface, ParsedFileListener {
+public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQueryInterface, ParsedFileListener, WebToolReportingInterface {
 
 	public static final String LOGGING_FILE_PATH = "./log4j.settings";
 	private static final LocalHub singletonHub;
@@ -560,6 +561,13 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 			hubToDebug.videoPostProductionHandler.addNewPostAnimationMediaOutput(new ImagesWithAnimationToVideoOutput());
 		}
 
+	}
+
+	@Override
+	public void reportToolStream(ToolStream ts)	//requests coming in from the web
+	{
+		this.databaseManager.writeToolStreamToDatabase(ts);
+		
 	}
 
 }

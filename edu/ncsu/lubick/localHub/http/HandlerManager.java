@@ -29,6 +29,10 @@ public class HandlerManager
 		h.addHandler(new LookupHandler("/", wqi));
 		h.addHandler(new LookupHandler("/index", wqi));
 		h.addHandler(new VideoCreator("/makeVideo", wqi));
+		if (wqi instanceof WebToolReportingInterface)
+		{
+			h.addHandler(new ToolReportingHandler("/reportTool", (WebToolReportingInterface)wqi ));
+		}
 
 		ResourceCollection resourceCollection = new ResourceCollection(staticResources);
 		ResourceHandler resourseHandler = new ResourceHandler();
