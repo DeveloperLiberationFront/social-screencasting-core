@@ -34,12 +34,14 @@ public class ToolStream {
 		try
 		{
 			jArray = new JSONArray(fileContents);
+			logger.debug("Array created: "+jArray.toString(1));
 		}
 		catch (JSONException e)
 		{
 			logger.error("Problem reading in from JSON", e);
 			return null;
 		}
+		
 
 		ToolStream ts = new ToolStream();
 

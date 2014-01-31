@@ -566,6 +566,8 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	@Override
 	public void reportToolStream(ToolStream ts)	//requests coming in from the web
 	{
+		logger.info("ToolStream Reported from Plugin: "+ts.getAssociatedPlugin());
+		logger.debug(ts.toString());
 		this.databaseManager.writeToolStreamToDatabase(ts);
 		
 	}

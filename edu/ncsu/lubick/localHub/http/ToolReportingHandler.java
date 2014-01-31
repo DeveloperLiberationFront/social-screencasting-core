@@ -57,10 +57,12 @@ public class ToolReportingHandler extends AbstractHandler  {
 		logger.debug("POST parameters recieved " + request.getParameterMap());
 		String pluginName = request.getParameter(POST_PROPERTY_PLUGIN_NAME);
 		String jsonArrayOfToolUsage = request.getParameter(POST_PROPERTY_JSON_ARRAY_TOOL_USAGES);
-		Long timeStamp = Long.decode(request.getParameter(POST_PROPERTY_TOOLSTREAM_TIME));
+		logger.debug(""+ pluginName+ " " +jsonArrayOfToolUsage.toString());
+		
+		//Long timeStamp = Long.decode(request.getParameter(POST_PROPERTY_TOOLSTREAM_TIME));
 		ToolStream ts = ToolStream.generateFromJSON(jsonArrayOfToolUsage);
 		ts.setAssociatedPlugin(pluginName);
-		ts.setTimeStamp(new Date(timeStamp));
+		//ts.setTimeStamp(new Date(timeStamp));
 		toolReportingInterface.reportToolStream(ts);
 	}
 
