@@ -34,6 +34,7 @@ public class HandlerManager
 			h.addHandler(new ToolReportingHandler("/reportTool", (WebToolReportingInterface)wqi ));
 		}
 
+		h.addHandler(new VersionHandler("/version"));
 		ResourceCollection resourceCollection = new ResourceCollection(staticResources);
 		ResourceHandler resourseHandler = new ResourceHandler();
 		resourseHandler.setBaseResource(resourceCollection);

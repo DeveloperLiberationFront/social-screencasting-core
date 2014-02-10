@@ -10,6 +10,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static org.hamcrest.CoreMatchers.*;
+
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
@@ -108,7 +110,7 @@ public class TestToolStream {
 			assertNotNull(tu.getToolClass());
 			assertNotNull(tu.getToolKeyPresses());
 			assertNotNull(tu.getToolName());
-			assertNotEquals(tu.getDuration(), 0);
+			assertThat(tu.getDuration(), not(equalTo(0)));
 
 			// Tests to make sure that the
 			gc.setTime(tu.getTimeStamp());
