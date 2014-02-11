@@ -1,7 +1,6 @@
 package edu.ncsu.lubick.localHub.http;
 
 import java.io.IOException;
-import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -17,7 +16,7 @@ public class ToolReportingHandler extends AbstractHandler  {
 
 	private static final String POST_PROPERTY_PLUGIN_NAME = "pluginName";
 	private static final String POST_PROPERTY_JSON_ARRAY_TOOL_USAGES = "toolUsages";
-	private static final String POST_PROPERTY_TOOLSTREAM_TIME = "toolStreamTime";
+	//private static final String POST_PROPERTY_TOOLSTREAM_TIME = "toolStreamTime";
 	
 	private String httpRequestPattern;
 	private WebToolReportingInterface toolReportingInterface;
