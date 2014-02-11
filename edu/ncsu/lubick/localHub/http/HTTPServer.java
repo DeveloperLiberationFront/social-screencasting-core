@@ -11,9 +11,7 @@ public class HTTPServer {
 	public static final int SERVER_PORT = 4443;
 
 	// information about the HTTP server
-	public static final String SERVER_NAME = "Social Screencasting";
-	public static final String SERVER_VERSION = "0.1";
-	public static final String SERVER_ETC = "now in Glorious No Color, with Handlers!";
+	public static final String VERSION_ID = "screencasting-1.0";
 
 	private static Logger logger = Logger.getLogger(HTTPServer.class.getName());
 

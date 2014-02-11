@@ -37,6 +37,7 @@ public class HandlerManager
 		{
 			h.addHandler(new ToolReportingHandler("/reportTool", (WebToolReportingInterface)wqi ));
 		}
+		h.addHandler(new VersionHandler("/version"));
 		
 		Resource[] staticResources = new Resource[staticResourcePaths.length];
 		int i = 0;
