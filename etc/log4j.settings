@@ -9,13 +9,13 @@ log4j.rootLogger=debug, mainLogger
 #log4j.logger.edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput = trace
 
 # mainLogger is set to be a ConsoleAppender.
-#log4j.appender.mainLogger=org.apache.log4j.ConsoleAppender
+log4j.appender.mainLogger=org.apache.log4j.ConsoleAppender
 
 # mainLogger is set to be a RollingFileAppender.
-log4j.appender.mainLogger=org.apache.log4j.RollingFileAppender
-log4j.appender.mainLogger.MaxBackupIndex = 10
-log4j.appender.mainLogger.File=screencasting.log
-log4j.appender.mainLogger.MaxFileSize=3MB
+#log4j.appender.mainLogger=org.apache.log4j.RollingFileAppender
+#log4j.appender.mainLogger.MaxBackupIndex = 10
+#log4j.appender.mainLogger.File=screencasting.log
+#log4j.appender.mainLogger.MaxFileSize=3MB
 
 
 # mainLogger uses PatternLayout.

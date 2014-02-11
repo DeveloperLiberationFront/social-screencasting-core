@@ -9,6 +9,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import javax.imageio.ImageIO;
 
@@ -27,12 +28,14 @@ public abstract class AbstractKeypressAnimationMaker implements KeypressAnimatio
 	{
 		if (unActivatedKeyboard == null)
 		{
-			File unactivatedKeyboardPath = new File("bin/imageAssets/QWERTY_keyboard_small.png");
+			URL unactivatedKeyboardPath = AbstractKeypressAnimationMaker.class.
+							getResource("/imageAssets/QWERTY_keyboard_small.png");
 			unActivatedKeyboard = ImageIO.read(unactivatedKeyboardPath);
 		}
 		if (activatedKeyboard == null)
 		{
-			File activatedKeyboardPath = new File("bin/imageAssets/QWERTY_keyboard_pressed_small.png");
+			URL activatedKeyboardPath = AbstractKeypressAnimationMaker.class.
+					getResource("/imageAssets/QWERTY_keyboard_pressed_small.png");
 			activatedKeyboard = ImageIO.read(activatedKeyboardPath);
 		}
 	}

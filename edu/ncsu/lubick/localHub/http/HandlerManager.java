@@ -2,6 +2,7 @@ package edu.ncsu.lubick.localHub.http;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Handler;
@@ -17,10 +18,13 @@ public class HandlerManager
 {
 	private static Logger logger = Logger.getLogger(HandlerManager.class.getName());
 
-	private static String[] staticResourcePaths = new String[] {
-			"src/frontend/public_html/",
-			"renderedVideos/"
+	private static String[] staticWebResourcePaths = new String[] {
+		"/public_html/",
+		"/templates/"			// the folder src/frontend is being treated a source folder, so it is not exported
+								// as /frontend/public_html and /frontend/templates, but as their own high-level folders
 	};
+
+	private static String renderedVideoPath = "renderedVideos/";
 
 	private HandlerManager()
 	{
@@ -30,20 +34,48 @@ public class HandlerManager
 	{
 		HandlerCollection h = new HandlerList();
 
+		makeAndAddHandlersForBrowsing(h, wqi);
+		makeAndAddHandlersForMediaEncoding(h, wqi);
+		makeAndAddHandlersForWebReporting(h, wqi);
+
+		Resource[] staticWebResources = setUpWebResources(h.getClass());
+		Resource[] allWebResources = setUpLocalMediaAssets(staticWebResources);
+		
+		logger.info("Web Resources "+Arrays.toString(allWebResources));
+
+		makeAndHandlerForFiles(h, allWebResources);
+
+		logger.debug("logger for HTTP Handlers set up with "+h.getChildHandlers().length+" handlers");
+		return h;
+	}
+
+	private static void makeAndAddHandlersForBrowsing(HandlerCollection h, WebQueryInterface wqi)
+	{
 		h.addHandler(new LookupHandler("/", wqi));
 		h.addHandler(new LookupHandler("/index", wqi));
+	}
+
+	private static void makeAndAddHandlersForMediaEncoding(HandlerCollection h, WebQueryInterface wqi)
+	{
 		h.addHandler(new VideoCreator("/makeVideo", wqi));
+	}
+
+	private static void makeAndAddHandlersForWebReporting(HandlerCollection h, WebQueryInterface wqi)
+	{
 		if (wqi instanceof WebToolReportingInterface)
 		{
 			h.addHandler(new ToolReportingHandler("/reportTool", (WebToolReportingInterface)wqi ));
 		}
 		h.addHandler(new VersionHandler("/version"));
-		
-		Resource[] staticResources = new Resource[staticResourcePaths.length];
+	}
+
+	private static Resource[] setUpWebResources(Class<?> classForJarResources)	//this will work whether running from Eclipse
+	{																			//or in a jar
+		Resource[] staticResources = new Resource[staticWebResourcePaths.length];	
 		int i = 0;
-		for(String resourcePath : staticResourcePaths)
+		for(String resourcePath : staticWebResourcePaths)
 		{
-			URL url = h.getClass().getResource(resourcePath);
+			URL url = classForJarResources.getResource(resourcePath);
 			try
 			{
 				staticResources[i] = Resource.newResource(url);
@@ -54,14 +86,32 @@ public class HandlerManager
 			}
 			i++;
 		}
+		return staticResources;
+	}
+
+	private static Resource[] setUpLocalMediaAssets(Resource[] staticWebResources)
+	{
+		Resource[] retVal = Arrays.copyOf(staticWebResources, staticWebResources.length+1);
 		
-		ResourceCollection resourceCollection = new ResourceCollection(staticResources);
+		try
+		{
+			retVal[staticWebResources.length] = Resource.newResource(renderedVideoPath);
+		}
+		catch (IOException e)
+		{
+			logger.error("problem with the rendered video assets.  Leaving them out for now");
+			return staticWebResources;
+		}
+		
+		return retVal;
+	}
+
+	private static void makeAndHandlerForFiles(HandlerCollection h, Resource[] allWebResources)
+	{
+		ResourceCollection resourceCollection = new ResourceCollection(allWebResources);
 		ResourceHandler resourseHandler = new ResourceHandler();
 		resourseHandler.setBaseResource(resourceCollection);
 		resourseHandler.setDirectoriesListed(false);
 		h.addHandler(resourseHandler);
-
-		logger.debug("logger set up with 4 handlers");
-		return h;
 	}
 }

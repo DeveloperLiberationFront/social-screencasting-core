@@ -1,7 +1,6 @@
 package edu.ncsu.lubick.localHub;
 
 import java.io.File;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -9,9 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 import edu.ncsu.lubick.ScreenRecordingModule;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
@@ -37,21 +34,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	// Static initializer to get the logging path set up and create the hub
 	static
 	{
-		try
-		{
-			URL url = LocalHub.class.getResource(LOGGING_FILE_PATH);
-			PropertyConfigurator.configure(url);
-			logger = Logger.getLogger(LocalHub.class.getName());
-		}
-		catch (Exception e)
-		{
-			//load safe defaults
-			BasicConfigurator.configure();
-			logger = Logger.getLogger(LocalHub.class.getName());
-			logger.info("Could not load property file, loading defaults", e);
-		}
-		
-		
+		logger = Logger.getLogger(LocalHub.class.getName());
 		singletonHub = new LocalHub();
 	}
 
@@ -121,7 +104,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	// singleton with restricted access.
 	private LocalHub()
 	{
-		logger.debug("Logging started in creation of LocalHub");
+		logger.debug("Logging started in creation of LocalHub "+new Date());
 
 		this.addLoadedFileListener(new VideoFileMonitor());
 	}
