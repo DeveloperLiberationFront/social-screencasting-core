@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.unitTests;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 import java.util.Date;
@@ -9,8 +10,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import static org.hamcrest.CoreMatchers.*;
 
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;

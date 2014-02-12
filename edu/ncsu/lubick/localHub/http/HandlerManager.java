@@ -97,7 +97,7 @@ public class HandlerManager
 		try
 		{
 			File renderedVideoDir = new File(renderedVideoPath);
-			if (!renderedVideoDir.exists() || renderedVideoDir.mkdirs())
+			if (renderedVideoDir.exists() || renderedVideoDir.mkdirs())
 			{
 				retVal[staticWebResources.length] = Resource.newResource(renderedVideoDir);
 			}

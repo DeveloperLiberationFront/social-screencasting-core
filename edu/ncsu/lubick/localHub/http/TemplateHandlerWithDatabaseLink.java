@@ -1,6 +1,5 @@
 package edu.ncsu.lubick.localHub.http;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
