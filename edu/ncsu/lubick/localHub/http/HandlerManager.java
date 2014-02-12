@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.localHub.http;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
@@ -95,7 +96,15 @@ public class HandlerManager
 		
 		try
 		{
-			retVal[staticWebResources.length] = Resource.newResource(renderedVideoPath);
+			File renderedVideoDir = new File(renderedVideoPath);
+			if (!renderedVideoDir.exists() || renderedVideoDir.mkdirs())
+			{
+				retVal[staticWebResources.length] = Resource.newResource(renderedVideoDir);
+			}
+			else
+			{
+				logger.error("Could not make the directory for the rendered video assets.  Won't serve them.");
+			}
 		}
 		catch (IOException e)
 		{

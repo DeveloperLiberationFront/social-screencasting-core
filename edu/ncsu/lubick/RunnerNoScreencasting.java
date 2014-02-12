@@ -17,7 +17,7 @@ public class RunnerNoScreencasting
 	{
 		try
 		{
-			URL url = Runner.class.getResource("/etc/log4j.settings");
+			URL url = Runner.class.getResource(LocalHub.LOGGING_FILE_PATH);
 			PropertyConfigurator.configure(url);
 			Logger.getRootLogger().info("Logging initialized");
 		}
