@@ -270,12 +270,7 @@ public class FileManager implements Runnable {
 	private int conditionallyAddFileToCollectionAfterContactingListener(File thisFile, boolean isInitialLoading, Collection<File> collectionToAddTo)
 	{
 		String fileContents = "[BINARYDATA]";
-		if (!thisFile.getName().endsWith(PostProductionHandler.EXPECTED_FILE_EXTENSION)) // these
-																							// get
-																							// too
-																							// big
-																							// to
-																							// parse
+		if (!thisFile.getName().endsWith(PostProductionHandler.EXPECTED_SCREENCAST_FILE_EXTENSION)) // these get too big to parse
 		{
 			fileContents = FileUtilities.readAllFromFile(thisFile);
 		}

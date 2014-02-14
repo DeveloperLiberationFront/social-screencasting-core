@@ -55,7 +55,7 @@ public class PostProductionHandler
 {
 	public static final String INTERMEDIATE_FILE_FORMAT = "png";
 	public static final int FRAME_RATE = 5;
-	public static final String EXPECTED_FILE_EXTENSION = ".cap";
+	public static final String EXPECTED_SCREENCAST_FILE_EXTENSION = ".cap";
 	public static final boolean DELETE_IMAGES_AFTER_USE = false;
 
 	private static final String SCRATCH_DIR = "./Scratch/";
@@ -103,9 +103,9 @@ public class PostProductionHandler
 			logger.error("Recieved null file to load in PostProductionVideoHandler");
 			throw new IllegalArgumentException("A capFile cannot be null");
 		}
-		if (!capFile.getName().endsWith(EXPECTED_FILE_EXTENSION))
+		if (!capFile.getName().endsWith(EXPECTED_SCREENCAST_FILE_EXTENSION))
 		{
-			logger.error("Expected cap file to have an extension " + EXPECTED_FILE_EXTENSION + " not like " + capFile.getName());
+			logger.error("Expected cap file to have an extension " + EXPECTED_SCREENCAST_FILE_EXTENSION + " not like " + capFile.getName());
 			this.currentCapFile = null;
 		}
 		this.currentCapFile = capFile;

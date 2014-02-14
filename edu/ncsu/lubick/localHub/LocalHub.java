@@ -23,7 +23,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationT
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToBrowserAnimatedPackage;
 
-public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQueryInterface, ParsedFileListener, WebToolReportingInterface {
+public class LocalHub implements ToolStreamFileParser, WebQueryInterface, ParsedFileListener, WebToolReportingInterface {
 
 	public static final String LOGGING_FILE_PATH = "/etc/log4j.settings";
 	private static final LocalHub singletonHub;
@@ -49,7 +49,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	private PostProductionHandler videoPostProductionHandler = new PostProductionHandler();
 
 	// listeners
-	private Set<LoadedFileListener> loadedFileListeners = new HashSet<>();
+	
 	private Set<ParsedFileListener> parsedFileListeners = new HashSet<>();
 
 	private boolean shouldUseHTTPServer;
@@ -58,6 +58,9 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	private ScreenRecordingModule screenRecordingModule;
 	private HTTPServer httpServer;
 	private boolean hasSetUpPostProduction = false;
+	
+	private LoadedFileListenerAggregator loadedFileManager = new LoadedFileListenerAggregator();
+	
 
 	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, boolean wantHTTP, boolean wantScreenRecording)
 	{
@@ -106,6 +109,11 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	{
 		logger.debug("Logging started in creation of LocalHub "+new Date());
 
+		setUpMonitoringOfScreencastFiles();
+	}
+
+	private void setUpMonitoringOfScreencastFiles()
+	{
 		this.addLoadedFileListener(new VideoFileMonitor());
 	}
 
@@ -117,7 +125,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 			return;
 		}
 		isRunning = true;
-		currentRunnable = new FileManager(this, this);
+		currentRunnable = new FileManager(loadedFileManager, this);
 		currentRunnable.setMonitorFolderAndUpdateTrackedFiles(this.monitorDirectory);
 		currentThread = new Thread(currentRunnable);
 		currentThread.start();
@@ -214,29 +222,15 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 	// manipulation======================================================================================
 	public void addLoadedFileListener(LoadedFileListener loadedFileListener)
 	{
-		loadedFileListeners.add(loadedFileListener);
+		loadedFileManager.add(loadedFileListener);
 	}
 
 	public void removeLoadedFileListener(LoadedFileListener loadedFileListener)
 	{
-		loadedFileListeners.remove(loadedFileListener);
+		loadedFileManager.remove(loadedFileListener);
 	}
 
-	@Override
-	public int loadFileResponse(LoadedFileEvent e)
-	{
-		int retVal = LoadedFileListener.NO_COMMENT;
-		for (LoadedFileListener lfl : loadedFileListeners)
-		{
-			int response = lfl.loadFileResponse(e);
-			// return the most extreme value
-			if (response > retVal)
-			{
-				retVal = response;
-			}
-		}
-		return retVal;
-	}
+
 
 	public void addParsedFileListener(ParsedFileListener parsedFileListener)
 	{
@@ -337,7 +331,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		return toolUsages;
 	}
 
-	//for testing
+	//for testing, returns the list of files to created so they can be validated
 	private List<File> extractMediaForLastUsageOfToolAndReturnFiles(String pluginName, String toolName) throws MediaEncodingException
 	{
 		setUpPostProductionHandler();
@@ -454,7 +448,7 @@ public class LocalHub implements LoadedFileListener, ToolStreamFileParser, WebQu
 		@Override
 		public int loadFileResponse(LoadedFileEvent e)
 		{
-			if (e.getFileName().endsWith(PostProductionHandler.EXPECTED_FILE_EXTENSION))
+			if (e.getFileName().endsWith(PostProductionHandler.EXPECTED_SCREENCAST_FILE_EXTENSION))
 			{
 				if (!e.wasInitialReadIn())
 				{
