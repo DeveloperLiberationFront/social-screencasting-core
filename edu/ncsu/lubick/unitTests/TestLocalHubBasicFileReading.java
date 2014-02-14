@@ -4,17 +4,21 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.ncsu.lubick.Runner;
 import edu.ncsu.lubick.localHub.FileUtilities;
 import edu.ncsu.lubick.localHub.LoadedFileEvent;
 import edu.ncsu.lubick.localHub.LoadedFileListener;
@@ -31,6 +35,22 @@ import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToVideoOutput;
 
 public class TestLocalHubBasicFileReading {
+	
+	static
+	{
+		try
+		{
+			URL url = Runner.class.getResource(LocalHub.LOGGING_FILE_PATH);
+			PropertyConfigurator.configure(url);
+			Logger.getRootLogger().info("Logging initialized");
+		}
+		catch (Exception e)
+		{
+			//load safe defaults
+			BasicConfigurator.configure();
+			Logger.getRootLogger().info("Could not load property file, loading defaults", e);
+		}
+	}
 
 	private static Logger logger = Logger.getLogger(TestLocalHubBasicFileReading.class.getName());
 	private static final String LOCAL_HUB_MONITOR_LOCATION = "BasicFileReading/";

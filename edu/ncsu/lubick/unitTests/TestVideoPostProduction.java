@@ -286,14 +286,14 @@ public class TestVideoPostProduction
 	private void verifyVideoFileIsCorrectlyMade(File outputFile)
 	{
 		assertNotNull(outputFile);
-		assertTrue(outputFile.exists());
-		assertTrue(outputFile.isFile());
-		assertFalse(outputFile.isHidden());
-		assertTrue(outputFile.getName().endsWith(ImagesWithAnimationToVideoOutput.VIDEO_EXTENSION));
-		assertTrue(outputFile.length() > 500000); // I expect the file size to
+		assertTrue(outputFile.toString(),outputFile.exists());
+		assertTrue(outputFile.toString(),outputFile.isFile());
+		assertFalse(outputFile.toString(),outputFile.isHidden());
+		assertTrue(outputFile.toString(),outputFile.getName().endsWith(ImagesWithAnimationToVideoOutput.VIDEO_EXTENSION));
+		assertTrue(outputFile.toString(),outputFile.length() > 500000); // I expect the file size to
 													// be at least 1 Mb and no
 													// more than 2Mb
-		assertTrue(outputFile.length() < 2000000);
+		assertTrue(outputFile.toString(),outputFile.length() < 2000000);
 	}
 
 	private void verifyGifNamedProperly(File outputFile, String toolName)

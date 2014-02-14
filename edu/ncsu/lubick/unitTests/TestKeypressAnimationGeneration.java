@@ -5,10 +5,16 @@ import static java.awt.event.KeyEvent.*;
 import static org.junit.Assert.*;
 
 import java.awt.image.BufferedImage;
+import java.net.URL;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.ncsu.lubick.Runner;
+import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedKeyboardMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.ShortcutsToKeyCodesConverter;
@@ -19,6 +25,18 @@ public class TestKeypressAnimationGeneration {
 	public static void setUpBeforeAll()
 	{
 		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
+		try
+		{
+			URL url = Runner.class.getResource(LocalHub.LOGGING_FILE_PATH);
+			PropertyConfigurator.configure(url);
+			Logger.getRootLogger().info("Logging initialized");
+		}
+		catch (Exception e)
+		{
+			//load safe defaults
+			BasicConfigurator.configure();
+			Logger.getRootLogger().info("Could not load property file, loading defaults", e);
+		}
 	}
 
 	@Test
