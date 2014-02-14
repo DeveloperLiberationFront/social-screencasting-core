@@ -23,7 +23,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationT
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToBrowserAnimatedPackage;
 
-public class LocalHub implements ToolStreamFileParser, WebQueryInterface, ParsedFileListener, WebToolReportingInterface {
+public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebToolReportingInterface {
 
 	public static final String LOGGING_FILE_PATH = "/etc/log4j.settings";
 	private static final LocalHub singletonHub;
@@ -41,7 +41,7 @@ public class LocalHub implements ToolStreamFileParser, WebQueryInterface, Parsed
 	private Thread currentThread = null;
 	private boolean isRunning = false;
 	private File monitorDirectory = null;
-	private SimpleDateFormat dateInMinutesToNumber = new SimpleDateFormat("DDDyykkmm");
+
 	private SimpleDateFormat dateInSecondsToNumber = FileUtilities.makeDateInSecondsToNumberFormatter();
 	private FileManager currentRunnable = null;
 
@@ -125,7 +125,7 @@ public class LocalHub implements ToolStreamFileParser, WebQueryInterface, Parsed
 			return;
 		}
 		isRunning = true;
-		currentRunnable = new FileManager(loadedFileManager, this);
+		currentRunnable = new FileManager(loadedFileManager, new ToolStreamMonitor());
 		currentRunnable.setMonitorFolderAndUpdateTrackedFiles(this.monitorDirectory);
 		currentThread = new Thread(currentRunnable);
 		currentThread.start();
@@ -256,53 +256,7 @@ public class LocalHub implements ToolStreamFileParser, WebQueryInterface, Parsed
 	// ============End
 	// Listeners======================================================================================
 
-	@Override
-	public void parseFile(File fileToParse)
-	{
-		logger.debug("parsing file " + fileToParse);
-		String fileContents = FileUtilities.readAllFromFile(fileToParse);
-		ToolStream ts = ToolStream.generateFromJSON(fileContents);
-
-		if (ts == null)
-		{
-			logger.info("malformed tool stream, deleting");
-		}
-		else
-		{
-			// Expecting name convention
-			// PLUGIN_NAME.ENCODEDEDATE.log
-			String fileName = fileToParse.getName();
-			String pluginName = fileName.substring(0, fileName.indexOf('.'));
-
-			Date associatedDate;
-			try
-			{
-				associatedDate = extractStartTime(fileName, this.dateInMinutesToNumber);
-			}
-			catch (ImproperlyEncodedDateException e)
-			{
-				logger.error("Problem parsing time info from file" + fileToParse + "  Skipping...", e);
-				return;
-			}
-
-			ts.setTimeStamp(associatedDate);
-			ts.setAssociatedPlugin(pluginName);
-
-			ParsedFileEvent event = new ParsedFileEvent(fileContents, ts, pluginName, associatedDate, fileToParse);
-
-			for (ParsedFileListener parsedFileListener : parsedFileListeners)
-			{
-				parsedFileListener.parsedFile(event);
-			}
-
-			databaseManager.writeToolStreamToDatabase(ts);
-		}
-
-		if (!fileToParse.delete())
-		{
-			logger.info("Could not delete toolstream file " + fileToParse + " but, continuing anyway.");
-		}
-	}
+	
 
 	@Override
 	public List<ToolUsage> getLastNInstancesOfToolUsage(int n, String pluginName, String toolName)
@@ -440,6 +394,59 @@ public class LocalHub implements ToolStreamFileParser, WebQueryInterface, Parsed
 	public List<ToolUsage> getAllToolUsagesForPlugin(String pluginName)
 	{
 		return databaseManager.getAllToolUsageHistoriesForPlugin(pluginName);
+	}
+	
+	private class ToolStreamMonitor implements ToolStreamFileParser
+	{
+		private SimpleDateFormat dateInMinutesToNumber = new SimpleDateFormat("DDDyykkmm");
+		
+		@Override
+		public void parseFile(File fileToParse)
+		{
+			logger.debug("parsing file " + fileToParse);
+			String fileContents = FileUtilities.readAllFromFile(fileToParse);
+			ToolStream ts = ToolStream.generateFromJSON(fileContents);
+
+			if (ts == null)
+			{
+				logger.info("malformed tool stream, deleting");
+			}
+			else
+			{
+				// Expecting name convention
+				// PLUGIN_NAME.ENCODEDEDATE.log
+				String fileName = fileToParse.getName();
+				String pluginName = fileName.substring(0, fileName.indexOf('.'));
+
+				Date associatedDate;
+				try
+				{
+					associatedDate = extractStartTime(fileName, this.dateInMinutesToNumber);
+				}
+				catch (ImproperlyEncodedDateException e)
+				{
+					logger.error("Problem parsing time info from file" + fileToParse + "  Skipping...", e);
+					return;
+				}
+
+				ts.setTimeStamp(associatedDate);
+				ts.setAssociatedPlugin(pluginName);
+
+				ParsedFileEvent event = new ParsedFileEvent(fileContents, ts, pluginName, associatedDate, fileToParse);
+
+				for (ParsedFileListener parsedFileListener : parsedFileListeners)
+				{
+					parsedFileListener.parsedFile(event);
+				}
+
+				databaseManager.writeToolStreamToDatabase(ts);
+			}
+
+			if (!fileToParse.delete())
+			{
+				logger.info("Could not delete toolstream file " + fileToParse + " but, continuing anyway.");
+			}
+		}
 	}
 
 	private class VideoFileMonitor implements LoadedFileListener
