@@ -23,7 +23,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationT
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToBrowserAnimatedPackage;
 
-public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebToolReportingInterface {
+public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebToolReportingInterface, VideoFileListener {
 
 	public static final String LOGGING_FILE_PATH = "/etc/log4j.settings";
 	private static final LocalHub singletonHub;
@@ -112,7 +112,7 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 
 	private void setUpMonitoringOfScreencastFiles()
 	{
-		this.addLoadedFileListener(new VideoFileMonitor());
+		this.addLoadedFileListener(new VideoFileMonitor(this));
 	}
 
 	private void start()
@@ -340,7 +340,8 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 		isRunning = false;
 	}
 
-	public void addVideoFileToDatabase(String fileName)
+	@Override
+	public void reportNewVideoFileLocation(String fileName)
 	{
 		File newVideoFile = new File(fileName);
 		Date videoStartTime;
@@ -445,27 +446,6 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 				logger.info("Could not delete toolstream file " + fileToParse + " but, continuing anyway.");
 			}
 		}
-	}
-
-	private class VideoFileMonitor implements LoadedFileListener
-	{
-
-		@Override
-		public int loadFileResponse(LoadedFileEvent e)
-		{
-			if (e.getFileName().endsWith(PostProductionHandler.EXPECTED_SCREENCAST_FILE_EXTENSION))
-			{
-				if (!e.wasInitialReadIn())
-				{
-					logger.info("Found ScreenCapFile " + e.getFileName());
-					addVideoFileToDatabase(e.getFullFileName());
-				}
-				return LoadedFileListener.DONT_PARSE;
-			}
-
-			return LoadedFileListener.NO_COMMENT;
-		}
-
 	}
 
 	/**
