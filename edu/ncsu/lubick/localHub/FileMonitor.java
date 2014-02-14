@@ -22,7 +22,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
  * @author Kevin Lubick
  * 
  */
-public class FileManager implements Runnable {
+public class FileMonitor implements Runnable {
 
 	private static final int TIME_BETWEEN_SEARCHES = 5000;
 	private Set<File> filesFromLastTime = new HashSet<>();
@@ -37,9 +37,9 @@ public class FileManager implements Runnable {
 	private ToolStreamFileParser fileParser = null;
 	private boolean isRunning;
 
-	private static Logger logger = Logger.getLogger(FileManager.class.getName());
+	private static Logger logger = Logger.getLogger(FileMonitor.class.getName());
 
-	public FileManager(LoadedFileListener loadedFileListener, ToolStreamFileParser fileParser)
+	public FileMonitor(LoadedFileListener loadedFileListener, ToolStreamFileParser fileParser)
 	{
 		this.loadedFileListener = loadedFileListener;
 		this.fileParser = fileParser;

@@ -38,18 +38,16 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 		singletonHub = new LocalHub();
 	}
 
-	private Thread currentThread = null;
 	private boolean isRunning = false;
 	private File monitorDirectory = null;
 
 	private SimpleDateFormat dateInSecondsToNumber = FileUtilities.makeDateInSecondsToNumberFormatter();
-	private FileManager currentRunnable = null;
+	private FileMonitor backgroundFileMonitor = null;
 
 	private BufferedDatabaseManager databaseManager = null;
 	private PostProductionHandler videoPostProductionHandler = new PostProductionHandler();
 
-	// listeners
-	
+	// listeners for file related events
 	private Set<ParsedFileListener> parsedFileListeners = new HashSet<>();
 
 	private boolean shouldUseHTTPServer;
@@ -121,13 +119,13 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 	{
 		if (isRunning() || this.monitorDirectory == null)
 		{
-			logger.debug("Did not start the server because " + (isRunning() ? "it was already running" : " no monitor directory had been set."));
+			logger.info("Did not start the server because " + (isRunning() ? "it was already running" : " no monitor directory had been set."));
 			return;
 		}
 		isRunning = true;
-		currentRunnable = new FileManager(loadedFileManager, new ToolStreamMonitor());
-		currentRunnable.setMonitorFolderAndUpdateTrackedFiles(this.monitorDirectory);
-		currentThread = new Thread(currentRunnable);
+		backgroundFileMonitor = new FileMonitor(loadedFileManager, new ToolStreamMonitor());
+		backgroundFileMonitor.setMonitorFolderAndUpdateTrackedFiles(this.monitorDirectory);
+		Thread currentThread = new Thread(backgroundFileMonitor);
 		currentThread.start();
 
 		if (shouldUseHTTPServer)
@@ -231,7 +229,7 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 	}
 
 
-
+	//mainly used for testing that file parsers were added.
 	public void addParsedFileListener(ParsedFileListener parsedFileListener)
 	{
 		parsedFileListeners.add(parsedFileListener);
@@ -336,7 +334,7 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 		{
 			httpServer.shutDown();
 		}
-		currentRunnable.stop();
+		backgroundFileMonitor.stop();
 		databaseManager.shutDown();
 
 		isRunning = false;
