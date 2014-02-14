@@ -24,6 +24,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
  */
 public class FileManager implements Runnable {
 
+	private static final int TIME_BETWEEN_SEARCHES = 5000;
 	private Set<File> filesFromLastTime = new HashSet<>();
 	private Set<File> filesToIgnore = new HashSet<>();
 	/**
@@ -69,7 +70,7 @@ public class FileManager implements Runnable {
 			// Sleep for a second and then do it all again
 			try
 			{
-				Thread.sleep(1000); // wake every second
+				Thread.sleep(TIME_BETWEEN_SEARCHES); // wake every second
 			}
 			catch (InterruptedException e)
 			{

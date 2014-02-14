@@ -16,7 +16,6 @@ public class ToolReportingHandler extends AbstractHandler  {
 
 	private static final String POST_PROPERTY_PLUGIN_NAME = "pluginName";
 	private static final String POST_PROPERTY_JSON_ARRAY_TOOL_USAGES = "toolUsages";
-	//private static final String POST_PROPERTY_TOOLSTREAM_TIME = "toolStreamTime";
 	
 	private String httpRequestPattern;
 	private WebToolReportingInterface toolReportingInterface;

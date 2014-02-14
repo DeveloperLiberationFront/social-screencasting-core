@@ -47,8 +47,6 @@ public abstract class TemplateHandlerWithDatabaseLink extends AbstractHandler {
 	{
 		cfg = new Configuration();
 
-		//File templatesDir = new File(TEMPLATES_DIR);
-		//cfg.setDirectoryForTemplateLoading(templatesDir);
 		TemplateLoader loader = new ClassTemplateLoader(TemplateHandlerWithDatabaseLink.class, TEMPLATES_DIR);
 		cfg.setTemplateLoader(loader);
 
