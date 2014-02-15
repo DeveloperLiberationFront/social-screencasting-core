@@ -53,12 +53,13 @@ import edu.ncsu.lubick.util.ThreadedImageDiskWritingStrategy;
  */
 public class PostProductionHandler
 {
+	public static final String MEDIA_OUTPUT_FOLDER = "renderedVideos\\";
 	public static final String INTERMEDIATE_FILE_FORMAT = "png";
 	public static final int FRAME_RATE = 5;
 	public static final String EXPECTED_SCREENCAST_FILE_EXTENSION = ".cap";
 	public static final boolean DELETE_IMAGES_AFTER_USE = false;
 
-	private static final String SCRATCH_DIR = "./Scratch/";
+	private static final String MEDIA_ASSEMBLY_DIR = "./MediaAssembly/";
 
 	private static Logger logger = Logger.getLogger(PostProductionHandler.class.getName());
 
@@ -82,7 +83,7 @@ public class PostProductionHandler
 
 	public PostProductionHandler()
 	{
-		this.imageWriter = new ThreadedImageDiskWritingStrategy(SCRATCH_DIR, DELETE_IMAGES_AFTER_USE);
+		this.imageWriter = new ThreadedImageDiskWritingStrategy(MEDIA_ASSEMBLY_DIR, DELETE_IMAGES_AFTER_USE);
 
 		KeypressAnimationMaker animationSource = null;
 		try
@@ -93,7 +94,7 @@ public class PostProductionHandler
 		{
 			logger.info("Problem with the animations", e);
 		}
-		this.postProductionAnimator = new CornerKeypressAnimation(SCRATCH_DIR, FRAME_RATE, RUN_UP_TIME, animationSource);
+		this.postProductionAnimator = new CornerKeypressAnimation(MEDIA_ASSEMBLY_DIR, FRAME_RATE, RUN_UP_TIME, animationSource);
 	}
 
 	public void loadFile(File capFile)
@@ -362,7 +363,7 @@ public class PostProductionHandler
 			logger.info("Got a null toolname, recovering with empty string");
 			toolName = "";
 		}
-		return "renderedVideos\\" + pluginName + createNumberForVideoFile(toolName) + "_";
+		return MEDIA_OUTPUT_FOLDER + pluginName + createNumberForVideoFile(toolName) + "_";
 	}
 
 	@Deprecated
@@ -373,7 +374,7 @@ public class PostProductionHandler
 			logger.info("Got a null toolname, recovering with empty string");
 			toolName = "";
 		}
-		return "renderedVideos\\" + pluginName + createNumberForVideoFile(toolName) + "_"+ toolTime.getTime();
+		return MEDIA_OUTPUT_FOLDER + pluginName + createNumberForVideoFile(toolName) + "_"+ toolTime.getTime();
 	}
 	
 	public static String makeFileNameStemForToolPluginMedia(ToolUsage tu)
@@ -381,9 +382,9 @@ public class PostProductionHandler
 		if (tu == null)
 		{
 			logger.info("Got a null toolusage, recovering with empty string");
-			return "renderedVideos\\";
+			return MEDIA_OUTPUT_FOLDER;
 		}
-		return "renderedVideos\\" + tu.getPluginName() + createNumberForVideoFile(tu);
+		return MEDIA_OUTPUT_FOLDER + tu.getPluginName() + createNumberForVideoFile(tu);
 	}
 
 	private static String createNumberForVideoFile(ToolUsage tu)
@@ -440,7 +441,7 @@ public class PostProductionHandler
 
 	public static String getIntermediateFolderLocation()
 	{
-		return SCRATCH_DIR;
+		return MEDIA_ASSEMBLY_DIR;
 	}
 
 	public void addNewPostAnimationMediaOutput(ImagesWithAnimationToMediaOutput newMediaOutput)

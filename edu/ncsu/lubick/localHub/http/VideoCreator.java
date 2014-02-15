@@ -37,7 +37,7 @@ public class VideoCreator extends TemplateHandlerWithDatabaseLink implements Han
 	private static final String POST_COMMAND_SWAP_MEDIA = "changeToOtherSource";
 	private static Logger logger;
 	
-	private static final File MEDIA_OUTPUT_FOLDER = new File("renderedVideos");
+	private static final File MEDIA_OUTPUT_FOLDER = new File(PostProductionHandler.MEDIA_OUTPUT_FOLDER);
 	
 
 	// static initializer

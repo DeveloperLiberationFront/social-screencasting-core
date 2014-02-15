@@ -298,8 +298,8 @@ public class TestVideoPostProduction
 
 	private void verifyGifNamedProperly(File outputFile, String toolName)
 	{
-		assertTrue(outputFile.getPath().startsWith(PostProductionHandler.makeFileNameStemNoDateForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
-		assertTrue(outputFile.getPath().endsWith(".gif"));
+		assertTrue(outputFile.toString(),outputFile.getPath().startsWith(PostProductionHandler.makeFileNameStemNoDateForToolPluginMedia(TEST_PLUGIN_NAME, toolName)));
+		assertTrue(outputFile.toString(),outputFile.getPath().endsWith(".gif"));
 	}
 
 	private void verifyGifFileIsCorrectlyMade(File outputFile)

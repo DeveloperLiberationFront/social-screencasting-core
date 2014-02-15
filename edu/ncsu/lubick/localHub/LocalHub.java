@@ -359,7 +359,7 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 	}
 
 	// Expecting name convention
-	// screencast.ENCODEDDATE.cap
+	// screencasts.ENCODEDDATE.cap
 	// OR
 	// PLUGINNAME.ENCODEDDATE.log
 	private Date extractStartTime(String fileName, SimpleDateFormat formatter) throws ImproperlyEncodedDateException
@@ -408,7 +408,7 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 
 			if (ts == null)
 			{
-				logger.info("malformed tool stream, deleting");
+				logger.info("malformed tool stream [null], deleting");
 			}
 			else
 			{

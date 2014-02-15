@@ -14,6 +14,7 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceCollection;
 
 import edu.ncsu.lubick.localHub.WebQueryInterface;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 
 public class HandlerManager
 {
@@ -25,7 +26,7 @@ public class HandlerManager
 								// as /frontend/public_html and /frontend/templates, but as their own high-level folders
 	};
 
-	private static String renderedVideoPath = "renderedVideos/";
+	private static String renderedVideoPath = PostProductionHandler.MEDIA_OUTPUT_FOLDER;
 
 	private HandlerManager()
 	{
