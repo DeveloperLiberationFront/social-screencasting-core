@@ -105,7 +105,7 @@ public class ShortcutsToKeyCodesConverter
 	{
 		try
 		{
-			int numberForKeyCode = Integer.valueOf(command);
+			int numberForKeyCode = Integer.valueOf(command); 
 			return handleNumber(numberForKeyCode);
 		}
 		catch (NumberFormatException e)
