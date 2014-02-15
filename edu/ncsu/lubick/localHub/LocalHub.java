@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.ScreenRecordingModule;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
-import edu.ncsu.lubick.localHub.database.FileDateStructs;
 import edu.ncsu.lubick.localHub.database.LocalSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.http.HTTPServer;
@@ -22,6 +21,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToMediaOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToBrowserAnimatedPackage;
+import edu.ncsu.lubick.util.FileDateStructs;
 
 public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebToolReportingInterface, VideoFileListener {
 
@@ -304,8 +304,7 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 			throw new MediaEncodingException("There were no video files that match the tool usage");
 		}
 		videoPostProductionHandler.reset();
-		videoPostProductionHandler.loadFile(filesToload.get(0).file);
-		videoPostProductionHandler.setCurrentFileStartTime(filesToload.get(0).startTime);
+		videoPostProductionHandler.loadFile(filesToload.get(0));
 
 		for (int i = 1; i < filesToload.size(); i++)
 		{

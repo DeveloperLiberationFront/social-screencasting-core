@@ -95,19 +95,20 @@ public class PostProductionHandler
 		this.postProductionAnimator = new CornerKeypressAnimation(MEDIA_ASSEMBLY_DIR, FRAME_RATE, RUN_UP_TIME, animationSource);
 	}
 
-	public void loadFile(File capFile)
+	public void loadFile(FileDateStructs fileDateStructs)
 	{
-		if (capFile == null)
+		if (fileDateStructs == null || fileDateStructs.date == null || fileDateStructs.file == null)
 		{
 			logger.error("Recieved null file to load in PostProductionVideoHandler");
 			throw new IllegalArgumentException("A capFile cannot be null");
 		}
-		if (!capFile.getName().endsWith(SingleCapFileExtractor.EXPECTED_SCREENCAST_FILE_EXTENSION))
+		if (!fileDateStructs.file.getName().endsWith(SingleCapFileExtractor.EXPECTED_SCREENCAST_FILE_EXTENSION))
 		{
-			logger.error("Expected cap file to have an extension " + SingleCapFileExtractor.EXPECTED_SCREENCAST_FILE_EXTENSION + " not like " + capFile.getName());
+			logger.error("Expected cap file to have an extension " + SingleCapFileExtractor.EXPECTED_SCREENCAST_FILE_EXTENSION + " not like " + fileDateStructs);
 			this.currentCapFile = null;
 		}
-		this.currentCapFile = capFile;
+		this.currentCapFile = fileDateStructs.file;
+		setCurrentFileStartTime(fileDateStructs.date);
 
 	}
 	
@@ -126,7 +127,7 @@ public class PostProductionHandler
 		return null;
 	}
 
-	public void setCurrentFileStartTime(Date startTime)
+	private void setCurrentFileStartTime(Date startTime)
 	{
 		if (startTime == null)
 		{
@@ -366,25 +367,16 @@ public class PostProductionHandler
 	/**
 	 * Adds an extra file to this handler to use if the wanted toolstream's behavior extends over the end of the loaded cap file
 	 * 
-	 * @param extraCapFile
-	 * @param extraDate
 	 */
-	public void enqueueOverLoadFile(File extraCapFile, Date extraDate)
-	{
-		this.queueOfOverloadFiles.offer(new OverloadFile(extraCapFile, extraDate));
-
-	}
-	
 	public void enqueueOverLoadFile(FileDateStructs fileDateStructs)
 	{
-		// TODO Auto-generated method stub
-		
+		this.queueOfOverloadFiles.offer(fileDateStructs);
 	}
 
 	private InputStream goToNextFileInQueue(InputStream oldInputStream) throws IOException
 	{
 		oldInputStream.close();
-		OverloadFile nextFile = queueOfOverloadFiles.poll();
+		FileDateStructs nextFile = queueOfOverloadFiles.poll();
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(Files.readAllBytes(nextFile.file.toPath()));
 		decompressor.readInFileHeader(inputStream);
 

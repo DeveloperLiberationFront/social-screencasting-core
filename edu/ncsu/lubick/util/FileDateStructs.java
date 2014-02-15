@@ -6,19 +6,19 @@ import java.util.Date;
 public class FileDateStructs {
 
 	public File file;
-	public Date startTime;
+	public Date date;
 
-	public FileDateStructs(File file, Date startTime)
+	public FileDateStructs(File file, Date date)
 	{
 
 		this.file = file;
-		this.startTime = startTime;
+		this.date = date;
 	}
 
 	@Override
 	public String toString()
 	{
-		return "FileDateStructs [file=" + file + ", startTime=" + startTime
+		return "FileDateStructs [file=" + file + ", date=" + date
 				+ "]";
 	}
 

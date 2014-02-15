@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.util.FileDateStructs;
 
 public abstract class LocalDBAbstraction
 {

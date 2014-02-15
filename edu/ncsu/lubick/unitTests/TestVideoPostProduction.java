@@ -26,6 +26,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationT
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToThumbnailOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToBrowserAnimatedPackage;
+import edu.ncsu.lubick.util.FileDateStructs;
 
 public class TestVideoPostProduction
 {
@@ -142,9 +143,7 @@ public class TestVideoPostProduction
 
 		Date date = UtilitiesForTesting.truncateTimeToMinute(new Date());
 
-		handler.loadFile(capFile);
-
-		handler.setCurrentFileStartTime(date);
+		handler.loadFile(new FileDateStructs(capFile, date));
 
 		Date datePlusFifteen = new Date(date.getTime() + 15 * 1000); // plus
 																		// fifteen
@@ -169,9 +168,7 @@ public class TestVideoPostProduction
 		Date date = UtilitiesForTesting.truncateTimeToMinute(new Date());
 
 		PostProductionHandler handler = makeVideoPostProductionHandler();
-		handler.loadFile(capFile);
-
-		handler.setCurrentFileStartTime(date);
+		handler.loadFile(new FileDateStructs(capFile, date));
 
 		Date datePlusOne = new Date(date.getTime() + 1 * 1000); // plus one
 																// second
@@ -199,10 +196,8 @@ public class TestVideoPostProduction
 		Date secondDate = UtilitiesForTesting.truncateTimeToMinute(new Date(date.getTime() + 61 * 1000));
 
 		PostProductionHandler handler = makeVideoPostProductionHandler();
-		handler.loadFile(firstcapFile);
-		handler.enqueueOverLoadFile(secondCapFile, secondDate);
-
-		handler.setCurrentFileStartTime(date);
+		handler.loadFile(new FileDateStructs(firstcapFile, date));
+		handler.enqueueOverLoadFile(new FileDateStructs(secondCapFile, secondDate));
 
 		Date datePlusFiftyFive = new Date(date.getTime() + 55 * 1000); // plus 55 seconds, plenty to over run this file
 
@@ -220,10 +215,10 @@ public class TestVideoPostProduction
 	{ // https://bitbucket.org/klubick/screencasting-module/issue/8/extracting-some-tools-causes-a
 		// This was an overlap problem.
 
-		File firstcapFile = new File("./src/ForTesting/bug8.screencasts.28913211516.cap");
+		File firstCapFile = new File("./src/ForTesting/bug8.screencasts.28913211516.cap");
 		File secondCapFile = new File("./src/ForTesting/bug8.screencasts.28913211615.cap");
 
-		assertTrue(firstcapFile.exists());
+		assertTrue(firstCapFile.exists());
 		assertTrue(secondCapFile.exists());
 
 		Date date = dateInSecondsToNumber.parse("28913211516");
@@ -233,10 +228,8 @@ public class TestVideoPostProduction
 		assertNotNull(secondDate);
 
 		PostProductionHandler handler = makeVideoPostProductionHandler();
-		handler.loadFile(firstcapFile);
-		handler.enqueueOverLoadFile(secondCapFile, secondDate);
-
-		handler.setCurrentFileStartTime(date);
+		handler.loadFile(new FileDateStructs(firstCapFile, date));
+		handler.enqueueOverLoadFile(new FileDateStructs(secondCapFile, secondDate));
 
 		Date dateOfBuggyToolUsage = new Date(1381972574596L); // from the bug
 																// report.
