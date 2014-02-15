@@ -1,8 +1,6 @@
 package edu.ncsu.lubick.localHub;
 
 import java.io.File;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -41,7 +39,6 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 	private boolean isRunning = false;
 	private File monitorDirectory = null;
 
-	private SimpleDateFormat dateInSecondsToNumber = FileUtilities.makeDateInSecondsToNumberFormatter();
 	private FileMonitor backgroundFileMonitor = null;
 
 	private BufferedDatabaseManager databaseManager = null;
@@ -346,7 +343,7 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 		Date videoStartTime;
 		try
 		{
-			videoStartTime = extractStartTime(newVideoFile.getName(), dateInSecondsToNumber);
+			videoStartTime = FileUtilities.parseStartDateOfCapFile(newVideoFile);
 		}
 		catch (ImproperlyEncodedDateException e)
 		{
@@ -355,31 +352,6 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 		}
 		this.databaseManager.addVideoFile(newVideoFile, videoStartTime, LocalHub.SCREEN_RECORDING_VIDEO_LENGTH);
 
-	}
-
-	// Expecting name convention
-	// screencasts.ENCODEDDATE.cap
-	// OR
-	// PLUGINNAME.ENCODEDDATE.log
-	private Date extractStartTime(String fileName, SimpleDateFormat formatter) throws ImproperlyEncodedDateException
-	{
-		if (fileName.indexOf('.') < 0 || fileName.lastIndexOf('.') == fileName.indexOf('.'))
-		{
-			throw new ImproperlyEncodedDateException(
-					"Improperly formatted file name:  Should be like PLUGINNAME.ENCODEDDATE.log or screencast.ENCODEDDATE.cap, was " + fileName);
-		}
-		String dateString = fileName.substring(fileName.indexOf('.') + 1, fileName.lastIndexOf('.'));
-
-		Date associatedDate = null;
-		try
-		{
-			associatedDate = formatter.parse(dateString);
-		}
-		catch (ParseException e)
-		{
-			throw new ImproperlyEncodedDateException("Trouble parsing Date " + dateString, e);
-		}
-		return associatedDate;
 	}
 
 	@Override
@@ -395,9 +367,7 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 	}
 	
 	private class ToolStreamMonitor implements ToolStreamFileParser
-	{
-		private SimpleDateFormat dateInMinutesToNumber = new SimpleDateFormat("DDDyykkmm");
-		
+	{	
 		@Override
 		public void parseFile(File fileToParse)
 		{
@@ -419,7 +389,7 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 				Date associatedDate;
 				try
 				{
-					associatedDate = extractStartTime(fileName, this.dateInMinutesToNumber);
+					associatedDate = FileUtilities.parseStartDateOfToolStream(fileToParse);
 				}
 				catch (ImproperlyEncodedDateException e)
 				{

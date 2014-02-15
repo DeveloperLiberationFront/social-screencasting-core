@@ -18,8 +18,7 @@ public class FileDateStructs {
 	@Override
 	public String toString()
 	{
-		return "FileDateStructs [file=" + file + ", date=" + date
-				+ "]";
+		return "FileDateStructs [file=" + file + ", date=" + date + "]";
 	}
 
 }

@@ -16,6 +16,8 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import edu.ncsu.lubick.localHub.FileUtilities;
+import edu.ncsu.lubick.localHub.ImproperlyEncodedDateException;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextAndKeyboardMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeypressAnimation;
@@ -115,17 +117,19 @@ public class PostProductionHandler
 	public static void debugWriteOutAllImagesInCapFile(File capFile, File outputDirectory)
 	{
 		SingleCapFileExtractor extractor = new SingleCapFileExtractor(outputDirectory);
-		extractor.setStartTime(parseStartDate(capFile));
+		try
+		{
+			extractor.setStartTime(FileUtilities.parseStartDateOfCapFile(capFile));
+		}
+		catch (ImproperlyEncodedDateException e)
+		{
+			logger.error("Problem parsing the date of the cap file "+capFile, e);
+			extractor.setStartTime(new Date(0));
+		}
 		extractor.loadFile(capFile);
 		extractor.extractAllImages();
 	}
 
-
-	private static Date parseStartDate(File capFile)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	private void setCurrentFileStartTime(Date startTime)
 	{

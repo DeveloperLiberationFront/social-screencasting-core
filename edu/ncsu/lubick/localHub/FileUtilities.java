@@ -3,7 +3,9 @@ package edu.ncsu.lubick.localHub;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.log4j.Logger;
 
@@ -55,6 +57,46 @@ public class FileUtilities
 	public static SimpleDateFormat makeDateInSecondsToNumberFormatter()
 	{
 		return new SimpleDateFormat("DDDyykkmmss");
+	}
+
+	public static SimpleDateFormat makeDateInMinutesToNumberFormatter()
+	{
+		return new SimpleDateFormat("DDDyykkmm");
+	}
+
+	public static Date parseStartDateOfCapFile(File capFile) throws ImproperlyEncodedDateException
+	{
+		return extractStartTime(capFile.getName(), makeDateInSecondsToNumberFormatter());
+	}
+
+	// Expecting name convention
+	// screencasts.ENCODEDDATE.cap
+	// OR
+	// PLUGINNAME.ENCODEDDATE.log
+	private static Date extractStartTime(String fileName, SimpleDateFormat formatter) throws ImproperlyEncodedDateException
+	{
+		if (fileName.indexOf('.') < 0 || fileName.lastIndexOf('.') == fileName.indexOf('.'))
+		{
+			throw new ImproperlyEncodedDateException(
+					"Improperly formatted file name:  Should be like PLUGINNAME.ENCODEDDATE.log or screencast.ENCODEDDATE.cap, was " + fileName);
+		}
+		String dateString = fileName.substring(fileName.indexOf('.') + 1, fileName.lastIndexOf('.'));
+	
+		Date associatedDate = null;
+		try
+		{
+			associatedDate = formatter.parse(dateString);
+		}
+		catch (ParseException e)
+		{
+			throw new ImproperlyEncodedDateException("Trouble parsing Date " + dateString, e);
+		}
+		return associatedDate;
+	}
+
+	public static Date parseStartDateOfToolStream(File fileToParse) throws ImproperlyEncodedDateException
+	{
+		return extractStartTime(fileToParse.getName(), makeDateInMinutesToNumberFormatter());
 	}
 
 }
