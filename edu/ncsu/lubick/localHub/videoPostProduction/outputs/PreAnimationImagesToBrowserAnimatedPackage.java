@@ -15,7 +15,6 @@ import javax.imageio.ImageIO;
 
 import org.apache.log4j.Logger;
 
-import edu.ncsu.lubick.localHub.FileUtilities;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.videoPostProduction.AbstractImagesToMediaOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
@@ -25,6 +24,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextAndKey
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.KeypressAnimationMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.ShortcutsToKeyCodesConverter;
+import edu.ncsu.lubick.util.FileUtilities;
 
 public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput implements PreAnimationImagesToMediaOutput
 {

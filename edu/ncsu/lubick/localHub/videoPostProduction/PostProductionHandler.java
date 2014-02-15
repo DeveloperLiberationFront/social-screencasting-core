@@ -16,7 +16,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import edu.ncsu.lubick.localHub.FileUtilities;
 import edu.ncsu.lubick.localHub.ImproperlyEncodedDateException;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextAndKeyboardMaker;
@@ -25,6 +24,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.animation.KeypressAnimationM
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToMediaOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToMediaOutput;
 import edu.ncsu.lubick.util.FileDateStructs;
+import edu.ncsu.lubick.util.FileUtilities;
 import edu.ncsu.lubick.util.ThreadedImageDiskWritingStrategy;
 
 /* Some parts of this (the decoding aspect) have the following license:

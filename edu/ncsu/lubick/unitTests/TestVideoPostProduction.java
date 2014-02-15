@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
-import edu.ncsu.lubick.localHub.FileUtilities;
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
@@ -27,6 +26,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationT
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToBrowserAnimatedPackage;
 import edu.ncsu.lubick.util.FileDateStructs;
+import edu.ncsu.lubick.util.FileUtilities;
 
 public class TestVideoPostProduction
 {

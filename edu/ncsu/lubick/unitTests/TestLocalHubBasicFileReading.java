@@ -19,7 +19,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.ncsu.lubick.Runner;
-import edu.ncsu.lubick.localHub.FileUtilities;
 import edu.ncsu.lubick.localHub.LoadedFileEvent;
 import edu.ncsu.lubick.localHub.LoadedFileListener;
 import edu.ncsu.lubick.localHub.LocalHub;
@@ -33,6 +32,7 @@ import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToVideoOutput;
+import edu.ncsu.lubick.util.FileUtilities;
 
 public class TestLocalHubBasicFileReading {
 	

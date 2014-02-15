@@ -13,6 +13,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.videoPostProduction.SingleCapFileExtractor;
+import edu.ncsu.lubick.util.FileUtilities;
 
 /**
  * This is the Runnable that operates on the background thread.
