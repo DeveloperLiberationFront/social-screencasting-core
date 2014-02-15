@@ -98,14 +98,14 @@ public class ShortcutsToKeyCodesConverter
 	{
 		String numberString = command.substring(1);
 
-		return VK_F1 + Integer.valueOf(numberString) - 1;
+		return VK_F1 + Integer.parseInt(numberString) - 1;
 	}
 
 	private int handleSingleLetterOrNumber(String command)
 	{
 		try
 		{
-			int numberForKeyCode = Integer.valueOf(command); 
+			int numberForKeyCode = Integer.parseInt(command); 
 			return handleNumber(numberForKeyCode);
 		}
 		catch (NumberFormatException e)
