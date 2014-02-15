@@ -24,6 +24,11 @@ public class ThreadedImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 
 	}
 
+	public ThreadedImageDiskWritingStrategy(File outputDirectory, boolean deleteImagesAfterUse)
+	{
+		super(outputDirectory, deleteImagesAfterUse);
+	}
+
 	@Override
 	public void reset()
 	{

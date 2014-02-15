@@ -2,17 +2,18 @@ package edu.ncsu.lubick.localHub;
 
 import org.apache.log4j.Logger;
 
-import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
+import edu.ncsu.lubick.localHub.videoPostProduction.SingleCapFileExtractor;
 
 public class VideoFileMonitor implements LoadedFileListener
 {
 
 	private VideoFileListener videoFileListener;
-	private static Logger logger = Logger.getLogger(VideoFileMonitor.class.getName());
+	protected Logger logger; 
 
 
 	public VideoFileMonitor(VideoFileListener localHub)
 	{
+		logger = Logger.getLogger(getClass().getName());
 		this.videoFileListener = localHub;
 		
 	}
@@ -20,7 +21,7 @@ public class VideoFileMonitor implements LoadedFileListener
 	@Override
 	public int loadFileResponse(LoadedFileEvent e)
 	{
-		if (e.getFileName().endsWith(PostProductionHandler.EXPECTED_SCREENCAST_FILE_EXTENSION))
+		if (e.getFileName().endsWith(SingleCapFileExtractor.EXPECTED_SCREENCAST_FILE_EXTENSION))
 		{
 			if (!e.wasInitialReadIn())
 			{

@@ -13,8 +13,8 @@ import org.apache.log4j.Logger;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.database.DBAbstractionException;
 import edu.ncsu.lubick.localHub.database.DBAbstractionFactory;
+import edu.ncsu.lubick.localHub.database.FileDateStructs;
 import edu.ncsu.lubick.localHub.database.LocalDBAbstraction;
-import edu.ncsu.lubick.localHub.database.LocalDBAbstraction.FileDateStructs;
 import edu.ncsu.lubick.localHub.database.RemoteDBAbstraction;
 import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 

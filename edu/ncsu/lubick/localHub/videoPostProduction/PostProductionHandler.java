@@ -22,7 +22,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeypressAnim
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.KeypressAnimationMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToMediaOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToMediaOutput;
-import edu.ncsu.lubick.util.ImageDiskWritingStrategy;
+import edu.ncsu.lubick.util.FileDateStructs;
 import edu.ncsu.lubick.util.ThreadedImageDiskWritingStrategy;
 
 /* Some parts of this (the decoding aspect) have the following license:
@@ -56,7 +56,6 @@ public class PostProductionHandler
 	public static final String MEDIA_OUTPUT_FOLDER = "renderedVideos\\";
 	public static final String INTERMEDIATE_FILE_FORMAT = "png";
 	public static final int FRAME_RATE = 5;
-	public static final String EXPECTED_SCREENCAST_FILE_EXTENSION = ".cap";
 	public static final boolean DELETE_IMAGES_AFTER_USE = false;
 
 	private static final String MEDIA_ASSEMBLY_DIR = "./MediaAssembly/";
@@ -71,15 +70,14 @@ public class PostProductionHandler
 
 	private PostProductionAnimationStrategy postProductionAnimator;
 
-	private Queue<OverloadFile> queueOfOverloadFiles = new LinkedList<>();
+	private Queue<FileDateStructs> queueOfOverloadFiles = new LinkedList<>();
 	private Set<ImagesWithAnimationToMediaOutput> postAnimationMediaOutputs = new HashSet<>();
 	private Set<PreAnimationImagesToMediaOutput> preAnimationMediaOutputs = new HashSet<>();
 
 	private FrameDecompressor decompressor = new FrameDecompressor();
-	private ImageDiskWritingStrategy imageWriter;
-
 	private double toolDemoInSeconds;
 	private ToolUsage currentToolStream;
+	private ThreadedImageDiskWritingStrategy imageWriter;
 
 	public PostProductionHandler()
 	{
@@ -104,42 +102,28 @@ public class PostProductionHandler
 			logger.error("Recieved null file to load in PostProductionVideoHandler");
 			throw new IllegalArgumentException("A capFile cannot be null");
 		}
-		if (!capFile.getName().endsWith(EXPECTED_SCREENCAST_FILE_EXTENSION))
+		if (!capFile.getName().endsWith(SingleCapFileExtractor.EXPECTED_SCREENCAST_FILE_EXTENSION))
 		{
-			logger.error("Expected cap file to have an extension " + EXPECTED_SCREENCAST_FILE_EXTENSION + " not like " + capFile.getName());
+			logger.error("Expected cap file to have an extension " + SingleCapFileExtractor.EXPECTED_SCREENCAST_FILE_EXTENSION + " not like " + capFile.getName());
 			this.currentCapFile = null;
 		}
 		this.currentCapFile = capFile;
 
 	}
-
+	
 	public static void debugWriteOutAllImagesInCapFile(File capFile, File outputDirectory)
 	{
-		PostProductionHandler thisHandler = new PostProductionHandler();
-		thisHandler.setCurrentFileStartTime(new Date());
-		thisHandler.loadFile(capFile);
-		if (!outputDirectory.mkdirs() && !outputDirectory.exists())
-		{
-			throw new RuntimeException("could not make output directory for debugWriteOutAllImagesInCapFile");
-		}
-		// set the output writer to be where we want
-		thisHandler.imageWriter = new ThreadedImageDiskWritingStrategy(outputDirectory.getPath(), false);
-		// write out all the images
-		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(Files.readAllBytes(thisHandler.currentCapFile.toPath())))
-		{
-			thisHandler.decompressor.readInFileHeader(inputStream);
+		SingleCapFileExtractor extractor = new SingleCapFileExtractor(outputDirectory);
+		extractor.setStartTime(parseStartDate(capFile));
+		extractor.loadFile(capFile);
+		extractor.extractAllImages();
+	}
 
-			thisHandler.imageWriter.reset();
 
-			thisHandler.extractAllImagesInStream(inputStream);
-
-			thisHandler.imageWriter.waitUntilDoneWriting();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-
+	private static Date parseStartDate(File capFile)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	public void setCurrentFileStartTime(Date startTime)
@@ -332,29 +316,7 @@ public class PostProductionHandler
 		}
 	}
 
-	private void extractAllImagesInStream(InputStream inputStream) throws IOException
-	{
-		while (true)
-		{
-			BufferedImage tempImage = null;
-			try
-			{
-				DecompressionFramePacket framePacket = decompressor.readInNextFrame(inputStream);
-				tempImage = decompressor.createBufferedImageFromDecompressedFramePacket(framePacket);
-			}
-			catch (MediaEncodingException e)
-			{
-				logger.error("There was a problem making the video frames. Stopping extraction...", e);
-				break;
-			}
-			catch (ReachedEndOfCapFileException e)
-			{
-				logger.info("reached the end of the cap file");
-				break;
-			}
-			imageWriter.writeImageToDisk(tempImage);
-		}
-	}
+
 
 	public static String makeFileNameStemNoDateForToolPluginMedia(String pluginName, String toolName)
 	{
@@ -412,6 +374,12 @@ public class PostProductionHandler
 		this.queueOfOverloadFiles.offer(new OverloadFile(extraCapFile, extraDate));
 
 	}
+	
+	public void enqueueOverLoadFile(FileDateStructs fileDateStructs)
+	{
+		// TODO Auto-generated method stub
+		
+	}
 
 	private InputStream goToNextFileInQueue(InputStream oldInputStream) throws IOException
 	{
@@ -425,19 +393,6 @@ public class PostProductionHandler
 		return inputStream;
 	}
 
-	private static class OverloadFile
-	{
-
-		private Date date;
-		private File file;
-
-		public OverloadFile(File extraCapFile, Date extraDate)
-		{
-			this.file = extraCapFile;
-			this.date = extraDate;
-		}
-
-	}
 
 	public static String getIntermediateFolderLocation()
 	{
@@ -471,5 +426,7 @@ public class PostProductionHandler
 		this.capFileStartTime = null;
 		
 	}
+
+
 
 }

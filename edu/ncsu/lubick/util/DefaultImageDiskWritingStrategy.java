@@ -17,10 +17,15 @@ public abstract class DefaultImageDiskWritingStrategy implements ImageDiskWritin
 
 	public DefaultImageDiskWritingStrategy(String baseDirectoryName, boolean deleteImagesAfterUse)
 	{
-		this.workingDir = new File(baseDirectoryName);
+		this(new File(baseDirectoryName), deleteImagesAfterUse);
+	}
+	
+	public DefaultImageDiskWritingStrategy(File baseDirectory, boolean deleteImagesAfterUse)
+	{
+		this.workingDir = baseDirectory;
 		if (!workingDir.exists() && !workingDir.mkdir())
 		{
-			getLogger().error("There was a problem making the scratchDirectory for the images");
+			getLogger().error("There was a problem making "+baseDirectory+"  for the images");
 		}
 		this.deleteImagesAfterUse = deleteImagesAfterUse;
 

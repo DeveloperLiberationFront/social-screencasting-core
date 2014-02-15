@@ -38,16 +38,11 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 public class TestImageCompressionAndDecompression
 {
 
-	private static final byte HOMOGENEOUS_FIRST_BYTE = (byte) -127; // this
-																	// means the
-																	// first
-																	// byte is
+	private static final String TEST_OUTPUT_FOLDER = "./TEST_OUTPUT/";
+	private static final byte HOMOGENEOUS_FIRST_BYTE = (byte) -127; // this means the first n pixels are all the same
 	private static final Rectangle TestImage800x600 = new Rectangle(800, 600);
 	private static final Rectangle TestImage1600x900 = new Rectangle(1600, 900);
-	private static final int BYTES_FOR_HOMOGENEOUS_IMAGE = 15244; // observed
-																	// via
-																	// validated
-																	// tests.
+	private static final int BYTES_FOR_HOMOGENEOUS_IMAGE = 15244; // observed via validated tests.
 
 	private static final int ABSOLUTE_BLACK_PIXEL_VALUE = -16777216;
 	private static final int FUDGED_BLACK_PIXEL_VALUE = -16777215;
@@ -62,33 +57,22 @@ public class TestImageCompressionAndDecompression
 	private Rectangle imageSizeRectangle;
 
 	// Patterns for checking
-	private byte[] blueMainPattern = new byte[] { 0, 0, -1 }; // this is
-																// equivalent to
-																// RGB(0,0,255)
-	private byte[] blueTailPattern = new byte[] { 65, 0, 0, -1 }; // Each
-																	// homogeneous
-																	// 800x600
-																	// ends with
+	private byte[] blueMainPattern = new byte[] { 0, 0, -1 }; // this is equivalent to RGB(0,0,255)
+	private byte[] blueTailPattern = new byte[] { 65, 0, 0, -1 }; // Each homogeneous 800x600 ends with 65 pixels
 	private byte[] darkRedMainPattern = new byte[] { 122, 0, 0 };
 	private byte[] darkRedTailPattern = new byte[] { 65, 122, 0, 0 };
 	private byte[] greenMainPattern = new byte[] { 0, -1, 0 };
 	private byte[] greenTailPattern = new byte[] { 65, 0, -1, 0 };
 	private byte[] redMainPattern = new byte[] { -1, 0, 0 };
 	private byte[] redTailPattern = new byte[] { 65, -1, 0, 0 };
-	private byte[] blackMainPattern = new byte[] { 0, 0, 1 }; // all black is
-																// compressed to
-																// have an RGB
-																// of 0,0,1 so
-																// as not to
-																// confuse the
-																// "same as last time"
-																// stuff
+	private byte[] blackMainPattern = new byte[] { 0, 0, 1 }; // all black is compressed to have an RGB of 0,0,1 so
+	// as not to confuse the "same as last time" stuff
 	private byte[] blackTailPattern = new byte[] { 65, 0, 0, 1 };
 
 	static
 	{
 		PropertyConfigurator.configure(ScreenRecordingModule.LOGGING_FILE_PATH);
-		
+
 	}
 
 	@BeforeClass
@@ -190,18 +174,8 @@ public class TestImageCompressionAndDecompression
 
 		File imageFile = new File("./src/test_images/800x600_blue.png");
 
-		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile); // do
-																			// this
-																			// in
-																			// two
-																			// steps
-																			// to
-																			// have
-																			// this
-																			// to
-																			// compare
-																			// to
-																			// later
+		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile); // do this in two steps to have this to compare
+		// to later
 
 		int numBytes = compressToPackedBytesArray(rawData);
 
@@ -221,18 +195,8 @@ public class TestImageCompressionAndDecompression
 
 		File imageFile = new File("./src/test_images/800x600_black.png");
 
-		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile); // do
-																			// this
-																			// in
-																			// two
-																			// steps
-																			// to
-																			// have
-																			// this
-																			// to
-																			// compare
-																			// to
-																			// later
+		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile); // do this in two steps to have this to compare
+		// to later
 
 		int numBytes = compressToPackedBytesArray(rawData);
 
@@ -255,18 +219,8 @@ public class TestImageCompressionAndDecompression
 
 		File imageFile = new File("./src/test_images/800x600_darkRed.png");
 
-		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile); // do
-																			// this
-																			// in
-																			// two
-																			// steps
-																			// to
-																			// have
-																			// this
-																			// to
-																			// compare
-																			// to
-																			// later
+		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile); // do this in two steps to have this to compare
+		// to later
 
 		int numBytes = compressToPackedBytesArray(rawData);
 
@@ -286,18 +240,8 @@ public class TestImageCompressionAndDecompression
 
 		File imageFile = new File("./src/test_images/800x600_purple.png");
 
-		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile); // do
-																			// this
-																			// in
-																			// two
-																			// steps
-																			// to
-																			// have
-																			// this
-																			// to
-																			// compare
-																			// to
-																			// later
+		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile); // do this in two steps to have this to compare
+		// to later
 
 		int numBytes = compressToPackedBytesArray(rawData);
 
@@ -317,18 +261,8 @@ public class TestImageCompressionAndDecompression
 
 		File imageFile = new File("./src/test_images/800x600_purple_red.png");
 
-		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile); // do
-																			// this
-																			// in
-																			// two
-																			// steps
-																			// to
-																			// have
-																			// this
-																			// to
-																			// compare
-																			// to
-																			// later
+		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile); // do this in two steps to have this to compare
+		// to later
 
 		int numBytes = compressToPackedBytesArray(rawData);
 
@@ -346,18 +280,8 @@ public class TestImageCompressionAndDecompression
 
 		File imageFile = new File("./src/test_images/800x600_purple_blue.png");
 
-		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile); // do
-																			// this
-																			// in
-																			// two
-																			// steps
-																			// to
-																			// have
-																			// this
-																			// to
-																			// compare
-																			// to
-																			// later
+		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile); // do this in two steps to have this to compare
+		// to later
 
 		int numBytes = compressToPackedBytesArray(rawData);
 
@@ -375,18 +299,8 @@ public class TestImageCompressionAndDecompression
 
 		File imageFile = new File("./src/test_images/800x600_yellow_with_black_pattern.png");
 
-		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile); // do
-																			// this
-																			// in
-																			// two
-																			// steps
-																			// to
-																			// have
-																			// this
-																			// to
-																			// compare
-																			// to
-																			// later
+		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile); // do this in two steps to have this to compare
+		// to later
 
 		int numBytes = compressToPackedBytesArray(rawData);
 
@@ -404,18 +318,8 @@ public class TestImageCompressionAndDecompression
 
 		File imageFile = new File("./src/test_images/800x600_blue_with_box.png");
 
-		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile); // do
-																			// this
-																			// in
-																			// two
-																			// steps
-																			// to
-																			// have
-																			// this
-																			// to
-																			// compare
-																			// to
-																			// later
+		int[] rawData = readInImagesRawDataUsingImplicitSize(imageFile); // do this in two steps to have this to compare
+		// to later
 
 		int numBytes = compressToPackedBytesArray(rawData);
 
@@ -434,18 +338,8 @@ public class TestImageCompressionAndDecompression
 		setUpForImageSize(TestImage800x600);
 
 		File firstImage = new File("./src/test_images/800x600_blue.png");
-		int[] firstImageRawData = readInImagesRawDataUsingImplicitSize(firstImage); // do
-																					// this
-																					// in
-																					// two
-																					// steps
-																					// to
-																					// have
-																					// this
-																					// to
-																					// compare
-																					// to
-																					// later
+		int[] firstImageRawData = readInImagesRawDataUsingImplicitSize(firstImage); // do this in two steps to have this to compare
+		// to later
 
 		File secondImage = new File("./src/test_images/800x600_blue_with_box.png");
 		int[] secondImageRawData = readInImagesRawDataUsingImplicitSize(secondImage);
@@ -479,7 +373,7 @@ public class TestImageCompressionAndDecompression
 	public void testTwoLifelikeFrames() throws Exception
 	{
 		setUpForImageSize(TestImage1600x900); // Set up for the larger frame
-												// size here:
+		// size here:
 
 		File firstImage = new File("./src/test_images/full_screen_0008.png");
 		int[] firstImageRawData = readInImagesRawDataUsingImplicitSize(firstImage);
@@ -519,26 +413,10 @@ public class TestImageCompressionAndDecompression
 		BasicCapFileManager testCapFileManager = new BasicCapFileManager(testCapFile);
 		testCapFileManager.setAndWriteFrameWidth(1600);
 		testCapFileManager.setAndWriteFrameHeight(900);
-
-		setUpForImageSizeUsingCapManager(TestImage1600x900, testCapFileManager); // Set
-																					// up
-																					// for
-																					// the
-																					// larger
-																					// frame
-																					// size
-																					// here
-																					// and
-																					// use
-																					// a
-																					// cap
-																					// manager
-																					// so
-																					// we
-																					// can
-																					// check
-																					// the
-																					// output
+		
+		// Set up for the larger frame size here and use a cap manager so we can check the  output
+		setUpForImageSizeUsingCapManager(TestImage1600x900, testCapFileManager);
+		
 		List<File> testImages = load10TestImages();
 
 		for (File f : testImages)
@@ -549,8 +427,8 @@ public class TestImageCompressionAndDecompression
 			((FrameCompressor) compressorToTest).packFrame(pack);
 		}
 
-		File testSequenceFolder = new File("./Scratch/");
-		UtilitiesForTesting.clearOutDirectory("./Scratch/");
+		File testSequenceFolder = new File(TEST_OUTPUT_FOLDER);
+		UtilitiesForTesting.clearOutDirectory(TEST_OUTPUT_FOLDER);
 		PostProductionHandler.debugWriteOutAllImagesInCapFile(testCapFile, testSequenceFolder);
 
 		File[] createdFiles = testSequenceFolder.listFiles();
@@ -750,7 +628,7 @@ public class TestImageCompressionAndDecompression
 	private byte[] slimDataInPackedBytesArray(int numBytes)
 	{
 		byte[] slimmedPackedBytes = new byte[numBytes]; // Just to make sure we
-														// have 0s there
+		// have 0s there
 		for (int i = 0; i < slimmedPackedBytes.length; i++)
 		{
 			slimmedPackedBytes[i] = packedBytes[i];
@@ -773,9 +651,9 @@ public class TestImageCompressionAndDecompression
 
 		compressionPacket.updateFieldsForNextFrame(dataPack);
 		compressionPacket.dataToWriteBuffer = packedBytes; // using this for
-															// "spying" reasons
-															// instead of
-															// compressionPacket.resizeInternalBytesIfNeeded();
+		// "spying" reasons
+		// instead of
+		// compressionPacket.resizeInternalBytesIfNeeded();
 		compressionPacket.isFullFrame = false;
 
 		int numBytes = compressorToTest.compressData(compressionPacket);

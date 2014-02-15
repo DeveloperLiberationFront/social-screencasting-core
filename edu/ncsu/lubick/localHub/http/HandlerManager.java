@@ -59,7 +59,7 @@ public class HandlerManager
 
 	private static void makeAndAddHandlersForMediaEncoding(HandlerCollection h, WebQueryInterface wqi)
 	{
-		h.addHandler(new VideoCreator("/makeVideo", wqi));
+		h.addHandler(new HTTPVideoCreator("/makeVideo", wqi));
 	}
 
 	private static void makeAndAddHandlersForWebReporting(HandlerCollection h, WebQueryInterface wqi)

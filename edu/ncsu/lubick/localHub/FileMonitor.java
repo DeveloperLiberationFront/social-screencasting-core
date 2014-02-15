@@ -12,7 +12,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
+import edu.ncsu.lubick.localHub.videoPostProduction.SingleCapFileExtractor;
 
 /**
  * This is the Runnable that operates on the background thread.
@@ -270,7 +270,7 @@ public class FileMonitor implements Runnable {
 	private int conditionallyAddFileToCollectionAfterContactingListener(File thisFile, boolean isInitialLoading, Collection<File> collectionToAddTo)
 	{
 		String fileContents = "[BINARYDATA]";
-		if (!thisFile.getName().endsWith(PostProductionHandler.EXPECTED_SCREENCAST_FILE_EXTENSION)) // these get too big to parse
+		if (!thisFile.getName().endsWith(SingleCapFileExtractor.EXPECTED_SCREENCAST_FILE_EXTENSION)) // these get too big to parse
 		{
 			fileContents = FileUtilities.readAllFromFile(thisFile);
 		}

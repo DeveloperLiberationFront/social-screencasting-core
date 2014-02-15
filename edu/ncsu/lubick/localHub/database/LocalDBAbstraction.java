@@ -23,25 +23,4 @@ public abstract class LocalDBAbstraction
 
 	public abstract List<String> getNamesOfAllPlugins();
 
-	public static class FileDateStructs {
-
-		public File file;
-		public Date startTime;
-
-		public FileDateStructs(File file, Date startTime)
-		{
-
-			this.file = file;
-			this.startTime = startTime;
-		}
-
-		@Override
-		public String toString()
-		{
-			return "FileDateStructs [file=" + file + ", startTime=" + startTime
-					+ "]";
-		}
-
-	}
-
 }
