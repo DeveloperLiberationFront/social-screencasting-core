@@ -10,8 +10,8 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
+import edu.ncsu.lubick.util.BlockingImageDiskWritingStrategy;
 import edu.ncsu.lubick.util.ImageDiskWritingStrategy;
-import edu.ncsu.lubick.util.ThreadedImageDiskWritingStrategy;
 
 public class SingleCapFileExtractor {
 
@@ -19,16 +19,19 @@ public class SingleCapFileExtractor {
 	private Logger logger = Logger.getLogger(SingleCapFileExtractor.class.getName());
 	private File currentCapFile;
 	private FrameDecompressor decompressor = new FrameDecompressor();
+	private Date capFileStartTime;
+	private int frameRate;
 	public static final String EXPECTED_SCREENCAST_FILE_EXTENSION = ".cap";
 
-	public SingleCapFileExtractor(String outputPath)
+	public SingleCapFileExtractor(String outputPath, int frameRate)
 	{
-		this(new File(outputPath));
+		this(new File(outputPath),frameRate);
 	}
 
-	public SingleCapFileExtractor(File outputDirectory)
+	public SingleCapFileExtractor(File outputDirectory, int frameRate)
 	{
-		this.imageWriter = new ThreadedImageDiskWritingStrategy(outputDirectory, false);
+		this.imageWriter = new ChronologicalImageDiskWritingStrategy(outputDirectory);
+		this.frameRate = frameRate;
 	}
 
 	public void loadFile(File capFile)
@@ -45,6 +48,11 @@ public class SingleCapFileExtractor {
 		}
 		this.currentCapFile = capFile;
 
+	}
+
+	public void setStartTime(Date startTime)
+	{
+		this.capFileStartTime = startTime;
 	}
 
 	public void extractAllImages()
@@ -90,11 +98,23 @@ public class SingleCapFileExtractor {
 			imageWriter.writeImageToDisk(tempImage);
 		}
 	}
+	
+	
+	class ChronologicalImageDiskWritingStrategy extends BlockingImageDiskWritingStrategy{
 
-	public void setStartTime(Date startTime)
-	{
-		// TODO Auto-generated method stub
-
+		int currentFrame = 0;
+		
+		public ChronologicalImageDiskWritingStrategy(File outputDirectory)
+		{
+			super(outputDirectory, false);
+		}
+		
+		@Override
+		protected String getNextFileName()
+		{
+			// TODO Auto-generated method stub
+			// maybe something like 
+		}
 	}
 
 }

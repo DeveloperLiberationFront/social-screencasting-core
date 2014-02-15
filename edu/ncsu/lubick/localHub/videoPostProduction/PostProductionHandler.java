@@ -116,7 +116,7 @@ public class PostProductionHandler
 	
 	public static void debugWriteOutAllImagesInCapFile(File capFile, File outputDirectory)
 	{
-		SingleCapFileExtractor extractor = new SingleCapFileExtractor(outputDirectory);
+		SingleCapFileExtractor extractor = new SingleCapFileExtractor(outputDirectory, FRAME_RATE);
 		try
 		{
 			extractor.setStartTime(FileUtilities.parseStartDateOfCapFile(capFile));

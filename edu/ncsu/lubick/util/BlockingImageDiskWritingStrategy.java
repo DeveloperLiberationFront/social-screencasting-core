@@ -15,9 +15,9 @@ public class BlockingImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 
 	private static Logger logger = Logger.getLogger(BlockingImageDiskWritingStrategy.class.getName());
 
-	public BlockingImageDiskWritingStrategy(String baseDirectoryName, boolean deleteImagesAfterUse)
+	public BlockingImageDiskWritingStrategy(File outputDirectory, boolean deleteImagesAfterUse)
 	{
-		super(baseDirectoryName, deleteImagesAfterUse);
+		super(outputDirectory, deleteImagesAfterUse);
 	}
 
 	@Override
