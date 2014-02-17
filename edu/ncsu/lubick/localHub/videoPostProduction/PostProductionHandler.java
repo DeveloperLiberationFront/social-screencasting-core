@@ -116,6 +116,11 @@ public class PostProductionHandler
 	
 	public static void debugWriteOutAllImagesInCapFile(File capFile, File outputDirectory)
 	{
+		if (!outputDirectory.exists() && !outputDirectory.mkdirs())
+		{
+			logger.fatal("Could not write out images because making "+outputDirectory+" doesn't exist");
+			return;
+		}
 		SingleCapFileExtractor extractor = new SingleCapFileExtractor(outputDirectory, FRAME_RATE);
 		try
 		{

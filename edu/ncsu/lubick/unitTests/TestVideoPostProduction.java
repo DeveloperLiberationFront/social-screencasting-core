@@ -3,14 +3,18 @@ package edu.ncsu.lubick.unitTests;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.ncsu.lubick.Runner;
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
@@ -36,9 +40,22 @@ public class TestVideoPostProduction
 	private static final String DEFAULT_TESTING_KEYPRESS = "Ctrl+5";
 	private static final String DEFAULT_TESTING_TOOL_CLASS = "Debug";
 
-	static
+	@BeforeClass
+	public static void setUpBeforeAll()
 	{
-		PropertyConfigurator.configure(LocalHub.LOGGING_FILE_PATH);
+		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
+		try
+		{
+			URL url = Runner.class.getResource(LocalHub.LOGGING_FILE_PATH);
+			PropertyConfigurator.configure(url);
+			Logger.getRootLogger().info("Logging initialized");
+		}
+		catch (Exception e)
+		{
+			//load safe defaults
+			BasicConfigurator.configure();
+			Logger.getRootLogger().info("Could not load property file, loading defaults", e);
+		}
 		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
 	}
 
@@ -136,6 +153,8 @@ public class TestVideoPostProduction
 		File capFile = new File("./src/ForTesting/oneMinuteCap.cap");
 		String toolName = WHOMBO_TOOL_1;
 
+		//PostProductionHandler.debugWriteOutAllImagesInCapFile(capFile, new File("./test/"));
+		
 		assertTrue(capFile.exists());
 
 		Date date = UtilitiesForTesting.truncateTimeToMinute(new Date());
@@ -188,6 +207,8 @@ public class TestVideoPostProduction
 
 		assertTrue(firstcapFile.exists());
 		assertTrue(secondCapFile.exists());
+		
+		PostProductionHandler.debugWriteOutAllImagesInCapFile(firstcapFile, new File("./test/"));
 
 		Date date = UtilitiesForTesting.truncateTimeToMinute(new Date());
 		Date secondDate = UtilitiesForTesting.truncateTimeToMinute(new Date(date.getTime() + 61 * 1000));

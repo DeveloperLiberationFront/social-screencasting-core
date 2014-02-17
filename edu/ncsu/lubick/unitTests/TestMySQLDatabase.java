@@ -4,8 +4,10 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.URL;
 import java.util.Scanner;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.After;
@@ -13,6 +15,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.ncsu.lubick.Runner;
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.database.QueuedMySQLDatabase;
 import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
@@ -22,14 +25,27 @@ public class TestMySQLDatabase
 	private static Logger logger = Logger.getLogger(TestMySQLDatabase.class.getName());
 	private static File testFile = new File(RemoteSQLDatabaseFactory.TEST_PATH_TO_USER_FILE);
 
+	
 	@BeforeClass
-	public static void setUpClass() throws Exception
+	public static void setUpBeforeAll()
 	{
-		PropertyConfigurator.configure(LocalHub.LOGGING_FILE_PATH);
+		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
+		try
+		{
+			URL url = Runner.class.getResource(LocalHub.LOGGING_FILE_PATH);
+			PropertyConfigurator.configure(url);
+			Logger.getRootLogger().info("Logging initialized");
+		}
+		catch (Exception e)
+		{
+			//load safe defaults
+			BasicConfigurator.configure();
+			Logger.getRootLogger().info("Could not load property file, loading defaults", e);
+		}
 		RemoteSQLDatabaseFactory.setUpToUseTestUserFile(true);
 		RemoteSQLDatabaseFactory.setUpToUseMockDB(false);
 	}
-
+	
 
 	private QueuedMySQLDatabase db;
 

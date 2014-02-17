@@ -6,6 +6,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -13,6 +14,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Before;
@@ -27,7 +29,8 @@ import com.wet.wired.jsr.recorder.compression.FrameCompressorSavingStrategy;
 import com.wet.wired.jsr.recorder.compression.FrameDataPack;
 
 import edu.ncsu.lubick.BasicCapFileManager;
-import edu.ncsu.lubick.ScreenRecordingModule;
+import edu.ncsu.lubick.Runner;
+import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
 import edu.ncsu.lubick.localHub.videoPostProduction.DecompressionFramePacket;
@@ -69,17 +72,26 @@ public class TestImageCompressionAndDecompression
 	// as not to confuse the "same as last time" stuff
 	private byte[] blackTailPattern = new byte[] { 65, 0, 0, 1 };
 
-	static
-	{
-		PropertyConfigurator.configure(ScreenRecordingModule.LOGGING_FILE_PATH);
-
-	}
-
 	@BeforeClass
-	public static void setUpBeforeClass() throws Exception
+	public static void setUpBeforeAll()
 	{
 		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
+		try
+		{
+			URL url = Runner.class.getResource(LocalHub.LOGGING_FILE_PATH);
+			PropertyConfigurator.configure(url);
+			Logger.getRootLogger().info("Logging initialized");
+		}
+		catch (Exception e)
+		{
+			//load safe defaults
+			BasicConfigurator.configure();
+			Logger.getRootLogger().info("Could not load property file, loading defaults", e);
+		}
+		
+		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
 	}
+
 
 	@Before
 	public void setUp() throws Exception

@@ -3,14 +3,20 @@ package edu.ncsu.lubick.unitTests;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
+import java.net.URL;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.ncsu.lubick.Runner;
+import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
@@ -19,10 +25,30 @@ import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
 
 public class TestToolStream {
 
+	
+	@BeforeClass
+	public static void setUpBeforeAll()
+	{
+		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
+		try
+		{
+			URL url = Runner.class.getResource(LocalHub.LOGGING_FILE_PATH);
+			PropertyConfigurator.configure(url);
+			Logger.getRootLogger().info("Logging initialized");
+		}
+		catch (Exception e)
+		{
+			//load safe defaults
+			BasicConfigurator.configure();
+			Logger.getRootLogger().info("Could not load property file, loading defaults", e);
+		}
+		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
+	}
+	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception
 	{
-		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
+		
 	}
 
 	@Before

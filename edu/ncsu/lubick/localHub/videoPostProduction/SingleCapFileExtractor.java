@@ -103,19 +103,27 @@ public class SingleCapFileExtractor {
 	
 	class ChronologicalImageDiskWritingStrategy extends BlockingImageDiskWritingStrategy{
 
-		int currentFrame = 0;
 		private Date currFrameDate;
 		
 		public ChronologicalImageDiskWritingStrategy(File outputDirectory)
 		{
 			super(outputDirectory, false);
-			this.currFrameDate = new Date(capFileStartTime.getTime());
+			this.currFrameDate = new Date((capFileStartTime.getTime()/100)*100); //round to nearest 1/10th of second to start
 		}
 		
 		@Override
 		protected String getNextFileName()
 		{
-			return FileUtilities.encodeMediaFrameName(currFrameDate);
+			String encodedMediaFrameName = FileUtilities.encodeMediaFrameName(currFrameDate);
+			currFrameDate = advanceFrame(currFrameDate);
+			return encodedMediaFrameName;
+		}
+
+		private Date advanceFrame(Date frameDate)
+		{
+			long updatedTimeInMillis = frameDate.getTime() + (1000 / frameRate);
+			frameDate.setTime(updatedTimeInMillis);
+			return frameDate;
 		}
 	}
 

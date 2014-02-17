@@ -78,11 +78,6 @@ public class FileUtilities
 		return new SimpleDateFormat("DDDyykkmm");
 	}
 
-	public static Date parseStartDateOfCapFile(File capFile) throws ImproperlyEncodedDateException
-	{
-		return extractStartTime(capFile.getName(), makeDateInSecondsToNumberFormatter());
-	}
-
 	// Expecting name convention
 	// screencasts.ENCODEDDATE.cap
 	// OR
@@ -111,6 +106,11 @@ public class FileUtilities
 	public static Date parseStartDateOfToolStream(File fileToParse) throws ImproperlyEncodedDateException
 	{
 		return extractStartTime(fileToParse.getName(), makeDateInMinutesToNumberFormatter());
+	}
+
+	public static Date parseStartDateOfCapFile(File capFile) throws ImproperlyEncodedDateException
+	{
+		return extractStartTime(capFile.getName(), makeDateInSecondsToNumberFormatter());
 	}
 
 	public static String encodeCapFileName(Date date)
