@@ -11,6 +11,7 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.util.BlockingImageDiskWritingStrategy;
+import edu.ncsu.lubick.util.FileUtilities;
 import edu.ncsu.lubick.util.ImageDiskWritingStrategy;
 
 public class SingleCapFileExtractor {
@@ -114,9 +115,7 @@ public class SingleCapFileExtractor {
 		@Override
 		protected String getNextFileName()
 		{
-			// TODO Auto-generated method stub
-			// maybe something like 
-			return "7";
+			return FileUtilities.encodeMediaFrameName(currFrameDate);
 		}
 	}
 

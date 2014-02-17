@@ -11,13 +11,16 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ImproperlyEncodedDateException;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 
 public class FileUtilities
 {
 	private static Logger logger = Logger.getLogger(FileUtilities.class.getName());
 	
+	private static DateFormat formatterForFrames = makeDateInMillisToNumberFormatter();
 	private static DateFormat formatterForCapFile = makeDateInSecondsToNumberFormatter();
 	private static DateFormat formatterForLogFiles = makeDateInMinutesToNumberFormatter();
+	
 
 	private FileUtilities()
 	{
@@ -43,7 +46,7 @@ public class FileUtilities
 		if (i < 0)
 		{
 			logger.error("Who put a negative here? " + i);
-			return "I cant deal with negatives";
+			return padIntTo4Digits(Math.abs(i));
 		}
 		if (i < 10)
 		{
@@ -60,6 +63,11 @@ public class FileUtilities
 		return String.valueOf(i);
 	}
 
+	private static SimpleDateFormat makeDateInMillisToNumberFormatter()
+	{
+		return new SimpleDateFormat("DDDyykkmmssSSS");
+	}
+	
 	private static SimpleDateFormat makeDateInSecondsToNumberFormatter()
 	{
 		return new SimpleDateFormat("DDDyykkmmss");
@@ -119,6 +127,11 @@ public class FileUtilities
 		{
 			return pluginName +"."+formatterForLogFiles.format(date)+".log";
 		}
+	}
+
+	public static String encodeMediaFrameName(Date date)
+	{
+		return "frame."+formatterForFrames.format(date)+"."+PostProductionHandler.INTERMEDIATE_FILE_FORMAT;
 	}
 
 }
