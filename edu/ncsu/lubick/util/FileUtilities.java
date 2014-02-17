@@ -131,7 +131,10 @@ public class FileUtilities
 
 	public static String encodeMediaFrameName(Date date)
 	{
-		return "frame."+formatterForFrames.format(date)+"."+PostProductionHandler.INTERMEDIATE_FILE_FORMAT;
+		synchronized (formatterForFrames)
+		{
+			return "frame."+formatterForFrames.format(date)+"."+PostProductionHandler.INTERMEDIATE_FILE_FORMAT;	
+		}
 	}
 
 }
