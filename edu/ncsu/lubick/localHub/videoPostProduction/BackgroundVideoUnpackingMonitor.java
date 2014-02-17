@@ -22,7 +22,7 @@ public class BackgroundVideoUnpackingMonitor extends VideoFileMonitor {
 	public BackgroundVideoUnpackingMonitor(VideoFileListener localHub)
 	{
 		super(localHub);
-		this.capFileExtractor = new SingleCapFileExtractor("./BackgroundVideo/");
+		this.capFileExtractor = new SingleCapFileExtractor("./BackgroundVideo/", PostProductionHandler.FRAME_RATE);
 		this.backgroundThread = new Thread(new Runnable() {
 			
 			@Override

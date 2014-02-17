@@ -3,7 +3,6 @@ package edu.ncsu.lubick.unitTests;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -36,8 +35,6 @@ public class TestVideoPostProduction
 	private static final String TEST_PLUGIN_NAME = "Testing";
 	private static final String DEFAULT_TESTING_KEYPRESS = "Ctrl+5";
 	private static final String DEFAULT_TESTING_TOOL_CLASS = "Debug";
-
-	private SimpleDateFormat dateInSecondsToNumber = FileUtilities.makeDateInSecondsToNumberFormatter();
 
 	static
 	{
@@ -221,8 +218,8 @@ public class TestVideoPostProduction
 		assertTrue(firstCapFile.exists());
 		assertTrue(secondCapFile.exists());
 
-		Date date = dateInSecondsToNumber.parse("28913211516");
-		Date secondDate = dateInSecondsToNumber.parse("28913211615");
+		Date date = FileUtilities.parseStartDateOfCapFile(firstCapFile);
+		Date secondDate = FileUtilities.parseStartDateOfCapFile(secondCapFile);
 
 		assertNotNull(date);
 		assertNotNull(secondDate);

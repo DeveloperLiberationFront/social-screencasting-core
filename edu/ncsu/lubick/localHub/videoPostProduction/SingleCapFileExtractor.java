@@ -103,10 +103,12 @@ public class SingleCapFileExtractor {
 	class ChronologicalImageDiskWritingStrategy extends BlockingImageDiskWritingStrategy{
 
 		int currentFrame = 0;
+		private Date currFrameDate;
 		
 		public ChronologicalImageDiskWritingStrategy(File outputDirectory)
 		{
 			super(outputDirectory, false);
+			this.currFrameDate = new Date(capFileStartTime.getTime());
 		}
 		
 		@Override
@@ -114,6 +116,7 @@ public class SingleCapFileExtractor {
 		{
 			// TODO Auto-generated method stub
 			// maybe something like 
+			return "7";
 		}
 	}
 

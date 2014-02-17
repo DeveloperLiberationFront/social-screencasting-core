@@ -3,6 +3,7 @@ package edu.ncsu.lubick.util;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -14,6 +15,9 @@ import edu.ncsu.lubick.localHub.ImproperlyEncodedDateException;
 public class FileUtilities
 {
 	private static Logger logger = Logger.getLogger(FileUtilities.class.getName());
+	
+	private static DateFormat formatterForCapFile = makeDateInSecondsToNumberFormatter();
+	private static DateFormat formatterForLogFiles = makeDateInMinutesToNumberFormatter();
 
 	private FileUtilities()
 	{
@@ -56,12 +60,12 @@ public class FileUtilities
 		return String.valueOf(i);
 	}
 
-	public static SimpleDateFormat makeDateInSecondsToNumberFormatter()
+	private static SimpleDateFormat makeDateInSecondsToNumberFormatter()
 	{
 		return new SimpleDateFormat("DDDyykkmmss");
 	}
 
-	public static SimpleDateFormat makeDateInMinutesToNumberFormatter()
+	private static SimpleDateFormat makeDateInMinutesToNumberFormatter()
 	{
 		return new SimpleDateFormat("DDDyykkmm");
 	}
@@ -99,6 +103,22 @@ public class FileUtilities
 	public static Date parseStartDateOfToolStream(File fileToParse) throws ImproperlyEncodedDateException
 	{
 		return extractStartTime(fileToParse.getName(), makeDateInMinutesToNumberFormatter());
+	}
+
+	public static String encodeCapFileName(Date date)
+	{
+		synchronized (formatterForCapFile)			//SimpleDateFormats are not thread-safe
+		{
+			return "screencasts."+formatterForCapFile.format(date)+".cap";
+		}
+	}
+
+	public static String encodeLogFileName(String pluginName, Date date)
+	{
+		synchronized (formatterForLogFiles)
+		{
+			return pluginName +"."+formatterForLogFiles.format(date)+".log";
+		}
 	}
 
 }

@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -58,10 +57,6 @@ public class TestLocalHubBasicFileReading {
 	private static int testIteration = 1;
 	private static LocalHubDebugAccess localHub;
 	private File testPluginDirectory;
-	// This won't work in the year 2100 or later.
-	private SimpleDateFormat dateInMinutesToNumber = new SimpleDateFormat("DDDyykkmm");
-	private SimpleDateFormat dateInSecondsToNumber = FileUtilities.makeDateInSecondsToNumberFormatter();
-
 	// used with listeners. These give listeners a place to refer
 	private LoadedFileEvent observedEvent = null;
 	private boolean hasSeenResponseFlag = false;
@@ -154,8 +149,9 @@ public class TestLocalHubBasicFileReading {
 		assertTrue(nestedDirectory.mkdir());
 
 		Date currentTime = new Date();
-		File createdNestedFile = UtilitiesForTesting.createAbsoluteFileWithContent(nestedDirectory.getAbsolutePath(), getCurrentPluginName() + "."
-				+ dateInMinutesToNumber.format(currentTime) + ".log", "ThisIsAToolstream");
+		
+		File createdNestedFile = UtilitiesForTesting.createAbsoluteFileWithContent(nestedDirectory.getAbsolutePath(), 
+				FileUtilities.encodeLogFileName(getCurrentPluginName(), currentTime), "ThisIsAToolstream");
 
 		assertNotNull(createdNestedFile);
 		assertTrue(createdNestedFile.exists());
@@ -294,7 +290,7 @@ public class TestLocalHubBasicFileReading {
 		hasSeenResponseFlag = false;
 		createToolStreamFileAndVerifyItHappened(firstToolStream, defaultLoadedFileListener);
 
-		String nameOfSourceFile = "SourceVideo." + dateInSecondsToNumber.format(teeMinusFive) + ".cap";
+		String nameOfSourceFile = FileUtilities.encodeCapFileName(teeMinusFive);
 		copyScreenCastCapFileToDirectoryAndVerifyItHappened(new File("./src/ForTesting/oneMinuteCap.cap"), nameOfSourceFile);
 
 		observedEvent = null;
@@ -351,8 +347,8 @@ public class TestLocalHubBasicFileReading {
 		localHub.addLoadedFileListener(loadedFileListener);
 		observedEvent = null;
 
-		File createdFile = UtilitiesForTesting.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(), getCurrentPluginName() + "."
-				+ dateInMinutesToNumber.format(timeStamp) + ".log", fileContents);
+		File createdFile = UtilitiesForTesting.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),
+				FileUtilities.encodeLogFileName(getCurrentPluginName(), timeStamp), fileContents);
 
 		assertNotNull(createdFile);
 		assertTrue(createdFile.exists());
@@ -466,7 +462,7 @@ public class TestLocalHubBasicFileReading {
 	private File createToolStreamOnDisk(IdealizedToolStream its)
 	{
 		return UtilitiesForTesting.createAbsoluteFileWithContent(testPluginDirectory.getAbsolutePath(),
-				getCurrentPluginName() + "." + dateInMinutesToNumber.format(its.getTimeStamp()) + ".log", its.toJSON());
+				FileUtilities.encodeLogFileName(getCurrentPluginName(), its.getTimeStamp()), its.toJSON());
 
 	}
 
