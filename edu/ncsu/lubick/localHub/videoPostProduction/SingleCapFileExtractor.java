@@ -10,13 +10,12 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
-import edu.ncsu.lubick.util.BlockingImageDiskWritingStrategy;
 import edu.ncsu.lubick.util.FileUtilities;
-import edu.ncsu.lubick.util.ImageDiskWritingStrategy;
+import edu.ncsu.lubick.util.ThreadedImageDiskWritingStrategy;
 
 public class SingleCapFileExtractor {
 
-	private ImageDiskWritingStrategy imageWriter;
+	private ChronologicalImageDiskWritingStrategy imageWriter;
 	private Logger logger = Logger.getLogger(SingleCapFileExtractor.class.getName());
 	private File currentCapFile;
 	private FrameDecompressor decompressor = new FrameDecompressor();
@@ -54,6 +53,8 @@ public class SingleCapFileExtractor {
 	public void setStartTime(Date startTime)
 	{
 		this.capFileStartTime = startTime;
+		imageWriter.setTime(this.capFileStartTime);
+		this.decompressor.setFrameZeroTime(capFileStartTime);
 	}
 
 	public void extractAllImages()
@@ -101,14 +102,18 @@ public class SingleCapFileExtractor {
 	}
 	
 	
-	class ChronologicalImageDiskWritingStrategy extends BlockingImageDiskWritingStrategy{
+	class ChronologicalImageDiskWritingStrategy extends ThreadedImageDiskWritingStrategy{
 
 		private Date currFrameDate;
 		
 		public ChronologicalImageDiskWritingStrategy(File outputDirectory)
 		{
 			super(outputDirectory, false);
-			this.currFrameDate = new Date((capFileStartTime.getTime()/100)*100); //round to nearest 1/10th of second to start
+		}
+
+		private void setTime(Date date)
+		{
+			this.currFrameDate = new Date((date.getTime()/100)*100); //round to nearest 1/10th of second to start
 		}
 		
 		@Override

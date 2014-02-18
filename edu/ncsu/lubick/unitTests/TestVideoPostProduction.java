@@ -201,14 +201,14 @@ public class TestVideoPostProduction
 	public void testSingleToolUsageExtractionOverlappingFiles() throws Exception
 	{
 
-		File firstcapFile = new File("./src/ForTesting/oneMinuteCap.cap");
+		final File firstcapFile = new File("./src/ForTesting/oneMinuteCap.cap");
 		File secondCapFile = new File("./src/ForTesting/oneMinuteCap.cap"); // we'll just reuse this for testing
 		String toolName = "WhomboTool #3";
 
 		assertTrue(firstcapFile.exists());
 		assertTrue(secondCapFile.exists());
+	
 		
-		PostProductionHandler.debugWriteOutAllImagesInCapFile(firstcapFile, new File("./test/"));
 
 		Date date = UtilitiesForTesting.truncateTimeToMinute(new Date());
 		Date secondDate = UtilitiesForTesting.truncateTimeToMinute(new Date(date.getTime() + 61 * 1000));
