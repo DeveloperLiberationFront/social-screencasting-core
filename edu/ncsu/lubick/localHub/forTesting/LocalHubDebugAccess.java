@@ -29,6 +29,4 @@ public interface LocalHubDebugAccess {
 
 	List<String> getAllPluginNames();
 
-	void forceVideoOutput();
-
 }

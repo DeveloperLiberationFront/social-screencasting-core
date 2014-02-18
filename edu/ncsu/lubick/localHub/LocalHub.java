@@ -16,8 +16,6 @@ import edu.ncsu.lubick.localHub.http.HTTPServer;
 import edu.ncsu.lubick.localHub.http.WebToolReportingInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
-import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToMediaOutput;
-import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToVideoOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToBrowserAnimatedPackage;
 import edu.ncsu.lubick.util.FileDateStructs;
 import edu.ncsu.lubick.util.FileUtilities;
@@ -492,18 +490,6 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 			return hubToDebug.getNamesOfAllPlugins();
 		}
 
-		@Override
-		public void forceVideoOutput()
-		{
-			for (ImagesWithAnimationToMediaOutput m : hubToDebug.videoPostProductionHandler.getPostAnimationMediaOutputs())
-			{
-				if (m instanceof ImagesWithAnimationToVideoOutput)
-				{
-					return;
-				}
-			}
-			hubToDebug.videoPostProductionHandler.addNewPostAnimationMediaOutput(new ImagesWithAnimationToVideoOutput());
-		}
 
 	}
 

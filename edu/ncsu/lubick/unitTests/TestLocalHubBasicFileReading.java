@@ -30,7 +30,6 @@ import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
-import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToVideoOutput;
 import edu.ncsu.lubick.util.FileUtilities;
 
 public class TestLocalHubBasicFileReading {
@@ -273,10 +272,10 @@ public class TestLocalHubBasicFileReading {
 	}
 
 	@Test
+	//TODO change to Browser package
 	public void testDatabasePullAndVideoCreation() throws Exception
 	{
 		assertTrue(localHub.isRunning());
-		localHub.forceVideoOutput();
 		Date currentTime = getFastForwardedDate();
 		Date teeMinusFive = new Date(currentTime.getTime() - 5 * 1000);
 		Date teePlusThirty = new Date(currentTime.getTime() + 30 * 1000);
@@ -308,7 +307,7 @@ public class TestLocalHubBasicFileReading {
 		assertTrue(outputFile.exists());
 		assertTrue(outputFile.isFile());
 		assertFalse(outputFile.isHidden());
-		assertTrue(outputFile.getName().endsWith(ImagesWithAnimationToVideoOutput.VIDEO_EXTENSION));
+		//assertTrue(outputFile.getName().endsWith(ImagesWithAnimationToVideoOutput.VIDEO_EXTENSION));
 		assertTrue(outputFile.length() > 100000); // I expect the file size to
 													// be at least 100k and no
 													// more than 3Mb
@@ -318,7 +317,9 @@ public class TestLocalHubBasicFileReading {
 
 	public File getJustVideoFromLocalHub(String uniqueToolString) throws MediaEncodingException
 	{
-		List<File> mediaOutputs = localHub.extractVideoForLastUsageOfTool(getCurrentPluginName(), uniqueToolString);
+		return null;
+		//TODO migrate to non-video
+		/*List<File> mediaOutputs = localHub.extractVideoForLastUsageOfTool(getCurrentPluginName(), uniqueToolString);
 		if (mediaOutputs == null)
 		{
 			return null;
@@ -329,6 +330,7 @@ public class TestLocalHubBasicFileReading {
 				return f;
 		}
 		return null;
+		*/
 	}
 
 	/**
