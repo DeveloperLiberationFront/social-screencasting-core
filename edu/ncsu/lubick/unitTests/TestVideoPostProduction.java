@@ -61,7 +61,10 @@ public class TestVideoPostProduction
 	@Test
 	public void testSingleToolUsageExtractionBrowserMedia() throws Exception
 	{
-		File expectedOutputDir = prepareForBrowserMediaTest();
+		Date truncatedDate = UtilitiesForTesting.truncateTimeToMinute(new Date());
+		ToolUsage sampleToolUsage = makeToolUsage(truncatedDate, WHOMBO_TOOL_1);
+		
+		File expectedOutputDir = prepareForBrowserMediaTest(sampleToolUsage);
 
 		PostProductionHandler handler = makeBrowserMediaPostProductionHandler();
 
@@ -71,10 +74,9 @@ public class TestVideoPostProduction
 	}
 
 
-	@SuppressWarnings("deprecation")
-	private File prepareForBrowserMediaTest()
+	private File prepareForBrowserMediaTest(ToolUsage testToolUsage)
 	{
-		String mediaDirName = PostProductionHandler.makeFileNameStemForToolPluginMedia(TEST_PLUGIN_NAME, WHOMBO_TOOL_1, new Date());
+		String mediaDirName = PostProductionHandler.makeFileNameStemForToolPluginMedia(testToolUsage);
 		File expectedOutputDir = new File(mediaDirName);
 		if (expectedOutputDir.exists())
 		{
@@ -85,6 +87,7 @@ public class TestVideoPostProduction
 		}
 		return expectedOutputDir;
 	}
+
 
 
 
@@ -113,14 +116,15 @@ public class TestVideoPostProduction
 		assertTrue(capFile.exists());
 
 		Date date = UtilitiesForTesting.truncateTimeToMinute(new Date());
-
-		handler.loadFile(new FileDateStructs(capFile, date));
-
 		Date datePlusFifteen = new Date(date.getTime() + 15 * 1000); // plus
 																		// fifteen
 																		// seconds
 
 		ToolUsage testToolUsage = makeToolUsage(datePlusFifteen, toolName);
+		
+		handler.loadFile(new FileDateStructs(capFile, date));
+
+		
 
 		List<File> mediaOutputs = handler.extractMediaForToolUsage(testToolUsage);
 
@@ -130,22 +134,24 @@ public class TestVideoPostProduction
 	@Test
 	public void testSingleToolUsageExtractionReallyEarly() throws Exception
 	{
-		File expectedOutputDir = prepareForBrowserMediaTest();
-		
 		File capFile = new File("./src/ForTesting/oneMinuteCap.cap");
-		String toolName = "WhomboTool #2";
-
 		assertTrue(capFile.exists());
-
+		
+		String toolName = "WhomboTool #2";
 		Date date = UtilitiesForTesting.truncateTimeToMinute(new Date());
-
-		PostProductionHandler handler = makeBrowserMediaPostProductionHandler();
-		handler.loadFile(new FileDateStructs(capFile, date));
-
 		Date datePlusOne = new Date(date.getTime() + 1 * 1000); // plus one
 																// second
 
 		ToolUsage testToolUsage = makeToolUsage(datePlusOne, toolName);
+		
+		
+		File expectedOutputDir = prepareForBrowserMediaTest(testToolUsage);
+
+
+		PostProductionHandler handler = makeBrowserMediaPostProductionHandler();
+		handler.loadFile(new FileDateStructs(capFile, date));
+
+		
 
 		List<File> mediaOutputs = handler.extractMediaForToolUsage(testToolUsage);
 
@@ -154,27 +160,26 @@ public class TestVideoPostProduction
 
 	@Test
 	public void testSingleToolUsageExtractionOverlappingFiles() throws Exception
-	{
-		File expectedOutputDir = prepareForBrowserMediaTest();
-		
+	{		
 		File firstcapFile = new File("./src/ForTesting/oneMinuteCap.cap");
 		File secondCapFile = new File("./src/ForTesting/oneMinuteCap.cap"); // we'll just reuse this for testing
-		String toolName = "WhomboTool #3";
-
 		assertTrue(firstcapFile.exists());
 		assertTrue(secondCapFile.exists());
-
+		
 		Date date = UtilitiesForTesting.truncateTimeToMinute(new Date());
 		Date secondDate = UtilitiesForTesting.truncateTimeToMinute(new Date(date.getTime() + 61 * 1000));
 
-		
-		PostProductionHandler handler = makeBrowserMediaPostProductionHandler();
-		handler.loadFile(new FileDateStructs(firstcapFile, date));
-		handler.enqueueOverLoadFile(new FileDateStructs(secondCapFile, secondDate));
-
 		Date datePlusFiftyFive = new Date(date.getTime() + 55 * 1000); // plus 55 seconds, plenty to over run this file
 
+		String toolName = "WhomboTool #3";
 		ToolUsage testToolUsage = makeToolUsage(datePlusFiftyFive, toolName, 10 * 1000);
+		
+		File expectedOutputDir = prepareForBrowserMediaTest(testToolUsage);
+		
+		PostProductionHandler handler = makeBrowserMediaPostProductionHandler();
+		
+		handler.loadFile(new FileDateStructs(firstcapFile, date));
+		handler.enqueueOverLoadFile(new FileDateStructs(secondCapFile, secondDate));
 
 		List<File> mediaOutputs = handler.extractMediaForToolUsage(testToolUsage);
 
