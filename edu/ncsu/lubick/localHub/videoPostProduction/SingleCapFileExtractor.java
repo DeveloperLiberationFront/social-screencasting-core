@@ -1,15 +1,19 @@
 package edu.ncsu.lubick.localHub.videoPostProduction;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Date;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.log4j.Logger;
 
+import edu.ncsu.lubick.util.BlockingImageDiskWritingStrategy;
 import edu.ncsu.lubick.util.FileUtilities;
 import edu.ncsu.lubick.util.ThreadedImageDiskWritingStrategy;
 
@@ -22,10 +26,14 @@ public class SingleCapFileExtractor {
 	private Date capFileStartTime;
 	private int frameRate;
 	public static final String EXPECTED_SCREENCAST_FILE_EXTENSION = ".cap";
+	
 
 	public SingleCapFileExtractor(String outputPath, int frameRate)
 	{
 		this(new File(outputPath),frameRate);
+		
+
+		
 	}
 
 	public SingleCapFileExtractor(File outputDirectory, int frameRate)
@@ -102,7 +110,7 @@ public class SingleCapFileExtractor {
 	}
 	
 	
-	class ChronologicalImageDiskWritingStrategy extends ThreadedImageDiskWritingStrategy{
+	class ChronologicalImageDiskWritingStrategy extends BlockingImageDiskWritingStrategy{
 
 		private Date currFrameDate;
 		

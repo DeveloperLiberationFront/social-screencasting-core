@@ -56,6 +56,13 @@ public class TestVideoPostProduction
 	}
 
 
+	@Test
+	public void testFullCapFileExtraction() throws Exception
+	{
+		File capFile = new File("./src/ForTesting/oneMinuteCap.cap");
+		
+		PostProductionHandler.debugWriteOutAllImagesInCapFile(capFile, new File("./test/"));
+	}
 
 
 	@Test

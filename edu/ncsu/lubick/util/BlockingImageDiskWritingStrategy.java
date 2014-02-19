@@ -1,8 +1,12 @@
 package edu.ncsu.lubick.util;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.imageio.ImageIO;
 
@@ -14,20 +18,34 @@ public class BlockingImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 {
 
 	private static Logger logger = Logger.getLogger(BlockingImageDiskWritingStrategy.class.getName());
+	private ZipOutputStream out;
 
 	public BlockingImageDiskWritingStrategy(File outputDirectory, boolean deleteImagesAfterUse)
 	{
 		super(outputDirectory, deleteImagesAfterUse);
+		
+		File file = new File("video.zip");
+		try
+		{
+			if (file.exists() || file.createNewFile())
+			{
+				out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+			}
+		}
+		catch (IOException e)
+		{
+			logger.fatal(e);
+		}
 	}
 
 	@Override
 	public void writeImageToDisk(BufferedImage image) throws IOException
 	{
 		File f = new File(workingDir, getNextFileName()); // gets filenames from listener
-		if (!f.createNewFile())
+		/*if (!f.createNewFile())
 		{
 			logger.debug("The image file already exists, going to overwrite");
-		}
+		}*/
 		writeImageToDisk(image, f);
 	}
 
@@ -35,7 +53,10 @@ public class BlockingImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 	public void writeImageToDisk(BufferedImage image, File outputFile) throws IOException
 	{
 		logger.trace("Starting write to disk");
-		ImageIO.write(image, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, outputFile);
+		ZipEntry entry=new ZipEntry(outputFile.getName());
+		out.putNextEntry(entry);
+		ImageIO.write(image, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, out);
+		out.closeEntry();
 		logger.trace("Finished write to disk");
 		if (deleteImagesAfterUse)
 		{
