@@ -18,24 +18,11 @@ public class BlockingImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 {
 
 	private static Logger logger = Logger.getLogger(BlockingImageDiskWritingStrategy.class.getName());
-	private ZipOutputStream out;
+
 
 	public BlockingImageDiskWritingStrategy(File outputDirectory, boolean deleteImagesAfterUse)
 	{
 		super(outputDirectory, deleteImagesAfterUse);
-		
-		File file = new File("video.zip");
-		try
-		{
-			if (file.exists() || file.createNewFile())
-			{
-				out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
-			}
-		}
-		catch (IOException e)
-		{
-			logger.fatal(e);
-		}
 	}
 
 	@Override
@@ -53,10 +40,9 @@ public class BlockingImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 	public void writeImageToDisk(BufferedImage image, File outputFile) throws IOException
 	{
 		logger.trace("Starting write to disk");
-		ZipEntry entry=new ZipEntry(outputFile.getName());
-		out.putNextEntry(entry);
-		ImageIO.write(image, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, out);
-		out.closeEntry();
+
+		ImageIO.write(image, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, outputFile);
+
 		logger.trace("Finished write to disk");
 		if (deleteImagesAfterUse)
 		{

@@ -87,8 +87,14 @@ public class SingleCapFileExtractor {
 
 	private void extractAllImagesInStream(InputStream inputStream) throws IOException
 	{
+		int i = 0;
 		while (true)
 		{
+			if (i%10 == 0)
+			{
+				logger.info(i+" images extracted");
+			}
+			i++;
 			BufferedImage tempImage = null;
 			try
 			{
@@ -110,7 +116,7 @@ public class SingleCapFileExtractor {
 	}
 	
 	
-	class ChronologicalImageDiskWritingStrategy extends BlockingImageDiskWritingStrategy{
+	class ChronologicalImageDiskWritingStrategy extends ThreadedImageDiskWritingStrategy{
 
 		private Date currFrameDate;
 		

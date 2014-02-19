@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.imageio.ImageIO;
 
@@ -15,9 +17,13 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 
 public class ThreadedImageDiskWritingStrategy extends DefaultImageDiskWritingStrategy {
 
+	private static final int THREAD_PRIORITY = Thread.NORM_PRIORITY-1;
+	private static final int MAX_THREADS = 5;
 	private static Logger logger = Logger.getLogger(ThreadedImageDiskWritingStrategy.class.getName());
 	private ExecutorService workingThreadPool = null;
 
+	private final AtomicInteger workingThreadCount = new AtomicInteger(0);
+	
 	public ThreadedImageDiskWritingStrategy(String baseDirectoryName, boolean deleteImagesAfterUse)
 	{
 		super(baseDirectoryName, deleteImagesAfterUse);
@@ -63,10 +69,6 @@ public class ThreadedImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 	public void writeImageToDisk(final BufferedImage tempImage) throws IOException
 	{
 		final File f = new File(workingDir, getNextFileName());
-		if (!f.createNewFile())
-		{
-			logger.debug("The image file already exists, going to overwrite");
-		}
 		writeImageToDisk(tempImage, f);
 
 	}
@@ -75,11 +77,23 @@ public class ThreadedImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 	public void writeImageToDisk(final BufferedImage image, final File outputFile)
 	{
 		logger.trace("Starting write to disk");
+		while (workingThreadCount.get() >= MAX_THREADS)
+		{
+			try
+			{
+				Thread.sleep(50);
+			}
+			catch (InterruptedException e)
+			{
+				logger.error("Interrupted while waiting for worker space",e);
+			}
+		}
 		workingThreadPool.submit(new Runnable() {
 
 			@Override
 			public void run()
 			{
+				workingThreadCount.incrementAndGet();
 				try
 				{
 					ImageIO.write(image, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, outputFile);
@@ -95,6 +109,7 @@ public class ThreadedImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 				{
 					logger.error("There was a problem writing an image to disk on a background thread", e);
 				}
+				workingThreadCount.decrementAndGet();
 			}
 		});
 	}
@@ -112,7 +127,16 @@ public class ThreadedImageDiskWritingStrategy extends DefaultImageDiskWritingStr
 		{
 			workingThreadPool.shutdownNow();
 		}
-		this.workingThreadPool = Executors.newCachedThreadPool();
+		this.workingThreadPool = Executors.newCachedThreadPool(new ThreadFactory() {
+			
+			@Override
+			public Thread newThread(Runnable arg0)
+			{
+				Thread t = new Thread(arg0);
+				t.setPriority(THREAD_PRIORITY);
+				return t;
+			}
+		});
 	}
 
 }

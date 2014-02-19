@@ -56,7 +56,7 @@ import edu.ncsu.lubick.util.ThreadedImageDiskWritingStrategy;
 public class PostProductionHandler
 {
 	public static final String MEDIA_OUTPUT_FOLDER = "renderedVideos\\";
-	public static final String INTERMEDIATE_FILE_FORMAT = "png";
+	public static final String INTERMEDIATE_FILE_FORMAT = "jpg";
 	public static final int FRAME_RATE = 5;
 	public static final boolean DELETE_IMAGES_AFTER_USE = false;
 

@@ -25,6 +25,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToBrowserAnimatedPackage;
 import edu.ncsu.lubick.util.FileDateStructs;
+import edu.ncsu.lubick.util.FileUtilities;
 
 public class TestVideoPostProduction
 {
@@ -59,9 +60,13 @@ public class TestVideoPostProduction
 	@Test
 	public void testFullCapFileExtraction() throws Exception
 	{
+		File outputDirectory = new File("./test/");
+		UtilitiesForTesting.clearOutDirectory(outputDirectory);
+		
 		File capFile = new File("./src/ForTesting/oneMinuteCap.cap");
 		
-		PostProductionHandler.debugWriteOutAllImagesInCapFile(capFile, new File("./test/"));
+		
+		PostProductionHandler.debugWriteOutAllImagesInCapFile(capFile, outputDirectory);
 	}
 
 
