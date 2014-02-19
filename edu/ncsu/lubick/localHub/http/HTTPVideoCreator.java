@@ -19,7 +19,6 @@ import org.eclipse.jetty.server.Request;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
-import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.FileUtilities;
 import freemarker.template.SimpleNumber;
@@ -103,41 +102,13 @@ public class HTTPVideoCreator extends TemplateHandlerWithDatabaseLink implements
 		baseRequest.setHandled(true);
 	}
 
+	@SuppressWarnings("unused")
+	@Deprecated
 	private void makeVideo(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
-		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
-		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
-
-		if (pluginName == null || toolName == null)
-		{
-			response.getWriter().println("<span>Internal Error. </span>");
-			return;
-		}
-
-		try
-		{
-			this.databaseLink.extractMediaForLastNUsagesOfTool(3, pluginName, toolName);
-		}
-		catch (MediaEncodingException e)
-		{
-			respondWithError(baseRequest, response, e);
-			return;
-		}
-
-		serveUpNthUsageOfMediaIfExists(response, new InternalToolRepresentation(toolName, pluginName, null, 0));
-		baseRequest.setHandled(true);
+		
 	}
 
-	private void respondWithError(Request baseRequest, HttpServletResponse response, Exception e) throws IOException
-	{
-		logger.fatal("Error caught when video making requested: ", e);
-		response.getWriter().println("<span>Internal Video Creation Error. </span>");
-		response.getWriter().println("<div>");
-		response.getWriter().print(e.getLocalizedMessage());
-		response.getWriter().println("</div>");
-		baseRequest.setHandled(true);
-		return;
-	}
 
 	private void respondToDoesMediaExist(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
