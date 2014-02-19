@@ -18,7 +18,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 public class ThreadedImageDiskWritingStrategy extends DefaultImageDiskWritingStrategy {
 
 	private static final int THREAD_PRIORITY = Thread.NORM_PRIORITY-1;
-	private static final int MAX_THREADS = 5;
+	private static final int MAX_THREADS = 4;
 	private static Logger logger = Logger.getLogger(ThreadedImageDiskWritingStrategy.class.getName());
 	private ExecutorService workingThreadPool = null;
 

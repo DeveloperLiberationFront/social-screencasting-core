@@ -25,7 +25,6 @@ import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToBrowserAnimatedPackage;
 import edu.ncsu.lubick.util.FileDateStructs;
-import edu.ncsu.lubick.util.FileUtilities;
 
 public class TestVideoPostProduction
 {
@@ -40,7 +39,6 @@ public class TestVideoPostProduction
 	@BeforeClass
 	public static void setUpBeforeAll()
 	{
-		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
 		try
 		{
 			URL url = Runner.class.getResource(LocalHub.LOGGING_FILE_PATH);
@@ -57,7 +55,7 @@ public class TestVideoPostProduction
 	}
 
 
-	@Test
+	//@Test
 	public void testFullCapFileExtraction() throws Exception
 	{
 		File outputDirectory = new File("./test/");
@@ -74,6 +72,7 @@ public class TestVideoPostProduction
 	public void testSingleToolUsageExtractionBrowserMedia() throws Exception
 	{
 		Date truncatedDate = UtilitiesForTesting.truncateTimeToMinute(new Date());
+		
 		ToolUsage sampleToolUsage = makeToolUsage(truncatedDate, WHOMBO_TOOL_1);
 		
 		File expectedOutputDir = prepareForBrowserMediaTest(sampleToolUsage);
@@ -83,6 +82,64 @@ public class TestVideoPostProduction
 		List<File> outputMedia = testARandomToolInAPostAnimationHandler(handler);
 
 		verifyBrowserMediaCreatedCorrectly(expectedOutputDir, outputMedia);
+	}
+
+
+	@Test
+	public void testSingleToolUsageExtractionReallyEarly() throws Exception
+	{
+		File capFile = new File("./src/ForTesting/oneMinuteCap.cap");
+		assertTrue(capFile.exists());
+		
+		String toolName = "WhomboTool #2";
+		Date date = UtilitiesForTesting.truncateTimeToMinute(new Date());
+		Date datePlusOne = new Date(date.getTime() + 1 * 1000); // plus one
+																// second
+	
+		ToolUsage testToolUsage = makeToolUsage(datePlusOne, toolName);
+		
+		
+		File expectedOutputDir = prepareForBrowserMediaTest(testToolUsage);
+	
+	
+		PostProductionHandler handler = makeBrowserMediaPostProductionHandler();
+		handler.loadFile(new FileDateStructs(capFile, date));
+	
+		
+	
+		List<File> mediaOutputs = handler.extractMediaForToolUsage(testToolUsage);
+	
+		verifyBrowserMediaCreatedCorrectly(expectedOutputDir, mediaOutputs);
+	}
+
+
+	@Test
+	public void testSingleToolUsageExtractionOverlappingFiles() throws Exception
+	{		
+		File firstcapFile = new File("./src/ForTesting/oneMinuteCap.cap");
+		File secondCapFile = new File("./src/ForTesting/oneMinuteCap.cap"); // we'll just reuse this for testing
+		assertTrue(firstcapFile.exists());
+		assertTrue(secondCapFile.exists());
+		
+		Date date = UtilitiesForTesting.truncateTimeToMinute(new Date());
+		Date secondDate = UtilitiesForTesting.truncateTimeToMinute(new Date(date.getTime() + 61 * 1000));
+	
+		Date datePlusFiftyFive = new Date(date.getTime() + 55 * 1000); // plus 55 seconds, plenty to over run this file
+	
+		String toolName = "WhomboTool #3";
+		ToolUsage testToolUsage = makeToolUsage(datePlusFiftyFive, toolName, 10 * 1000);
+		
+		File expectedOutputDir = prepareForBrowserMediaTest(testToolUsage);
+		
+		PostProductionHandler handler = makeBrowserMediaPostProductionHandler();
+		
+		handler.loadFile(new FileDateStructs(firstcapFile, date));
+		handler.enqueueOverLoadFile(new FileDateStructs(secondCapFile, secondDate));
+	
+		List<File> mediaOutputs = handler.extractMediaForToolUsage(testToolUsage);
+	
+		verifyBrowserMediaCreatedCorrectly(expectedOutputDir, mediaOutputs);
+	
 	}
 
 
@@ -115,7 +172,7 @@ public class TestVideoPostProduction
 		assertTrue(listOfFileNames.contains("image_text_un.png"));
 		assertTrue(listOfFileNames.contains("text.png"));
 		assertTrue(listOfFileNames.contains("text_un.png"));
-		assertTrue(listOfFileNames.contains("frame0000.png"));
+		assertTrue(listOfFileNames.contains("frame0000.jpg"));
 	}
 
 	private List<File> testARandomToolInAPostAnimationHandler(PostProductionHandler handler) throws MediaEncodingException
@@ -141,62 +198,6 @@ public class TestVideoPostProduction
 		List<File> mediaOutputs = handler.extractMediaForToolUsage(testToolUsage);
 
 		return mediaOutputs;
-	}
-
-	@Test
-	public void testSingleToolUsageExtractionReallyEarly() throws Exception
-	{
-		File capFile = new File("./src/ForTesting/oneMinuteCap.cap");
-		assertTrue(capFile.exists());
-		
-		String toolName = "WhomboTool #2";
-		Date date = UtilitiesForTesting.truncateTimeToMinute(new Date());
-		Date datePlusOne = new Date(date.getTime() + 1 * 1000); // plus one
-																// second
-
-		ToolUsage testToolUsage = makeToolUsage(datePlusOne, toolName);
-		
-		
-		File expectedOutputDir = prepareForBrowserMediaTest(testToolUsage);
-
-
-		PostProductionHandler handler = makeBrowserMediaPostProductionHandler();
-		handler.loadFile(new FileDateStructs(capFile, date));
-
-		
-
-		List<File> mediaOutputs = handler.extractMediaForToolUsage(testToolUsage);
-
-		verifyBrowserMediaCreatedCorrectly(expectedOutputDir, mediaOutputs);
-	}
-
-	@Test
-	public void testSingleToolUsageExtractionOverlappingFiles() throws Exception
-	{		
-		File firstcapFile = new File("./src/ForTesting/oneMinuteCap.cap");
-		File secondCapFile = new File("./src/ForTesting/oneMinuteCap.cap"); // we'll just reuse this for testing
-		assertTrue(firstcapFile.exists());
-		assertTrue(secondCapFile.exists());
-		
-		Date date = UtilitiesForTesting.truncateTimeToMinute(new Date());
-		Date secondDate = UtilitiesForTesting.truncateTimeToMinute(new Date(date.getTime() + 61 * 1000));
-
-		Date datePlusFiftyFive = new Date(date.getTime() + 55 * 1000); // plus 55 seconds, plenty to over run this file
-
-		String toolName = "WhomboTool #3";
-		ToolUsage testToolUsage = makeToolUsage(datePlusFiftyFive, toolName, 10 * 1000);
-		
-		File expectedOutputDir = prepareForBrowserMediaTest(testToolUsage);
-		
-		PostProductionHandler handler = makeBrowserMediaPostProductionHandler();
-		
-		handler.loadFile(new FileDateStructs(firstcapFile, date));
-		handler.enqueueOverLoadFile(new FileDateStructs(secondCapFile, secondDate));
-
-		List<File> mediaOutputs = handler.extractMediaForToolUsage(testToolUsage);
-
-		verifyBrowserMediaCreatedCorrectly(expectedOutputDir, mediaOutputs);
-
 	}
 
 	private ToolUsage makeToolUsage(Date toolUsageDate, String toolUsageName)
