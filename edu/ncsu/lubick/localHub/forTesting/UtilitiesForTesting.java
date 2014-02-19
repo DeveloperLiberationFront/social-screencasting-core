@@ -8,6 +8,9 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
+import edu.ncsu.lubick.util.FileUtilities;
+
 public class UtilitiesForTesting {
 
 	private UtilitiesForTesting()
@@ -130,6 +133,17 @@ public class UtilitiesForTesting {
 		Files.copy(sourceOfFileToCopy.toPath(), fos);
 
 		return destination;
+	}
+
+	@Deprecated
+	public static String makeFileNameStemForToolPluginMedia(String pluginName, String toolName, Date toolTime)
+	{
+		if (toolName == null)
+		{
+			PostProductionHandler.logger.info("Got a null toolname, recovering with empty string");
+			toolName = "";
+		}
+		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + pluginName + FileUtilities.createNumberFromToolName(toolName) + "_"+ toolTime.getTime();
 	}
 
 }

@@ -11,6 +11,7 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ImproperlyEncodedDateException;
+import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 
 public class FileUtilities
@@ -135,6 +136,40 @@ public class FileUtilities
 		{
 			return "frame."+formatterForFrames.format(date)+"."+PostProductionHandler.INTERMEDIATE_FILE_FORMAT;	
 		}
+	}
+
+	public static String makeFileNameStemForToolPluginMedia(ToolUsage tu)
+	{
+		if (tu == null)
+		{
+			PostProductionHandler.logger.info("Got a null toolusage, recovering with empty string");
+			return PostProductionHandler.MEDIA_OUTPUT_FOLDER;
+		}
+		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + tu.getPluginName() + FileUtilities.createNumberForMediaOutput(tu);
+	}
+
+	private static String createNumberForMediaOutput(ToolUsage tu)
+	{
+		int startingPoint = FileUtilities.createNumberFromToolName(tu.getToolName());
+		return ""+startingPoint +"_"+tu.getTimeStamp().getTime();
+	}
+
+	public static int createNumberFromToolName(String toolName)
+	{
+		int retval = toolName.hashCode();
+		if (toolName.hashCode() == Integer.MIN_VALUE)
+			retval = 0;
+		return Math.abs(retval);
+	}
+
+	public static String makeFileNameStemNoDateForToolPluginMedia(String pluginName, String toolName)
+	{
+		if (toolName == null)
+		{
+			PostProductionHandler.logger.info("Got a null toolname, recovering with empty string");
+			toolName = "";
+		}
+		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + pluginName + createNumberFromToolName(toolName) + "_";
 	}
 
 }

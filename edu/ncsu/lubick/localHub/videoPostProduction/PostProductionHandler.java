@@ -22,6 +22,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextAndKey
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeypressAnimation;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.KeypressAnimationMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToMediaOutput;
+import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToBrowserAnimatedPackage;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToMediaOutput;
 import edu.ncsu.lubick.util.FileDateStructs;
 import edu.ncsu.lubick.util.FileUtilities;
@@ -62,21 +63,18 @@ public class PostProductionHandler
 
 	private static final String MEDIA_ASSEMBLY_DIR = "./MediaAssembly/";
 
-	private static Logger logger = Logger.getLogger(PostProductionHandler.class.getName());
+	public static Logger logger = Logger.getLogger(PostProductionHandler.class.getName());
 
 	private static final int RUN_UP_TIME = 5;
-
-	private File currentCapFile;
-
 	private Date capFileStartTime;
 
 	private PostProductionAnimationStrategy postProductionAnimator;
 
 	private Queue<FileDateStructs> queueOfOverloadFiles = new LinkedList<>();
-	private Set<ImagesWithAnimationToMediaOutput> postAnimationMediaOutputs = new HashSet<>();
 	private Set<PreAnimationImagesToMediaOutput> preAnimationMediaOutputs = new HashSet<>();
 
-	private FrameDecompressor decompressor = new FrameDecompressor();
+	PreAnimationImagesToBrowserAnimatedPackage browserMediaMaker = new PreAnimationImagesToBrowserAnimatedPackage();
+
 	private double toolDemoInSeconds;
 	private ToolUsage currentToolStream;
 	private ThreadedImageDiskWritingStrategy imageWriter;
@@ -95,56 +93,6 @@ public class PostProductionHandler
 			logger.info("Problem with the animations", e);
 		}
 		this.postProductionAnimator = new CornerKeypressAnimation(MEDIA_ASSEMBLY_DIR, FRAME_RATE, RUN_UP_TIME, animationSource);
-	}
-
-	public void loadFile(FileDateStructs fileDateStructs)
-	{
-		if (fileDateStructs == null || fileDateStructs.date == null || fileDateStructs.file == null)
-		{
-			logger.error("Recieved null file to load in PostProductionVideoHandler");
-			throw new IllegalArgumentException("A capFile cannot be null");
-		}
-		if (!fileDateStructs.file.getName().endsWith(SingleCapFileExtractor.EXPECTED_SCREENCAST_FILE_EXTENSION))
-		{
-			logger.error("Expected cap file to have an extension " + SingleCapFileExtractor.EXPECTED_SCREENCAST_FILE_EXTENSION + " not like " + fileDateStructs);
-			this.currentCapFile = null;
-		}
-		this.currentCapFile = fileDateStructs.file;
-		setCurrentFileStartTime(fileDateStructs.date);
-
-	}
-	
-	public static void debugWriteOutAllImagesInCapFile(File capFile, File outputDirectory)
-	{
-		if (!outputDirectory.exists() && !outputDirectory.mkdirs())
-		{
-			logger.fatal("Could not write out images because making "+outputDirectory+" doesn't exist");
-			return;
-		}
-		SingleCapFileExtractor extractor = new SingleCapFileExtractor(outputDirectory, FRAME_RATE);
-		try
-		{
-			extractor.setStartTime(FileUtilities.parseStartDateOfCapFile(capFile));
-		}
-		catch (ImproperlyEncodedDateException e)
-		{
-			logger.error("Problem parsing the date of the cap file "+capFile, e);
-			extractor.setStartTime(new Date(0));
-		}
-		extractor.loadFile(capFile);
-		extractor.extractAllImages();
-	}
-
-
-	private void setCurrentFileStartTime(Date startTime)
-	{
-		if (startTime == null)
-		{
-			logger.error("Recieved null startTime in PostProductionVideoHandler");
-			throw new IllegalArgumentException("The start time cannot be null");
-		}
-		this.capFileStartTime = startTime;
-		decompressor.setFrameZeroTime(capFileStartTime);
 	}
 
 	public List<File> extractMediaForToolUsage(ToolUsage specificToolUse) throws MediaEncodingException
@@ -175,7 +123,7 @@ public class PostProductionHandler
 			logger.info("Fast forwarding to the appropriate time");
 			fastFowardStreamToTime(inputStream, timeToLookFor); // throws VideoEncodingException if there was a problem prior to the important bits
 
-			String newFileNameStem = makeFileNameStemForToolPluginMedia(specificToolUse);
+			String newFileNameStem = FileUtilities.makeFileNameStemForToolPluginMedia(specificToolUse);
 			logger.info("Beginning the extraction of the frames");
 			createdMediaFilesToReturn = extractDemoVideoToFile(inputStream, newFileNameStem);
 
@@ -184,12 +132,6 @@ public class PostProductionHandler
 		{
 			logger.error("There was a problem extracting the video", e);
 			throw new MediaEncodingException("There was a problem extracting the video", e);
-		}
-		catch (ReachedEndOfCapFileException e)
-		{
-			logger.error("Unexpectedly hit the end of the cap file when seeking to start of tool usage");
-			throw new MediaEncodingException(
-					"Unexpectedly hit the end of the cap file when seeking to start of tool usage", e);
 		}
 		catch (PostProductionAnimationException e)
 		{
@@ -209,25 +151,9 @@ public class PostProductionHandler
 		return timeToLookFor;
 	}
 
-	private void fastFowardStreamToTime(InputStream inputStream, Date timeToLookFor) throws IOException, MediaEncodingException, ReachedEndOfCapFileException
-	{
-		if (timeToLookFor.equals(capFileStartTime)) // no fast forwarding required
-		{
-			return;
-		}
-
-		Date currTimeStamp = capFileStartTime;
-
-		while (currTimeStamp.before(timeToLookFor))
-		{
-			decompressor.bypassNextFrame(inputStream); // throws VideoEncodingException if there was a problem
-			currTimeStamp = decompressor.getPreviousFrameTimeStamp();
-
-		}
-	}
 
 	private List<File> extractDemoVideoToFile(InputStream inputStream, String fileNameStem) throws IOException, MediaEncodingException,
-			PostProductionAnimationException
+	PostProductionAnimationException
 	{
 		imageWriter.reset();
 		List<File> createdFiles = new ArrayList<>();
@@ -239,16 +165,6 @@ public class PostProductionHandler
 
 		createdFiles.addAll(handlePreAnimationMediaOutput(fileNameStem));
 
-		if (postAnimationMediaOutputs.size() > 0)
-		{
-			addAnimationToImagesInScratchFolder();
-
-			createdFiles.addAll(handleAnimationPostProduction(fileNameStem));
-		}
-		else
-		{
-			logger.info("Skipping animation step because no media outputs");
-		}
 
 		return createdFiles;
 	}
@@ -256,142 +172,10 @@ public class PostProductionHandler
 	private List<File> handlePreAnimationMediaOutput(String fileNameStem) throws MediaEncodingException
 	{
 		List<File> createdFiles = new ArrayList<>();
-		for (PreAnimationImagesToMediaOutput mediaOutput : preAnimationMediaOutputs)
-		{
-			createdFiles.add(mediaOutput.combineImageFilesToMakeMedia(fileNameStem, this.currentToolStream));
-			logger.info(mediaOutput.getMediaTypeInfo() + " Rendered");
-		}
+
+		createdFiles.add(browserMediaMaker.combineImageFilesToMakeMedia(fileNameStem, this.currentToolStream));
+		logger.info(browserMediaMaker.getMediaTypeInfo() + " Rendered");
 		return createdFiles;
-	}
-
-	private void addAnimationToImagesInScratchFolder() throws PostProductionAnimationException
-	{
-		logger.info("Adding animation to video");
-		try
-		{
-			postProductionAnimator.addAnimationToImagesInScratchFolderForToolStream(this.currentToolStream);
-		}
-		catch (IOException e)
-		{
-			throw new PostProductionAnimationException(e);
-		}
-	}
-
-	public List<File> handleAnimationPostProduction(String fileName) throws MediaEncodingException
-	{
-		List<File> createdFiles = new ArrayList<>();
-
-		logger.info("Rendering Media");
-
-		for (ImagesWithAnimationToMediaOutput mediaOutput : postAnimationMediaOutputs)
-		{
-			createdFiles.add(mediaOutput.combineImageFilesToMakeMedia(fileName)); // throws MediaEncodingException if any problem
-			logger.info(mediaOutput.getMediaTypeInfo() + " Rendered");
-		}
-		return createdFiles;
-	}
-
-	private void extractImagesForTimePeriodToScratchFolder(InputStream inputStream) throws IOException
-	{
-		logger.debug("starting extraction");
-		for (int i = 0; i < FRAME_RATE * (RUN_UP_TIME + toolDemoInSeconds); i++)
-		{
-			BufferedImage tempImage = null;
-			DecompressionFramePacket framePacket = null;
-			try
-			{
-				framePacket = decompressor.readInNextFrame(inputStream);
-				tempImage = decompressor.createBufferedImageFromDecompressedFramePacket(framePacket);
-
-			}
-			catch (MediaEncodingException e)
-			{
-				logger.error("There was a problem making the video frames.  Attempting to make a video from what I've got", e);
-				break;
-			}
-			catch (ReachedEndOfCapFileException e)
-			{
-				if (queueOfOverloadFiles.size() == 0)
-				{
-					logger.error("Ran out of cap files to pull video from.  Truncated with what I've got");
-					break;
-				}
-				inputStream = goToNextFileInQueue(inputStream);
-				// call this image a mulligan and go to the top of the loop.
-				i--;
-				continue;
-			}
-			imageWriter.writeImageToDisk(tempImage);
-
-		}
-	}
-
-
-
-	public static String makeFileNameStemNoDateForToolPluginMedia(String pluginName, String toolName)
-	{
-		if (toolName == null)
-		{
-			logger.info("Got a null toolname, recovering with empty string");
-			toolName = "";
-		}
-		return MEDIA_OUTPUT_FOLDER + pluginName + createNumberForVideoFile(toolName) + "_";
-	}
-
-	@Deprecated
-	public static String makeFileNameStemForToolPluginMedia(String pluginName, String toolName, Date toolTime)
-	{
-		if (toolName == null)
-		{
-			logger.info("Got a null toolname, recovering with empty string");
-			toolName = "";
-		}
-		return MEDIA_OUTPUT_FOLDER + pluginName + createNumberForVideoFile(toolName) + "_"+ toolTime.getTime();
-	}
-	
-	public static String makeFileNameStemForToolPluginMedia(ToolUsage tu)
-	{
-		if (tu == null)
-		{
-			logger.info("Got a null toolusage, recovering with empty string");
-			return MEDIA_OUTPUT_FOLDER;
-		}
-		return MEDIA_OUTPUT_FOLDER + tu.getPluginName() + createNumberForVideoFile(tu);
-	}
-
-	private static String createNumberForVideoFile(ToolUsage tu)
-	{
-		int startingPoint = createNumberForVideoFile(tu.getToolName());
-		return ""+startingPoint +"_"+tu.getTimeStamp().getTime();
-	}
-
-	private static int createNumberForVideoFile(String toolName)
-	{
-		int retval = toolName.hashCode();
-		if (toolName.hashCode() == Integer.MIN_VALUE)
-			retval = 0;
-		return Math.abs(retval);
-	}
-
-	/**
-	 * Adds an extra file to this handler to use if the wanted toolstream's behavior extends over the end of the loaded cap file
-	 * 
-	 */
-	public void enqueueOverLoadFile(FileDateStructs fileDateStructs)
-	{
-		this.queueOfOverloadFiles.offer(fileDateStructs);
-	}
-
-	private InputStream goToNextFileInQueue(InputStream oldInputStream) throws IOException
-	{
-		oldInputStream.close();
-		FileDateStructs nextFile = queueOfOverloadFiles.poll();
-		ByteArrayInputStream inputStream = new ByteArrayInputStream(Files.readAllBytes(nextFile.file.toPath()));
-		decompressor.readInFileHeader(inputStream);
-
-		setCurrentFileStartTime(nextFile.date);
-
-		return inputStream;
 	}
 
 
@@ -400,32 +184,11 @@ public class PostProductionHandler
 		return MEDIA_ASSEMBLY_DIR;
 	}
 
-	public void addNewPostAnimationMediaOutput(ImagesWithAnimationToMediaOutput newMediaOutput)
-	{
-		this.postAnimationMediaOutputs.add(newMediaOutput);
-	}
-
-	public Set<ImagesWithAnimationToMediaOutput> getPostAnimationMediaOutputs()
-	{
-		return new HashSet<>(this.postAnimationMediaOutputs);
-	}
-
-	public void addNewPreAnimationMediaOutput(PreAnimationImagesToMediaOutput newMediaOutput)
-	{
-		this.preAnimationMediaOutputs.add(newMediaOutput);
-	}
-
-	public Set<PreAnimationImagesToMediaOutput> getPreAnimationMediaOutputs()
-	{
-		return new HashSet<>(this.preAnimationMediaOutputs);
-	}
 
 	public void reset()
 	{
-		this.currentCapFile = null;
-		this.queueOfOverloadFiles.clear();
-		this.capFileStartTime = null;
 		
+
 	}
 
 

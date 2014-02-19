@@ -25,6 +25,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToBrowserAnimatedPackage;
 import edu.ncsu.lubick.util.FileDateStructs;
+import edu.ncsu.lubick.util.FileUtilities;
 
 public class TestVideoPostProduction
 {
@@ -145,7 +146,7 @@ public class TestVideoPostProduction
 
 	private File prepareForBrowserMediaTest(ToolUsage testToolUsage)
 	{
-		String mediaDirName = PostProductionHandler.makeFileNameStemForToolPluginMedia(testToolUsage);
+		String mediaDirName = FileUtilities.makeFileNameStemForToolPluginMedia(testToolUsage);
 		File expectedOutputDir = new File(mediaDirName);
 		if (expectedOutputDir.exists())
 		{

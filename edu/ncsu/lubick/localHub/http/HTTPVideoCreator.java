@@ -21,6 +21,7 @@ import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
+import edu.ncsu.lubick.util.FileUtilities;
 import freemarker.template.SimpleNumber;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateHashModel;
@@ -154,7 +155,7 @@ public class HTTPVideoCreator extends TemplateHandlerWithDatabaseLink implements
 		
 		String pluginName = itr.humanPluginName;
 		String toolName = itr.humanToolName;
-		String folderName = PostProductionHandler.makeFileNameStemNoDateForToolPluginMedia(pluginName, toolName);
+		String folderName = FileUtilities.makeFileNameStemNoDateForToolPluginMedia(pluginName, toolName);
 		
 		List<File> mediaFolders = getFoldersPrefixedWith(folderName);
 		
