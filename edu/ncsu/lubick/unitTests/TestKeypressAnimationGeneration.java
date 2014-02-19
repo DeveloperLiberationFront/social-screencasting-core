@@ -1,11 +1,15 @@
 package edu.ncsu.lubick.unitTests;
 
-import static edu.ncsu.lubick.unitTests.TestImageCompressionAndDecompression.*;
 import static java.awt.event.KeyEvent.*;
 import static org.junit.Assert.*;
 
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+
+import javax.imageio.ImageIO;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -144,6 +148,66 @@ public class TestKeypressAnimationGeneration {
 
 		assertTrue(doTwoImagesMatch("./src/test_images/AltShiftXT.png", "test.png"));
 
+	}
+	
+	public static void debugWriteImageToFile(BufferedImage bufferedImage, String outputFileName) throws IOException
+	{
+		File outputFile = new File(outputFileName);
+		if (outputFile.exists() && !outputFile.delete())
+		{
+			fail("Problem overwriting debugging image");
+
+		}
+		ImageIO.write(bufferedImage, "png", outputFile);
+	}
+	
+	public static boolean doTwoImagesMatch(String fileOne, String fileTwo) throws IOException
+	{
+		return doTwoImagesMatch(new File(fileOne), new File(fileTwo));
+	}
+
+	public static boolean doTwoImagesMatch(File fileOne, File fileTwo) throws IOException
+	{
+		int[] firstImageRawData = readInImagesRawData(fileOne);
+
+		int[] secondImageRawData = readInImagesRawData(fileTwo);
+		return verifyArrayMatchesExactly(firstImageRawData, secondImageRawData);
+
+	}
+
+	private static boolean verifyArrayMatchesExactly(int[] firstImageRawData, int[] secondImageRawData)
+	{
+		if (firstImageRawData.length != secondImageRawData.length)
+		{
+			return false;
+		}
+		for (int i = 0; i < firstImageRawData.length; i++)
+		{
+			if (firstImageRawData[i] != secondImageRawData[i])
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private static int[] readInImagesRawData(File imageFile) throws IOException
+	{
+
+		BufferedImage image = ImageIO.read(imageFile);
+
+		Rectangle imageSize = new Rectangle(0, 0, image.getWidth(), image.getHeight());
+
+		return convertBufferedImageToIntArray(image, imageSize);
+	}
+
+	private static int[] convertBufferedImageToIntArray(BufferedImage image, Rectangle imageSizeRectangle)
+	{
+		int[] rawData = new int[imageSizeRectangle.width * imageSizeRectangle.height];
+
+		image.getRGB(0, 0, imageSizeRectangle.width, imageSizeRectangle.height, rawData, 0, imageSizeRectangle.width);
+
+		return rawData;
 	}
 
 }
