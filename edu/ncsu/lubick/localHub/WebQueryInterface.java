@@ -11,7 +11,7 @@ public interface WebQueryInterface {
 
 	List<String> getNamesOfAllPlugins();
 
-	List<ToolUsage> extractMediaForLastNUsagesOfTool(int n, String pluginName, String toolName) throws MediaEncodingException;
+	//List<ToolUsage> extractMediaForLastNUsagesOfTool(int n, String pluginName, String toolName) throws MediaEncodingException;
 
 	List<ToolUsage> getLastNInstancesOfToolUsage(int n, String pluginName, String toolName);
 

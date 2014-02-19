@@ -16,8 +16,6 @@ import edu.ncsu.lubick.localHub.http.HTTPServer;
 import edu.ncsu.lubick.localHub.http.WebToolReportingInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
-import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToBrowserAnimatedPackage;
-import edu.ncsu.lubick.util.FileDateStructs;
 import edu.ncsu.lubick.util.FileUtilities;
 
 public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebToolReportingInterface, VideoFileListener {
@@ -38,10 +36,10 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 	private boolean isRunning = false;
 	private File monitorDirectory = null;
 
-	private FileMonitor backgroundFileMonitor = null;
+	//private FileMonitor backgroundFileMonitor = null;
 
 	private BufferedDatabaseManager databaseManager = null;
-	private PostProductionHandler videoPostProductionHandler = new PostProductionHandler();
+	private PostProductionHandler postProductionHandler = null;
 
 	// listeners for file related events
 	private Set<ParsedFileListener> parsedFileListeners = new HashSet<>();
@@ -51,9 +49,9 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 	private boolean isDebug = false;
 	private ScreenRecordingModule screenRecordingModule;
 	private HTTPServer httpServer;
-	private boolean hasSetUpPostProduction = false;
+	//private boolean hasSetUpPostProduction = false;
 	
-	private LoadedFileListenerAggregator loadedFileManager = new LoadedFileListenerAggregator();
+	//private LoadedFileListenerAggregator loadedFileManager = new LoadedFileListenerAggregator();
 	
 
 	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, boolean wantHTTP, boolean wantScreenRecording)
@@ -103,12 +101,6 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 	{
 		logger.debug("Logging started in creation of LocalHub "+new Date());
 
-		setUpMonitoringOfScreencastFiles();
-	}
-
-	private void setUpMonitoringOfScreencastFiles()
-	{
-		this.addLoadedFileListener(new VideoFileMonitor(this));
 	}
 
 	private void start()
@@ -119,10 +111,10 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 			return;
 		}
 		isRunning = true;
-		backgroundFileMonitor = new FileMonitor(loadedFileManager, new ToolStreamMonitor());
-		backgroundFileMonitor.setMonitorFolderAndUpdateTrackedFiles(this.monitorDirectory);
-		Thread currentThread = new Thread(backgroundFileMonitor);
-		currentThread.start();
+		//backgroundFileMonitor = new FileMonitor(loadedFileManager, new ToolStreamMonitor());
+		//backgroundFileMonitor.setMonitorFolderAndUpdateTrackedFiles(this.monitorDirectory);
+		//Thread currentThread = new Thread(backgroundFileMonitor);
+		//currentThread.start();
 
 		if (shouldUseHTTPServer)
 		{
@@ -132,8 +124,16 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 
 		if (shouldUseScreenRecording)
 		{
-			this.screenRecordingModule = new ScreenRecordingModule(new File(this.monitorDirectory, SCREENCASTING_PATH));
+			File screencastingOutputFolder = new File(this.monitorDirectory, SCREENCASTING_PATH);
+			if (!(screencastingOutputFolder.exists() || screencastingOutputFolder.mkdir()))
+			{
+				logger.fatal("Could not setup screencast output folder");
+				return;
+			}
+			
+			this.screenRecordingModule = new ScreenRecordingModule(screencastingOutputFolder);
 			screenRecordingModule.startRecording();
+			this.postProductionHandler = new PostProductionHandler(screencastingOutputFolder);
 		}
 
 	}
@@ -212,19 +212,6 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 		return this.isRunning;
 	}
 
-	// Listener
-	// manipulation======================================================================================
-	public void addLoadedFileListener(LoadedFileListener loadedFileListener)
-	{
-		loadedFileManager.add(loadedFileListener);
-	}
-
-	public void removeLoadedFileListener(LoadedFileListener loadedFileListener)
-	{
-		loadedFileManager.remove(loadedFileListener);
-	}
-
-
 	//mainly used for testing that file parsers were added.
 	public void addParsedFileListener(ParsedFileListener parsedFileListener)
 	{
@@ -258,66 +245,6 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 		return databaseManager.getLastNInstancesOfToolUsage(n, pluginName, toolName);
 	}
 
-	@Override
-	public List<ToolUsage> extractMediaForLastNUsagesOfTool(int n, String pluginName, String toolName)
-	{
-		setUpPostProductionHandler();
-		List<ToolUsage> toolUsages = getLastNInstancesOfToolUsage(n, pluginName, toolName);
-
-		for (ToolUsage tu:toolUsages)
-		{
-			try
-			{
-				makeMediaForToolUsage(tu);// thow away list. Clients of DatabaseQueryInterface don't need the files made
-			}
-			catch (MediaEncodingException e)
-			{
-				logger.error("Problem while extracting Media");
-			} 
-		}
-
-		return toolUsages;
-	}
-
-	//for testing, returns the list of files to created so they can be validated
-	private List<File> extractMediaForLastUsageOfToolAndReturnFiles(String pluginName, String toolName) throws MediaEncodingException
-	{
-		setUpPostProductionHandler();
-		ToolUsage lastToolUsage = getLastNInstancesOfToolUsage(1, pluginName, toolName).get(0);
-
-		return makeMediaForToolUsage(lastToolUsage);
-	}
-	
-
-	private List<File> makeMediaForToolUsage(ToolUsage toolUsage) throws MediaEncodingException
-	{
-		List<FileDateStructs> filesToload = databaseManager.getVideoFilesLinkedToTimePeriod(toolUsage);
-
-		logger.debug("Loading files " + filesToload);
-		if (filesToload == null || filesToload.size() == 0)
-		{
-			logger.error("There were no video files that match the tool usage");
-			throw new MediaEncodingException("There were no video files that match the tool usage");
-		}
-		videoPostProductionHandler.reset();
-		videoPostProductionHandler.loadFile(filesToload.get(0));
-
-		for (int i = 1; i < filesToload.size(); i++)
-		{
-			videoPostProductionHandler.enqueueOverLoadFile(filesToload.get(i));
-		}
-
-		return videoPostProductionHandler.extractMediaForToolUsage(toolUsage);
-	}
-
-	private void setUpPostProductionHandler()
-	{
-		if (!isDebug && !hasSetUpPostProduction) // debug callers are expected to add their own handlers
-		{
-			hasSetUpPostProduction = true;
-			this.videoPostProductionHandler.addNewPreAnimationMediaOutput(new PreAnimationImagesToBrowserAnimatedPackage());
-		}
-	}
 
 	public void shutDown()
 	{
@@ -329,7 +256,6 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 		{
 			httpServer.shutDown();
 		}
-		backgroundFileMonitor.stop();
 		databaseManager.shutDown();
 
 		isRunning = false;
@@ -434,21 +360,9 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 		}
 
 		@Override
-		public void addLoadedFileListener(LoadedFileListener loadedFileListener)
-		{
-			hubToDebug.addLoadedFileListener(loadedFileListener);
-		}
-
-		@Override
 		public boolean isRunning()
 		{
 			return hubToDebug.isRunning();
-		}
-
-		@Override
-		public void removeLoadedFileListener(LoadedFileListener lflToRemove)
-		{
-			this.hubToDebug.removeLoadedFileListener(lflToRemove);
 		}
 
 		@Override
@@ -478,11 +392,6 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 
 		}
 
-		@Override
-		public List<File> extractVideoForLastUsageOfTool(String pluginName, String toolName) throws MediaEncodingException
-		{
-			return hubToDebug.extractMediaForLastUsageOfToolAndReturnFiles(pluginName, toolName);
-		}
 
 		@Override
 		public List<String> getAllPluginNames()
@@ -499,7 +408,17 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 		logger.info("ToolStream Reported from Plugin: "+ts.getAssociatedPlugin());
 		logger.debug(ts.toString());
 		this.databaseManager.writeToolStreamToDatabase(ts);
-		
+		for(ToolUsage tu : ts.getAsList())
+		{
+			try
+			{
+				this.postProductionHandler.extractBrowserMediaForToolUsage(tu);
+			}
+			catch (MediaEncodingException e)
+			{
+				logger.error("Problem making media for "+tu,e);
+			}
+		}
 	}
 
 }
