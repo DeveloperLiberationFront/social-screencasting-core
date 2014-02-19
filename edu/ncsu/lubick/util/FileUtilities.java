@@ -142,7 +142,7 @@ public class FileUtilities
 	{
 		if (tu == null)
 		{
-			PostProductionHandler.logger.info("Got a null toolusage, recovering with empty string");
+			logger.info("Got a null toolusage, recovering with empty string");
 			return PostProductionHandler.MEDIA_OUTPUT_FOLDER;
 		}
 		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + tu.getPluginName() + FileUtilities.createNumberForMediaOutput(tu);
@@ -166,7 +166,7 @@ public class FileUtilities
 	{
 		if (toolName == null)
 		{
-			PostProductionHandler.logger.info("Got a null toolname, recovering with empty string");
+			logger.info("Got a null toolname, recovering with empty string");
 			toolName = "";
 		}
 		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + pluginName + createNumberFromToolName(toolName) + "_";

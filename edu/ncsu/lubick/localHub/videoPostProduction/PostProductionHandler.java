@@ -39,7 +39,7 @@ public class PostProductionHandler
 	private static final String MEDIA_ASSEMBLY_DIR = "./MediaAssembly/";
 
 
-	public static Logger logger = Logger.getLogger(PostProductionHandler.class.getName());
+	private static Logger logger = Logger.getLogger(PostProductionHandler.class.getName());
 
 	private static final int RUN_UP_TIME = 5;
 
