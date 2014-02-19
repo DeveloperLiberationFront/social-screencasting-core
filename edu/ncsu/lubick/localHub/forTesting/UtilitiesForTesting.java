@@ -143,7 +143,7 @@ public class UtilitiesForTesting {
 			logger.info("Got a null toolname, recovering with empty string");
 			toolName = "";
 		}
-		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + pluginName + FileUtilities.createNumberFromToolName(toolName) + "_"+ toolTime.getTime();
+		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + pluginName + FileUtilities.createHashFromToolName(toolName) + "_"+ toolTime.getTime();
 	}
 
 }

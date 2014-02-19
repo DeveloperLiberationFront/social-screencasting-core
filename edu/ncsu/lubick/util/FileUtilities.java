@@ -150,11 +150,11 @@ public class FileUtilities
 
 	private static String createNumberForMediaOutput(ToolUsage tu)
 	{
-		int startingPoint = FileUtilities.createNumberFromToolName(tu.getToolName());
+		int startingPoint = FileUtilities.createHashFromToolName(tu.getToolName());
 		return ""+startingPoint +"_"+tu.getTimeStamp().getTime();
 	}
 
-	public static int createNumberFromToolName(String toolName)
+	public static int createHashFromToolName(String toolName)
 	{
 		int retval = toolName.hashCode();
 		if (toolName.hashCode() == Integer.MIN_VALUE)
@@ -169,7 +169,7 @@ public class FileUtilities
 			logger.info("Got a null toolname, recovering with empty string");
 			toolName = "";
 		}
-		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + pluginName + createNumberFromToolName(toolName) + "_";
+		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + pluginName + createHashFromToolName(toolName) + "_";
 	}
 
 }

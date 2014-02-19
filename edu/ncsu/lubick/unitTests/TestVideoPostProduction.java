@@ -23,7 +23,7 @@ import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
-import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToBrowserAnimatedPackage;
+import edu.ncsu.lubick.localHub.videoPostProduction.outputs.FramesToBrowserAnimatedPackage;
 import edu.ncsu.lubick.util.FileDateStructs;
 import edu.ncsu.lubick.util.FileUtilities;
 
@@ -154,6 +154,13 @@ public class TestVideoPostProduction
 				assertTrue(UtilitiesForTesting.clearOutDirectory(expectedOutputDir));
 				assertTrue(expectedOutputDir.delete());
 				assertFalse(expectedOutputDir.exists());
+				try
+				{
+					Thread.sleep(100);
+				}
+				catch (InterruptedException e)
+				{
+				}
 			}
 			return expectedOutputDir;
 		}
@@ -163,6 +170,7 @@ public class TestVideoPostProduction
 	//
 		private void verifyBrowserMediaCreatedCorrectly(File expectedOutputDir, File folderContainingBrowserPackage)
 		{
+			assertNotNull(folderContainingBrowserPackage);
 			assertTrue(folderContainingBrowserPackage.exists());
 			assertTrue(folderContainingBrowserPackage.isDirectory());
 			List<String> listOfFileNames = Arrays.asList(expectedOutputDir.list());
@@ -190,7 +198,7 @@ public class TestVideoPostProduction
 		
 		verifyBrowserMediaCreatedCorrectly(expectedOutputDir, folderContainingBrowserPackage);
 		
-		assertEquals(28+6, expectedOutputDir.list().length);		//28 frames and 6 animations
+		assertEquals(28+5+5+6, expectedOutputDir.list().length);		//28 frames, plus 5 copies of the last, plus 5 frames of black and 6 animations
 		
 	}
 

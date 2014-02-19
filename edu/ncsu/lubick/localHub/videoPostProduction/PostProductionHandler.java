@@ -3,6 +3,7 @@ package edu.ncsu.lubick.localHub.videoPostProduction;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -23,7 +24,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextAndKey
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeypressAnimation;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.KeypressAnimationMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.ImagesWithAnimationToMediaOutput;
-import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToBrowserAnimatedPackage;
+import edu.ncsu.lubick.localHub.videoPostProduction.outputs.FramesToBrowserAnimatedPackage;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.PreAnimationImagesToMediaOutput;
 import edu.ncsu.lubick.util.FileDateStructs;
 import edu.ncsu.lubick.util.FileUtilities;
@@ -43,7 +44,7 @@ public class PostProductionHandler
 
 	private static final int RUN_UP_TIME = 5;
 
-	PreAnimationImagesToBrowserAnimatedPackage browserMediaMaker = new PreAnimationImagesToBrowserAnimatedPackage();
+	private FramesToBrowserAnimatedPackage browserMediaMaker = null;
 
 	private double toolDemoInSeconds;
 	private ToolUsage currentToolStream;
@@ -55,7 +56,7 @@ public class PostProductionHandler
 	{
 		this.screencastFolder = sourceOfFrames;
 		
-		
+		this.browserMediaMaker = new FramesToBrowserAnimatedPackage(sourceOfFrames);
 		/*this.imageWriter = new ThreadedImageDiskWritingStrategy(MEDIA_ASSEMBLY_DIR, DELETE_IMAGES_AFTER_USE);
 
 		KeypressAnimationMaker animationSource = null;
@@ -73,15 +74,21 @@ public class PostProductionHandler
 
 	public File extractBrowserMediaForToolUsage(ToolUsage specificToolUse) throws MediaEncodingException
 	{
-		Date timeToLookFor = specificToolUse.getTimeStamp();
+		Date startTimeToLookFor = specificToolUse.getTimeStamp();
+		Date endTimeToLookFor = new Date(startTimeToLookFor.getTime() + specificToolUse.getDuration());
 		
-		File[] allFrames = this.screencastFolder.listFiles();
-		Arrays.sort(allFrames);
+		File[] allFrames = getSortedFrameFiles();
 		
-		int startIndex = Arrays.binarySearch(allFrames, FileUtilities.encodeMediaFrameName(timeToLookFor));
+		int startIndex = findFrameBelongingToDate(startTimeToLookFor, allFrames);
+		logger.debug("The first frame needed is at index "+startIndex+", which corresponds to frame/file "+allFrames[startIndex]);
 		
-		logger.info(allFrames[startIndex]);
-		return null;
+		int endIndex = findFrameBelongingToDate(endTimeToLookFor, allFrames);
+		logger.debug("The last frame needed is at index "+endIndex+", which corresponds to frame/file "+allFrames[endIndex]);
+		
+		browserMediaMaker.setSortedFrames(allFrames);
+		File createdPackage= browserMediaMaker.combineImageFilesToMakeMedia(specificToolUse, startIndex, endIndex);
+		
+		return createdPackage;
 		
 		
 		/*Date timeToLookFor = specificToolUse.getTimeStamp();
@@ -119,6 +126,36 @@ public class PostProductionHandler
 		return createdMediaFilesToReturn;*/
 	}
 
+	private File[] getSortedFrameFiles()
+	{
+		File[] allFrames = this.screencastFolder.listFiles(new FileFilter() {
+
+			@Override
+			public boolean accept(File pathname)
+			{
+				return pathname.getName().endsWith(PostProductionHandler.INTERMEDIATE_FILE_FORMAT);
+			}
+		});
+		Arrays.sort(allFrames);
+		return allFrames;
+	}
+
+	private int findFrameBelongingToDate(Date date, File[] allFrames)
+	{
+		File goalFile = new File(this.screencastFolder, FileUtilities.encodeMediaFrameName(date));
+		int startIndex = findIndexOfGoalFile(allFrames, goalFile);
+		return startIndex;
+	}
+	
+
+	private int findIndexOfGoalFile(File[] allFrames, File goalFile)
+	{
+		int startIndex = Arrays.binarySearch(allFrames, goalFile);
+		
+		startIndex = startIndex >= 0? startIndex : -1-startIndex;
+		return startIndex;
+	}
+
 
 //	private List<File> extractDemoVideoToFile(InputStream inputStream, String fileNameStem) throws IOException, MediaEncodingException,
 //	PostProductionAnimationException
@@ -137,14 +174,6 @@ public class PostProductionHandler
 //		return createdFiles;
 //	}
 
-	private List<File> handlePreAnimationMediaOutput(String fileNameStem) throws MediaEncodingException
-	{
-		List<File> createdFiles = new ArrayList<>();
-
-		createdFiles.add(browserMediaMaker.combineImageFilesToMakeMedia(fileNameStem, this.currentToolStream));
-		logger.info(browserMediaMaker.getMediaTypeInfo() + " Rendered");
-		return createdFiles;
-	}
 
 
 	public static String getIntermediateFolderLocation()

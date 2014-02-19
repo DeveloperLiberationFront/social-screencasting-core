@@ -36,19 +36,6 @@ public abstract class AbstractImagesToMediaOutput
 
 	protected abstract Logger getLogger();
 
-	protected File[] getImageFilesToAnimate()
-	{
-		File[] imagesToAnimate = scratchDir.listFiles(new FileFilter() {
-
-			@Override
-			public boolean accept(File pathname)
-			{
-				return pathname.getName().endsWith(PostProductionHandler.INTERMEDIATE_FILE_FORMAT);
-			}
-		});
-		Arrays.sort(imagesToAnimate);
-		return imagesToAnimate;
-	}
 
 	protected File makeDirectoryIfClear(String fileNameMinusExtension) throws MediaEncodingException
 	{
@@ -61,7 +48,7 @@ public abstract class AbstractImagesToMediaOutput
 		{
 			throw new MediaEncodingException("Not creating new media because a non-directory exists where this should be");
 		}
-		else if (!newDir.exists() && !newDir.mkdir()) // makes the dir
+		else if (!newDir.exists() && !newDir.mkdirs()) // makes the dir
 		{
 			throw new MediaEncodingException("Could not create media folder.  Unknown cause");
 		}

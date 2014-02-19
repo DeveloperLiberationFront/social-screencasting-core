@@ -2,6 +2,7 @@ package edu.ncsu.lubick.localHub.videoPostProduction.outputs;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -26,18 +27,25 @@ import edu.ncsu.lubick.localHub.videoPostProduction.animation.KeypressAnimationM
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.ShortcutsToKeyCodesConverter;
 import edu.ncsu.lubick.util.FileUtilities;
 
-public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput implements PreAnimationImagesToMediaOutput
+public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput implements PreAnimationImagesToMediaOutput
 {
 
-	private static Logger logger = Logger.getLogger(PreAnimationImagesToBrowserAnimatedPackage.class.getName());
+	private static Logger logger = Logger.getLogger(FramesToBrowserAnimatedPackage.class.getName());
 	private ShortcutsToKeyCodesConverter keyCodeReader = new ShortcutsToKeyCodesConverter();
 	private List<KeypressAnimationMaker> animationSources = new ArrayList<>();
 	private Dimension size;
-	private File newDir;
+	private File browserPackageRootDir;
+	private File[] sortedFrameFiles;
 
-	public PreAnimationImagesToBrowserAnimatedPackage()
+	@Deprecated
+	public FramesToBrowserAnimatedPackage()
 	{
 		super(new File(PostProductionHandler.getIntermediateFolderLocation()));
+	}
+
+	public FramesToBrowserAnimatedPackage(File sourceOfFrames)
+	{
+		super(sourceOfFrames);
 	}
 
 	@Override
@@ -53,24 +61,45 @@ public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesTo
 	}
 
 	@Override
-	public File combineImageFilesToMakeMedia(String folderName, ToolUsage toolUsage) throws MediaEncodingException
+	public File combineImageFilesToMakeMedia(ToolUsage toolUsage, int startIndex, int endIndex) throws MediaEncodingException
 	{
-		this.newDir = super.makeDirectoryIfClear(folderName);
+		String browserPackageRootDirName = FileUtilities.makeFileNameStemForToolPluginMedia(toolUsage);
+		this.browserPackageRootDir = super.makeDirectoryIfClear(browserPackageRootDirName);
 		try
 		{
-			BufferedImage lastFrame = this.copyImagesToFolderAndReturnLast();
+			BufferedImage lastFrame = this.copyImagesToFolderAndReturnLast(startIndex, endIndex);
 			int frameCounter = duplicateLastFrame5Times(lastFrame);
 			add5FramesOfBlack(frameCounter);
 
 			this.lazyLoadAnimationSources();
 			this.createAnimationImagesForToolStream(toolUsage);
-			return newDir;
+			return browserPackageRootDir;
 		}
 		catch (IOException e)
 		{
 			throw new MediaEncodingException(e);
 		}
 	}
+
+//	@Override
+//	public File combineImageFilesToMakeMedia(String newFolderName, ToolUsage toolUsage) throws MediaEncodingException
+//	{
+//		this.newDir = super.makeDirectoryIfClear(newFolderName);
+//		try
+//		{
+//			BufferedImage lastFrame = this.copyImagesToFolderAndReturnLast();
+//			int frameCounter = duplicateLastFrame5Times(lastFrame);
+//			add5FramesOfBlack(frameCounter);
+//
+//			this.lazyLoadAnimationSources();
+//			this.createAnimationImagesForToolStream(toolUsage);
+//			return newDir;
+//		}
+//		catch (IOException e)
+//		{
+//			throw new MediaEncodingException(e);
+//		}
+//	}
 
 	private void add5FramesOfBlack(int frameCounter) throws IOException
 	{
@@ -82,7 +111,7 @@ public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesTo
 		for(int i = frameCounter;i<frameCounter+5;i++)
 		{
 			String newFileName = "frame" + FileUtilities.padIntTo4Digits(i) + "." + PostProductionHandler.INTERMEDIATE_FILE_FORMAT;
-			File newFile = new File(newDir, newFileName);
+			File newFile = new File(browserPackageRootDir, newFileName);
 			ImageIO.write(image, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, newFile);
 		}
 		
@@ -90,12 +119,12 @@ public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesTo
 
 	private int duplicateLastFrame5Times(BufferedImage lastFrame) throws IOException
 	{
-		int numFramesSoFar = getImageFilesToAnimate().length;
+		int numFramesSoFar = sortedFrameFiles.length;
 		this.size = new Dimension(lastFrame.getWidth(), lastFrame.getHeight());
 		for(int i = numFramesSoFar;i<numFramesSoFar+5;i++)
 		{
 			String newFileName = "frame" + FileUtilities.padIntTo4Digits(i) + "." + PostProductionHandler.INTERMEDIATE_FILE_FORMAT;
-			File newFile = new File(newDir, newFileName);
+			File newFile = new File(browserPackageRootDir, newFileName);
 			ImageIO.write(lastFrame, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, newFile);
 		}
 		
@@ -129,33 +158,42 @@ public class PreAnimationImagesToBrowserAnimatedPackage extends AbstractImagesTo
 			BufferedImage activatedAnimation = animationSource.makeNewAnimationForKeyPresses(keyCodes, toolUsage.getToolKeyPresses());
 
 			String animationPrefix = animationSource.getAnimationTypeName();
-			File unactivatedAnimationFile = new File(newDir, animationPrefix + "_un.png");
-			File activatedAnimationFile = new File(newDir, animationPrefix + ".png");
+			File unactivatedAnimationFile = new File(browserPackageRootDir, animationPrefix + "_un.png");
+			File activatedAnimationFile = new File(browserPackageRootDir, animationPrefix + ".png");
 			ImageIO.write(unactivatedAnimation, "png", unactivatedAnimationFile);
 			ImageIO.write(activatedAnimation, "png", activatedAnimationFile);
 		}
 
 	}
 
-	private BufferedImage copyImagesToFolderAndReturnLast() throws IOException
+	private BufferedImage copyImagesToFolderAndReturnLast(int startIndex, int endIndex) throws IOException
 	{
-		File[] imageFilesToAnimate = getImageFilesToAnimate();
-		
-		if (imageFilesToAnimate == null  || imageFilesToAnimate.length == 0)
+	
+		if (sortedFrameFiles == null  || sortedFrameFiles.length == 0)
 		{
 			throw new IOException("Empty Temporary Folder");
 		}
 		
-		for (File originalImageFile : imageFilesToAnimate)
+		int frameIndex = 0;
+		for (int i = startIndex; i<sortedFrameFiles.length && i<=endIndex; i++)
 		{
-			String destinationFileNumberAndExtension = originalImageFile.getName().substring("temp".length());
+			File originalImageFile = sortedFrameFiles[i];
+			
+			String destinationFileNumberAndExtension = FileUtilities.padIntTo4Digits(frameIndex) + "."+PostProductionHandler.INTERMEDIATE_FILE_FORMAT;
 			String destinationFileName = "frame" + destinationFileNumberAndExtension;
-			File destination = new File(newDir, destinationFileName);
+			File destination = new File(browserPackageRootDir, destinationFileName);
 			Files.copy(originalImageFile.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			frameIndex++;
 		}
 
-		BufferedImage lastFrame = ImageIO.read(imageFilesToAnimate[imageFilesToAnimate.length-1]);
+		BufferedImage lastFrame = ImageIO.read(sortedFrameFiles[sortedFrameFiles.length-1]);
 		return lastFrame;
+	}
+
+	@Override
+	public void setSortedFrames(File[] sortedFrameFiles)
+	{
+		this.sortedFrameFiles = sortedFrameFiles;
 	}
 
 }

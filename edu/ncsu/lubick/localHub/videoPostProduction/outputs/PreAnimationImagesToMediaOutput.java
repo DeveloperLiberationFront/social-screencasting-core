@@ -7,7 +7,9 @@ import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 
 public interface PreAnimationImagesToMediaOutput
 {
-	public File combineImageFilesToMakeMedia(String fileNameStem, ToolUsage toolUsage) throws MediaEncodingException;
+	String getMediaTypeInfo();
 
-	public String getMediaTypeInfo();
+	File combineImageFilesToMakeMedia(ToolUsage toolUsage, int startIndex, int endIndex) throws MediaEncodingException;
+
+	void setSortedFrames(File[] sortedFrameFiles);
 }
