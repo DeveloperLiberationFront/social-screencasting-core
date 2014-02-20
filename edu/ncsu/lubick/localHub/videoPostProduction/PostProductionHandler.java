@@ -8,10 +8,8 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
-import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeypressAnimation;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.FramesToBrowserAnimatedPackage;
 import edu.ncsu.lubick.util.FileUtilities;
-import edu.ncsu.lubick.util.ThreadedImageDiskWritingStrategy;
 
 public class PostProductionHandler
 {
@@ -20,23 +18,17 @@ public class PostProductionHandler
 	public static final int FRAME_RATE = 5;
 	public static final boolean DELETE_IMAGES_AFTER_USE = false;
 
-	private static final String MEDIA_ASSEMBLY_DIR = "./MediaAssembly/";
-
 	private static Logger logger = Logger.getLogger(PostProductionHandler.class.getName());
 
 	private static final int RUN_UP_TIME = 5;
 
 	private FramesToBrowserAnimatedPackage browserMediaMaker = null;
-
-	private ToolUsage currentToolStream;
-	private ThreadedImageDiskWritingStrategy imageWriter;
-	private CornerKeypressAnimation postProductionAnimator;
+	
 	private File screencastFolder;
 
 	public PostProductionHandler(File sourceOfFrames)
 	{
 		this.screencastFolder = sourceOfFrames;
-
 		this.browserMediaMaker = new FramesToBrowserAnimatedPackage(sourceOfFrames);
 
 	}
@@ -98,33 +90,6 @@ public class PostProductionHandler
 
 		startIndex = startIndex >= 0 ? startIndex : -1 - startIndex;
 		return startIndex;
-	}
-
-	// private List<File> extractDemoVideoToFile(InputStream inputStream, String fileNameStem) throws IOException, MediaEncodingException,
-	// PostProductionAnimationException
-	// {
-	// imageWriter.reset();
-	// List<File> createdFiles = new ArrayList<>();
-	//
-	// extractImagesForTimePeriodToScratchFolder(inputStream);
-	//
-	// logger.debug("waiting until all the images are done extracting");
-	// imageWriter.waitUntilDoneWriting();
-	//
-	// createdFiles.addAll(handlePreAnimationMediaOutput(fileNameStem));
-	//
-	//
-	// return createdFiles;
-	// }
-
-	public static String getIntermediateFolderLocation()
-	{
-		return MEDIA_ASSEMBLY_DIR;
-	}
-
-	public void reset()
-	{
-
 	}
 
 }
