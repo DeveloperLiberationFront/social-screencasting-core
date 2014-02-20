@@ -2,7 +2,6 @@ package edu.ncsu.lubick.localHub.videoPostProduction.outputs;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -37,11 +36,6 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 	private File browserPackageRootDir;
 	private File[] sortedFrameFiles;
 
-	@Deprecated
-	public FramesToBrowserAnimatedPackage()
-	{
-		super(new File(PostProductionHandler.getIntermediateFolderLocation()));
-	}
 
 	public FramesToBrowserAnimatedPackage(File sourceOfFrames)
 	{
@@ -81,25 +75,6 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 		}
 	}
 
-//	@Override
-//	public File combineImageFilesToMakeMedia(String newFolderName, ToolUsage toolUsage) throws MediaEncodingException
-//	{
-//		this.newDir = super.makeDirectoryIfClear(newFolderName);
-//		try
-//		{
-//			BufferedImage lastFrame = this.copyImagesToFolderAndReturnLast();
-//			int frameCounter = duplicateLastFrame5Times(lastFrame);
-//			add5FramesOfBlack(frameCounter);
-//
-//			this.lazyLoadAnimationSources();
-//			this.createAnimationImagesForToolStream(toolUsage);
-//			return newDir;
-//		}
-//		catch (IOException e)
-//		{
-//			throw new MediaEncodingException(e);
-//		}
-//	}
 
 	private void add5FramesOfBlack(int frameCounter) throws IOException
 	{

@@ -2,9 +2,7 @@ package edu.ncsu.lubick.localHub;
 
 import java.io.File;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -18,7 +16,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.FileUtilities;
 
-public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebToolReportingInterface, VideoFileListener {
+public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, VideoFileListener {
 
 	public static final String LOGGING_FILE_PATH = "/etc/log4j.settings";
 	private static final LocalHub singletonHub;
@@ -40,9 +38,6 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 
 	private BufferedDatabaseManager databaseManager = null;
 	private PostProductionHandler postProductionHandler = null;
-
-	// listeners for file related events
-	private Set<ParsedFileListener> parsedFileListeners = new HashSet<>();
 
 	private boolean shouldUseHTTPServer;
 	private boolean shouldUseScreenRecording;
@@ -212,27 +207,6 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 		return this.isRunning;
 	}
 
-	//mainly used for testing that file parsers were added.
-	public void addParsedFileListener(ParsedFileListener parsedFileListener)
-	{
-		parsedFileListeners.add(parsedFileListener);
-
-	}
-
-	public void removeParsedFileListener(ParsedFileListener parsedFileListener)
-	{
-		parsedFileListeners.remove(parsedFileListener);
-	}
-
-	@Override
-	public void parsedFile(ParsedFileEvent e)
-	{
-		// Just pass on the event
-		for (ParsedFileListener parsedFileListener : parsedFileListeners)
-		{
-			parsedFileListener.parsedFile(e);
-		}
-	}
 
 	// ============End
 	// Listeners======================================================================================
@@ -291,57 +265,6 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 		return databaseManager.getAllToolUsageHistoriesForPlugin(pluginName);
 	}
 	
-	private class ToolStreamMonitor implements ToolStreamFileParser
-	{	
-		@Override
-		public void parseFile(File fileToParse)
-		{
-			logger.debug("parsing file " + fileToParse);
-			String fileContents = FileUtilities.readAllFromFile(fileToParse);
-			ToolStream ts = ToolStream.generateFromJSON(fileContents);
-
-			if (ts == null)
-			{
-				logger.info("malformed tool stream [null], deleting");
-			}
-			else
-			{
-				// Expecting name convention
-				// PLUGIN_NAME.ENCODEDEDATE.log
-				String fileName = fileToParse.getName();
-				String pluginName = fileName.substring(0, fileName.indexOf('.'));
-
-				Date associatedDate;
-				try
-				{
-					associatedDate = FileUtilities.parseStartDateOfToolStream(fileToParse);
-				}
-				catch (ImproperlyEncodedDateException e)
-				{
-					logger.error("Problem parsing time info from file" + fileToParse + "  Skipping...", e);
-					return;
-				}
-
-				ts.setTimeStamp(associatedDate);
-				ts.setAssociatedPlugin(pluginName);
-
-				ParsedFileEvent event = new ParsedFileEvent(fileContents, ts, pluginName, associatedDate, fileToParse);
-
-				for (ParsedFileListener parsedFileListener : parsedFileListeners)
-				{
-					parsedFileListener.parsedFile(event);
-				}
-
-				databaseManager.writeToolStreamToDatabase(ts);
-			}
-
-			if (!fileToParse.delete())
-			{
-				logger.info("Could not delete toolstream file " + fileToParse + " but, continuing anyway.");
-			}
-		}
-	}
-
 	/**
 	 * A class that allows unit tests to have indirect, controlled access to the inner workings of the LocalHub. This can only be created with a static method
 	 * in LocalHub
@@ -365,19 +288,6 @@ public class LocalHub implements  WebQueryInterface, ParsedFileListener, WebTool
 			return hubToDebug.isRunning();
 		}
 
-		@Override
-		public void addParsedFileListener(ParsedFileListener parsedFileListener)
-		{
-			hubToDebug.addParsedFileListener(parsedFileListener);
-
-		}
-
-		@Override
-		public void removeParsedFileListener(ParsedFileListener parsedFileListener)
-		{
-			hubToDebug.removeParsedFileListener(parsedFileListener);
-
-		}
 
 		@Override
 		public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName)

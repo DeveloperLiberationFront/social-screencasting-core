@@ -1,8 +1,6 @@
 package edu.ncsu.lubick.localHub.videoPostProduction;
 
 import java.io.File;
-import java.io.FileFilter;
-import java.util.Arrays;
 
 import org.apache.log4j.Logger;
 

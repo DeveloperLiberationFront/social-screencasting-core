@@ -21,10 +21,7 @@ import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
-import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
-import edu.ncsu.lubick.localHub.videoPostProduction.outputs.FramesToBrowserAnimatedPackage;
-import edu.ncsu.lubick.util.FileDateStructs;
 import edu.ncsu.lubick.util.FileUtilities;
 
 public class TestVideoPostProduction
@@ -190,7 +187,7 @@ public class TestVideoPostProduction
 	{
 		PostProductionHandler pph = new PostProductionHandler(new File("./test/"));
 		
-		ToolUsage testUsage = makeToolUsage(new Date(2500L), WHOMBO_TOOL_1, 5500);
+		ToolUsage testUsage = makeToolUsage(new Date(7500L), WHOMBO_TOOL_1, 5500);
 		
 		File expectedOutputDir = prepareForBrowserMediaTest(testUsage);
 		
@@ -198,36 +195,11 @@ public class TestVideoPostProduction
 		
 		verifyBrowserMediaCreatedCorrectly(expectedOutputDir, folderContainingBrowserPackage);
 		
-		assertEquals(28+5+5+6, expectedOutputDir.list().length);		//28 frames, plus 5 copies of the last, plus 5 frames of black and 6 animations
+		assertEquals(25+28+5+5+6, expectedOutputDir.list().length);		//25 frames (5 seconds) runup, 
+																		//28 frames, plus 5 copies of the last, plus 5 frames of black and 6 animations
 		
 	}
 
-//
-//	private List<File> testARandomToolInAPostAnimationHandler(PostProductionHandler handler) throws MediaEncodingException
-//	{
-//		File capFile = new File("./src/ForTesting/oneMinuteCap.cap");
-//		String toolName = WHOMBO_TOOL_1;
-//
-//		//PostProductionHandler.debugWriteOutAllImagesInCapFile(capFile, new File("./test/"));
-//		
-//		assertTrue(capFile.exists());
-//
-//		Date date = UtilitiesForTesting.truncateTimeToMinute(new Date());
-//		Date datePlusFifteen = new Date(date.getTime() + 15 * 1000); // plus
-//																		// fifteen
-//																		// seconds
-//
-//		ToolUsage testToolUsage = makeToolUsage(datePlusFifteen, toolName);
-//		
-//		handler.loadFile(new FileDateStructs(capFile, date));
-//
-//		
-//
-//		List<File> mediaOutputs = handler.extractBrowserMediaForToolUsage(testToolUsage);
-//
-//		return mediaOutputs;
-//	}
-//
 	private ToolUsage makeToolUsage(Date toolUsageDate, String toolUsageName)
 	{
 		return makeToolUsage(toolUsageDate, toolUsageName, 2000);
@@ -245,12 +217,5 @@ public class TestVideoPostProduction
 		ToolUsage testToolUsage = toolStream.getAsList().get(0);
 		return testToolUsage;
 	}
-//
-//	private PostProductionHandler makeBrowserMediaPostProductionHandler()
-//	{
-//		PostProductionHandler handler = new PostProductionHandler();
-//		handler.addNewPreAnimationMediaOutput(new PreAnimationImagesToBrowserAnimatedPackage());
-//		return handler;
-//	}
 
 }
