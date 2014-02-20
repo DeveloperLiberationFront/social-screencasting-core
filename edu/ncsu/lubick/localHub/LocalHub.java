@@ -14,9 +14,8 @@ import edu.ncsu.lubick.localHub.http.HTTPServer;
 import edu.ncsu.lubick.localHub.http.WebToolReportingInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
-import edu.ncsu.lubick.util.FileUtilities;
 
-public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, VideoFileListener {
+public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
 	public static final String LOGGING_FILE_PATH = "/etc/log4j.settings";
 	private static final LocalHub singletonHub;
@@ -34,8 +33,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	private boolean isRunning = false;
 	private File monitorDirectory = null;
 
-	//private FileMonitor backgroundFileMonitor = null;
-
 	private BufferedDatabaseManager databaseManager = null;
 	private PostProductionHandler postProductionHandler = null;
 
@@ -44,10 +41,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	private boolean isDebug = false;
 	private ScreenRecordingModule screenRecordingModule;
 	private HTTPServer httpServer;
-	//private boolean hasSetUpPostProduction = false;
-	
-	//private LoadedFileListenerAggregator loadedFileManager = new LoadedFileListenerAggregator();
-	
 
 	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, boolean wantHTTP, boolean wantScreenRecording)
 	{
@@ -96,6 +89,11 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	{
 		logger.debug("Logging started in creation of LocalHub "+new Date());
 
+	}
+
+	public boolean isDebug()
+	{
+		return isDebug;
 	}
 
 	private void start()
@@ -235,23 +233,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 		isRunning = false;
 	}
 
-	@Override
-	public void reportNewVideoFileLocation(String fileName)
-	{
-		File newVideoFile = new File(fileName);
-		Date videoStartTime;
-		try
-		{
-			videoStartTime = FileUtilities.parseStartDateOfCapFile(newVideoFile);
-		}
-		catch (ImproperlyEncodedDateException e)
-		{
-			logger.error("Problem with video " + fileName + ", Skipping it", e);
-			return;
-		}
-		this.databaseManager.addVideoFile(newVideoFile, videoStartTime, LocalHub.SCREEN_RECORDING_VIDEO_LENGTH);
-
-	}
 
 	@Override
 	public List<String> getNamesOfAllPlugins()
