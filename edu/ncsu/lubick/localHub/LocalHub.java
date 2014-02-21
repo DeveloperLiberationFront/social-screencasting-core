@@ -19,7 +19,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
 	public static final String LOGGING_FILE_PATH = "/etc/log4j.settings";
 	private static final LocalHub singletonHub;
-	private static final int SCREEN_RECORDING_VIDEO_LENGTH = 60; // 60 seconds for every minivideo recorded
 	private static final String SCREENCASTING_PATH = "Screencasting";
 	private static Logger logger;
 
@@ -296,6 +295,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	@Override
 	public void reportToolStream(ToolStream ts)	//requests coming in from the web
 	{
+		//TODO write unit test for this
 		logger.info("ToolStream Reported from Plugin: "+ts.getAssociatedPlugin());
 		logger.debug(ts.toString());
 		this.databaseManager.writeToolStreamToDatabase(ts);
