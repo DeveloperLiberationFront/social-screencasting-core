@@ -1,8 +1,10 @@
 package edu.ncsu.lubick;
 
+import java.awt.AWTException;
 import java.awt.Desktop;
 import java.awt.Image;
 import java.awt.SystemTray;
+import java.awt.Toolkit;
 import java.awt.TrayIcon;
 import java.net.URI;
 import java.net.URL;
@@ -39,25 +41,38 @@ public class Runner
 		Thread.sleep(1000);
 		Desktop.getDesktop().browse(new URI("http://localhost:4443/"));
 	}
+	
+	
 	private static void setUpTrayIcon()
 	{
 		if (!SystemTray.isSupported()) {
 			Logger.getRootLogger().info("SystemTray is not supported");
 			return;
 		}
-		final TrayIcon trayIcon = new TrayIcon(createImage("images/bulb.gif", "tray icon"));
+		final TrayIcon trayIcon = new TrayIcon(createImage("/imageAssets/tray_icon_small.png"));
+		trayIcon.setImageAutoSize(true);
 		final SystemTray tray = SystemTray.getSystemTray();
 
+		try
+		{
+			tray.add(trayIcon);
+		}
+		catch (AWTException e)
+		{
+			Logger.getRootLogger().error("Problem making tray icon",e);
+		}
 	}
 
-	protected static Image createImage(String path, String description) {
+	private static Image createImage(String path) {
 		URL imageURL = Runner.class.getResource(path);
 
 		if (imageURL == null) {
 			System.err.println("Resource not found: " + path);
 			return null;
 		} 
-		return (new ImageIcon(imageURL, description)).getImage();
+		Image img = Toolkit.getDefaultToolkit().getImage(imageURL);
+		
+		return img;
 
 	}
 }
