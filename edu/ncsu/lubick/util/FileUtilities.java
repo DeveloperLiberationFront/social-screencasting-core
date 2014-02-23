@@ -109,12 +109,19 @@ public class FileUtilities
 		return extractStartTime(fileToParse.getName(), makeDateInMinutesToNumberFormatter());
 	}
 
-	public static Date parseStartDateOfCapFile(File capFile) throws ImproperlyEncodedDateException
+	@Deprecated
+	private static Date parseStartDateOfCapFile(File capFile) throws ImproperlyEncodedDateException
 	{
 		return extractStartTime(capFile.getName(), makeDateInSecondsToNumberFormatter());
 	}
 
-	public static String encodeCapFileName(Date date)
+	public static Date parseDateOfMediaFrame(File frame) throws ImproperlyEncodedDateException
+	{
+		return extractStartTime(frame.getName(), makeDateInMillisToNumberFormatter());
+	}
+
+	@Deprecated
+	private static String encodeCapFileName(Date date)
 	{
 		synchronized (formatterForCapFile)			//SimpleDateFormats are not thread-safe
 		{

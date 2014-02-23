@@ -79,9 +79,7 @@ public class TestPostProductionHandler
 	{
 		Date screencastBeginDate = new Date(60_000); //one minute past the epoch
 		
-		setUpScreencastingFolderForDate(screencastBeginDate);
-		
-		PostProductionHandler pph = new PostProductionHandler(TEST_SCREENCAST_FOLDER);
+		PostProductionHandler pph = standardFolderAndProductionSetup(screencastBeginDate);
 	
 		ToolUsage testUsage = makeToolUsage(new Date(screencastBeginDate.getTime() + 7500L), WHOMBO_TOOL_1, 5500);
 	
@@ -89,10 +87,72 @@ public class TestPostProductionHandler
 	
 		File folderContainingBrowserPackage = pph.extractBrowserMediaForToolUsage(testUsage);
 	
-		verifyBrowserMediaCreatedCorrectly(expectedOutputDir, folderContainingBrowserPackage);
+		//25 frames (5 seconds) runup, 28 frames, plus extra
+		verifyBrowserMediaCreatedCorrectly(expectedOutputDir, folderContainingBrowserPackage, 25 + 28 + EXTRA_FRAMES_AND_ANIMATIONS);	
 	
-		assertEquals(25 + 28 + EXTRA_FRAMES_AND_ANIMATIONS, expectedOutputDir.list().length);		//25 frames (5 seconds) runup, 28 frames, plus extra
+	}
 	
+	@Test
+	public void testBrowserPackageExtractionWAYBeforeScreencasting() throws Exception
+	{
+		Date screencastBeginDate = new Date(60_000); //one minute past the epoch
+		
+		PostProductionHandler pph = standardFolderAndProductionSetup(screencastBeginDate);
+	
+		ToolUsage testUsage = makeToolUsage(new Date(0), WHOMBO_TOOL_1, 5500);
+	
+		File expectedOutputDir = prepareForBrowserMediaTest(testUsage);
+		
+		assertNotNull(expectedOutputDir);
+		assertNull(pph.extractBrowserMediaForToolUsage(testUsage));
+	
+	}
+	
+	@Test
+	public void testBrowserPackageExtractionSomewhatBeforeScreencasting() throws Exception
+	{
+		Date screencastBeginDate = new Date(60_000); //one minute past the epoch
+		
+		PostProductionHandler pph = standardFolderAndProductionSetup(screencastBeginDate);
+	
+		ToolUsage testUsage = makeToolUsage(new Date(screencastBeginDate.getTime() - 4000L), WHOMBO_TOOL_1, 5500);
+	
+		File expectedOutputDir = prepareForBrowserMediaTest(testUsage);
+		
+		assertNotNull(expectedOutputDir);
+		assertNull(pph.extractBrowserMediaForToolUsage(testUsage));
+	
+	}
+	
+	@Test
+	public void testBrowserPackageExtractionCloseToBeginningScreencasting() throws Exception
+	{
+		Date screencastBeginDate = new Date(60_000); //one minute past the epoch
+		
+		PostProductionHandler pph = standardFolderAndProductionSetup(screencastBeginDate);
+	
+		ToolUsage testUsage = makeToolUsage(new Date(screencastBeginDate.getTime() + 1000L), WHOMBO_TOOL_1, 5500);
+	
+		File expectedOutputDir = prepareForBrowserMediaTest(testUsage);
+	
+		File folderContainingBrowserPackage = pph.extractBrowserMediaForToolUsage(testUsage);
+	
+		//5 frames (1 seconds) runup, 28 frames, plus extra
+		verifyBrowserMediaCreatedCorrectly(expectedOutputDir, folderContainingBrowserPackage, 5 + 28 + EXTRA_FRAMES_AND_ANIMATIONS);	
+	
+	}
+	
+	
+
+
+
+
+	private PostProductionHandler standardFolderAndProductionSetup(Date screencastBeginDate)
+	{
+		setUpScreencastingFolderForDate(screencastBeginDate);
+		
+		PostProductionHandler pph = new PostProductionHandler(TEST_SCREENCAST_FOLDER);
+		return pph;
 	}
 
 
@@ -168,13 +228,13 @@ public class TestPostProductionHandler
 		return expectedOutputDir;
 	}
 
-	private void verifyBrowserMediaCreatedCorrectly(File expectedOutputDir, File folderContainingBrowserPackage)
+	private void verifyBrowserMediaCreatedCorrectly(File expectedOutputDir, File folderContainingBrowserPackage, int expectedNumFrames)
 	{
 		assertNotNull(folderContainingBrowserPackage);
 		assertTrue(folderContainingBrowserPackage.exists());
 		assertTrue(folderContainingBrowserPackage.isDirectory());
 		List<String> listOfFileNames = Arrays.asList(expectedOutputDir.list());
-		assertTrue(listOfFileNames.size() > 8); 
+		assertEquals(expectedNumFrames, listOfFileNames.size()); 
 		assertTrue(listOfFileNames.contains("image.png"));
 		assertTrue(listOfFileNames.contains("image_un.png"));
 		assertTrue(listOfFileNames.contains("image_text.png"));

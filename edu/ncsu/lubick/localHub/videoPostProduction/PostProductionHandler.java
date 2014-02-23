@@ -7,6 +7,7 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
+import edu.ncsu.lubick.localHub.ImproperlyEncodedDateException;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.FramesToBrowserAnimatedPackage;
 import edu.ncsu.lubick.util.FileUtilities;
@@ -43,19 +44,45 @@ public class PostProductionHandler
 		int startIndex = findFrameBelongingToDate(startTimeToLookFor, allFrames);
 		if (startIndex >= allFrames.length)
 		{
-			logger.info("This tool use appears to be in the future, or at least past "+allFrames[allFrames.length-1]);
+			logger.info("This tool use appears to be in the future, or at least later than "+allFrames[allFrames.length-1]);
 			return null;
 		}
+		if (startIndex == 0)
+		{
+			if (checkForTooEarlyToolUsage(specificToolUse.getTimeStamp(),allFrames[0]))
+			{
+				return null;
+			}
+		}
+		
+		
 		logger.debug("The first frame needed is at index " + startIndex + ", which corresponds to frame/file " + allFrames[startIndex]);
 
 		int endIndex = findFrameBelongingToDate(endTimeToLookFor, allFrames);
 		logger.debug("The last frame needed is at index " + endIndex + ", which corresponds to frame/file " + allFrames[endIndex]);
-
+		
 		browserMediaMaker.setSortedFrames(allFrames);
 		File createdPackage = browserMediaMaker.combineImageFilesToMakeMedia(specificToolUse, startIndex, endIndex);
 
 		return createdPackage;
 
+	}
+
+	private boolean checkForTooEarlyToolUsage(Date timeStamp, File firstFrame)
+	{
+		
+		Date parsedDate;
+		try
+		{
+			parsedDate = FileUtilities.parseDateOfMediaFrame(firstFrame);
+		}
+		catch (ImproperlyEncodedDateException e)
+		{
+			logger.error("The frames are named different than convention dictate", e);
+			return false;
+		}
+		
+		return timeStamp.after(parsedDate) || timeStamp.equals(parsedDate);
 	}
 
 	private Date getEndTime(ToolUsage specificToolUse)

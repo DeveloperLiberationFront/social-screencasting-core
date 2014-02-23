@@ -62,8 +62,9 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 		try
 		{
 			BufferedImage lastFrame = this.copyImagesToFolderAndReturnLast(startIndex, endIndex);
-			int frameCounter = duplicateLastFrame5Times(lastFrame);
-			add5FramesOfBlack(frameCounter);
+			int framesCopiedSoFar = endIndex-startIndex+1;
+			framesCopiedSoFar = duplicateLastFrame5Times(lastFrame, framesCopiedSoFar);
+			add5FramesOfBlack(framesCopiedSoFar);
 
 			this.lazyLoadAnimationSources();
 			this.createAnimationImagesForToolStream(toolUsage);
@@ -92,9 +93,8 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 		
 	}
 
-	private int duplicateLastFrame5Times(BufferedImage lastFrame) throws IOException
+	private int duplicateLastFrame5Times(BufferedImage lastFrame, int numFramesSoFar) throws IOException
 	{
-		int numFramesSoFar = sortedFrameFiles.length;
 		this.size = new Dimension(lastFrame.getWidth(), lastFrame.getHeight());
 		for(int i = numFramesSoFar;i<numFramesSoFar+5;i++)
 		{
