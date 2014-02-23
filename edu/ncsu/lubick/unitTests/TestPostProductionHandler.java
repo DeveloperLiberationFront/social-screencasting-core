@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -90,7 +91,7 @@ public class TestPostProductionHandler
 		File folderContainingBrowserPackage = pph.extractBrowserMediaForToolUsage(testUsage);
 	
 		//25 frames (5 seconds) runup, 28 frames, plus extra
-		verifyBrowserMediaCreatedCorrectly(expectedOutputDir, folderContainingBrowserPackage, 25 + 28 + EXTRA_FRAMES_AND_ANIMATIONS);	
+		verifyBrowserMediaCreatedCorrectlyKeyboard(expectedOutputDir, folderContainingBrowserPackage, 25 + 28 + EXTRA_FRAMES_AND_ANIMATIONS);	
 	
 	}
 	
@@ -108,7 +109,7 @@ public class TestPostProductionHandler
 		File folderContainingBrowserPackage = pph.extractBrowserMediaForToolUsage(testUsage);
 	
 		//25 frames (5 seconds) runup, 28 frames, plus extra frames (no animations because GUI)
-		verifyBrowserMediaCreatedCorrectly(expectedOutputDir, folderContainingBrowserPackage, 25 + 28 + EXTRA_FRAMES);	
+		verifyBrowserMediaCreatedCorrectlyGUI(expectedOutputDir, folderContainingBrowserPackage, 25 + 28 + EXTRA_FRAMES);	
 	
 	}
 	
@@ -158,7 +159,7 @@ public class TestPostProductionHandler
 		File folderContainingBrowserPackage = pph.extractBrowserMediaForToolUsage(testUsage);
 	
 		//6 frames (~1 second) runup, 28 frames, plus extra
-		verifyBrowserMediaCreatedCorrectly(expectedOutputDir, folderContainingBrowserPackage, 6 + 28 + EXTRA_FRAMES_AND_ANIMATIONS);	
+		verifyBrowserMediaCreatedCorrectlyKeyboard(expectedOutputDir, folderContainingBrowserPackage, 6 + 28 + EXTRA_FRAMES_AND_ANIMATIONS);	
 	
 	}
 	
@@ -248,19 +249,26 @@ public class TestPostProductionHandler
 		return expectedOutputDir;
 	}
 
-	private void verifyBrowserMediaCreatedCorrectly(File expectedOutputDir, File folderContainingBrowserPackage, int expectedNumFrames)
+	private void verifyBrowserMediaCreatedCorrectlyKeyboard(File expectedOutputDir, File folderContainingBrowserPackage, int expectedNumFrames)
 	{
-		assertNotNull(folderContainingBrowserPackage);
-		assertTrue(folderContainingBrowserPackage.exists());
-		assertTrue(folderContainingBrowserPackage.isDirectory());
+		verifyBrowserMediaCreatedCorrectlyGUI(expectedOutputDir, folderContainingBrowserPackage, expectedNumFrames);
 		List<String> listOfFileNames = Arrays.asList(expectedOutputDir.list());
-		assertEquals(expectedNumFrames, listOfFileNames.size()); 
 		assertTrue(listOfFileNames.contains("image.png"));
 		assertTrue(listOfFileNames.contains("image_un.png"));
 		assertTrue(listOfFileNames.contains("image_text.png"));
 		assertTrue(listOfFileNames.contains("image_text_un.png"));
 		assertTrue(listOfFileNames.contains("text.png"));
 		assertTrue(listOfFileNames.contains("text_un.png"));
+		assertTrue(listOfFileNames.contains("frame0000.jpg"));	
+	}
+	
+	private void verifyBrowserMediaCreatedCorrectlyGUI(File expectedOutputDir, File folderContainingBrowserPackage, int expectedNumFrames)
+	{
+		assertNotNull(folderContainingBrowserPackage);
+		assertTrue(folderContainingBrowserPackage.exists());
+		assertTrue(folderContainingBrowserPackage.isDirectory());
+		List<String> listOfFileNames = Arrays.asList(expectedOutputDir.list());
+		assertEquals(expectedNumFrames, listOfFileNames.size()); 
 		assertTrue(listOfFileNames.contains("frame0000.jpg"));
 		verifyFrameNameIntegrity(listOfFileNames, listOfFileNames.size() - NUMBER_KEYBOARD_ANIMATIONS);
 		
@@ -269,6 +277,7 @@ public class TestPostProductionHandler
 
 	private void verifyFrameNameIntegrity(List<String> listOfFileNames, int expectedFrames)
 	{
+		Collections.sort(listOfFileNames);
 		for(int i = 0;i<expectedFrames;i++)
 		{
 			assertEquals("frame"+FileUtilities.padIntTo4Digits(i)+"."+PostProductionHandler.INTERMEDIATE_FILE_FORMAT, listOfFileNames.get(i));

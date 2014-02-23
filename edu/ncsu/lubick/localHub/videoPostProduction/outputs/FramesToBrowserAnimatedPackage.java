@@ -22,6 +22,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedKeyboardMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextAndKeyboardMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextMaker;
+import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeypressAnimation;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.KeypressAnimationMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.ShortcutsToKeyCodesConverter;
 import edu.ncsu.lubick.util.FileUtilities;
@@ -120,7 +121,7 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 
 	private void createAnimationImagesForToolStream(ToolUsage toolUsage) throws IOException
 	{
-		if (toolUsage == null || toolUsage.getToolKeyPresses().equals("MENU"))
+		if (toolUsage == null || toolUsage.getToolKeyPresses().equals(CornerKeypressAnimation.MENU_KEY_PRESS))
 		{
 			return; // no animation for menus
 		}
