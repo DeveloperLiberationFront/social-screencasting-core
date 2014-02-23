@@ -69,7 +69,7 @@ public class PostProductionHandler
 	}
 
 	private boolean checkForTooEarlyToolUsage(Date timeStamp, File firstFrame)
-	{
+	{	//returns true if the timeStamp< firstFrame time
 		
 		Date parsedDate;
 		try
@@ -79,10 +79,10 @@ public class PostProductionHandler
 		catch (ImproperlyEncodedDateException e)
 		{
 			logger.error("The frames are named different than convention dictate", e);
-			return false;
+			return true;
 		}
 		
-		return timeStamp.after(parsedDate) || timeStamp.equals(parsedDate);
+		return timeStamp.before(parsedDate);
 	}
 
 	private Date getEndTime(ToolUsage specificToolUse)

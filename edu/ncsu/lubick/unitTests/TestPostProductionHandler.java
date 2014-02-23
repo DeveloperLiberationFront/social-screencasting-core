@@ -22,13 +22,15 @@ import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
+import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeypressAnimation;
 import edu.ncsu.lubick.util.FileUtilities;
 
 public class TestPostProductionHandler
 {
 	
-	private static final int NUMBER_ANIMATIONS = 6;
-	private static final int EXTRA_FRAMES_AND_ANIMATIONS = 5+5+NUMBER_ANIMATIONS; //5 copies of the last, plus 5 frames of black and 6 animations
+	private static final int EXTRA_FRAMES = 5+5;   //5 copies of the last, plus 5 frames of black
+	private static final int NUMBER_KEYBOARD_ANIMATIONS = 6;  //and 6 animations
+	private static final int EXTRA_FRAMES_AND_ANIMATIONS = EXTRA_FRAMES + NUMBER_KEYBOARD_ANIMATIONS;  
 	private static final int MILLIS_BETWEEN_FRAMES = 200;
 	private static final File TEST_SCREENCAST_FOLDER = new File("./test_screencasting/");
 	private static final File DUMMY_SCREENCAST_ZIP = new File("sampleScreencastMinute.zip");
@@ -81,7 +83,7 @@ public class TestPostProductionHandler
 		
 		PostProductionHandler pph = standardFolderAndProductionSetup(screencastBeginDate);
 	
-		ToolUsage testUsage = makeToolUsage(new Date(screencastBeginDate.getTime() + 7500L), WHOMBO_TOOL_1, 5500);
+		ToolUsage testUsage = makeKeyboardToolUsage(new Date(screencastBeginDate.getTime() + 7500L), WHOMBO_TOOL_1, 5500);
 	
 		File expectedOutputDir = prepareForBrowserMediaTest(testUsage);
 	
@@ -93,13 +95,31 @@ public class TestPostProductionHandler
 	}
 	
 	@Test
+	public void testBasicBrowserPackageExtractionGUI() throws Exception
+	{
+		Date screencastBeginDate = new Date(60_000); //one minute past the epoch
+		
+		PostProductionHandler pph = standardFolderAndProductionSetup(screencastBeginDate);
+	
+		ToolUsage testUsage = makeGUIToolUsage(new Date(screencastBeginDate.getTime() + 8500L), WHOMBO_TOOL_1, 5500);
+				
+		File expectedOutputDir = prepareForBrowserMediaTest(testUsage);
+	
+		File folderContainingBrowserPackage = pph.extractBrowserMediaForToolUsage(testUsage);
+	
+		//25 frames (5 seconds) runup, 28 frames, plus extra frames (no animations because GUI)
+		verifyBrowserMediaCreatedCorrectly(expectedOutputDir, folderContainingBrowserPackage, 25 + 28 + EXTRA_FRAMES);	
+	
+	}
+	
+	@Test
 	public void testBrowserPackageExtractionWAYBeforeScreencasting() throws Exception
 	{
 		Date screencastBeginDate = new Date(60_000); //one minute past the epoch
 		
 		PostProductionHandler pph = standardFolderAndProductionSetup(screencastBeginDate);
 	
-		ToolUsage testUsage = makeToolUsage(new Date(0), WHOMBO_TOOL_1, 5500);
+		ToolUsage testUsage = makeKeyboardToolUsage(new Date(0), WHOMBO_TOOL_1, 5500);
 	
 		File expectedOutputDir = prepareForBrowserMediaTest(testUsage);
 		
@@ -115,7 +135,7 @@ public class TestPostProductionHandler
 		
 		PostProductionHandler pph = standardFolderAndProductionSetup(screencastBeginDate);
 	
-		ToolUsage testUsage = makeToolUsage(new Date(screencastBeginDate.getTime() - 4000L), WHOMBO_TOOL_1, 5500);
+		ToolUsage testUsage = makeKeyboardToolUsage(new Date(screencastBeginDate.getTime() - 4000L), WHOMBO_TOOL_1, 5500);
 	
 		File expectedOutputDir = prepareForBrowserMediaTest(testUsage);
 		
@@ -131,14 +151,14 @@ public class TestPostProductionHandler
 		
 		PostProductionHandler pph = standardFolderAndProductionSetup(screencastBeginDate);
 	
-		ToolUsage testUsage = makeToolUsage(new Date(screencastBeginDate.getTime() + 1000L), WHOMBO_TOOL_1, 5500);
+		ToolUsage testUsage = makeKeyboardToolUsage(new Date(screencastBeginDate.getTime() + 1000L), WHOMBO_TOOL_1, 5500);
 	
 		File expectedOutputDir = prepareForBrowserMediaTest(testUsage);
 	
 		File folderContainingBrowserPackage = pph.extractBrowserMediaForToolUsage(testUsage);
 	
-		//5 frames (1 seconds) runup, 28 frames, plus extra
-		verifyBrowserMediaCreatedCorrectly(expectedOutputDir, folderContainingBrowserPackage, 5 + 28 + EXTRA_FRAMES_AND_ANIMATIONS);	
+		//6 frames (~1 second) runup, 28 frames, plus extra
+		verifyBrowserMediaCreatedCorrectly(expectedOutputDir, folderContainingBrowserPackage, 6 + 28 + EXTRA_FRAMES_AND_ANIMATIONS);	
 	
 	}
 	
@@ -242,7 +262,7 @@ public class TestPostProductionHandler
 		assertTrue(listOfFileNames.contains("text.png"));
 		assertTrue(listOfFileNames.contains("text_un.png"));
 		assertTrue(listOfFileNames.contains("frame0000.jpg"));
-		verifyFrameNameIntegrity(listOfFileNames, listOfFileNames.size() - NUMBER_ANIMATIONS);
+		verifyFrameNameIntegrity(listOfFileNames, listOfFileNames.size() - NUMBER_KEYBOARD_ANIMATIONS);
 		
 	}
 
@@ -259,10 +279,26 @@ public class TestPostProductionHandler
 
 
 
-	private ToolUsage makeToolUsage(Date toolUsageDate, String toolUsageName, int duration)
+	private ToolUsage makeKeyboardToolUsage(Date toolUsageDate, String toolUsageName, int duration)
 	{
 		IdealizedToolStream iToolStream = new IdealizedToolStream(TestingUtils.truncateTimeToMinute(toolUsageDate));
 		iToolStream.addToolUsage(toolUsageName, DEFAULT_TESTING_TOOL_CLASS, DEFAULT_TESTING_KEYPRESS, toolUsageDate, duration);
+
+		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
+		toolStream.setAssociatedPlugin(TEST_PLUGIN_NAME);
+		assertEquals(1, toolStream.getAsList().size());
+
+		ToolUsage testToolUsage = toolStream.getAsList().get(0);
+		return testToolUsage;
+	}
+
+
+
+
+	private ToolUsage makeGUIToolUsage(Date toolUsageDate, String toolUsageName, int duration)
+	{
+		IdealizedToolStream iToolStream = new IdealizedToolStream(TestingUtils.truncateTimeToMinute(toolUsageDate));
+		iToolStream.addToolUsage(toolUsageName, DEFAULT_TESTING_TOOL_CLASS, CornerKeypressAnimation.MENU_KEY_PRESS, toolUsageDate, duration);
 
 		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
 		toolStream.setAssociatedPlugin(TEST_PLUGIN_NAME);
