@@ -71,15 +71,14 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		return new LocalHubTesting(singletonHub);
 	}
 
-	public static void startServerForUse(String monitorLocation)
+	public static LocalHubProcess startServerForUse(String monitorLocation)
 	{
-		//
-		startServerForUse(monitorLocation, LocalSQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
+		return startServerForUse(monitorLocation, LocalSQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
 	}
 
-	public static void startServerForUse(String monitorLocation, String databaseLocation)
+	public static LocalHubProcess startServerForUse(String monitorLocation, String databaseLocation)
 	{
-		startServer(monitorLocation, databaseLocation, true, true, false);
+		return startServer(monitorLocation, databaseLocation, true, true, false);
 	}
 
 	// You need to call a static method to initiate this class. It is a
@@ -230,6 +229,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		databaseManager.shutDown();
 
 		isRunning = false;
+		logger.info("All the way shut down!");
 	}
 
 

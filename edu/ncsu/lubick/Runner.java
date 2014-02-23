@@ -10,21 +10,21 @@ import java.awt.Toolkit;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.net.URI;
 import java.net.URL;
-
-import javax.swing.ImageIcon;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import edu.ncsu.lubick.localHub.LocalHub;
+import edu.ncsu.lubick.localHub.LocalHubProcess;
 
 public class Runner
 {
+	private static LocalHubProcess localHub;
+	private static TrayIcon addedTrayIcon;
+
 	static
 	{
 		try
@@ -43,12 +43,12 @@ public class Runner
 	public static void main(String[] args) throws Exception
 	{
 		setUpTrayIcon();
-		LocalHub.startServerForUse("HF/", "kevinsDatabase.sqlite");
+		localHub = LocalHub.startServerForUse("HF/", "kevinsDatabase.sqlite");
 		Thread.sleep(1000);
 		Desktop.getDesktop().browse(new URI("http://localhost:4443/"));
 	}
-	
-	
+
+
 	private static void setUpTrayIcon()
 	{
 		if (!SystemTray.isSupported()) {
@@ -58,30 +58,37 @@ public class Runner
 		final TrayIcon trayIcon = new TrayIcon(createImage("/imageAssets/tray_icon_small.png"));
 		trayIcon.setImageAutoSize(true);
 		trayIcon.setToolTip("Social Screencasting running on port 4443");
-		trayIcon.addMouseListener(new MouseAdapter() {
-			
+
+		PopupMenu pm = new PopupMenu("Social Screencasting");
+		MenuItem exitItem = new MenuItem("Exit");
+		exitItem.addActionListener(new ActionListener() {
+
 			@Override
-			public void mouseClicked(MouseEvent e)
+			public void actionPerformed(ActionEvent arg0)
 			{
-				if (e.getClickCount() == 2)
-				{
-					PopupMenu pm = new PopupMenu("Social Screencasting");
-					MenuItem exitItem = new MenuItem("Exit");
-					exitItem.addActionListener(new ActionListener() {
-						
-						@Override
-						public void actionPerformed(ActionEvent arg0)
-						{
-							System.exit(0);
-						}
-					});
-				}
+				shutDown();
 			}
-			
 		});
-		
-		
+		pm.add(exitItem);
+		trayIcon.setPopupMenu(pm);
+
+
 		addTrayIconToSystemTray(trayIcon);
+	}
+
+	public static void shutDown()
+	{
+		localHub.shutDown();
+		cleanUpSystemTray();
+	}
+
+
+	private static void cleanUpSystemTray()
+	{
+		if (addedTrayIcon != null)
+		{
+			SystemTray.getSystemTray().remove(addedTrayIcon);
+		}
 	}
 
 
@@ -91,6 +98,7 @@ public class Runner
 		{
 			final SystemTray tray = SystemTray.getSystemTray();
 			tray.add(trayIcon);
+			addedTrayIcon = trayIcon;
 		}
 		catch (AWTException e)
 		{
@@ -106,7 +114,7 @@ public class Runner
 			return null;
 		} 
 		Image img = Toolkit.getDefaultToolkit().getImage(imageURL);
-		
+
 		return img;
 
 	}
