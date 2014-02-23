@@ -19,7 +19,6 @@ public class FileUtilities
 	private static Logger logger = Logger.getLogger(FileUtilities.class.getName());
 	
 	private static DateFormat formatterForFrames = makeDateInMillisToNumberFormatter();
-	private static DateFormat formatterForCapFile = makeDateInSecondsToNumberFormatter();
 	private static DateFormat formatterForLogFiles = makeDateInMinutesToNumberFormatter();
 	
 
@@ -69,7 +68,7 @@ public class FileUtilities
 		return new SimpleDateFormat("DDDyykkmmssSSS");
 	}
 	
-	private static SimpleDateFormat makeDateInSecondsToNumberFormatter()
+	public static SimpleDateFormat makeDateInSecondsToNumberFormatter()
 	{
 		return new SimpleDateFormat("DDDyykkmmss");
 	}
@@ -109,24 +108,9 @@ public class FileUtilities
 		return extractStartTime(fileToParse.getName(), makeDateInMinutesToNumberFormatter());
 	}
 
-	@Deprecated
-	private static Date parseStartDateOfCapFile(File capFile) throws ImproperlyEncodedDateException
-	{
-		return extractStartTime(capFile.getName(), makeDateInSecondsToNumberFormatter());
-	}
-
 	public static Date parseDateOfMediaFrame(File frame) throws ImproperlyEncodedDateException
 	{
 		return extractStartTime(frame.getName(), makeDateInMillisToNumberFormatter());
-	}
-
-	@Deprecated
-	private static String encodeCapFileName(Date date)
-	{
-		synchronized (formatterForCapFile)			//SimpleDateFormats are not thread-safe
-		{
-			return "screencasts."+formatterForCapFile.format(date)+".cap";
-		}
 	}
 
 	public static String encodeLogFileName(String pluginName, Date date)
