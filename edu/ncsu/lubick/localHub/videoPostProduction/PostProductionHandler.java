@@ -41,6 +41,11 @@ public class PostProductionHandler
 		File[] allFrames = getSortedFrameFiles();
 
 		int startIndex = findFrameBelongingToDate(startTimeToLookFor, allFrames);
+		if (startIndex >= allFrames.length)
+		{
+			logger.info("This tool use appears to be in the future, or at least past "+allFrames[allFrames.length-1]);
+			return null;
+		}
 		logger.debug("The first frame needed is at index " + startIndex + ", which corresponds to frame/file " + allFrames[startIndex]);
 
 		int endIndex = findFrameBelongingToDate(endTimeToLookFor, allFrames);

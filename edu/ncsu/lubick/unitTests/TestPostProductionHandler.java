@@ -11,7 +11,6 @@ import java.util.List;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -27,6 +26,9 @@ import edu.ncsu.lubick.util.FileUtilities;
 
 public class TestPostProductionHandler
 {
+	
+	private static final int NUMBER_ANIMATIONS = 6;
+	private static final int EXTRA_FRAMES_AND_ANIMATIONS = 5+5+NUMBER_ANIMATIONS; //5 copies of the last, plus 5 frames of black and 6 animations
 	private static final int MILLIS_BETWEEN_FRAMES = 200;
 	private static final File TEST_SCREENCAST_FOLDER = new File("./test_screencasting/");
 	private static final File DUMMY_SCREENCAST_ZIP = new File("sampleScreencastMinute.zip");
@@ -75,7 +77,7 @@ public class TestPostProductionHandler
 	@Test
 	public void testBasicBrowserPackageExtraction() throws Exception
 	{
-		Date screencastBeginDate = new Date(0);
+		Date screencastBeginDate = new Date(60_000); //one minute past the epoch
 		
 		setUpScreencastingFolderForDate(screencastBeginDate);
 		
@@ -89,8 +91,7 @@ public class TestPostProductionHandler
 	
 		verifyBrowserMediaCreatedCorrectly(expectedOutputDir, folderContainingBrowserPackage);
 	
-		assertEquals(25+28+5+5+6, expectedOutputDir.list().length);		//25 frames (5 seconds) runup, 
-		//28 frames, plus 5 copies of the last, plus 5 frames of black and 6 animations
+		assertEquals(25 + 28 + EXTRA_FRAMES_AND_ANIMATIONS, expectedOutputDir.list().length);		//25 frames (5 seconds) runup, 28 frames, plus extra
 	
 	}
 
@@ -100,6 +101,7 @@ public class TestPostProductionHandler
 	{
 		if (timeAssociatedWithScreencasting == null)
 		{
+			logger.info("Checking to see if we need to re-unzip the screencasts");
 			File[] files = TEST_SCREENCAST_FOLDER.listFiles();
 			Arrays.sort(files);
 			if (files.length < 300 || !files[0].getName().equals(FileUtilities.encodeMediaFrameName(screencastBeginDate)))
@@ -122,8 +124,8 @@ public class TestPostProductionHandler
 		
 		timeAssociatedWithScreencasting = new Date(screencastBeginDate.getTime());	//clone this date as the param will be used below
 		
-		TestingUtils.clearOutDirectory(TEST_SCREENCAST_FOLDER);
-		TestingUtils.unzipFileToFolder(DUMMY_SCREENCAST_ZIP, TEST_SCREENCAST_FOLDER);
+		//TestingUtils.clearOutDirectory(TEST_SCREENCAST_FOLDER);
+		//TestingUtils.unzipFileToFolder(DUMMY_SCREENCAST_ZIP, TEST_SCREENCAST_FOLDER);
 		File[] files = TEST_SCREENCAST_FOLDER.listFiles();
 		assertTrue(files.length >= 300);
 		Arrays.sort(files);
@@ -160,6 +162,7 @@ public class TestPostProductionHandler
 			}
 			catch (InterruptedException e)
 			{
+				logger.info("Interrupted while waiting for prepared browser media folder to be ready",e);
 			}
 		}
 		return expectedOutputDir;
@@ -179,12 +182,26 @@ public class TestPostProductionHandler
 		assertTrue(listOfFileNames.contains("text.png"));
 		assertTrue(listOfFileNames.contains("text_un.png"));
 		assertTrue(listOfFileNames.contains("frame0000.jpg"));
+		verifyFrameNameIntegrity(listOfFileNames, listOfFileNames.size() - NUMBER_ANIMATIONS);
+		
 	}
+
+
+	private void verifyFrameNameIntegrity(List<String> listOfFileNames, int expectedFrames)
+	{
+		for(int i = 0;i<expectedFrames;i++)
+		{
+			assertEquals("frame"+FileUtilities.padIntTo4Digits(i)+"."+PostProductionHandler.INTERMEDIATE_FILE_FORMAT, listOfFileNames.get(i));
+		}
+		
+	}
+
+
 
 
 	private ToolUsage makeToolUsage(Date toolUsageDate, String toolUsageName, int duration)
 	{
-		IdealizedToolStream iToolStream = new IdealizedToolStream(toolUsageDate);
+		IdealizedToolStream iToolStream = new IdealizedToolStream(TestingUtils.truncateTimeToMinute(toolUsageDate));
 		iToolStream.addToolUsage(toolUsageName, DEFAULT_TESTING_TOOL_CLASS, DEFAULT_TESTING_KEYPRESS, toolUsageDate, duration);
 
 		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
