@@ -49,7 +49,7 @@ public class IdealizedToolStream
 		// Create time in the past or future and round it to the nearest minute.
 		// This is the minute
 		// of our timeStream.
-		Date minuteDate = UtilitiesForTesting.truncateTimeToMinute((new Date()).getTime() - rand.nextInt());
+		Date minuteDate = TestingUtils.truncateTimeToMinute((new Date()).getTime() - rand.nextInt());
 
 		return generateRandomToolStream(numberOfCommands, minuteDate);
 	}
@@ -71,7 +71,7 @@ public class IdealizedToolStream
 		if (gc.get(GregorianCalendar.SECOND) != 0)
 		{
 			logger.info("WARNING: timestamp set to toolstream that was not rounded to the nearest minute");
-			minuteDate = UtilitiesForTesting.truncateTimeToMinute(minuteDate);
+			minuteDate = TestingUtils.truncateTimeToMinute(minuteDate);
 		}
 		this.timestamp = minuteDate;
 

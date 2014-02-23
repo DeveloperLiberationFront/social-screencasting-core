@@ -3,9 +3,15 @@ package edu.ncsu.lubick;
 import java.awt.AWTException;
 import java.awt.Desktop;
 import java.awt.Image;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.Toolkit;
 import java.awt.TrayIcon;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.net.URI;
 import java.net.URL;
 
@@ -51,10 +57,39 @@ public class Runner
 		}
 		final TrayIcon trayIcon = new TrayIcon(createImage("/imageAssets/tray_icon_small.png"));
 		trayIcon.setImageAutoSize(true);
-		final SystemTray tray = SystemTray.getSystemTray();
+		trayIcon.setToolTip("Social Screencasting running on port 4443");
+		trayIcon.addMouseListener(new MouseAdapter() {
+			
+			@Override
+			public void mouseClicked(MouseEvent e)
+			{
+				if (e.getClickCount() == 2)
+				{
+					PopupMenu pm = new PopupMenu("Social Screencasting");
+					MenuItem exitItem = new MenuItem("Exit");
+					exitItem.addActionListener(new ActionListener() {
+						
+						@Override
+						public void actionPerformed(ActionEvent arg0)
+						{
+							System.exit(0);
+						}
+					});
+				}
+			}
+			
+		});
+		
+		
+		addTrayIconToSystemTray(trayIcon);
+	}
 
+
+	private static void addTrayIconToSystemTray(final TrayIcon trayIcon)
+	{
 		try
 		{
+			final SystemTray tray = SystemTray.getSystemTray();
 			tray.add(trayIcon);
 		}
 		catch (AWTException e)

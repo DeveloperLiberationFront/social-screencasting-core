@@ -21,7 +21,7 @@ import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream.IdealizedToolUsage;
-import edu.ncsu.lubick.localHub.forTesting.UtilitiesForTesting;
+import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 
 public class TestToolStream {
 
@@ -60,7 +60,7 @@ public class TestToolStream {
 	public void testManualCreationOfToolStream()
 	{
 
-		Date firstDate = UtilitiesForTesting.truncateTimeToMinute(new Date());
+		Date firstDate = TestingUtils.truncateTimeToMinute(new Date());
 
 		IdealizedToolStream iToolStream = new IdealizedToolStream(firstDate);
 

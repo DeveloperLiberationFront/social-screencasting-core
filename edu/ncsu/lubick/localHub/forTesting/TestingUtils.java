@@ -1,23 +1,25 @@
 package edu.ncsu.lubick.localHub.forTesting;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Date;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.apache.log4j.Logger;
 
-import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
-import edu.ncsu.lubick.util.FileUtilities;
+public class TestingUtils {
 
-public class UtilitiesForTesting {
-
-	private UtilitiesForTesting()
+	private TestingUtils()
 	{
 	}
 
-	private static Logger logger = Logger.getLogger(UtilitiesForTesting.class.getName());
+	private static Logger logger = Logger.getLogger(TestingUtils.class.getName());
 
 	/**
 	 * Creates a file in the given directory with the given fileName and then writes the fileContents to disk.
@@ -135,15 +137,38 @@ public class UtilitiesForTesting {
 		return destination;
 	}
 
-	@Deprecated
-	public static String makeFileNameStemForToolPluginMedia(String pluginName, String toolName, Date toolTime)
+
+	public static void unzipFileToFolder(File dummyScreencastZip, File testScreencastFolder)
 	{
-		if (toolName == null)
+		//From http://kodejava.org/how-do-i-decompress-a-zip-file-using-zipinputstream/
+		try (FileInputStream fis = new FileInputStream(dummyScreencastZip);ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));)
 		{
-			logger.info("Got a null toolname, recovering with empty string");
-			toolName = "";
+			ZipEntry entry;
+
+			while ((entry = zis.getNextEntry()) != null) 
+			{
+				logger.debug("Unzipping: " + entry.getName());
+
+				int size;
+				byte[] buffer = new byte[2048];
+
+				File newFile = new File(testScreencastFolder, entry.getName());
+				if (!newFile.exists() && !newFile.createNewFile())
+				{
+					logger.info("Could not make file " +newFile+". Continuing anyway...");
+				}
+				try(FileOutputStream fos = new FileOutputStream(newFile);BufferedOutputStream bos = new BufferedOutputStream(fos, buffer.length);)
+				{
+					while ((size = zis.read(buffer, 0, buffer.length)) != -1) {
+						bos.write(buffer, 0, size);
+					}
+				}
+			}
+
+		} 
+		catch (IOException e) {
+			logger.error("Problem unzipping "+dummyScreencastZip +" into "+testScreencastFolder,e);
 		}
-		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + pluginName + FileUtilities.createHashFromToolName(toolName) + "_"+ toolTime.getTime();
 	}
 
 }

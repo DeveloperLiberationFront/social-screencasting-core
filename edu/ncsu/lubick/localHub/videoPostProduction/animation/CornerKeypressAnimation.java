@@ -26,6 +26,7 @@ import edu.ncsu.lubick.util.ThreadedImageDiskWritingStrategy;
 public class CornerKeypressAnimation implements PostProductionAnimationStrategy
 {
 
+	public static final String MENU_KEY_PRESS = "[GUI]";
 	private static Logger logger = Logger.getLogger(CornerKeypressAnimation.class.getName());
 	private static final int TIME_FOR_ACTIVATED_ANIMATION = 2; // in seconds
 	private static final int FRAMES_TO_ACCOUNT_FOR_LAG_TIME = 3;
@@ -66,7 +67,7 @@ public class CornerKeypressAnimation implements PostProductionAnimationStrategy
 	@Override
 	public void addAnimationToImagesInScratchFolderForToolStream(ToolUsage toolUsage) throws IOException
 	{
-		if (toolUsage.getToolKeyPresses().equals("MENU") || animationSource == null)
+		if (toolUsage.getToolKeyPresses().equals(MENU_KEY_PRESS) || animationSource == null)
 		{
 			return; // no animation for menus, or if the animationSource happens to be null
 		}
