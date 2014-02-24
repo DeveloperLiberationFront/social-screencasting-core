@@ -2,7 +2,9 @@ package edu.ncsu.lubick.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -29,7 +31,7 @@ public class FileUtilities
 
 	public static String readAllFromFile(File fileToParse)
 	{
-		byte[] bytes;
+		byte[] bytes; 
 		try
 		{
 			bytes = Files.readAllBytes(fileToParse.toPath());
@@ -162,6 +164,24 @@ public class FileUtilities
 			toolName = "";
 		}
 		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + pluginName + createHashFromToolName(toolName) + "_";
+	}
+
+	public static File copyFileToDir(File sourceFile, File destFolder) throws IOException
+	{
+		if (!destFolder.isDirectory() || !destFolder.exists())
+		{
+			logger.error("Can't copy to "+destFolder+"!  It's not a directory or doesn't exist");
+			return null;
+		}
+		if (sourceFile==null||!sourceFile.exists())
+		{
+			logger.error("Can't copy "+sourceFile+"!  It's null or doesn't exist");
+			return null;
+		}
+		File newFile = new File(destFolder,sourceFile.getName());
+		
+		return Files.copy(sourceFile.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING).toFile();
+		
 	}
 
 }

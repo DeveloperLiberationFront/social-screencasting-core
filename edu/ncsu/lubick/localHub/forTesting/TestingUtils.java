@@ -15,8 +15,11 @@ import org.apache.log4j.Logger;
 
 public class TestingUtils {
 	
-	private static File TESTING_ASSETS_DIR = new File("./src/testAssets/");
-	private static File TESTING_IMAGES_DIR = new File(TESTING_ASSETS_DIR, "test_images/");
+	private static final File TESTING_ASSETS_DIR = new File("./src/testAssets/");
+	private static final File TESTING_IMAGES_DIR = new File(TESTING_ASSETS_DIR, "test_images/");
+	private static final File TESTING_USER_FILE_DIR = new File(TESTING_ASSETS_DIR, "test_user_files/");
+	
+	
 	private TestingUtils()
 	{
 	}
@@ -176,6 +179,11 @@ public class TestingUtils {
 	public static File getTestImageFile(String testImageName)
 	{
 		return new File(TESTING_IMAGES_DIR, testImageName);
+	}
+
+	public static File getTestUserFile(String testUserFileName)
+	{
+		return new File(TESTING_USER_FILE_DIR, testUserFileName);
 	}
 
 }
