@@ -15,6 +15,7 @@ import javax.imageio.ImageIO;
 
 import org.apache.log4j.Logger;
 
+import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.videoPostProduction.AbstractImagesToMediaOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
@@ -22,7 +23,6 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedKeyboardMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextAndKeyboardMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedTextMaker;
-import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeypressAnimation;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.KeypressAnimationMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.ShortcutsToKeyCodesConverter;
 import edu.ncsu.lubick.util.FileUtilities;
@@ -121,7 +121,7 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 
 	private void createAnimationImagesForToolStream(ToolUsage toolUsage) throws IOException
 	{
-		if (toolUsage == null || toolUsage.getToolKeyPresses().equals(CornerKeypressAnimation.MENU_KEY_PRESS))
+		if (toolUsage == null || toolUsage.getToolKeyPresses().equals(ToolStream.MENU_KEY_PRESS))
 		{
 			return; // no animation for menus
 		}

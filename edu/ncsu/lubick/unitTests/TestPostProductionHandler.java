@@ -23,7 +23,6 @@ import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
-import edu.ncsu.lubick.localHub.videoPostProduction.animation.CornerKeypressAnimation;
 import edu.ncsu.lubick.util.FileUtilities;
 
 public class TestPostProductionHandler
@@ -307,7 +306,7 @@ public class TestPostProductionHandler
 	private ToolUsage makeGUIToolUsage(Date toolUsageDate, String toolUsageName, int duration)
 	{
 		IdealizedToolStream iToolStream = new IdealizedToolStream(TestingUtils.truncateTimeToMinute(toolUsageDate));
-		iToolStream.addToolUsage(toolUsageName, DEFAULT_TESTING_TOOL_CLASS, CornerKeypressAnimation.MENU_KEY_PRESS, toolUsageDate, duration);
+		iToolStream.addToolUsage(toolUsageName, DEFAULT_TESTING_TOOL_CLASS, ToolStream.MENU_KEY_PRESS, toolUsageDate, duration);
 
 		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
 		toolStream.setAssociatedPlugin(TEST_PLUGIN_NAME);

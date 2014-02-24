@@ -16,6 +16,7 @@ public class ToolStream {
 	public static final String TOOL_KEY_PRESSES = "Tool_Key_Presses";
 	public static final String TOOL_TIMESTAMP = "Tool_Timestamp";
 	public static final String TOOL_DURATION = "Tool_Duration";
+	public static final String MENU_KEY_PRESS = "[GUI]";
 
 	private List<ToolUsage> listOfToolUsages;
 	private Date timeStamp;

@@ -24,6 +24,7 @@ public class FileUtilities
 
 	private FileUtilities()
 	{
+		
 	}
 
 	public static String readAllFromFile(File fileToParse)
