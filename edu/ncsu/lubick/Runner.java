@@ -56,7 +56,7 @@ public class Runner
 			return;
 		}
 		final TrayIcon trayIcon = new TrayIcon(createImage("/imageAssets/tray_icon_small.png"));
-		trayIcon.setImageAutoSize(true);
+		trayIcon.setImageAutoSize(true); 
 		trayIcon.setToolTip("Social Screencasting running on port 4443");
 
 		PopupMenu pm = new PopupMenu("Social Screencasting");

@@ -14,7 +14,9 @@ import java.util.zip.ZipInputStream;
 import org.apache.log4j.Logger;
 
 public class TestingUtils {
-
+	
+	private static File TESTING_ASSETS_DIR = new File("./src/testAssets/");
+	private static File TESTING_IMAGES_DIR = new File(TESTING_ASSETS_DIR, "test_images/");
 	private TestingUtils()
 	{
 	}
@@ -169,6 +171,11 @@ public class TestingUtils {
 		catch (IOException e) {
 			logger.error("Problem unzipping "+dummyScreencastZip +" into "+testScreencastFolder,e);
 		}
+	}
+
+	public static File getTestImageFile(String testImageName)
+	{
+		return new File(TESTING_IMAGES_DIR, testImageName);
 	}
 
 }

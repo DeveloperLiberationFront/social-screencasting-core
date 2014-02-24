@@ -40,6 +40,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	private boolean isDebug = false;
 	private ScreenRecordingModule screenRecordingModule;
 	private HTTPServer httpServer;
+	private UserManager userManager;
 
 	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, boolean wantHTTP, boolean wantScreenRecording)
 	{

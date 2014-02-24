@@ -20,6 +20,7 @@ import org.junit.Test;
 import edu.ncsu.lubick.Runner;
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
+import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedKeyboardMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.ShortcutsToKeyCodesConverter;
 
@@ -146,7 +147,7 @@ public class TestKeypressAnimationGeneration {
 
 		debugWriteImageToFile(img, "test.png");
 
-		assertTrue(doTwoImagesMatch("./src/test_images/AltShiftXT.png", "test.png"));
+		assertTrue(doTwoImagesMatch("AltShiftXT.png", "test.png"));
 
 	}
 	
@@ -163,7 +164,7 @@ public class TestKeypressAnimationGeneration {
 	
 	public static boolean doTwoImagesMatch(String fileOne, String fileTwo) throws IOException
 	{
-		return doTwoImagesMatch(new File(fileOne), new File(fileTwo));
+		return doTwoImagesMatch(TestingUtils.getTestImageFile(fileOne), new File(fileTwo));
 	}
 
 	public static boolean doTwoImagesMatch(File fileOne, File fileTwo) throws IOException
