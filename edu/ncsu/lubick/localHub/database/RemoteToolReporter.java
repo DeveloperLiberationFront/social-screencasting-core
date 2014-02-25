@@ -1,7 +1,18 @@
 package edu.ncsu.lubick.localHub.database;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,7 +28,8 @@ public class RemoteToolReporter {
 	private BufferedDatabaseManager databaseManager;
 
 	private UserManager userManager;
-	
+
+	private CloseableHttpClient client = HttpClients.createDefault();
 
 
 	public RemoteToolReporter(BufferedDatabaseManager databaseManager, UserManager userManager)
@@ -27,13 +39,34 @@ public class RemoteToolReporter {
 	}
 	
 	
-	private void reportTools() throws JSONException
+	public void reportTools() throws JSONException
 	{
 		
 		JSONObject objectToReport = makeAggregateForAllPlugins();
-		objectToReport.put("name", userManager.getUserName());
-		objectToReport.put("email", userManager.getUserEmail());
-		objectToReport.put("token", userManager.getUserToken());
+		JSONObject userObject = new JSONObject();
+		userObject.put("name", userManager.getUserName());
+		userObject.put("email", userManager.getUserEmail());
+		userObject.put("token", userManager.getUserToken());
+
+		
+		HttpPut httpPut = new HttpPut("http://screencaster-hub.appspot.com/api/"+userManager.getUserEmail()+"/");
+
+		List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+		nvps.add(new BasicNameValuePair("user", userObject.toString()));
+		nvps.add(new BasicNameValuePair("data", objectToReport.toString()));
+		
+		logger.debug("reporting data "+objectToReport.toString(2));
+
+		try
+		{
+			httpPut.setEntity(new UrlEncodedFormEntity(nvps));
+			client.execute(httpPut);
+		}
+		catch (IOException e)
+		{
+			logger.fatal("Problem reporting tool info",e);
+		}
+		
 	}
 	
 	private JSONObject makeAggregateForAllPlugins()
@@ -53,16 +86,7 @@ public class RemoteToolReporter {
 			}
 		}
 		
-		JSONObject retVal = new JSONObject();
-		try
-		{
-			retVal.put("data", allPlugins);
-		}
-		catch (JSONException e)
-		{
-			logger.error("Unusual JSON exception, squashing: ",e);
-		}
-		return retVal;
+		return allPlugins;
 	}
 
 

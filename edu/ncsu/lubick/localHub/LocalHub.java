@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.json.JSONException;
 
 import edu.ncsu.lubick.ScreenRecordingModule;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
@@ -34,7 +35,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	private File monitorDirectory = null;
 
 	private BufferedDatabaseManager databaseManager = null;
-	private PostProductionHandler postProductionHandler = null;
+	private PostProductionHandler postProductionHandler = new PostProductionHandler(new File(".\\HF\\Screencasting"));
 
 	private boolean shouldUseHTTPServer;
 	private boolean shouldUseScreenRecording;
@@ -129,6 +130,14 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		{
 			userManager = new UserManager(new File("."));
 			remoteToolReporter = new RemoteToolReporter(this.databaseManager, userManager);
+			try
+			{
+				remoteToolReporter.reportTools();
+			}
+			catch (JSONException e)
+			{
+				logger.error(e);
+			}
 		}
 
 	}
