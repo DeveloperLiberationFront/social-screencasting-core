@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import edu.ncsu.lubick.ScreenRecordingModule;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.database.LocalSQLDatabaseFactory;
+import edu.ncsu.lubick.localHub.database.RemoteToolReporter;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.http.HTTPServer;
 import edu.ncsu.lubick.localHub.http.WebToolReportingInterface;
@@ -41,6 +42,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	private ScreenRecordingModule screenRecordingModule;
 	private HTTPServer httpServer;
 	private UserManager userManager;
+	private RemoteToolReporter remoteToolReporter;
 
 	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, boolean wantHTTP, boolean wantScreenRecording)
 	{
@@ -103,10 +105,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			return;
 		}
 		isRunning = true;
-		//backgroundFileMonitor = new FileMonitor(loadedFileManager, new ToolStreamMonitor());
-		//backgroundFileMonitor.setMonitorFolderAndUpdateTrackedFiles(this.monitorDirectory);
-		//Thread currentThread = new Thread(backgroundFileMonitor);
-		//currentThread.start();
 
 		if (shouldUseHTTPServer)
 		{
@@ -126,6 +124,11 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			this.screenRecordingModule = new ScreenRecordingModule(screencastingOutputFolder);
 			screenRecordingModule.startRecording();
 			this.postProductionHandler = new PostProductionHandler(screencastingOutputFolder);
+		}
+		
+		{
+			userManager = new UserManager(new File("."));
+			remoteToolReporter = new RemoteToolReporter(this.databaseManager, userManager);
 		}
 
 	}

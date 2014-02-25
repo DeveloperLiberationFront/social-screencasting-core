@@ -1,9 +1,12 @@
 package edu.ncsu.lubick.localHub;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -17,6 +20,7 @@ import edu.ncsu.lubick.localHub.database.LocalDBAbstraction;
 import edu.ncsu.lubick.localHub.database.RemoteDBAbstraction;
 import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.util.FileDateStructs;
+import edu.ncsu.lubick.util.ToolCountStruct;
 
 /**
  * An implementation of a database that prioritizes quick writes at the expenses of blocking on data pulls.
@@ -231,6 +235,31 @@ public class BufferedDatabaseManager
 		{
 			resetThreadPools();
 		}
+		return retVal;
+	}
+
+	public List<ToolCountStruct> getAllToolAggregateForPlugin(String pluginName)
+	{
+		List<ToolUsage> toolUsages = getAllToolUsageHistoriesForPlugin(pluginName);
+		Map<String, Integer> toolCountsMap = new HashMap<>();
+		// add the toolusages to the map
+		for (ToolUsage tu : toolUsages)
+		{
+			Integer previousCount = toolCountsMap.get(tu.getToolName());
+			if (previousCount == null)
+			{
+				previousCount = 0;
+			}
+			toolCountsMap.put(tu.getToolName(), previousCount + 1);
+		}
+		// convert the map back to a list
+		List<ToolCountStruct> retVal = new ArrayList<>();
+		for (String toolName : toolCountsMap.keySet())
+		{
+			retVal.add(new ToolCountStruct(toolName, toolCountsMap.get(toolName)));
+		}
+		// sort, using the internal comparator
+		Collections.sort(retVal);
 		return retVal;
 	}
 

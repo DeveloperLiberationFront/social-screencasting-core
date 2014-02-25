@@ -16,6 +16,7 @@ import org.eclipse.jetty.server.Request;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
+import edu.ncsu.lubick.util.ToolCountStruct;
 import freemarker.template.SimpleNumber;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateHashModel;
@@ -102,16 +103,17 @@ public class LookupHandler extends TemplateHandlerWithDatabaseLink {
 	private Map<Object, Object> getToolUsagesAndCountsFromDatabase(String pluginName)
 	{
 		List<ToolUsage> toolUsages = this.databaseLink.getAllToolUsagesForPlugin(pluginName);
-		List<ToolNameAndCount> toolsAndCounts = countUpAllToolUsages(toolUsages);
+		List<ToolCountTemplateModel> toolsAndCounts = countUpAllToolUsages(toolUsages);
 
 		Map<Object, Object> retval = new HashMap<>();
 		retval.put("toolsAndCounts", toolsAndCounts);
 		retval.put("plugin", pluginName);
-		return retval;
+		return retval; 
 	}
 
-	private List<ToolNameAndCount> countUpAllToolUsages(List<ToolUsage> toolUsages)
+	private List<ToolCountTemplateModel> countUpAllToolUsages(List<ToolUsage> toolUsages)
 	{
+		//TODO this is duplicated code.  Perhaps refactor
 		Map<String, Integer> toolCountsMap = new HashMap<>();
 		// add the toolusages to the map
 		for (ToolUsage tu : toolUsages)
@@ -124,10 +126,10 @@ public class LookupHandler extends TemplateHandlerWithDatabaseLink {
 			toolCountsMap.put(tu.getToolName(), previousCount + 1);
 		}
 		// convert the map back to a list
-		List<ToolNameAndCount> retVal = new ArrayList<>();
+		List<ToolCountTemplateModel> retVal = new ArrayList<>();
 		for (String toolName : toolCountsMap.keySet())
 		{
-			retVal.add(new ToolNameAndCount(toolName, toolCountsMap.get(toolName)));
+			retVal.add(new ToolCountTemplateModel(toolName, toolCountsMap.get(toolName)));
 		}
 		// sort, using the internal comparator
 		Collections.sort(retVal);
@@ -149,57 +151,18 @@ public class LookupHandler extends TemplateHandlerWithDatabaseLink {
 	 * implements TemplatehashModel so that in the templates, its fields can be accessed via ${toolNameAndCount.toolCount}
 	 * implements Comparable so that I can sort them on the server before sending them out
 	 */
-	private class ToolNameAndCount implements Comparable<ToolNameAndCount>, TemplateHashModel
+	private class ToolCountTemplateModel extends ToolCountStruct implements TemplateHashModel
 	{
-
-		private Integer toolCount;
-		private String toolName;
-
-		public ToolNameAndCount(String toolName, Integer toolCount)
+		public ToolCountTemplateModel(String toolName, int toolCount)
 		{
-			this.toolName = toolName;
-			this.toolCount = toolCount;
+			super(toolName, toolCount);
 		}
 
-		@Override
-		public int compareTo(ToolNameAndCount o)
-		{ // sort by tool usage, if they are the same, sort by alphabetical
-			// order on the tool name
-			if (this.toolCount.compareTo(o.toolCount) != 0)
-			{
-				return o.toolCount.compareTo(this.toolCount); // reversed so
-																// that
-																// Collections.sort
-																// sorts in
-																// descending
-																// order
-			}
-			return o.toolName.compareTo(this.toolName); // reversed so that
-														// Collections.sort
-														// sorts in descending
-														// order
-		}
-
-		@Override
-		public int hashCode()
-		{
-			return (toolName + toolCount.toString()).hashCode();
-		}
-
-		@Override
-		public boolean equals(Object obj)
-		{
-			if (obj instanceof ToolNameAndCount)
-			{
-				return this.hashCode() == obj.hashCode();
-			}
-			return false;
-		}
 
 		@Override
 		public String toString()
 		{ // for debugging
-			return "ToolNameAndCount [toolName=" + toolName + ", toolCount="
+			return "ToolCountTemplateModel [toolName=" + toolName + ", toolCount="
 					+ toolCount + "]";
 		}
 
