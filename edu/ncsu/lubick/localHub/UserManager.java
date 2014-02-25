@@ -24,6 +24,12 @@ public class UserManager {
 
 	private void parseOutFile(File initFile)
 	{
+		if (!initFile.exists())
+		{
+			promptUserForInfo();
+			writeOutInitFile(initFile);
+			return;
+		}
 		String fileContents = FileUtilities.readAllFromFile(initFile);
 		try
 		{
@@ -36,6 +42,18 @@ public class UserManager {
 		{
 			logger.info("Problem parsing User Init file",e);
 		}
+	}
+
+	protected void writeOutInitFile(File initFile)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	protected void promptUserForInfo()
+	{
+		// TODO Auto-generated method stub
+		
 	}
 
 	public String getUserName()

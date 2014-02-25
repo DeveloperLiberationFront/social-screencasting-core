@@ -42,13 +42,6 @@ public class TestToolStream {
 			BasicConfigurator.configure();
 			Logger.getRootLogger().info("Could not load property file, loading defaults", e);
 		}
-		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
-	}
-	
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception
-	{
-		
 	}
 
 	@Before

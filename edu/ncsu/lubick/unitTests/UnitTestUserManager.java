@@ -6,7 +6,7 @@ import edu.ncsu.lubick.localHub.UserManager;
 
 public class UnitTestUserManager extends UserManager {
 
-	private boolean deployedGUI = false;
+	private boolean deployedGUI;
 	
 	
 	public UnitTestUserManager(File workingDir)
@@ -19,4 +19,10 @@ public class UnitTestUserManager extends UserManager {
 		return deployedGUI;		
 	}
 
+	
+	@Override
+	protected void promptUserForInfo()
+	{
+		deployedGUI = true;
+	}
 }
