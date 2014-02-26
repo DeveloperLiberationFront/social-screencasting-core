@@ -92,14 +92,21 @@ public class RemoteToolReporter {
 	private JSONObject assembleReportingJSONObject() throws JSONException
 	{
 		JSONObject pluginAggregate = makeAggregateForAllPlugins();
-		JSONObject userObject = new JSONObject();
-		userObject.put("name", userManager.getUserName());
-		userObject.put("email", userManager.getUserEmail());
-		userObject.put("token", userManager.getUserToken());
+		JSONObject userObject = assembleUserObject();
 		JSONObject reportingObject = new JSONObject();
 		reportingObject.put("user", userObject);
 		reportingObject.put("data", pluginAggregate);
 		return reportingObject;
+	}
+
+
+	private JSONObject assembleUserObject() throws JSONException
+	{
+		JSONObject userObject = new JSONObject();
+		userObject.put("name", userManager.getUserName());
+		userObject.put("email", userManager.getUserEmail());
+		userObject.put("token", userManager.getUserToken());
+		return userObject;
 	}
 	
 	private JSONObject makeAggregateForAllPlugins()
