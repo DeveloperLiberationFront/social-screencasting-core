@@ -1,15 +1,13 @@
 package edu.ncsu.lubick.localHub.database;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -42,24 +40,37 @@ public class RemoteToolReporter {
 	public void reportTools() throws JSONException
 	{
 		
-		JSONObject objectToReport = makeAggregateForAllPlugins();
+		JSONObject pluginAggregate = makeAggregateForAllPlugins();
 		JSONObject userObject = new JSONObject();
 		userObject.put("name", userManager.getUserName());
 		userObject.put("email", userManager.getUserEmail());
 		userObject.put("token", userManager.getUserToken());
 
 		
-		HttpPut httpPut = new HttpPut("http://screencaster-hub.appspot.com/api/"+userManager.getUserEmail()+"/");
+		HttpPut httpPut = new HttpPut("http://screencaster-hub.appspot.com/api/"+userManager.getUserEmail());
 
-		List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+		//httpPut.set
+		
+		/*List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 		nvps.add(new BasicNameValuePair("user", userObject.toString()));
 		nvps.add(new BasicNameValuePair("data", objectToReport.toString()));
 		
 		logger.debug("reporting data "+objectToReport.toString(2));
+		*/
+		
+		JSONObject reportingObject = new JSONObject();
+		reportingObject.put("user", userObject);
+		reportingObject.put("data", pluginAggregate);
+		
+		logger.debug("reporting data "+reportingObject.toString(2));
+		
 
 		try
 		{
-			httpPut.setEntity(new UrlEncodedFormEntity(nvps));
+			StringEntity content = new StringEntity(reportingObject.toString());
+			content.setContentType("application/json");
+			//content.writeTo(System.err);
+			httpPut.setEntity(content);
 			client.execute(httpPut);
 		}
 		catch (IOException e)
