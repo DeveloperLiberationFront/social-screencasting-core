@@ -2,12 +2,17 @@ package edu.ncsu.lubick.localHub.videoPostProduction;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,23 +37,25 @@ public class BrowserMediaPackageUploader {
 	public static void main(String[] args) throws Exception
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
-		String putUrl = "http://screencaster-hub.appspot.com/api/test@mailinator.com/Eclipse/Copy/4321/frame0000.jpg";
+		String putUrl = "http://screencaster-hub.appspot.com/api/test@mailinator.com/Eclipse/Copy/4321/frame0000.jpg?";
+		
+		List<NameValuePair> userObject = assembleUserObject();
+		putUrl+=URLEncodedUtils.format(userObject, "UTF-8");
 		
 		HttpPut httpPut = new HttpPut(putUrl);
 		
 		File file = new File("test_screencasting\\frame.36569190100000.jpg");
 		
+		
+		
 		MultipartEntityBuilder mpeBuilder = MultipartEntityBuilder.create();
-		
-		JSONObject userObject = assembleUserObject();
-		
-		mpeBuilder.addTextBody("user", userObject.toString());
 		
 		mpeBuilder.addBinaryBody("image", file);
 
 		try
 		{
 			HttpEntity content = mpeBuilder.build();
+			
 
 			httpPut.setEntity(content);
 			client.execute(httpPut);
@@ -60,13 +67,18 @@ public class BrowserMediaPackageUploader {
 	}
 	
 	
-	private static JSONObject assembleUserObject() throws JSONException
+	private static List<NameValuePair> assembleUserObject() throws JSONException
 	{
-		JSONObject userObject = new JSONObject();
+		/*JSONObject userObject = new JSONObject();
 		userObject.put("name", "Test User");
 		userObject.put("email", "test@mailinator.com");
 		userObject.put("token", "123");
-		return userObject;
+		*/
+		List<NameValuePair> retVal = new ArrayList<>();
+		retVal.add(new BasicNameValuePair("name", "Test User"));
+		retVal.add(new BasicNameValuePair("email", "test@mailinator.com"));
+		retVal.add(new BasicNameValuePair("token", "123"));
+		return retVal;
 	}
 	
 	
