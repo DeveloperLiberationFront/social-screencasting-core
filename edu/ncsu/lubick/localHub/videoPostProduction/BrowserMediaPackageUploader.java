@@ -41,6 +41,7 @@ public class BrowserMediaPackageUploader {
 		MultipartEntityBuilder mpeBuilder = MultipartEntityBuilder.create();
 		
 		JSONObject userObject = assembleUserObject();
+		
 		mpeBuilder.addTextBody("user", userObject.toString());
 		
 		mpeBuilder.addBinaryBody("image", file);

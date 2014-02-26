@@ -19,6 +19,7 @@ import org.apache.log4j.PropertyConfigurator;
 
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.LocalHubProcess;
+import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 
 public class Runner
 {
@@ -27,18 +28,7 @@ public class Runner
 
 	static
 	{
-		try
-		{
-			URL url = Runner.class.getResource(LocalHub.LOGGING_FILE_PATH);
-			PropertyConfigurator.configure(url);
-			Logger.getRootLogger().info("Logging initialized");
-		}
-		catch (Exception e)
-		{
-			//load safe defaults
-			BasicConfigurator.configure();
-			Logger.getRootLogger().info("Could not load property file, loading defaults", e);
-		}
+		TestingUtils.makeSureLoggingIsSetUp();
 	}
 	public static void main(String[] args) throws Exception
 	{

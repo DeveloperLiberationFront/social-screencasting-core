@@ -4,13 +4,14 @@ import java.awt.Desktop;
 import java.net.URI;
 
 import edu.ncsu.lubick.localHub.LocalHub;
+import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 
 public class RunnerNoScreencasting
 {
 
 	static
 	{
-		
+		TestingUtils.makeSureLoggingIsSetUp();
 	}
 
 	public static void main(String[] args) throws Exception
