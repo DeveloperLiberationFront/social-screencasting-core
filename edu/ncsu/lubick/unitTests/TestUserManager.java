@@ -4,20 +4,15 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import edu.ncsu.lubick.Runner;
-import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
+import edu.ncsu.lubick.localHub.forTesting.UnitTestUserManager;
 import edu.ncsu.lubick.util.FileUtilities;
 
 public class TestUserManager {
@@ -28,18 +23,7 @@ public class TestUserManager {
 	@BeforeClass
 	public static void setUpClass() throws Exception
 	{
-		try
-		{
-			URL url = Runner.class.getResource(LocalHub.LOGGING_FILE_PATH);
-			PropertyConfigurator.configure(url);
-			Logger.getRootLogger().info("Logging initialized");
-		}
-		catch (Exception e)
-		{
-			//load safe defaults
-			BasicConfigurator.configure();
-			Logger.getRootLogger().info("Could not load property file, loading defaults", e);
-		}
+		TestingUtils.makeSureLoggingIsSetUp();
 		if (!workingDir.exists() && !workingDir.mkdir())
 		{
 			fail("Couldn't make scratch folder");

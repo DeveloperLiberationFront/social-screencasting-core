@@ -7,18 +7,12 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 
 import javax.imageio.ImageIO;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import edu.ncsu.lubick.Runner;
-import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedKeyboardMaker;
@@ -29,19 +23,8 @@ public class TestKeypressAnimationGeneration {
 	@BeforeClass
 	public static void setUpBeforeAll()
 	{
+		TestingUtils.makeSureLoggingIsSetUp();
 		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
-		try
-		{
-			URL url = Runner.class.getResource(LocalHub.LOGGING_FILE_PATH);
-			PropertyConfigurator.configure(url);
-			Logger.getRootLogger().info("Logging initialized");
-		}
-		catch (Exception e)
-		{
-			//load safe defaults
-			BasicConfigurator.configure();
-			Logger.getRootLogger().info("Could not load property file, loading defaults", e);
-		}
 	}
 
 	@Test

@@ -6,12 +6,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+
+import edu.ncsu.lubick.Runner;
+import edu.ncsu.lubick.localHub.LocalHub;
 
 public class TestingUtils {
 	
@@ -22,10 +28,37 @@ public class TestingUtils {
 	
 	private TestingUtils()
 	{
+		
 	}
 
-	private static Logger logger = Logger.getLogger(TestingUtils.class.getName());
+	private static Logger logger;
 
+	static{
+		setUpLogging();
+		logger = Logger.getLogger(TestingUtils.class.getName());
+	}
+	
+	private static void setUpLogging()
+	{
+		try
+		{
+			URL url = Runner.class.getResource(LocalHub.LOGGING_FILE_PATH);
+			PropertyConfigurator.configure(url);
+			Logger.getRootLogger().info("Logging initialized");
+		}
+		catch (Exception e)
+		{
+			// load safe defaults
+			BasicConfigurator.configure();
+			Logger.getRootLogger().info("Could not load property file, loading defaults", e);
+		}
+	}
+	
+	public static void makeSureLoggingIsSetUp()
+	{
+		//the act of calling this method will run the static initializer if it hasn't been run already
+	}
+	
 	/**
 	 * Creates a file in the given directory with the given fileName and then writes the fileContents to disk.
 	 * 

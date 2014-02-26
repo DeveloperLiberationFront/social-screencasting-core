@@ -2,24 +2,21 @@ package edu.ncsu.lubick.localHub.videoPostProduction;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.ncsu.lubick.Runner;
-import edu.ncsu.lubick.localHub.LocalHub;
+import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 
 /**
- * Uploads a browser media package to app engine
+ * Uploads a browser media package to app engine.  Does not deal with sharing, that is
+ * BrowserMediaPackageSharer
  * @author KevinLubick
  *
  */
@@ -30,26 +27,11 @@ public class BrowserMediaPackageUploader {
 	
 	private static CloseableHttpClient client = HttpClients.createDefault();
 	
-	static
-	{
-		try
-		{
-			URL url = Runner.class.getResource(LocalHub.LOGGING_FILE_PATH);
-			PropertyConfigurator.configure(url);
-			Logger.getRootLogger().info("Logging initialized");
-		}
-		catch (Exception e)
-		{
-			// load safe defaults
-			BasicConfigurator.configure();
-			Logger.getRootLogger().info("Could not load property file, loading defaults", e);
-		}
-	}
 	
 	//For whitebox/end-to-end testing
 	public static void main(String[] args) throws Exception
 	{
-		
+		TestingUtils.makeSureLoggingIsSetUp();
 		String putUrl = "http://screencaster-hub.appspot.com/api/test@mailinator.com/Eclipse/Copy/4321/frame0000.jpg";
 		
 		HttpPut httpPut = new HttpPut(putUrl);

@@ -3,20 +3,15 @@ package edu.ncsu.lubick.unitTests;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import edu.ncsu.lubick.Runner;
-import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
@@ -47,18 +42,7 @@ public class TestPostProductionHandler
 	@BeforeClass
 	public static void setUpBeforeAll()
 	{
-		try
-		{
-			URL url = Runner.class.getResource(LocalHub.LOGGING_FILE_PATH);
-			PropertyConfigurator.configure(url);
-			Logger.getRootLogger().info("Logging initialized");
-		}
-		catch (Exception e)
-		{
-			//load safe defaults
-			BasicConfigurator.configure();
-			Logger.getRootLogger().info("Could not load property file, loading defaults", e);
-		}
+		TestingUtils.makeSureLoggingIsSetUp();
 		logger = Logger.getLogger(TestPostProductionHandler.class);
 		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
 		
