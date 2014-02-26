@@ -19,10 +19,21 @@ public class UnitTestUserManager extends UserManager {
 		return deployedGUI;		
 	}
 
+	@Override
+	public void writeOutInitFile(File initFile)
+	{
+		super.writeOutInitFile(initFile);
+	}
 	
 	@Override
-	protected void promptUserForInfo()
+	public void promptUserForInfo()
 	{
 		deployedGUI = true;
+	}
+
+	public void setData(String testName, String testEmail, String testUUID)
+	{
+		// TODO Auto-generated method stub
+		
 	}
 }

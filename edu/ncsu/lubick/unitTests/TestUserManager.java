@@ -9,6 +9,7 @@ import java.net.URL;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -63,6 +64,7 @@ public class TestUserManager {
 		moveTestUserFileIntoPlace("existingUserFile.txt");
 		
 		UserManager um = new UnitTestUserManager(workingDir);
+		assertFalse(um.needsUserInput());
 		assertEquals(um.getUserName(), "Kevin Lubick");
 		assertEquals(um.getUserEmail(), "kjlubick@ncsu.edu");
 		assertEquals(um.getUserToken(), "221ed3d8-6a09-4967-91b6-482783ec5313");
@@ -72,11 +74,30 @@ public class TestUserManager {
 	@Test
 	public void testNonCreatedUser() throws Exception
 	{
-		assertFalse(new File(workingDir,UserManager.EXPECTED_USER_SETTINGS).exists());
+		File expectedINIFile = new File(workingDir,UserManager.EXPECTED_USER_SETTINGS);
+		assertFalse(expectedINIFile.exists());
 		
 		UserManager um = new UnitTestUserManager(workingDir);
+		assertTrue(um.needsUserInput());
+		um.promptUserForInfo();
+		UnitTestUserManager testUm = ((UnitTestUserManager) um);
+		assertTrue(testUm.hadToDeployGUIPrompt());
 		
-		assertTrue(((UnitTestUserManager) um).hadToDeployGUIPrompt());
+		testUm.setData("TestUser", "test@mailinator.com", "[SOME UUID]");
+		testUm.writeOutInitFile(expectedINIFile);
+		
+		assertTrue(expectedINIFile.exists());
+		
+		String fileContents = FileUtilities.readAllFromFile(expectedINIFile);
+		assertNotNull(fileContents);
+		JSONObject jobj = new JSONObject(fileContents);
+		assertTrue(jobj.has("name"));
+		assertEquals(jobj.get("name"), "TestUser");
+		assertTrue(jobj.has("email"));
+		assertEquals(jobj.get("email"), "test@mailinator.com");
+		assertTrue(jobj.has("token"));
+		assertEquals(jobj.get("token"), "[SOME UUID]");
+		
 	}
 
 }

@@ -1,16 +1,14 @@
 package edu.ncsu.lubick.localHub.database;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,6 +20,8 @@ import edu.ncsu.lubick.util.ToolCountStruct;
 public class RemoteToolReporter {
 
 	private static final Logger logger = Logger.getLogger(RemoteToolReporter.class);
+
+	private static final long REPORTING_DELAY = 300_000;		//every 5 minutes report
 	
 	private BufferedDatabaseManager databaseManager;
 
@@ -29,55 +29,77 @@ public class RemoteToolReporter {
 
 	private CloseableHttpClient client = HttpClients.createDefault();
 
+	private Timer reportingTimer;
+
 
 	public RemoteToolReporter(BufferedDatabaseManager databaseManager, UserManager userManager)
 	{
 		this.databaseManager = databaseManager;
 		this.userManager = userManager;
+		
+		beginReportingTools();
 	}
 	
 	
-	public void reportTools() throws JSONException
+	private void beginReportingTools()
+	{
+		TimerTask reportingTask = new TimerTask() {
+			
+			@Override
+			public void run()
+			{
+				try
+				{
+					reportTools();
+				}
+				catch (JSONException e)
+				{
+					logger.error("JSON Exception while reporting",e);
+				}
+			}
+		};
+		
+		reportingTimer = new Timer(true);	//quit on application end
+		reportingTimer.schedule(reportingTask, 10000, REPORTING_DELAY);
+	}
+
+
+	private void reportTools() throws JSONException
 	{
 		
-		JSONObject pluginAggregate = makeAggregateForAllPlugins();
-		JSONObject userObject = new JSONObject();
-		userObject.put("name", userManager.getUserName());
-		userObject.put("email", userManager.getUserEmail());
-		userObject.put("token", userManager.getUserToken());
-
+		JSONObject reportingObject = assembleReportingJSONObject();
 		
+		logger.debug("preparing to report data "+reportingObject.toString(2));
+
 		HttpPut httpPut = new HttpPut("http://screencaster-hub.appspot.com/api/"+userManager.getUserEmail());
-
-		//httpPut.set
-		
-		/*List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-		nvps.add(new BasicNameValuePair("user", userObject.toString()));
-		nvps.add(new BasicNameValuePair("data", objectToReport.toString()));
-		
-		logger.debug("reporting data "+objectToReport.toString(2));
-		*/
-		
-		JSONObject reportingObject = new JSONObject();
-		reportingObject.put("user", userObject);
-		reportingObject.put("data", pluginAggregate);
-		
-		logger.debug("reporting data "+reportingObject.toString(2));
-		
 
 		try
 		{
 			StringEntity content = new StringEntity(reportingObject.toString());
 			content.setContentType("application/json");
-			//content.writeTo(System.err);
+
 			httpPut.setEntity(content);
 			client.execute(httpPut);
 		}
 		catch (IOException e)
 		{
-			logger.fatal("Problem reporting tool info",e);
+			logger.error("Problem reporting tool info",e);
 		}
 		
+	}
+
+
+	private JSONObject assembleReportingJSONObject() throws JSONException
+	{
+		JSONObject pluginAggregate = makeAggregateForAllPlugins();
+		JSONObject userObject = new JSONObject();
+		userObject.put("name", userManager.getUserName());
+		userObject.put("email", userManager.getUserEmail());
+		userObject.put("token", userManager.getUserToken());
+		JSONObject reportingObject = new JSONObject();
+		reportingObject.put("user", userObject);
+		reportingObject.put("data", pluginAggregate);
+		return reportingObject;
 	}
 	
 	private JSONObject makeAggregateForAllPlugins()
@@ -118,6 +140,12 @@ public class RemoteToolReporter {
 			}
 		}
 		return retVal;
+	}
+
+
+	public void shutDown()
+	{
+		this.reportingTimer.cancel();
 	}
 
 }

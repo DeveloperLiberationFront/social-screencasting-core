@@ -50,7 +50,7 @@ public class UserManager {
 		
 	}
 
-	protected void promptUserForInfo()
+	public void promptUserForInfo()
 	{
 		// TODO Auto-generated method stub
 		
@@ -69,6 +69,12 @@ public class UserManager {
 	public String getUserToken()
 	{
 		return userId;
+	}
+
+	public boolean needsUserInput()
+	{
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 

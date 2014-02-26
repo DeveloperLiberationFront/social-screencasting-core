@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.json.JSONException;
 
 import edu.ncsu.lubick.ScreenRecordingModule;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
@@ -129,15 +128,11 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		
 		{
 			userManager = new UserManager(new File("."));
+			if (userManager.needsUserInput())
+			{
+				userManager.promptUserForInfo();
+			}
 			remoteToolReporter = new RemoteToolReporter(this.databaseManager, userManager);
-			try
-			{
-				remoteToolReporter.reportTools();
-			}
-			catch (JSONException e)
-			{
-				logger.error(e);
-			}
 		}
 
 	}
@@ -239,6 +234,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		{
 			httpServer.shutDown();
 		}
+		remoteToolReporter.shutDown();
 		databaseManager.shutDown();
 
 		isRunning = false;
