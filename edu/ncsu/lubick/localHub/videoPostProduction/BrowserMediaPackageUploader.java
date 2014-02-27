@@ -32,8 +32,6 @@ import edu.ncsu.lubick.util.FileUtilities;
  */
 public class BrowserMediaPackageUploader {
 
-	
-	private static final String BASE_URL = "screencaster-hub.appspot.com";
 
 	private static final Logger logger = Logger.getLogger(BrowserMediaPackageUploader.class);
 	
@@ -136,7 +134,7 @@ public class BrowserMediaPackageUploader {
 		URI u;
 		try
 		{
-			u = new URI("http", BASE_URL, pathBuilder.toString(), HTTPUtils.getUserAuthURL(userManager), null);
+			u = new URI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), HTTPUtils.getUserAuthURL(userManager), null);
 			return u;
 		}
 		catch (URISyntaxException e)

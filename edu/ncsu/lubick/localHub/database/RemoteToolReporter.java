@@ -5,19 +5,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,8 +27,6 @@ import edu.ncsu.lubick.localHub.http.HTTPUtils;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
 public class RemoteToolReporter {
-
-	private static final String BASE_URL = "http://screencaster-hub.appspot.com/api/";
 
 	private static final Logger logger = Logger.getLogger(RemoteToolReporter.class);
 
@@ -77,7 +73,7 @@ public class RemoteToolReporter {
 		};
 		
 		reportingTimer = new Timer(true);	//quit on application end
-		reportingTimer.schedule(reportingTask, 0*10000, REPORTING_DELAY);
+		reportingTimer.schedule(reportingTask, 10*10000, REPORTING_DELAY);
 	}
 
 
@@ -134,9 +130,22 @@ public class RemoteToolReporter {
 	}
 
 
-	private String preparePutURL()
+	private URI preparePutURL()
 	{
-		return BASE_URL+userManager.getUserEmail()+"?"+HTTPUtils.getUserAuthURL(userManager);
+		StringBuilder pathBuilder = new StringBuilder("/api/");
+		pathBuilder.append(userManager.getUserEmail());
+		URI u;
+		try
+		{
+			u = new URI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), HTTPUtils.getUserAuthURL(userManager), null);
+			return u;
+		}
+		catch (URISyntaxException e)
+		{
+			logger.fatal("Could not encode URI",e);
+			return null;
+		}
+
 	}
 
 

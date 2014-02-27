@@ -11,6 +11,8 @@ import edu.ncsu.lubick.localHub.UserManager;
 
 public class HTTPUtils {
 
+	public static final String BASE_URL = "screencaster-hub.appspot.com";
+
 	public static List<NameValuePair> assembleUserObject(UserManager userManager)
 	{
 		List<NameValuePair> retVal = new ArrayList<>();
