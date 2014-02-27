@@ -22,10 +22,19 @@ public class HTTPUtils {
 		return retVal;
 	}
 
-	public static String getUserAuthURL(UserManager userManager)
+	public static String getUnEscapedUserAuthURL(UserManager userManager)
 	{
-		List<NameValuePair> userObject = HTTPUtils.assembleUserObject(userManager);
-		return URLEncodedUtils.format(userObject, "UTF-8");
+		//List<NameValuePair> userObject = HTTPUtils.assembleUserObject(userManager);
+		//return URLEncodedUtils.format(userObject, "UTF-8");
+		StringBuilder sb = new StringBuilder();
+		sb.append("name=");
+		sb.append(userManager.getUserName());
+		sb.append("&email=");
+		sb.append(userManager.getUserEmail());
+		sb.append("&token=");
+		sb.append(userManager.getUserToken());
+		return sb.toString();
+		
 	}
 
 }
