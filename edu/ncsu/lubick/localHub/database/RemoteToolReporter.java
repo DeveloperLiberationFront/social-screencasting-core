@@ -25,6 +25,7 @@ import org.json.JSONObject;
 import edu.ncsu.lubick.localHub.BufferedDatabaseManager;
 import edu.ncsu.lubick.localHub.NotificationManager;
 import edu.ncsu.lubick.localHub.UserManager;
+import edu.ncsu.lubick.localHub.http.HTTPUtils;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
 public class RemoteToolReporter {
@@ -135,13 +136,7 @@ public class RemoteToolReporter {
 
 	private String preparePutURL()
 	{
-		return BASE_URL+userManager.getUserEmail()+"?"+makeAuthParameters();
-	}
-
-
-	private String makeAuthParameters()
-	{
-		return URLEncodedUtils.format(assembleUserObject(), "UTF-8");
+		return BASE_URL+userManager.getUserEmail()+"?"+HTTPUtils.getUserAuthURL(userManager);
 	}
 
 
@@ -154,16 +149,6 @@ public class RemoteToolReporter {
 		return reportingObject;
 	}
 
-
-	
-	private List<NameValuePair> assembleUserObject()
-	{
-		List<NameValuePair> retVal = new ArrayList<>();
-		retVal.add(new BasicNameValuePair("name", userManager.getUserName()));
-		retVal.add(new BasicNameValuePair("email", userManager.getUserEmail()));
-		retVal.add(new BasicNameValuePair("token", userManager.getUserToken()));
-		return retVal;
-	}
 	
 	private JSONObject makeAggregateForAllPlugins()
 	{

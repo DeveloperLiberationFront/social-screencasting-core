@@ -1,22 +1,24 @@
 package edu.ncsu.lubick.localHub.videoPostProduction;
 
+import static org.junit.Assert.*;
+
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
-import org.json.JSONException;
 
+import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.UserManager;
+import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 import edu.ncsu.lubick.localHub.http.HTTPUtils;
 import edu.ncsu.lubick.unitTests.TestPostProductionHandler;
@@ -31,7 +33,7 @@ import edu.ncsu.lubick.util.FileUtilities;
 public class BrowserMediaPackageUploader {
 
 	
-	private static final String BASE_URL = "http://screencaster-hub.appspot.com/api/";
+	private static final String BASE_URL = "screencaster-hub.appspot.com";
 
 	private static final Logger logger = Logger.getLogger(BrowserMediaPackageUploader.class);
 	
@@ -40,13 +42,28 @@ public class BrowserMediaPackageUploader {
 	private UserManager userManager = null;
 	
 	
+	public BrowserMediaPackageUploader(UserManager userManager)
+	{
+		this.userManager = userManager;
+	}
+
+
 	//For whitebox/end-to-end testing
 	public static void main(String[] args) throws Exception
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
-		BrowserMediaPackageUploader uploader = new BrowserMediaPackageUploader();
+		BrowserMediaPackageUploader uploader = new BrowserMediaPackageUploader(new UserManager(new File(".")));
+		Date toolUsageDate = new Date(7500L);
+		IdealizedToolStream iToolStream = new IdealizedToolStream(TestingUtils.truncateTimeToMinute(toolUsageDate));
+		iToolStream.addToolUsage("Save", "", "CTRL+5", toolUsageDate, 5500);
 		
-		ToolUsage testToolUsage = TestPostProductionHandler.makeKeyboardToolUsage(new Date(7500L), "WhomboTool #1", 5500);
+		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
+		toolStream.setAssociatedPlugin("Eclipse");
+		assertEquals(1, toolStream.getAsList().size());
+		
+		ToolUsage testToolUsage1 = toolStream.getAsList().get(0);
+		
+		ToolUsage testToolUsage = testToolUsage1;
 		
 		uploader.uploadToolUsage(testToolUsage);
 		
@@ -65,6 +82,8 @@ public class BrowserMediaPackageUploader {
 		
 		File packageDirectory = new File(browserPackageRootDirName);
 		
+		logger.info("Searching for browser package in directory "+packageDirectory);
+		
 		for(File file: packageDirectory.listFiles())
 		{
 			this.reportFile(file,file.getName());
@@ -80,7 +99,7 @@ public class BrowserMediaPackageUploader {
 
 	private void reportFile(File file, String reportingName)
 	{
-		String putUrl = this.preparePutURL(reportingName);
+		URI putUrl = this.preparePutURL(reportingName);
 		
 		HttpPut httpPut = new HttpPut(putUrl);
 		MultipartEntityBuilder mpeBuilder = MultipartEntityBuilder.create();
@@ -101,24 +120,32 @@ public class BrowserMediaPackageUploader {
 	}
 
 
-	private String preparePutURL(String reportingName)
+	private URI preparePutURL(String reportingName)
 	{
+		StringBuilder pathBuilder = new StringBuilder("/api/");
+		pathBuilder.append(userManager.getUserEmail());
+		pathBuilder.append("/");
+		pathBuilder.append(currentToolUsage.getPluginName());
+		pathBuilder.append("/");
+		pathBuilder.append(currentToolUsage.getToolName());
+		pathBuilder.append("/");
+		pathBuilder.append(currentToolUsage.getTimeStamp().getTime());
+		pathBuilder.append("/");
+		pathBuilder.append(reportingName);
+		
+		URI u;
+		try
+		{
+			u = new URI("http", BASE_URL, pathBuilder.toString(), HTTPUtils.getUserAuthURL(userManager), null);
+			return u;
+		}
+		catch (URISyntaxException e)
+		{
+			logger.fatal("Could not encode URI",e);
+			return null;
+		}
 		
 		
-		StringBuilder putUrl = new StringBuilder(BASE_URL);
-		putUrl.append(userManager.getUserEmail());
-		putUrl.append("/");
-		putUrl.append(currentToolUsage.getPluginName());
-		putUrl.append("/");
-		putUrl.append(currentToolUsage.getToolName());
-		putUrl.append("/");
-		putUrl.append(currentToolUsage.getTimeStamp().getTime());
-		putUrl.append("/");
-		putUrl.append(reportingName);
-		putUrl.append("?");
-
-		putUrl.append(HTTPUtils.getUserAuthURL(userManager));
-		return putUrl.toString();
 	}
 	
 	
