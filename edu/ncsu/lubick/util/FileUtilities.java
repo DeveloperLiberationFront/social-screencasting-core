@@ -131,7 +131,7 @@ public class FileUtilities
 		}
 	}
 
-	public static String makeFileNameStemForToolPluginMedia(ToolUsage tu)
+	public static String makeFolderNameForBrowserMediaPackage(ToolUsage tu)
 	{
 		if (tu == null)
 		{

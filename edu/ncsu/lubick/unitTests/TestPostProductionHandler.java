@@ -212,7 +212,7 @@ public class TestPostProductionHandler
 
 	private File prepareForBrowserMediaTest(ToolUsage testToolUsage)
 	{
-		String mediaDirName = FileUtilities.makeFileNameStemForToolPluginMedia(testToolUsage);
+		String mediaDirName = FileUtilities.makeFolderNameForBrowserMediaPackage(testToolUsage);
 		File expectedOutputDir = new File(mediaDirName);
 		if (expectedOutputDir.exists())
 		{
@@ -271,7 +271,7 @@ public class TestPostProductionHandler
 
 
 
-	private ToolUsage makeKeyboardToolUsage(Date toolUsageDate, String toolUsageName, int duration)
+	public static ToolUsage makeKeyboardToolUsage(Date toolUsageDate, String toolUsageName, int duration)
 	{
 		IdealizedToolStream iToolStream = new IdealizedToolStream(TestingUtils.truncateTimeToMinute(toolUsageDate));
 		iToolStream.addToolUsage(toolUsageName, DEFAULT_TESTING_TOOL_CLASS, DEFAULT_TESTING_KEYPRESS, toolUsageDate, duration);
@@ -287,7 +287,7 @@ public class TestPostProductionHandler
 
 
 
-	private ToolUsage makeGUIToolUsage(Date toolUsageDate, String toolUsageName, int duration)
+	public static ToolUsage makeGUIToolUsage(Date toolUsageDate, String toolUsageName, int duration)
 	{
 		IdealizedToolStream iToolStream = new IdealizedToolStream(TestingUtils.truncateTimeToMinute(toolUsageDate));
 		iToolStream.addToolUsage(toolUsageName, DEFAULT_TESTING_TOOL_CLASS, ToolStream.MENU_KEY_PRESS, toolUsageDate, duration);

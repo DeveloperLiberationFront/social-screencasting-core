@@ -4,6 +4,7 @@ log4j.rootLogger=debug, mainLogger
 #custom logging levels can go here
 #Format them like log4j.logger.[package].[class name]
 log4j.logger.edu.ncsu.lubick.localHub.ToolStream = info
+log4j.logger.org.apache = info
 #log4j.logger.edu.ncsu.lubick.unitTests.TestImageCompressionAndDecompression = trace
 #log4j.logger.edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput = trace
 

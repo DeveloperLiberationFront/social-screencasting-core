@@ -132,7 +132,9 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			{
 				userManager.promptUserForInfo();
 			}
-			remoteToolReporter = new RemoteToolReporter(this.databaseManager, userManager);
+			remoteToolReporter = new RemoteToolReporter(this.databaseManager, userManager, null);
+			
+			
 		}
 
 	}

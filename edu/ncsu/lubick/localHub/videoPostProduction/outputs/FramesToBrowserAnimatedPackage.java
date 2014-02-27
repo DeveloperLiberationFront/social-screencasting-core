@@ -58,7 +58,7 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 	@Override
 	public File combineImageFilesToMakeMedia(ToolUsage toolUsage, int startIndex, int endIndex) throws MediaEncodingException
 	{
-		String browserPackageRootDirName = FileUtilities.makeFileNameStemForToolPluginMedia(toolUsage);
+		String browserPackageRootDirName = FileUtilities.makeFolderNameForBrowserMediaPackage(toolUsage);
 		this.browserPackageRootDir = super.makeDirectoryIfClear(browserPackageRootDirName);
 		try
 		{
