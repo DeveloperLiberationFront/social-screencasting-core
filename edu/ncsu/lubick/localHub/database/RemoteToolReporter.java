@@ -1,10 +1,6 @@
 package edu.ncsu.lubick.localHub.database;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -93,7 +89,7 @@ public class RemoteToolReporter {
 			httpPut.setEntity(content);
 			try(CloseableHttpResponse response = client.execute(httpPut);)
 			{
-				String responseBody = getResponseBody(response);
+				String responseBody = HTTPUtils.getResponseBody(response);
 				logger.info("response: " +responseBody);
 				this.notificationManager.handlePossibleNotification(new JSONObject(responseBody));
 			}
@@ -104,29 +100,6 @@ public class RemoteToolReporter {
 			logger.error("Problem reporting tool info",e);
 		}
 		
-	}
-
-
-	private String getResponseBody(CloseableHttpResponse response) throws IOException, UnsupportedEncodingException
-	{
-		StringBuilder sb = new StringBuilder();
-		InputStream ips  = response.getEntity().getContent();
-		try(BufferedReader buf = new BufferedReader(new InputStreamReader(ips,"UTF-8"));)
-		{
-			
-		    String s;
-			while(true )
-		    {
-		        s = buf.readLine();
-		        if(s==null || s.length()==0)
-		            break;
-		        sb.append(s);
-
-		    }
-		
-			
-		}
-		return sb.toString();
 	}
 
 

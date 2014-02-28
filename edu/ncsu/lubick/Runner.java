@@ -13,9 +13,7 @@ import java.awt.event.ActionListener;
 import java.net.URI;
 import java.net.URL;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.LocalHubProcess;
