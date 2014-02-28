@@ -12,6 +12,7 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ImproperlyEncodedDateException;
+import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 
@@ -131,6 +132,7 @@ public class FileUtilities
 		}
 	}
 
+	@Deprecated
 	public static String makeFolderNameForBrowserMediaPackage(ToolUsage tu)
 	{
 		if (tu == null)
@@ -140,6 +142,17 @@ public class FileUtilities
 		}
 		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + tu.getPluginName() + FileUtilities.createNumberForMediaOutput(tu);
 	}
+	
+	public static String makeFolderNameForBrowserMediaPackage(ToolUsage tu, String userEmail)
+	{
+		if (tu == null)
+		{
+			logger.info("Got a null toolusage, recovering with empty string");
+			return PostProductionHandler.MEDIA_OUTPUT_FOLDER;
+		}
+		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + ToolStream.makeUniqueIdentifierForToolUsage(tu, userEmail);
+	}
+	
 
 	private static String createNumberForMediaOutput(ToolUsage tu)
 	{

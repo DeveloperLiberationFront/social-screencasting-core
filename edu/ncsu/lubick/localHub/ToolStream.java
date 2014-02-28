@@ -3,6 +3,7 @@ package edu.ncsu.lubick.localHub;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -27,6 +28,22 @@ public class ToolStream {
 	protected ToolStream()
 	{
 		listOfToolUsages = new ArrayList<>();
+	}
+
+	public static String makeUniqueIdentifierForToolUsage(ToolUsage toolUsage, String userEmail)
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append(userEmail);
+		String name = toolUsage.getPluginName();
+		sb.append(name);
+		sb.append(toolUsage.getToolName());
+		sb.append(toolUsage.getTimeStamp().getTime());
+		
+		UUID u = UUID.nameUUIDFromBytes(sb.toString().getBytes());
+		
+		//add a truncatedName for readability
+		String truncatedName = name.substring(0, name.length()>=8?8:name.length());
+		return truncatedName+u.toString();
 	}
 
 	public static ToolStream generateFromJSON(String fileContents)
@@ -135,6 +152,11 @@ public class ToolStream {
 		public void setPluginName(String pluginName)
 		{
 			this.pluginName = pluginName;
+		}
+
+		public String getUniqueIdentifier(String userEmail)
+		{
+			return ToolStream.makeUniqueIdentifierForToolUsage(this, userEmail);
 		}
 
 	}

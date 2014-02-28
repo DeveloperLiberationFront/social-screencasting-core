@@ -120,7 +120,7 @@ public class BrowserMediaPackageUploader {
 		pathBuilder.append("/");
 		pathBuilder.append(currentToolUsage.getToolName());
 		pathBuilder.append("/");
-		pathBuilder.append(currentToolUsage.getTimeStamp().getTime());
+		pathBuilder.append(currentToolUsage.getUniqueIdentifier(userManager.getUserEmail()));
 		pathBuilder.append("/");
 		pathBuilder.append(reportingName);
 
