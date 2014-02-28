@@ -9,20 +9,23 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
+import edu.ncsu.lubick.localHub.forTesting.UnitTestUserManager;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.FileUtilities;
 
 public class TestPostProductionHandler
 {
-	
+
 	private static final int EXTRA_FRAMES = 5+5;   //5 copies of the last, plus 5 frames of black
 	private static final int NUMBER_KEYBOARD_ANIMATIONS = 6;  //and 6 animations
 	private static final int EXTRA_FRAMES_AND_ANIMATIONS = EXTRA_FRAMES + NUMBER_KEYBOARD_ANIMATIONS;  
@@ -55,6 +58,17 @@ public class TestPostProductionHandler
 		{
 			fail("Need a zip file of screencasting frames to perform tests on.  Download from bitbucket and name as "+DUMMY_SCREENCAST_ZIP);
 		}
+	}
+
+
+
+
+	private UserManager fakeUserManager;
+	
+	@Before
+	public void setUp()
+	{
+		this.fakeUserManager = new UnitTestUserManager("Test User", "test@mailinator.com", "123");
 	}
 	
 
@@ -155,7 +169,7 @@ public class TestPostProductionHandler
 	{
 		setUpScreencastingFolderForDate(screencastBeginDate);
 		
-		PostProductionHandler pph = new PostProductionHandler(TEST_SCREENCAST_FOLDER);
+		PostProductionHandler pph = new PostProductionHandler(TEST_SCREENCAST_FOLDER, fakeUserManager);
 		return pph;
 	}
 
@@ -212,7 +226,7 @@ public class TestPostProductionHandler
 
 	private File prepareForBrowserMediaTest(ToolUsage testToolUsage)
 	{
-		String mediaDirName = FileUtilities.makeFolderNameForBrowserMediaPackage(testToolUsage);
+		String mediaDirName = testToolUsage.getUniqueIdentifier(fakeUserManager.getUserEmail());
 		File expectedOutputDir = new File(mediaDirName);
 		if (expectedOutputDir.exists())
 		{

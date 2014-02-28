@@ -34,7 +34,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	private File monitorDirectory = null;
 
 	private BufferedDatabaseManager databaseManager = null;
-	private PostProductionHandler postProductionHandler = new PostProductionHandler(new File(".\\HF\\Screencasting"));
+	private PostProductionHandler postProductionHandler; // = new PostProductionHandler(new File(".\\HF\\Screencasting"));
 
 	private boolean shouldUseHTTPServer;
 	private boolean shouldUseScreenRecording;
@@ -105,6 +105,12 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			return;
 		}
 		isRunning = true;
+		
+		userManager = new UserManager(new File("."));
+		if (userManager.needsUserInput())
+		{
+			userManager.promptUserForInfo();
+		}
 
 		if (shouldUseHTTPServer)
 		{
@@ -112,9 +118,10 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			logger.debug("Server started up");
 		}
 
+		File screencastingOutputFolder = new File(this.monitorDirectory, SCREENCASTING_PATH);
 		if (shouldUseScreenRecording)
 		{
-			File screencastingOutputFolder = new File(this.monitorDirectory, SCREENCASTING_PATH);
+			
 			if (!(screencastingOutputFolder.exists() || screencastingOutputFolder.mkdir()))
 			{
 				logger.fatal("Could not setup screencast output folder");
@@ -123,19 +130,11 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			
 			this.screenRecordingModule = new ScreenRecordingModule(screencastingOutputFolder);
 			screenRecordingModule.startRecording();
-			this.postProductionHandler = new PostProductionHandler(screencastingOutputFolder);
 		}
 		
-		{
-			userManager = new UserManager(new File("."));
-			if (userManager.needsUserInput())
-			{
-				userManager.promptUserForInfo();
-			}
-			remoteToolReporter = new RemoteToolReporter(this.databaseManager, userManager, null);
-			
-			
-		}
+		this.postProductionHandler = new PostProductionHandler(screencastingOutputFolder, userManager);
+		
+		this.remoteToolReporter = new RemoteToolReporter(this.databaseManager, userManager, null);
 
 	}
 
@@ -321,6 +320,11 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 				logger.error("Problem making media for "+tu,e);
 			}
 		}
+	}
+
+	public static String getCurrentUserEmail()
+	{
+		return singletonHub.userManager.getUserEmail();
 	}
 
 }

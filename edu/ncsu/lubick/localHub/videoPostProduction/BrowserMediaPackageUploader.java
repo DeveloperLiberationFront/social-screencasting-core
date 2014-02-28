@@ -47,7 +47,7 @@ public class BrowserMediaPackageUploader {
 
 	public boolean uploadToolUsage(ToolUsage toolUsage)
 	{
-		String expectedPackageRootDir = FileUtilities.makeFolderNameForBrowserMediaPackage(toolUsage);
+		String expectedPackageRootDir = toolUsage.getUniqueIdentifier(userManager.getUserEmail());
 
 		setCurrentToolUsage(toolUsage);
 

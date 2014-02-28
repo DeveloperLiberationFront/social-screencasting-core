@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.videoPostProduction.AbstractImagesToMediaOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
@@ -36,11 +37,13 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 	private Dimension size;
 	private File browserPackageRootDir;
 	private File[] sortedFrameFiles;
+	private UserManager userManager;
 
 
-	public FramesToBrowserAnimatedPackage(File sourceOfFrames)
+	public FramesToBrowserAnimatedPackage(File sourceOfFrames, UserManager userManager)
 	{
 		super(sourceOfFrames);
+		this.userManager = userManager;
 	}
 
 	@Override
@@ -58,7 +61,7 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 	@Override
 	public File combineImageFilesToMakeMedia(ToolUsage toolUsage, int startIndex, int endIndex) throws MediaEncodingException
 	{
-		String browserPackageRootDirName = FileUtilities.makeFolderNameForBrowserMediaPackage(toolUsage);
+		String browserPackageRootDirName = toolUsage.getUniqueIdentifier(userManager.getUserEmail());
 		this.browserPackageRootDir = super.makeDirectoryIfClear(browserPackageRootDirName);
 		try
 		{

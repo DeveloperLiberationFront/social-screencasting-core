@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ImproperlyEncodedDateException;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.videoPostProduction.outputs.FramesToBrowserAnimatedPackage;
 import edu.ncsu.lubick.util.FileUtilities;
 
@@ -26,11 +27,13 @@ public class PostProductionHandler
 	private FramesToBrowserAnimatedPackage browserMediaMaker = null;
 	
 	private File screencastFolder;
+	private UserManager userManager;
 
-	public PostProductionHandler(File sourceOfFrames)
+	public PostProductionHandler(File sourceOfFrames, UserManager userManager)
 	{
 		this.screencastFolder = sourceOfFrames;
-		this.browserMediaMaker = new FramesToBrowserAnimatedPackage(sourceOfFrames);
+		this.userManager = userManager;
+		this.browserMediaMaker = new FramesToBrowserAnimatedPackage(sourceOfFrames, userManager);
 
 	}
 

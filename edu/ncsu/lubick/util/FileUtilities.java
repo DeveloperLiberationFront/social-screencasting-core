@@ -132,16 +132,16 @@ public class FileUtilities
 		}
 	}
 
-	@Deprecated
-	public static String makeFolderNameForBrowserMediaPackage(ToolUsage tu)
-	{
-		if (tu == null)
-		{
-			logger.info("Got a null toolusage, recovering with empty string");
-			return PostProductionHandler.MEDIA_OUTPUT_FOLDER;
-		}
-		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + tu.getPluginName() + FileUtilities.createNumberForMediaOutput(tu);
-	}
+//	@Deprecated
+//	public static String makeFolderNameForBrowserMediaPackage(ToolUsage tu)
+//	{
+//		if (tu == null)
+//		{
+//			logger.info("Got a null toolusage, recovering with empty string");
+//			return PostProductionHandler.MEDIA_OUTPUT_FOLDER;
+//		}
+//		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + tu.getPluginName() + FileUtilities.createNumberForMediaOutput(tu);
+//	}
 	
 	public static String makeFolderNameForBrowserMediaPackage(ToolUsage tu, String userEmail)
 	{
