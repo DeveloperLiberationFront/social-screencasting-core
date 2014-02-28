@@ -13,13 +13,34 @@ public class UserManager {
 	public static final String EXPECTED_USER_SETTINGS = "user.ini";
 	private String userName;
 	private String userEmail;
-	private String userId;
+	private String userToken;
 	
 	private static final Logger logger = Logger.getLogger(UserManager.class);
 
+	
+	protected UserManager()
+	{
+		
+	}
+	
 	public UserManager(File initDirectory)
 	{
 		parseOutFile(new File(initDirectory, EXPECTED_USER_SETTINGS));
+	}
+
+	protected void setToken(String token)
+	{
+		this.userToken = token;
+	}
+
+	protected void setName(String userName)
+	{
+		this.userName = userName;
+	}
+
+	protected void setEmail(String userEmail)
+	{
+		this.userEmail = userEmail;
 	}
 
 	private void parseOutFile(File initFile)
@@ -34,9 +55,9 @@ public class UserManager {
 		try
 		{
 			JSONObject parsedJObject = new JSONObject(fileContents);
-			this.userName = parsedJObject.getString("name");
-			this.userEmail = parsedJObject.getString("email");
-			this.userId = parsedJObject.getString("token");
+			setName(parsedJObject.getString("name"));
+			setEmail(parsedJObject.getString("email"));
+			setToken(parsedJObject.getString("token"));
 		}
 		catch (JSONException e)
 		{
@@ -68,7 +89,7 @@ public class UserManager {
 
 	public String getUserToken()
 	{
-		return userId;
+		return userToken;
 	}
 
 	public boolean needsUserInput()

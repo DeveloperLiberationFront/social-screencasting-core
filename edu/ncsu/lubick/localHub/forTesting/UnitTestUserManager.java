@@ -14,6 +14,11 @@ public class UnitTestUserManager extends UserManager {
 		super(workingDir);
 	}
 	
+	public UnitTestUserManager(String testName, String testEmail, String testToken)
+	{
+		setData(testName, testEmail, testToken);
+	}
+	
 	public boolean hadToDeployGUIPrompt()
 	{
 		return deployedGUI;		
@@ -31,9 +36,11 @@ public class UnitTestUserManager extends UserManager {
 		deployedGUI = true;
 	}
 
-	public void setData(String testName, String testEmail, String testUUID)
+	public void setData(String testName, String testEmail, String testToken)
 	{
-		// TODO Auto-generated method stub
+		setName(testName);
+		setEmail(testEmail);
+		setToken(testToken);
 		
 	}
 }
