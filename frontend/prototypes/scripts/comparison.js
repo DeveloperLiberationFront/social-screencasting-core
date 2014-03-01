@@ -3,6 +3,8 @@
 var peoplesNames;
 var peoplesNamesIndex;
 
+var userName, userEmail, userToken, currentPlugin;
+var authString;
 function addResponseHTMLToWindow(data) {
     $(".modal").hide();
     $(".moreInfo").html(data);
@@ -30,12 +32,27 @@ function handleMouseLeave() {
 
 
 function rotatePeoplesNamesAndTools() {
+    var emailToView, getUrl;
     peoplesNamesIndex++;
     peoplesNamesIndex = peoplesNamesIndex % peoplesNames.length;
-    $("#otherPeoplesTools").find(".placeHolder").text(peoplesNames[peoplesNamesIndex] + "'s Tools");
+    $("#otherUsersPlaceHolder").text(peoplesNames[peoplesNamesIndex][0] + "'s Tools");
+    emailToView = peoplesNames[peoplesNamesIndex][1];
+    $("#otherUsersPlaceHolder").data("email", emailToView);
 
-	//TODO display peoples tools
+    //TODO display peoples tools
+    getUrl = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + authString;
 
+    $.ajax({
+        url: getUrl,
+        success: function (data) {
+            console.log(data);
+			console.log(JSON.stringify(data));
+        },
+        error: function () {
+            console.log("There was a problem");
+        }
+
+    });
 }
 
 function showUniqueTools(event) {
@@ -80,8 +97,17 @@ function loadPeople() {
         url: "http://screencaster-hub.appspot.com/api/users",
         success: function (data) {
             peoplesNamesIndex = -1;
-            peoplesNames = $("#otherPeoplesTools").data("names");
-            rotatePeoplesNamesAndTools();
+            peoplesNames = data["users"];
+			var i;
+			for(i = 0;i<peoplesNames.length;i++)
+			{
+				if (peoplesNames[i][1] == userEmail)
+				{
+					peoplesNames.splice(i, 1);
+					break;
+				}
+			}
+            $("#otherUsersPlaceHolder").text("Click to view Co-workers' Tools");
         }
     });
 }
@@ -92,7 +118,7 @@ $(document).ready(function () {
 
     $(".clickMe").on('mouseleave', handleMouseLeave);
 
-    $(".changeName").on('click', '.placeHolder', rotatePeoplesNamesAndTools);
+    $("#otherUsersPlaceHolder").on('click', rotatePeoplesNamesAndTools);
 
     loadPeople();
 
@@ -100,4 +126,9 @@ $(document).ready(function () {
     $(".showUnique").on("click", showUniqueTools);
     $(".showAll").on("click", showAllTools);
 
+    userName = $("body").data("name");
+    userEmail = $("body").data("email");
+    userToken = $("body").data("token");
+    currentPlugin = $("body").data("plugin");
+    authString = "?name=" + userName + "&email=" + userEmail + "&token=" + userToken;
 });
