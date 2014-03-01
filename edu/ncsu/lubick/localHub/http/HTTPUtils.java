@@ -1,10 +1,15 @@
 package edu.ncsu.lubick.localHub.http;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 
 import edu.ncsu.lubick.localHub.UserManager;
@@ -35,6 +40,28 @@ public class HTTPUtils {
 		sb.append(userManager.getUserToken());
 		return sb.toString();
 		
+	}
+
+	public static String getResponseBody(HttpResponse response) throws IOException, UnsupportedEncodingException
+	{
+		StringBuilder sb = new StringBuilder();
+		InputStream ips  = response.getEntity().getContent();
+		try(BufferedReader buf = new BufferedReader(new InputStreamReader(ips,"UTF-8"));)
+		{
+			
+		    String s;
+			while(true )
+		    {
+		        s = buf.readLine();
+		        if(s==null || s.length()==0)
+		            break;
+		        sb.append(s);
+	
+		    }
+		
+			
+		}
+		return sb.toString();
 	}
 
 }

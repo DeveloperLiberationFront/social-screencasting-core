@@ -32,9 +32,9 @@ public class HTTPVideoCreator extends TemplateHandlerWithDatabaseLink implements
 	private static final String POST_COMMAND_NTH_USAGE = "nthUsage";
 	private static final String POST_COMMAND_PLUGIN_NAME = "pluginName";
 	private static final String POST_COMMAND_IS_VIDEO_MADE_FOR_TOOL_USAGE = "isVideoAlreadyMade";
-	private static final String POST_COMMAND_MAKE_VIDEO_FOR_TOOL_STREAM = "makeVideo";
+
 	private static final String POST_COMMAND_TOOL_NAME = "toolName";
-	private static final String POST_COMMAND_SWAP_MEDIA = "changeToOtherSource";
+	private static final String POST_COMMAND_VIEW_NTH_USAGE = "changeToOtherSource";
 	private static Logger logger;
 	
 	private static final File MEDIA_OUTPUT_FOLDER = new File(PostProductionHandler.MEDIA_OUTPUT_FOLDER);
@@ -81,17 +81,17 @@ public class HTTPVideoCreator extends TemplateHandlerWithDatabaseLink implements
 		{
 			respondToDoesMediaExist(baseRequest, request, response);
 		}
-		else if (request.getParameter("thingToDo").equals(POST_COMMAND_MAKE_VIDEO_FOR_TOOL_STREAM))
+		else if (request.getParameter("thingToDo").equals(POST_COMMAND_VIEW_NTH_USAGE))
 		{
-			makeVideo(baseRequest, request, response);
+			respondToViewNthUsage(baseRequest, request, response);
 		}
-		else if (request.getParameter("thingToDo").equals(POST_COMMAND_SWAP_MEDIA))
-		{
-			respondToSwapMedia(baseRequest, request, response);
+		else {
+			logger.error("Cannot handle "+request.getParameter("thingToDo"));
+			baseRequest.setHandled(true);
 		}
 	}
 
-	private void respondToSwapMedia(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
+	private void respondToViewNthUsage(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
 		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
@@ -102,12 +102,6 @@ public class HTTPVideoCreator extends TemplateHandlerWithDatabaseLink implements
 		baseRequest.setHandled(true);
 	}
 
-	@SuppressWarnings("unused")
-	@Deprecated
-	private void makeVideo(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
-	{
-		
-	}
 
 
 	private void respondToDoesMediaExist(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException

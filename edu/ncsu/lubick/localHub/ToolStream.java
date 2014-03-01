@@ -154,11 +154,6 @@ public class ToolStream {
 			this.pluginName = pluginName;
 		}
 
-		public String getUniqueIdentifier(String userEmail)
-		{
-			return ToolStream.makeUniqueIdentifierForToolUsage(this, userEmail);
-		}
-
 	}
 
 	public void setTimeStamp(Date associatedDate)

@@ -47,7 +47,7 @@ public class BrowserMediaPackageUploader {
 
 	public boolean uploadToolUsage(ToolUsage toolUsage)
 	{
-		String expectedPackageRootDir = toolUsage.getUniqueIdentifier(userManager.getUserEmail());
+		String expectedPackageRootDir = FileUtilities.makeFolderNameForBrowserMediaPackage(toolUsage, userManager.getUserEmail());
 
 		setCurrentToolUsage(toolUsage);
 
@@ -90,7 +90,7 @@ public class BrowserMediaPackageUploader {
 		URI putUri;
 		try
 		{
-			putUri = this.preparePutURL(reportingName);
+			putUri = this.preparePutURI(reportingName);
 		}
 		catch (URISyntaxException e)
 		{
@@ -111,7 +111,7 @@ public class BrowserMediaPackageUploader {
 	}
 
 
-	private URI preparePutURL(String reportingName) throws URISyntaxException
+	private URI preparePutURI(String reportingName) throws URISyntaxException
 	{
 		StringBuilder pathBuilder = new StringBuilder("/api/");
 		pathBuilder.append(userManager.getUserEmail());
@@ -120,7 +120,7 @@ public class BrowserMediaPackageUploader {
 		pathBuilder.append("/");
 		pathBuilder.append(currentToolUsage.getToolName());
 		pathBuilder.append("/");
-		pathBuilder.append(currentToolUsage.getUniqueIdentifier(userManager.getUserEmail()));
+		pathBuilder.append(ToolStream.makeUniqueIdentifierForToolUsage(currentToolUsage, userManager.getUserEmail()));
 		pathBuilder.append("/");
 		pathBuilder.append(reportingName);
 

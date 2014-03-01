@@ -226,7 +226,7 @@ public class TestPostProductionHandler
 
 	private File prepareForBrowserMediaTest(ToolUsage testToolUsage)
 	{
-		String mediaDirName = testToolUsage.getUniqueIdentifier(fakeUserManager.getUserEmail());
+		String mediaDirName = FileUtilities.makeFolderNameForBrowserMediaPackage(testToolUsage, fakeUserManager.getUserEmail());
 		File expectedOutputDir = new File(mediaDirName);
 		if (expectedOutputDir.exists())
 		{
