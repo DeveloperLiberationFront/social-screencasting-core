@@ -30,6 +30,20 @@ function handleMouseLeave() {
     });
 }
 
+function sortPluginTuples(a, b) {
+    return  b.count - a.count;		//sorts so that bigger count numbers are better
+}
+
+function drawToolTable(tools) {
+    tools.sort(sortPluginTuples);
+    console.log(tools);
+	for(var i=0;i<tools.length;i++)
+	{
+		var newItem = $("<tr><td>"+tools[i].name+"<td>"+tools[i].count+"</tr>");
+		newItem.insertAfter($("#dynamicToolInsertionPoint"));
+	}
+}
+
 
 function rotatePeoplesNamesAndTools() {
     var emailToView, getUrl;
@@ -39,14 +53,22 @@ function rotatePeoplesNamesAndTools() {
     emailToView = peoplesNames[peoplesNamesIndex][1];
     $("#otherUsersPlaceHolder").data("email", emailToView);
 
-    //TODO display peoples tools
     getUrl = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + authString;
 
     $.ajax({
         url: getUrl,
         success: function (data) {
+            var keys, theseTools;
             console.log(data);
-			console.log(JSON.stringify(data));
+            console.log(JSON.stringify(data));
+            keys = Object.keys(data[currentPlugin]);
+            //turn map data[currentPlugin] to theseTools array
+            theseTools = keys.map(function (key) {
+                return { name: key, count: data[currentPlugin][key] };
+            }
+			);
+            drawToolTable(theseTools);
+
         },
         error: function () {
             console.log("There was a problem");
@@ -98,15 +120,14 @@ function loadPeople() {
         success: function (data) {
             peoplesNamesIndex = -1;
             peoplesNames = data["users"];
-			var i;
-			for(i = 0;i<peoplesNames.length;i++)
-			{
-				if (peoplesNames[i][1] == userEmail)
-				{
-					peoplesNames.splice(i, 1);
-					break;
-				}
-			}
+
+            //remove this user from the array
+            for (var i = 0; i < peoplesNames.length; i++) {
+                if (peoplesNames[i][1] == userEmail) {
+                    peoplesNames.splice(i, 1);
+                    break;
+                }
+            }
             $("#otherUsersPlaceHolder").text("Click to view Co-workers' Tools");
         }
     });
