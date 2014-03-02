@@ -18,7 +18,6 @@ function handleMouseEnter() {
             $(this).addClass("rowHover");
         }
     });
-
 }
 
 function handleMouseLeave() {
@@ -36,10 +35,11 @@ function sortPluginTuples(a, b) {
 
 function drawToolTable(tools) {
     tools.sort(sortPluginTuples);
-    console.log(tools);
+    //console.log(tools);
+	
 	for(var i=0;i<tools.length;i++)
 	{
-		var newItem = $("<tr><td>"+tools[i].name+"<td>"+tools[i].count+"</tr>");
+		var newItem = $("<tr class='clickMe addedItem' data-tool-name='"+tools[i].name+"'><td>"+tools[i].name+"<td>"+tools[i].count+"</tr>");
 		newItem.insertAfter($("#dynamicToolInsertionPoint"));
 	}
 }
@@ -53,6 +53,7 @@ function rotatePeoplesNamesAndTools() {
     emailToView = peoplesNames[peoplesNamesIndex][1];
     $("#otherUsersPlaceHolder").data("email", emailToView);
 
+	$(".addedItem").remove();
     getUrl = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + authString;
 
     $.ajax({
@@ -75,6 +76,7 @@ function rotatePeoplesNamesAndTools() {
         }
 
     });
+	
 }
 
 function showUniqueTools(event) {
@@ -135,9 +137,9 @@ function loadPeople() {
 
 $(document).ready(function () {
     //handles the click on the view buttons to see if a video file exists
-    $(".clickMe").on('mouseenter', handleMouseEnter);
+    $("table").on('mouseenter', '.clickMe', handleMouseEnter);
 
-    $(".clickMe").on('mouseleave', handleMouseLeave);
+    $("table").on('mouseleave', '.clickMe', handleMouseLeave);
 
     $("#otherUsersPlaceHolder").on('click', rotatePeoplesNamesAndTools);
 
