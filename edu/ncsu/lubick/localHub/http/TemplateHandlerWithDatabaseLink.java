@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.TemplateLoader;
@@ -27,6 +28,7 @@ public abstract class TemplateHandlerWithDatabaseLink extends AbstractHandler {
 	protected String httpRequestPattern;
 	protected WebQueryInterface databaseLink;
 	protected static Configuration cfg; // Template Configuration
+	protected UserManager userManager = HTTPServer.getUserManager();
 
 	public TemplateHandlerWithDatabaseLink(String matchPattern, WebQueryInterface databaseLink)
 	{

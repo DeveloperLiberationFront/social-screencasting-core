@@ -114,7 +114,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
 		if (shouldUseHTTPServer)
 		{
-			this.httpServer = HTTPServer.startUpAnHTTPServer(this);
+			this.httpServer = HTTPServer.startUpAnHTTPServer(this, userManager);
 			logger.debug("Server started up");
 		}
 

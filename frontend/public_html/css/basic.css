@@ -15,7 +15,7 @@ h1 {
 	display:none;
 }
 
-#moreInfo{
+.moreInfo{
 	border: 1px solid black;
 	padding: 10px 20px;
 	float:right;
@@ -24,25 +24,30 @@ h1 {
 	width:40%;
 }
 
-#resultsTable{
+.resultsTable{
 	display:block;
 	float:left;
-	margin-left:10%;
-	margin-right:40px;
+	margin-left:3%;
 	background-color:white;
 	border:3px solid orange;
 	border-spacing:0;
 	text-align:center;
 	font-size:16px;
+	max-width:20%;
 }
 
-#resultsTable th{
+.resultsTable th{
 	font-size:18px;
 }
 
 
 td, tr, th{
 	padding:4px;
+}
+
+.rowHover{
+	border: 5px solid #e48600;
+	background-color: #ffedd3;
 }
 
 .moreInfoTitle{
@@ -53,7 +58,7 @@ td, tr, th{
 	text-align:center;
 }
 
-.pluginListing input, .requestGeneration, .clickMe {
+.pluginListing input, .requestGeneration {
     padding: 10px 20px;
     color: #ffa729;
     background-color: white;
@@ -69,11 +74,19 @@ td, tr, th{
 	padding: 5px;
 }
 
-.pluginListing input:hover, .clickMe:hover, .requestGeneration:hover {
-    border: 3px solid #ffa729;
-	margin:0;
+.showAll, .showUnique{
+	display:block;
+	color: #ffa729;
+    background-color: white;
+	font-size: 17px;
+	margin:3px auto;
 }
 
-#tabs{
+.showAll{
 	display:none;
+}
+
+.pluginListing input:hover, .requestGeneration:hover {
+    border: 3px solid #ffa729;
+	margin:0;
 }

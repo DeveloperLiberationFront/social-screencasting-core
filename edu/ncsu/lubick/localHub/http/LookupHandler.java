@@ -106,8 +106,11 @@ public class LookupHandler extends TemplateHandlerWithDatabaseLink {
 		List<ToolCountTemplateModel> toolsAndCounts = countUpAllToolUsages(toolUsages);
 
 		Map<Object, Object> retval = new HashMap<>();
-		retval.put("toolsAndCounts", toolsAndCounts);
+		retval.put("myToolsAndCounts", toolsAndCounts);
 		retval.put("plugin", pluginName);
+		retval.put("userName", userManager.getUserName());
+		retval.put("userEmail", userManager.getUserEmail());
+		retval.put("userToken", userManager.getUserToken()); 	
 		return retval; 
 	}
 
