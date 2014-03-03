@@ -9,22 +9,22 @@ function addResponseHTMLToWindow(data) {
     renderPlayback();
 }
 
-function requestGenerationOfMedia() {
+/*function requestGenerationOfMedia() {
     stopFramePlayback();
     $("#moreInfo").removeClass("hidden");
     $(".modal").show();
-    $.post("makeVideo", {
+    $.post("mediaServer", {
         thingToDo: "makeVideo",
         pluginName: $(this).data("pluginName"),
         toolName: $(this).data("toolName")
     }, addResponseHTMLToWindow);
     //this will return the html to view the media
-}
+}*/
 
-function doesVideoExistHuh() {
+function checkMediaExistance() {
     stopFramePlayback();
     $("#moreInfo").removeClass("hidden");
-    $.post("makeVideo", {
+    $.post("mediaServer", {
         thingToDo: "isVideoAlreadyMade",
         pluginName: $(this).data("pluginName"),
         toolName: $(this).data("toolName")
@@ -33,10 +33,10 @@ function doesVideoExistHuh() {
     //or some html prompting the user to make the media
 }
 
-function swapMediaPlayback() {
+function changeLocalMediaSource() {
     stopFramePlayback();
     $("#moreInfo").removeClass("hidden");
-    $.post("makeVideo", {
+    $.post("mediaServer", {
         thingToDo: "changeToOtherSource",
         pluginName: $(this).data("pluginName"),
         toolName: $(this).data("toolName"),
@@ -46,13 +46,11 @@ function swapMediaPlayback() {
 }
 
 $(document).ready(function () {
-    //$("#tabs").tabs();
+
     //handles the click on the view buttons to see if a video file exists
-    $(".clickMe").on('click', doesVideoExistHuh);
+    $(".clickMe").on('click', checkMediaExistance);
 
-    $("#moreInfo").on('click', '.requestGeneration', requestGenerationOfMedia);
-
-    $("#moreInfo").on('click', '.viewOther', swapMediaPlayback);
+    $("#moreInfo").on('click', '.viewOther', changeLocalMediaSource);
 
     //figure out where the more info panel would be normally
     elementPosition = $('#moreInfo').offset();

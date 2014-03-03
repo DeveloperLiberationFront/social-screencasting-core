@@ -30,18 +30,19 @@ function handleMouseLeave() {
 }
 
 function sortPluginTuples(a, b) {
-    return  b.count - a.count;		//sorts so that bigger count numbers are better
+    return a.count - b.count;		//sorts so that smaller count numbers are better
 }
 
 function drawToolTable(tools) {
+    var i, newItem;
     tools.sort(sortPluginTuples);
     //console.log(tools);
-	
-	for(var i=0;i<tools.length;i++)
-	{
-		var newItem = $("<tr class='clickMe addedItem' data-tool-name='"+tools[i].name+"'><td>"+tools[i].name+"<td>"+tools[i].count+"</tr>");
-		newItem.insertAfter($("#dynamicToolInsertionPoint"));
-	}
+
+    //insert them smallest to largest
+    for (i = 0; i < tools.length; i++) {
+        newItem = $("<tr class='clickMe addedItem' data-tool-name='" + tools[i].name + "'><td>" + tools[i].name + "<td>" + tools[i].count + "</tr>");
+        newItem.insertAfter($("#dynamicToolInsertionPoint"));
+    }
 }
 
 
@@ -53,7 +54,7 @@ function rotatePeoplesNamesAndTools() {
     emailToView = peoplesNames[peoplesNamesIndex][1];
     $("#otherUsersPlaceHolder").data("email", emailToView);
 
-	$(".addedItem").remove();
+    $(".addedItem").remove();
     getUrl = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + authString;
 
     $.ajax({
@@ -76,7 +77,7 @@ function rotatePeoplesNamesAndTools() {
         }
 
     });
-	
+
 }
 
 function showUniqueTools(event) {
@@ -135,13 +136,40 @@ function loadPeople() {
     });
 }
 
+
+function checkExistanceOfShare(element) {
+    var target, getUrl, emailToView;
+    element.preventDefault();
+    $("#moreInfo").removeClass("hidden");
+
+    target = $(element.currentTarget);
+    emailToView = peoplesNames[peoplesNamesIndex][1];
+
+
+    getUrl = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + "/" + target.data("toolName") + authString;
+
+    $.ajax({
+        url: getUrl,
+        success: function (data) {
+            console.log(data);
+            console.log(JSON.stringify(data));
+
+        },
+        error: function () {
+            console.log("There was a problem");
+        }
+
+    });
+}
+
 $(document).ready(function () {
     //handles the click on the view buttons to see if a video file exists
     $("table").on('mouseenter', '.clickMe', handleMouseEnter);
-
     $("table").on('mouseleave', '.clickMe', handleMouseLeave);
 
     $("#otherUsersPlaceHolder").on('click', rotatePeoplesNamesAndTools);
+
+    $("table").on('click', ".addedItem", checkExistanceOfShare);
 
     loadPeople();
 

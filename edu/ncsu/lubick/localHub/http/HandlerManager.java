@@ -37,7 +37,7 @@ public class HandlerManager
 		HandlerCollection h = new HandlerList();
 
 		makeAndAddHandlersForBrowsing(h, wqi);
-		makeAndAddHandlersForMediaEncoding(h, wqi);
+		makeAndAddHandlersForMediaResources(h, wqi);
 		makeAndAddHandlersForWebReporting(h, wqi);
 
 		Resource[] staticWebResources = setUpWebResources(h.getClass());
@@ -57,9 +57,9 @@ public class HandlerManager
 		h.addHandler(new LookupHandler("/index", wqi));
 	}
 
-	private static void makeAndAddHandlersForMediaEncoding(HandlerCollection h, WebQueryInterface wqi)
+	private static void makeAndAddHandlersForMediaResources(HandlerCollection h, WebQueryInterface wqi)
 	{
-		h.addHandler(new HTTPMediaResourceHandler("/makeVideo", wqi));
+		h.addHandler(new HTTPMediaResourceHandler("/mediaServer", wqi));
 	}
 
 	private static void makeAndAddHandlersForWebReporting(HandlerCollection h, WebQueryInterface wqi)
