@@ -33,6 +33,8 @@ function sortPluginTuples(a, b) {
     return a.count - b.count;		//sorts so that smaller count numbers are better
 }
 
+
+
 function drawToolTable(tools) {
     var i, newItem;
     tools.sort(sortPluginTuples);
@@ -82,6 +84,7 @@ function rotatePeoplesNamesAndTools() {
 
 function showUniqueTools(event) {
     var parentTable, otherTable;
+	//TODO FIX
 
     event.preventDefault();
     parentTable = $(this).closest("table");
@@ -108,6 +111,7 @@ function showUniqueTools(event) {
 
 function showAllTools(event) {
     var parentTable;
+	//TODO FIX
 
     event.preventDefault();
     parentTable = $(this).closest("table");
@@ -136,6 +140,10 @@ function loadPeople() {
     });
 }
 
+function showSharedClips(arrayOfClips)
+{
+	
+}
 
 function checkExistanceOfShare(element) {
     var target, getUrl, emailToView;
@@ -154,6 +162,7 @@ function checkExistanceOfShare(element) {
             console.log(data);
             console.log(JSON.stringify(data));
 
+			showSharedClips(data.clips);
         },
         error: function () {
             console.log("There was a problem");

@@ -19,6 +19,8 @@ import org.json.JSONObject;
 import edu.ncsu.lubick.localHub.BufferedDatabaseManager;
 import edu.ncsu.lubick.localHub.NotificationManager;
 import edu.ncsu.lubick.localHub.UserManager;
+import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
+import edu.ncsu.lubick.localHub.forTesting.UnitTestUserManager;
 import edu.ncsu.lubick.localHub.http.HTTPUtils;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
@@ -69,7 +71,7 @@ public class RemoteToolReporter {
 		};
 		
 		reportingTimer = new Timer(true);	//quit on application end
-		reportingTimer.schedule(reportingTask, 10*10000, REPORTING_DELAY);
+		reportingTimer.schedule(reportingTask, 10_000, REPORTING_DELAY);
 	}
 
 
@@ -91,7 +93,7 @@ public class RemoteToolReporter {
 			{
 				String responseBody = HTTPUtils.getResponseBody(response);
 				logger.info("response: " +responseBody);
-				this.notificationManager.handlePossibleNotification(new JSONObject(responseBody));
+				//this.notificationManager.handlePossibleNotification(new JSONObject(responseBody));
 			}
 
 		}
@@ -176,6 +178,45 @@ public class RemoteToolReporter {
 	public void shutDown()
 	{
 		this.reportingTimer.cancel();
+	}
+	
+	
+	@SuppressWarnings("unused")
+	private static void main(String[] args) throws Exception
+	{
+		TestingUtils.makeSureLoggingIsSetUp();
+		CloseableHttpClient client = HttpClients.createDefault();
+		JSONObject reportingObject = new JSONObject("{\"data\": {\"Eclipse\": {\"Organize Imports\": 10, \"Save\": 20, \"Toggle Comment\": 5}}}");
+		
+		logger.debug("preparing to report data "+reportingObject.toString(2));
+
+		StringBuilder pathBuilder = new StringBuilder("/api/");
+		
+		UserManager um = new UnitTestUserManager("Test User", "test@mailonator.com", "123");
+		
+		pathBuilder.append(um.getUserEmail());
+		URI u = new URI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), HTTPUtils.getUnEscapedUserAuthURL(um), null);
+		
+		HttpPut httpPut = new HttpPut(u);
+
+		try
+		{
+			StringEntity content = new StringEntity(reportingObject.toString());
+			content.setContentType("application/json");
+
+			httpPut.setEntity(content);
+			try(CloseableHttpResponse response = client.execute(httpPut);)
+			{
+				String responseBody = HTTPUtils.getResponseBody(response);
+				logger.info("response: " +responseBody);
+				//this.notificationManager.handlePossibleNotification(new JSONObject(responseBody));
+			}
+
+		}
+		catch (IOException e)
+		{
+			logger.error("Problem reporting tool info",e);
+		}
 	}
 
 }

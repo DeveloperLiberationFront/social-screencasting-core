@@ -36,7 +36,7 @@ public class BrowserMediaPackageSharer {
 		JSONObject dataWrapper = new JSONObject();
 		JSONObject permissionsObject = new JSONObject();
 		permissionsObject.put("clip", "Eclipsedc3a37d4-4469-391f-bd62-0324ac2b7091");
-		permissionsObject.put("recipient", "test2@mailinator.com");
+		permissionsObject.put("recipient", "kjlubick@ncsu.edu");
 
 		dataWrapper.put("data", permissionsObject);
 		
