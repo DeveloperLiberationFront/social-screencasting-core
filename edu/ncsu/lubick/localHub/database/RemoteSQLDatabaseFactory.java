@@ -48,11 +48,12 @@ public final class RemoteSQLDatabaseFactory
 
 	public static RemoteSQLDatabase createMySQLDatabaseUsingUserFile()
 	{
-		if (blockAllActualConnections)
+		/*if (blockAllActualConnections)
 		{
 			return handleMockDB();
 		}
-		return handleNormalDB();
+		return handleNormalDB();*/
+		return handleMockDB();
 	}
 
 	private static RemoteSQLDatabase handleMockDB()

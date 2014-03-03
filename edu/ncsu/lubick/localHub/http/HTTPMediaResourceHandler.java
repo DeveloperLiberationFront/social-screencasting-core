@@ -27,7 +27,7 @@ import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
-public class HTTPVideoCreator extends TemplateHandlerWithDatabaseLink implements Handler {
+public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink implements Handler {
 
 	private static final String POST_COMMAND_NTH_USAGE = "nthUsage";
 	private static final String POST_COMMAND_PLUGIN_NAME = "pluginName";
@@ -43,10 +43,10 @@ public class HTTPVideoCreator extends TemplateHandlerWithDatabaseLink implements
 	// static initializer
 	static
 	{
-		logger = Logger.getLogger(HTTPVideoCreator.class.getName());
+		logger = Logger.getLogger(HTTPMediaResourceHandler.class.getName());
 	}
 
-	public HTTPVideoCreator(String matchPattern, WebQueryInterface databaseLink)
+	public HTTPMediaResourceHandler(String matchPattern, WebQueryInterface databaseLink)
 	{
 		super(matchPattern, databaseLink);
 	}
