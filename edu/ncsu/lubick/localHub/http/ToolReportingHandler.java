@@ -52,10 +52,10 @@ public class ToolReportingHandler extends AbstractHandler  {
 
 	private void respondToPost(HttpServletRequest request)
 	{
-		logger.debug("POST parameters recieved " + request.getParameterMap());
+		logger.debug("POST parameters received " + request.getParameterMap());
 		String pluginName = request.getParameter(POST_PROPERTY_PLUGIN_NAME);
 		String jsonArrayOfToolUsage = request.getParameter(POST_PROPERTY_JSON_ARRAY_TOOL_USAGES);
-		logger.debug(""+ pluginName+ " " +jsonArrayOfToolUsage.toString());
+		logger.debug(""+ pluginName+ " " +jsonArrayOfToolUsage);
 		
 		//Long timeStamp = Long.decode(request.getParameter(POST_PROPERTY_TOOLSTREAM_TIME));
 		ToolStream ts = ToolStream.generateFromJSON(jsonArrayOfToolUsage);

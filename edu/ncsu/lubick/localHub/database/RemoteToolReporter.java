@@ -186,13 +186,13 @@ public class RemoteToolReporter {
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
 		CloseableHttpClient client = HttpClients.createDefault();
-		JSONObject reportingObject = new JSONObject("{\"data\": {\"Eclipse\": {\"Organize Imports\": 10, \"Save\": 20, \"Toggle Comment\": 5}}}");
+		JSONObject reportingObject = new JSONObject("{\"data\": {\"Eclipse\": {\"Undo\": 10, \"Save\": 50, \"Toggle Comment\": 3}}}");
 		
 		logger.debug("preparing to report data "+reportingObject.toString(2));
 
 		StringBuilder pathBuilder = new StringBuilder("/api/");
 		
-		UserManager um = new UnitTestUserManager("Test User", "test@mailonator.com", "123");
+		UserManager um = new UnitTestUserManager("Test User", "test@mailinator.com", "123");
 		
 		pathBuilder.append(um.getUserEmail());
 		URI u = new URI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), HTTPUtils.getUnEscapedUserAuthURL(um), null);

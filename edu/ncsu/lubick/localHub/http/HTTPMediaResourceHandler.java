@@ -16,6 +16,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
@@ -29,12 +31,16 @@ import freemarker.template.TemplateModelException;
 
 public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink implements Handler {
 
+	private static final String CLIP_NAMES = "clipNames";
+	private static final String PERFORM_ACTION = "thingToDo";
 	private static final String POST_COMMAND_NTH_USAGE = "nthUsage";
 	private static final String POST_COMMAND_PLUGIN_NAME = "pluginName";
 	private static final String POST_COMMAND_IS_VIDEO_MADE_FOR_TOOL_USAGE = "isVideoAlreadyMade";
 
 	private static final String POST_COMMAND_TOOL_NAME = "toolName";
 	private static final String POST_COMMAND_VIEW_NTH_USAGE = "changeToOtherSource";
+	private static final String POST_COMMAND_MAKE_PLAYBACK_HTML_FOR_EXTERNAL_CLIP = "makePlaybackForExternalClip";
+	
 	private static Logger logger;
 	
 	private static final File MEDIA_OUTPUT_FOLDER = new File(PostProductionHandler.MEDIA_OUTPUT_FOLDER);
@@ -77,21 +83,44 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 		logger.debug("POST parameters recieved " + request.getParameterMap());
 		logger.debug("PluginName: " + request.getParameter(POST_COMMAND_PLUGIN_NAME));
 
-		if (request.getParameter("thingToDo").equals(POST_COMMAND_IS_VIDEO_MADE_FOR_TOOL_USAGE))
+		if (request.getParameter(PERFORM_ACTION).equals(POST_COMMAND_IS_VIDEO_MADE_FOR_TOOL_USAGE))
 		{
 			respondToDoesMediaExist(baseRequest, request, response);
 		}
-		else if (request.getParameter("thingToDo").equals(POST_COMMAND_VIEW_NTH_USAGE))
+		else if (request.getParameter(PERFORM_ACTION).equals(POST_COMMAND_VIEW_NTH_USAGE))
 		{
-			respondToViewNthUsage(baseRequest, request, response);
+			respondToViewNthLocalUsage(baseRequest, request, response);
+		}
+		else if (request.getParameter(PERFORM_ACTION).equals(POST_COMMAND_MAKE_PLAYBACK_HTML_FOR_EXTERNAL_CLIP))
+		{
+			respondToGenerateHTMLExternalClip(baseRequest, request, response);
 		}
 		else {
-			logger.error("Cannot handle "+request.getParameter("thingToDo"));
+			logger.error("Cannot handle "+request.getParameter(PERFORM_ACTION));
 			baseRequest.setHandled(true);
 		}
 	}
 
-	private void respondToViewNthUsage(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
+	private void respondToGenerateHTMLExternalClip(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
+	{
+		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
+		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
+		Integer nthUsage = Integer.valueOf(request.getParameter(POST_COMMAND_NTH_USAGE));
+		String arrayStringOfClipNames = request.getParameter(CLIP_NAMES);
+		
+		try
+		{
+			JSONArray jarrOfClipNames = new JSONArray(arrayStringOfClipNames);
+			serveUpNthUsageOfExternalMedia(response, toolName, pluginName, nthUsage, jarrOfClipNames);
+		}
+		catch (JSONException e)
+		{
+			throw new IOException(e);
+		}
+		
+	}
+
+	private void respondToViewNthLocalUsage(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
 		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
@@ -113,6 +142,13 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 
 		baseRequest.setHandled(true);
 
+	}
+
+	private void serveUpNthUsageOfExternalMedia(HttpServletResponse response, String toolName, String pluginName, Integer nthUsage,
+			JSONArray jarrOfClipNames)
+	{
+		// TODO Auto-generated method stub
+		
 	}
 
 	private void serveUpNthUsageOfMediaIfExists(HttpServletResponse response, InternalToolRepresentation itr) throws IOException

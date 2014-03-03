@@ -15,14 +15,7 @@ h1 {
 	display:none;
 }
 
-.moreInfo{
-	border: 1px solid black;
-	padding: 10px 20px;
-	float:right;
-	margin-right: 5%;
-	background-color:#ffdfb1;
-	width:40%;
-}
+
 
 .resultsTable{
 	display:block;
@@ -91,6 +84,23 @@ td, tr, th{
 	margin:0;
 }
 
+#moreInfo{
+	border: 1px solid black;
+	padding: 10px 20px;
+	float:right;
+	margin-right: 5%;
+	background-color:#ffdfb1;
+	width:40%;
+}
+
 #requestShare {
+	display:none;
+}
+
+#externalMedia {
+	display:none;
+}
+
+#externalMediaLoading {
 	display:none;
 }

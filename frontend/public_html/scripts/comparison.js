@@ -3,7 +3,7 @@
 var peoplesNames;
 var peoplesNamesIndex;
 
-var userName, userEmail, userToken, currentPlugin;
+var userName, userEmail, userToken, currentPlugin, currentTool;
 var authString;
 function addResponseHTMLToWindow(data) {
     $(".modal").hide();
@@ -84,7 +84,7 @@ function rotatePeoplesNamesAndTools() {
 
 function showUniqueTools(event) {
     var parentTable, otherTable;
-	//TODO FIX
+    //TODO FIX
 
     event.preventDefault();
     parentTable = $(this).closest("table");
@@ -111,7 +111,7 @@ function showUniqueTools(event) {
 
 function showAllTools(event) {
     var parentTable;
-	//TODO FIX
+    //TODO FIX
 
     event.preventDefault();
     parentTable = $(this).closest("table");
@@ -140,9 +140,42 @@ function loadPeople() {
     });
 }
 
-function showSharedClips(arrayOfClips)
-{
-	
+function setUpPlaybackForExternalData(data) {
+    console.log(data);
+}
+
+function changeSharedMediaSource(arrayOfClips, clipIndex) {
+    var getUrl, emailToView;
+
+    emailToView = peoplesNames[peoplesNamesIndex][1];
+    getUrl = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + "/" + currentTool + "/" + arrayOfClips[clipIndex] + authString;
+
+    $.ajax(getUrl, {
+        url: getUrl,
+        success: setUpPlaybackForExternalData,
+        error: function (error, e, f) {
+            console.log("error");
+            console.log(error);
+			console.log(e);
+			console.log(f);
+        }
+    });
+    //this will return the html to view the media
+}
+
+function showSharedClips(arrayOfClips) {
+    stopFramePlayback();
+    $("#placeholder").hide();
+    if (arrayOfClips.length === 0) {
+        $("#externalMediaLoading").hide();
+        $("#requestShare").show();
+    }
+    else {
+        $("#requestShare").hide();
+        $("#externalMediaLoading").show();
+        changeSharedMediaSource(arrayOfClips, 0);		//start with the first clip
+
+    }
 }
 
 function checkExistanceOfShare(element) {
@@ -152,9 +185,9 @@ function checkExistanceOfShare(element) {
 
     target = $(element.currentTarget);
     emailToView = peoplesNames[peoplesNamesIndex][1];
+    currentTool = target.data("toolName");
 
-
-    getUrl = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + "/" + target.data("toolName") + authString;
+    getUrl = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + "/" + currentTool + authString;
 
     $.ajax({
         url: getUrl,
@@ -162,7 +195,7 @@ function checkExistanceOfShare(element) {
             console.log(data);
             console.log(JSON.stringify(data));
 
-			showSharedClips(data.clips);
+            showSharedClips(data.clips);
         },
         error: function () {
             console.log("There was a problem");

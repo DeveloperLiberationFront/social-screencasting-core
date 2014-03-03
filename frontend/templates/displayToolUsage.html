@@ -1,45 +1,141 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Co-worker Tool Comparison</title>
-  <link rel="stylesheet" href="css/basic.css" />
-  <link rel="stylesheet" href="css/loading.css" />
-  <link rel="stylesheet" href="css/playback.css" />
+    <title>Co-worker Tool Comparison</title>
+    <link rel="stylesheet" href="css/basic.css" />
+    <link rel="stylesheet" href="css/loading.css" />
+    <link rel="stylesheet" href="css/playback.css" />
 </head>
 <body data-name="${userName}" data-email="${userEmail}" data-token="${userToken}" data-plugin="${plugin}">
-  <h1>The following tool usages are for plugin "${plugin}"</h1>
+    <h1>The following tool usages are for plugin "${plugin}"</h1>
 
-  <table border=1 class="resultsTable myTools">
-  <tr><th colspan="2">My Tools<br><button class="showUnique">Show Unique Tools Only</button><button class="showAll">Show All Tools</button>
-  <tr><th>Tool Name<th>Number of Occurrences</tr>
-  
-    <#list myToolsAndCounts as thisToolCount>
+    <table border="1" class="resultsTable myTools">
+        <tr>
+            <th colspan="2">My Tools<br>
+                <button class="showUnique">Show Unique Tools Only</button>
+                <button class="showAll">Show All Tools</button>
+            <tr>
+                <th>
+                Tool Name<th>
+                Number of Occurrences
+            </tr>
+
+        <#list myToolsAndCounts as thisToolCount>
   <tr class='clickMe' data-tool-name="${thisToolCount.toolName}">
-      <td>${thisToolCount.toolName}
-	  <td>${thisToolCount.toolCount}
+      <td>
+      ${thisToolCount.toolName}
+	  <td>
+      ${thisToolCount.toolCount}
   </#list>
 
-</table>
+    </table>
 
-  <table border=1 class="resultsTable otherPersonsTable">
-  <tr class="changeName" title="click to change person"><th colspan="2"  id="otherPeoplesTools"><span id="otherUsersPlaceHolder" data-email="">Loading Team-mates</span><br><button class="showUnique">Show Unique Tools Only</button><button class="showAll">Show All Tools</button>
-  <tr id="dynamicToolInsertionPoint"><th>Tool Name<th>Number of Occurrences</tr>
+    <table border="1" class="resultsTable otherPersonsTable">
+        <tr class="changeName" title="click to change person">
+            <th colspan="2" id="otherPeoplesTools"><span id="otherUsersPlaceHolder" data-email="">Loading Team-mates</span><br>
+                <button class="showUnique">Show Unique Tools Only</button>
+                <button class="showAll">Show All Tools</button>
+            <tr id="dynamicToolInsertionPoint">
+                <th>
+                Tool Name<th>
+                Number of Occurrences
+            </tr>
 
-</table>
-<div id="moreInfo">
-<div id="placeholder">Select a tool for more info.</div>
+    </table>
+    <div id="moreInfo">
+        <div id="placeholder">Select a tool for more info.</div>
 
-<div id="requestShare">You do not have permission to view...</div>
+        <div id="requestShare">You do not have permission to view...</div>
 
-</div>
+        <div id="externalMediaLoading">Loading clips</div>
+        <div id="externalMedia">
+            <div class="moreInfoTitle">"toolName"</div>
+            <div id="panelAndOverlay">
+                <div id="overlay">
+                    <span>Click for Full Screen</span>
+                </div>
+                <div id="panel" data-total-frames="" data-type="" data-playback-directory="">
 
-<div class="modal"><!-- Place at bottom of page --></div>
+                    <div id="moduleControlPanel" class="ui-widget-content">
+                        <button class="playPause">
+                            <img class="playbackCommand playImage pause" src="/images/playback/play.svg" />
+                            <img class="playbackCommand pauseImage pause" src="/images/playback/pause.svg" />
+                        </button>
+                        <div class="settings">
+                            <!-- <if keypress != "MENU"> -->
+                            <img class="animationSelection" src="/images/imageOnly.png" />
+                            <img class="animationSelection" src="/images/textOnly.png" />
+                            <img class="animationSelection" src="/images/imageAndText.png" />
+                            <!-- <if> -->
+                            <img class="animationSelection" src="/images/none.png" />
+                        </div>
+                        <div id="dockedSliderHolder">
+                            <div id="dockedSlider" class="slider">
+                                <label class="startLabel" title="The tool gets used here">&nbsp;</label>
+                            </div>
+                        </div>
+                    </div>
 
-<script src="jquery/jquery.min.js"></script>
-<script src="scripts/comparison.js"></script>
+                    <!-- <if keypress != "MENU">  -->
+                    <img class="keyAnimation full image" data-img-name="image.png" />
+                    <img class="keyAnimation blank image" data-img-name="image_un.png" />
 
-<link rel="stylesheet" href="jquery/jquery-ui.min.css">
-<script src="jquery/jquery-ui.min.js"></script>
+                    <img class="keyAnimation full text" data-img-name="text.png" />
+                    <img class="keyAnimation blank text" data-img-name="text_un.png" />
+
+                    <img class="keyAnimation full imageText" data-img-name="image_text.png" />
+                    <img class="keyAnimation blank imageText" data-img-name="image_text_un.png" />
+                    <!--  <if>  -->
+
+                    <img class="frame" data-img-name="frame0000.png" />
+                </div>
+            </div>
+
+            <div id="controlPanel">
+                <button class="playPause">
+                    <img class="playbackCommand playImage pause" src="/images/playback/play.svg" />
+                    <img class="playbackCommand pauseImage pause" src="/images/playback/pause.svg" />
+                </button>
+                <div class="settings">
+                    <!--<if keypress != "MENU">-->
+                    <img class="animationSelection" src="/images/imageOnly.png" />
+                    <img class="animationSelection" src="/images/textOnly.png" />
+                    <img class="animationSelection" src="/images/imageAndText.png" />
+                    <!-- <if>-->
+                    <img class="animationSelection" src="/images/none.png" />
+                </div>
+                <div id="staticSliderHolder">
+                    <div id="staticSlider" class="slider">
+                        <label class="startLabel" title="The tool gets used here">&nbsp;</label>
+                    </div>
+                </div>
+            </div>
+
+            <div></div>
+            <div>
+
+                <!-- </br>View More Usages</br>
+    <list viewMoreOptions as option>
+      <button class="viewOther $option.additionalClass}" data-display-option=$option.number} data-tool-name='$toolName}' data-plugin-name='$pluginName}'">$option.text}</button>
+    <list> -->
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="modal">
+        <!-- Place at bottom of page -->
+    </div>
+	
+	
+	<script src="jquery/jquery.min.js"></script>
+	<script src="scripts/playback.js"></script>
+    <script src="scripts/comparison.js"></script>
+
+    <link rel="stylesheet" href="jquery/jquery-ui.min.css">
+    <script src="jquery/jquery-ui.min.js"></script>
 
 </body>
-</html>  
+</html>
