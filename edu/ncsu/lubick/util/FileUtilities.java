@@ -142,13 +142,14 @@ public class FileUtilities
 		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + ToolStream.makeUniqueIdentifierForToolUsage(tu, userEmail);
 	}
 	
-
+	@Deprecated
 	private static String createNumberForMediaOutput(ToolUsage tu)
 	{
 		int startingPoint = FileUtilities.createHashFromToolName(tu.getToolName());
 		return ""+startingPoint +"_"+tu.getTimeStamp().getTime();
 	}
 
+	@Deprecated
 	public static int createHashFromToolName(String toolName)
 	{
 		int retval = toolName.hashCode();
@@ -157,6 +158,7 @@ public class FileUtilities
 		return Math.abs(retval);
 	}
 
+	@Deprecated
 	public static String makeFileNameStemNoDateForToolPluginMedia(String pluginName, String toolName)
 	{
 		if (toolName == null)

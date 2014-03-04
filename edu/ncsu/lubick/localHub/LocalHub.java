@@ -1,6 +1,7 @@
 package edu.ncsu.lubick.localHub;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import edu.ncsu.lubick.localHub.http.HTTPServer;
 import edu.ncsu.lubick.localHub.http.WebToolReportingInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
+import edu.ncsu.lubick.util.FileUtilities;
 
 public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
@@ -213,11 +215,8 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	}
 
 
-	// ============End
-	// Listeners======================================================================================
 
-	
-
+	@Deprecated
 	@Override
 	public List<ToolUsage> getLastNInstancesOfToolUsage(int n, String pluginName, String toolName)
 	{
@@ -325,6 +324,26 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	public static String getCurrentUserEmail()
 	{
 		return singletonHub.userManager.getUserEmail();
+	}
+
+	@Override
+	public List<File> getBestExamplesOfTool(String pluginName, String toolName)
+	{
+		List<ToolUsage> usages = this.databaseManager.getLastNInstancesOfToolUsage(5, pluginName, toolName);
+		
+		List<File> retVal = new ArrayList<>();
+		
+		for (ToolUsage toolUsage : usages)
+		{
+			File potentialFile = new File("renderedVideos/",FileUtilities.makeFolderNameForBrowserMediaPackage(toolUsage, userManager.getUserEmail()));
+			if (potentialFile.exists() && potentialFile.isDirectory())
+			{
+				retVal.add(potentialFile);
+			}
+		}
+		
+		return retVal;
+		
 	}
 
 }

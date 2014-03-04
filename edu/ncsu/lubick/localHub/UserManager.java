@@ -94,7 +94,6 @@ public class UserManager {
 
 	public boolean needsUserInput()
 	{
-		// TODO Auto-generated method stub
 		return false;
 	}
 

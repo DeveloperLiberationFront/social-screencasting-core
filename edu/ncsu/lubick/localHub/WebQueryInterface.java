@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.localHub;
 
+import java.io.File;
 import java.util.List;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
@@ -10,8 +11,9 @@ public interface WebQueryInterface {
 
 	List<String> getNamesOfAllPlugins();
 
-	//List<ToolUsage> extractMediaForLastNUsagesOfTool(int n, String pluginName, String toolName) throws MediaEncodingException;
-
+	@Deprecated
 	List<ToolUsage> getLastNInstancesOfToolUsage(int n, String pluginName, String toolName);
+
+	List<File> getBestExamplesOfTool(String pluginName, String toolName);
 
 }

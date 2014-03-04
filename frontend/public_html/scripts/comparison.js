@@ -1,6 +1,6 @@
-/*global renderPlayback,stopFramePlayback*/       //depends on playback.js
+/*global stopFramePlayback, setUpPlaybackForDataAuthAndDir */       //depends on playback.js and setUpPlayback.js
 
-var peoplesNames;
+var peoplesNames; 
 var peoplesNamesIndex;
 
 var userName, userEmail, userToken, currentPlugin, currentTool, currentClips, currentImageDir;
@@ -135,70 +135,7 @@ function loadPeople() {
     });
 }
 
-function setUpAnimations(imageAssets) {
-    //add in animation frames
-    var keyInsertionPoint, firstOptionIconInsertionPoint, secondOptionIconInsertionPoint;
-    keyInsertionPoint = $("#keyAnimationSpot");
-    firstOptionIconInsertionPoint = $("#animationSelectionSpot1");
-    secondOptionIconInsertionPoint = $("#animationSelectionSpot2");
 
-    $(".animationSelection").remove();
-    firstOptionIconInsertionPoint.after('<img class="animationSelection" src="/images/none.png" />');
-    secondOptionIconInsertionPoint.after('<img class="animationSelection" src="/images/none.png" />');
-
-    if (imageAssets.length === 0) {
-        return;
-    }
-	
-	firstOptionIconInsertionPoint.after('<img class="animationSelection" src="/images/imageAndText.png" />');
-    firstOptionIconInsertionPoint.after('<img class="animationSelection" src="/images/textOnly.png" />');
-	firstOptionIconInsertionPoint.after('<img class="animationSelection" src="/images/imageOnly.png" />');
-
-	secondOptionIconInsertionPoint.after('<img class="animationSelection" src="/images/imageAndText.png" />');
-    secondOptionIconInsertionPoint.after('<img class="animationSelection" src="/images/textOnly.png" />');
-	secondOptionIconInsertionPoint.after('<img class="animationSelection" src="/images/imageOnly.png" />');
-
-	keyInsertionPoint.after('<img class="keyAnimation full imageText" src="' + currentImageDir + '/image_text.png'+authString+'" />');
-    keyInsertionPoint.after('<img class="keyAnimation blank imageText" src="' + currentImageDir + '/image_text_un.png'+authString+'" />');
-	
-    keyInsertionPoint.after('<img class="keyAnimation full text" src="' + currentImageDir + '/text.png'+authString+'" />');
-    keyInsertionPoint.after('<img class="keyAnimation blank text" src="' + currentImageDir + '/text_un.png'+authString+'" />');
-	
-	keyInsertionPoint.after('<img class="keyAnimation full image" src="' + currentImageDir + '/image.png'+authString+'" />');
-    keyInsertionPoint.after('<img class="keyAnimation blank image" src="' + currentImageDir + '/image_un.png'+authString+'" />');
-}
-
-function setUpPlaybackForExternalData(data) {
-    var pluginName, toolName, frames, imageAssets, i;
-    //console.log(data);
-
-    pluginName = data.clip.plugin;
-    toolName = data.clip.tool;
-    frames = data.clip.filenames;
-    for (i = frames.length - 1; i > 0; i--) {
-        if (frames[i].lastIndexOf("frame", 0) === 0)	//http://stackoverflow.com/a/4579228/1447621
-        {
-            break;
-        }
-    }
-
-    imageAssets = frames.splice(i + 1, frames.length - i - 1);	//animations
-
-    //console.log(frames);
-    //console.log(imageAssets);
-
-    $("#mediaTitle").text(toolName);
-    $("#panel").data("totalFrames", frames.length)
-				.data("type", (imageAssets.length === 0 ? "menu" : "keystroke"))
-				.data("playbackDirectory", currentImageDir)
-				.data("auth");
-
-    setUpAnimations(imageAssets);
-
-    renderPlayback(authString);
-	$("#externalMediaLoading").hide();
-	$("#externalMedia").show();
-}
 
 
 function changeSharedMediaSource(arrayOfClips, clipIndex) {
@@ -208,13 +145,18 @@ function changeSharedMediaSource(arrayOfClips, clipIndex) {
     currentImageDir = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + "/" + currentTool + "/" + arrayOfClips[clipIndex];
     getUrl = currentImageDir + authString;
 
-    currentClips = arrayOfClips;
+    currentClips = arrayOfClips;		//TODO deal with more than one clip
 
+	//clear out all frames
 	$(".frame").remove();
 	
+	//reload frames //TODO: implement caching
     $.ajax(getUrl, {
         url: getUrl,
-        success: setUpPlaybackForExternalData,
+        success: function (data) {
+            setUpPlaybackForDataAuthAndDir(data, authString, currentImageDir);
+
+        },
         error: function (error, e, f) {
             console.log("error");
             console.log(error);
@@ -225,21 +167,69 @@ function changeSharedMediaSource(arrayOfClips, clipIndex) {
     //this will return the html to view the media
 }
 
+function changeLocalMediaSource(arrayOfClips, clipIndex)
+{
+	var postUrl;
+    currentImageDir = "/"+arrayOfClips[clipIndex]+"/";
+    postUrl = "/mediaServer";
+    currentClips = arrayOfClips;		//TODO deal with more than one clip
+
+	//clear out all frames
+	$(".frame").remove();
+	
+	//reload frames //TODO: implement caching
+    $.ajax({
+		type:"POST",
+        url: postUrl,
+		data: {"clipName": arrayOfClips[clipIndex]},
+        success: function (data) {
+            setUpPlaybackForDataAuthAndDir(data, "", currentImageDir);
+
+        },
+        error: function (error, e, f) {
+            console.log("error");
+            console.log(error);
+            console.log(e);
+            console.log(f);
+        }
+    });
+}
+
+
 function showSharedClips(arrayOfClips) {
     stopFramePlayback();
     $("#placeholder").hide();
     if (arrayOfClips.length === 0) {
-        $("#externalMediaLoading").hide();
-		
+        $("#clipLoading").hide();
+		$("#clipDoesNotExist").hide();
         $("#requestShare").show();
     }
     else {
+		$("#clipDoesNotExist").hide();
         $("#requestShare").hide();
-        $("#externalMediaLoading").show();
+        $("#clipLoading").show();
         changeSharedMediaSource(arrayOfClips, 0);		//start with the first clip
 
     }
 }
+
+function showLocalClips(arrayOfClips) {
+	stopFramePlayback();
+    $("#placeholder").hide();
+    if (arrayOfClips.length === 0) {
+        $("#clipLoading").hide();
+		$("#requestShare").hide();
+        $("#clipDoesNotExist").show();
+    }
+    else {
+		$("#requestShare").hide();
+        $("#clipDoesNotExist").hide();
+        $("#clipLoading").show();
+        changeLocalMediaSource(arrayOfClips, 0);		//start with the first clip
+
+    }
+}
+
 
 function checkExistanceOfShare(element) {
     var target, getUrl, emailToView;
@@ -251,7 +241,7 @@ function checkExistanceOfShare(element) {
 
     getUrl = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + "/" + currentTool + authString;
 
-	$("#externalMedia").hide();
+	$("#clipPlayer").hide();
 	
     $.ajax({
         url: getUrl,
@@ -260,6 +250,36 @@ function checkExistanceOfShare(element) {
             console.log(JSON.stringify(data));
 
             showSharedClips(data.clips);
+        },
+        error: function () {
+            console.log("There was a problem");
+        }
+
+    });
+}
+
+function checkExistanceOfLocalClips(element) {
+	var target, postUrl, emailToView;
+    element.preventDefault();
+
+    target = $(element.currentTarget);
+    emailToView = peoplesNames[peoplesNamesIndex][1];
+    currentTool = target.data("toolName");
+
+   //TODO postUrl = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + "/" + currentTool + authString;
+	postUrl = "/mediaServer"
+   
+	$("#clipPlayer").hide();
+	
+    $.ajax({
+		type:"POST",
+        url: postUrl,
+		data: {"pluginName": currentPlugin, "toolName": currentTool},
+        success: function (data) {
+            console.log(data);
+            console.log(JSON.stringify(data));
+			//Expecting a {clips: [CLIPID, CLIPID...]}
+            showLocalClips(data.clips);
         },
         error: function () {
             console.log("There was a problem");
@@ -277,6 +297,7 @@ $(document).ready(function () {
     $("#otherUsersPlaceHolder").on('click', rotatePeoplesNamesAndTools);
 
     $("table").on('click', ".addedItem", checkExistanceOfShare);
+	$("table").on('click', ".myItem", checkExistanceOfLocalClips);
 
     loadPeople();
 

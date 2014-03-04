@@ -21,7 +21,7 @@
             </tr>
 
         <#list myToolsAndCounts as thisToolCount>
-  <tr class='clickMe' data-tool-name="${thisToolCount.toolName}">
+  <tr class='clickMe myItem' data-tool-name="${thisToolCount.toolName}">
       <td>
       ${thisToolCount.toolName}
 	  <td>
@@ -44,11 +44,11 @@
     </table>
     <div id="moreInfo">
         <div id="placeholder">Select a tool for more info.</div>
-
+		<div id="clipDoesNotExist">No clips exist locally for this tool.  This is unexpected...</div>
         <div id="requestShare">You do not have permission to view...</div>
 
-        <div id="externalMediaLoading">Loading clips</div>
-        <div id="externalMedia">
+        <div id="clipLoading">Loading clips</div>
+        <div id="clipPlayer">
             <div id="mediaTitle">"toolName"</div>
             <div id="panelAndOverlay">
                 <div id="overlay">
@@ -122,6 +122,7 @@
 
                     <script src="jquery/jquery.min.js"></script>
                     <script src="scripts/playback.js"></script>
+					<script src="scripts/setUpPlayback.js"></script>
                     <script src="scripts/comparison.js"></script>
 
                     <link rel="stylesheet" href="jquery/jquery-ui.min.css">

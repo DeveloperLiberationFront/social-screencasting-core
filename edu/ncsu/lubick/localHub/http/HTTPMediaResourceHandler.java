@@ -35,11 +35,14 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 	private static final String PERFORM_ACTION = "thingToDo";
 	private static final String POST_COMMAND_NTH_USAGE = "nthUsage";
 	private static final String POST_COMMAND_PLUGIN_NAME = "pluginName";
-	private static final String POST_COMMAND_IS_VIDEO_MADE_FOR_TOOL_USAGE = "isVideoAlreadyMade";
+	//private static final String POST_COMMAND_IS_VIDEO_MADE_FOR_TOOL_USAGE = "isVideoAlreadyMade";
 
 	private static final String POST_COMMAND_TOOL_NAME = "toolName";
-	private static final String POST_COMMAND_VIEW_NTH_USAGE = "changeToOtherSource";
-	private static final String POST_COMMAND_MAKE_PLAYBACK_HTML_FOR_EXTERNAL_CLIP = "makePlaybackForExternalClip";
+	
+	private static final String QUERY_CLIP_EXISTANCE = "queryClipExistance";
+	
+	//private static final String POST_COMMAND_VIEW_NTH_USAGE = "changeToOtherSource";
+	//private static final String POST_COMMAND_MAKE_PLAYBACK_HTML_FOR_EXTERNAL_CLIP = "makePlaybackForExternalClip";
 	
 	private static Logger logger;
 	
@@ -83,7 +86,7 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 		logger.debug("POST parameters recieved " + request.getParameterMap());
 		logger.debug("PluginName: " + request.getParameter(POST_COMMAND_PLUGIN_NAME));
 
-		if (request.getParameter(PERFORM_ACTION).equals(POST_COMMAND_IS_VIDEO_MADE_FOR_TOOL_USAGE))
+		if (request.getParameter(PERFORM_ACTION).equals(QUERY_CLIP_EXISTANCE))
 		{
 			respondToDoesMediaExist(baseRequest, request, response);
 		}
@@ -138,8 +141,17 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
 		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
 
-		serveUpNthUsageOfMediaIfExists(response, new InternalToolRepresentation(toolName, pluginName, null, 0));
-
+		//serveUpNthUsageOfMediaIfExists(response, new InternalToolRepresentation(toolName, pluginName, null, 0));
+		List<File> browserPackages = databaseLink.getBestExamplesOfTool(pluginName, toolName);
+		
+		JSONArray jarr = new JSONArray();
+		for(File f: browserPackages)
+		{
+			jarr.put(f.getName());
+		}
+		
+		response.getWriter().write(jarr.toString());
+		
 		baseRequest.setHandled(true);
 
 	}

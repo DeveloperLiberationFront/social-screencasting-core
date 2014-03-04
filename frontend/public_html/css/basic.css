@@ -98,10 +98,10 @@ td, tr, th{
 	display:none;
 }
 
-#externalMedia {
+#clipPlayer {
 	display:none;
 }
 
-#externalMediaLoading {
+#clipLoading {
 	display:none;
 }
