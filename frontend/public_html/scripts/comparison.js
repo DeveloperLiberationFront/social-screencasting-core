@@ -5,11 +5,6 @@ var peoplesNamesIndex;
 
 var userName, userEmail, userToken, currentPlugin, currentTool, currentClips, currentImageDir;
 var authString;
-function addResponseHTMLToWindow(data) {
-    $(".modal").hide();
-    $(".moreInfo").html(data);
-    renderPlayback();
-}
 
 function handleMouseEnter() {
     var highlightedToolName = $(this).data("toolName");
@@ -148,28 +143,29 @@ function setUpAnimations(imageAssets) {
     secondOptionIconInsertionPoint = $("#animationSelectionSpot2");
 
     $(".animationSelection").remove();
-    firstOptionIconInsertionPoint.append('<img class="animationSelection" src="/images/none.png" />');
-    secondOptionIconInsertionPoint.append('<img class="animationSelection" src="/images/none.png" />');
+    firstOptionIconInsertionPoint.after('<img class="animationSelection" src="/images/none.png" />');
+    secondOptionIconInsertionPoint.after('<img class="animationSelection" src="/images/none.png" />');
 
     if (imageAssets.length === 0) {
         return;
     }
-    firstOptionIconInsertionPoint.append('<img class="animationSelection" src="/images/imageOnly.png" />');
-    firstOptionIconInsertionPoint.append('<img class="animationSelection" src="/images/textOnly.png" />');
-    firstOptionIconInsertionPoint.append('<img class="animationSelection" src="/images/imageAndText.png" />');
+	
+	firstOptionIconInsertionPoint.after('<img class="animationSelection" src="/images/imageAndText.png" />');
+    firstOptionIconInsertionPoint.after('<img class="animationSelection" src="/images/textOnly.png" />');
+	firstOptionIconInsertionPoint.after('<img class="animationSelection" src="/images/imageOnly.png" />');
 
-    secondOptionIconInsertionPoint.append('<img class="animationSelection" src="/images/imageOnly.png" />');
-    secondOptionIconInsertionPoint.append('<img class="animationSelection" src="/images/textOnly.png" />');
-    secondOptionIconInsertionPoint.append('<img class="animationSelection" src="/images/imageAndText.png" />');
+	secondOptionIconInsertionPoint.after('<img class="animationSelection" src="/images/imageAndText.png" />');
+    secondOptionIconInsertionPoint.after('<img class="animationSelection" src="/images/textOnly.png" />');
+	secondOptionIconInsertionPoint.after('<img class="animationSelection" src="/images/imageOnly.png" />');
 
-    keyInsertionPoint.append('<img class="keyAnimation full image" src="' + currentImageDir + '/image.png'+authString+'" />');
-    keyInsertionPoint.append('<img class="keyAnimation blank image" src="' + currentImageDir + '/image_un.png'+authString+'" />');
-
-    keyInsertionPoint.append('<img class="keyAnimation full text" src="' + currentImageDir + '/text.png'+authString+'" />');
-    keyInsertionPoint.append('<img class="keyAnimation blank text" src="' + currentImageDir + '/text_un.png'+authString+'" />');
-
-    keyInsertionPoint.append('<img class="keyAnimation full imageText" src="' + currentImageDir + '/image_text.png'+authString+'" />');
-    keyInsertionPoint.append('<img class="keyAnimation blank imageText" src="' + currentImageDir + '/image_text_un.png'+authString+'" />');
+	keyInsertionPoint.after('<img class="keyAnimation full imageText" src="' + currentImageDir + '/image_text.png'+authString+'" />');
+    keyInsertionPoint.after('<img class="keyAnimation blank imageText" src="' + currentImageDir + '/image_text_un.png'+authString+'" />');
+	
+    keyInsertionPoint.after('<img class="keyAnimation full text" src="' + currentImageDir + '/text.png'+authString+'" />');
+    keyInsertionPoint.after('<img class="keyAnimation blank text" src="' + currentImageDir + '/text_un.png'+authString+'" />');
+	
+	keyInsertionPoint.after('<img class="keyAnimation full image" src="' + currentImageDir + '/image.png'+authString+'" />');
+    keyInsertionPoint.after('<img class="keyAnimation blank image" src="' + currentImageDir + '/image_un.png'+authString+'" />');
 }
 
 function setUpPlaybackForExternalData(data) {
@@ -214,6 +210,8 @@ function changeSharedMediaSource(arrayOfClips, clipIndex) {
 
     currentClips = arrayOfClips;
 
+	$(".frame").remove();
+	
     $.ajax(getUrl, {
         url: getUrl,
         success: setUpPlaybackForExternalData,
@@ -232,6 +230,7 @@ function showSharedClips(arrayOfClips) {
     $("#placeholder").hide();
     if (arrayOfClips.length === 0) {
         $("#externalMediaLoading").hide();
+		
         $("#requestShare").show();
     }
     else {
@@ -245,7 +244,6 @@ function showSharedClips(arrayOfClips) {
 function checkExistanceOfShare(element) {
     var target, getUrl, emailToView;
     element.preventDefault();
-    $("#moreInfo").removeClass("hidden");
 
     target = $(element.currentTarget);
     emailToView = peoplesNames[peoplesNamesIndex][1];
@@ -253,6 +251,8 @@ function checkExistanceOfShare(element) {
 
     getUrl = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + "/" + currentTool + authString;
 
+	$("#externalMedia").hide();
+	
     $.ajax({
         url: getUrl,
         success: function (data) {

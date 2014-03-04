@@ -226,6 +226,7 @@ function renderPlayback(auth) {
         animationEnabled = true;
     }
 
+	//put a little green tick where the tool starts
     $(".startLabel").css('left', rampUp * 100 / totalFrames + '%');
     handleAnimationOptionsForCurrentFrame();
     setUpSliders();
