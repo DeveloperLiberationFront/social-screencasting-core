@@ -170,7 +170,7 @@ function setUpAnimations(imageAssets) {
 
 function setUpPlaybackForExternalData(data) {
     var pluginName, toolName, frames, imageAssets, i;
-    console.log(data);
+    //console.log(data);
 
     pluginName = data.clip.plugin;
     toolName = data.clip.tool;
@@ -184,8 +184,8 @@ function setUpPlaybackForExternalData(data) {
 
     imageAssets = frames.splice(i + 1, frames.length - i - 1);	//animations
 
-    console.log(frames);
-    console.log(imageAssets);
+    //console.log(frames);
+    //console.log(imageAssets);
 
     $("#mediaTitle").text(toolName);
     $("#panel").data("totalFrames", frames.length)

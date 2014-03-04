@@ -9,6 +9,7 @@ var totalAnimationChoices;
 var rampUp = 22;	//22 frames of ramp up
 var durationOfAnimation = 10;  //10 frames of showing animation
 var authString = "";
+var hasInitializedButtons = false;
 
 function launchFullScreen(element) {  //From davidwalsh.name/fullscreen
     if (element.requestFullScreen) {
@@ -215,12 +216,14 @@ function renderPlayback(auth) {
 
     setAnimationOverlaysTo(currentAnimationChoice);
 
-   
-    $("#overlay").on("click", goFullScreen);
+	if (!hasInitializedButtons)
+	{
+		$("#overlay").on("click", goFullScreen);
 
-    $("#moreInfo").on("click",".playPause", playOrPause);
-    $("#moreInfo").on("click",".settings", rotateAnimationSettings);
-
+		$("#moreInfo").on("click",".playPause", playOrPause);
+		$("#moreInfo").on("click",".settings", rotateAnimationSettings);
+		hasInitializedButtons = true;
+	}
     totalFrames = +$("#panel").data("totalFrames");
     if ($("#panel").data("type") == "keystroke") {
         animationEnabled = true;
