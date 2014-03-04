@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -18,11 +17,10 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
-import edu.ncsu.lubick.util.FileUtilities;
 import freemarker.template.SimpleNumber;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateHashModel;
@@ -31,7 +29,7 @@ import freemarker.template.TemplateModelException;
 
 public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink implements Handler {
 
-	private static final String CLIP_NAMES = "clipNames";
+	private static final String CLIP_NAME = "clipName";
 	private static final String PERFORM_ACTION = "thingToDo";
 	private static final String POST_COMMAND_NTH_USAGE = "nthUsage";
 	private static final String POST_COMMAND_PLUGIN_NAME = "pluginName";
@@ -40,6 +38,7 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 	private static final String POST_COMMAND_TOOL_NAME = "toolName";
 	
 	private static final String QUERY_CLIP_EXISTANCE = "queryClipExistance";
+	private static final String GET_IMAGES_FOR_CLIP = "getImages";
 	
 	//private static final String POST_COMMAND_VIEW_NTH_USAGE = "changeToOtherSource";
 	//private static final String POST_COMMAND_MAKE_PLAYBACK_HTML_FOR_EXTERNAL_CLIP = "makePlaybackForExternalClip";
@@ -90,13 +89,9 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 		{
 			respondToDoesMediaExist(baseRequest, request, response);
 		}
-		else if (request.getParameter(PERFORM_ACTION).equals(POST_COMMAND_VIEW_NTH_USAGE))
+		else if (request.getParameter(PERFORM_ACTION).equals(GET_IMAGES_FOR_CLIP))
 		{
-			respondToViewNthLocalUsage(baseRequest, request, response);
-		}
-		else if (request.getParameter(PERFORM_ACTION).equals(POST_COMMAND_MAKE_PLAYBACK_HTML_FOR_EXTERNAL_CLIP))
-		{
-			respondToGenerateHTMLExternalClip(baseRequest, request, response);
+			respondToGetClipImages(baseRequest, request, response);
 		}
 		else {
 			logger.error("Cannot handle "+request.getParameter(PERFORM_ACTION));
@@ -104,36 +99,48 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 		}
 	}
 
-	private void respondToGenerateHTMLExternalClip(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
+	private void respondToGetClipImages(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
-		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
-		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
-		Integer nthUsage = Integer.valueOf(request.getParameter(POST_COMMAND_NTH_USAGE));
-		String arrayStringOfClipNames = request.getParameter(CLIP_NAMES);
+		String clipName = request.getParameter(CLIP_NAME);
 		
-		try
+		File clipDir = new File("renderedVideos/",clipName);
+		
+		JSONObject clipObject = new JSONObject();
+		JSONArray fileNamesArr = new JSONArray();
+		
+		
+		if (clipDir.exists() && clipDir.isDirectory())
 		{
-			JSONArray jarrOfClipNames = new JSONArray(arrayStringOfClipNames);
-			serveUpNthUsageOfExternalMedia(response, toolName, pluginName, nthUsage, jarrOfClipNames);
+			String[] files = clipDir.list();
+			Arrays.sort(files);
+			for(String imageFile: files)
+			{
+				fileNamesArr.put(imageFile);
+			}
+		}
+		
+		
+		try{
+			JSONObject fileNamesObject = new JSONObject();
+			fileNamesObject.put("filenames", fileNamesArr);
+			fileNamesObject.put("name", clipName);
+			clipObject.put("clip", fileNamesObject);
+			
+			response.setContentType("application/json");
+			clipObject.write(response.getWriter());
 		}
 		catch (JSONException e)
 		{
-			throw new IOException(e);
+			logger.error("Problem compiling clip names and writing them out",e);
 		}
+
+	
+	baseRequest.setHandled(true);
+		
 		
 	}
 
-	private void respondToViewNthLocalUsage(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
-	{
-		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
-		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
-		Integer nthUsage = Integer.valueOf(request.getParameter(POST_COMMAND_NTH_USAGE));
-
-		serveUpNthUsageOfMediaIfExists(response, new InternalToolRepresentation(toolName, pluginName, null, nthUsage));
-		
-		baseRequest.setHandled(true);
-	}
-
+	
 
 
 	private void respondToDoesMediaExist(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
@@ -149,8 +156,22 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 		{
 			jarr.put(f.getName());
 		}
+		JSONObject clips = new JSONObject();
 		
-		response.getWriter().write(jarr.toString());
+		try
+		{
+			jarr.put("Eclipsedc3a37d4-4469-391f-bd62-0324ac2b7091");
+			//clips.put("clips", jarr);
+			clips.put("clips",jarr);
+			
+			response.setContentType("application/json");
+			clips.write(response.getWriter());
+		}
+		catch (JSONException e)
+		{
+			logger.error("Problem compiling clip names and writing them out",e);
+		}
+		
 		
 		baseRequest.setHandled(true);
 
@@ -161,40 +182,6 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 	{
 		// TODO Auto-generated method stub
 		
-	}
-
-	private void serveUpNthUsageOfMediaIfExists(HttpServletResponse response, InternalToolRepresentation itr) throws IOException
-	{
-		
-		String pluginName = itr.humanPluginName;
-		String toolName = itr.humanToolName;
-		String folderName = FileUtilities.makeFileNameStemNoDateForToolPluginMedia(pluginName, toolName);
-		
-		List<File> mediaFolders = getFoldersPrefixedWith(folderName);
-		
-		if (itr.nthMostRecent >= mediaFolders.size())
-		{
-			itr.nthMostRecent = mediaFolders.size() - 1;
-		}
-		
-		if (mediaFolders.size() > 0)
-		{
-			File nthMediaDir = mediaFolders.get(itr.nthMostRecent);	
-			int numFrames = countNumFrames(nthMediaDir);
-			List<ToolUsage> toolUsages = databaseLink.getLastNInstancesOfToolUsage(mediaFolders.size(), pluginName, toolName);
-					
-			itr.directory = nthMediaDir.getName();
-			processTemplateWithNameKeysAndNumFrames(response, toolUsages.get(itr.nthMostRecent).getToolKeyPresses(), itr, numFrames, mediaFolders.size());
-		}
-		else
-		{
-			logger.debug("No generated media found");
-
-			Map<Object, Object> dataModel = new HashMap<Object, Object>();
-			dataModel.put("toolName", toolName);
-			dataModel.put("pluginName", pluginName);
-			processTemplate(response, dataModel, "videoDoesNotExist.html.piece");
-		}
 	}
 
 	private List<File> getFoldersPrefixedWith(String folderName)

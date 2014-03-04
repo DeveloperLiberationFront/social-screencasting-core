@@ -1,6 +1,6 @@
 /*global stopFramePlayback, setUpPlaybackForDataAuthAndDir */       //depends on playback.js and setUpPlayback.js
 
-var peoplesNames; 
+var peoplesNames;
 var peoplesNamesIndex;
 
 var userName, userEmail, userToken, currentPlugin, currentTool, currentClips, currentImageDir;
@@ -147,10 +147,10 @@ function changeSharedMediaSource(arrayOfClips, clipIndex) {
 
     currentClips = arrayOfClips;		//TODO deal with more than one clip
 
-	//clear out all frames
-	$(".frame").remove();
-	
-	//reload frames //TODO: implement caching
+    //clear out all frames
+    $(".frame").remove();
+
+    //reload frames //TODO: implement caching
     $.ajax(getUrl, {
         url: getUrl,
         success: function (data) {
@@ -167,22 +167,23 @@ function changeSharedMediaSource(arrayOfClips, clipIndex) {
     //this will return the html to view the media
 }
 
-function changeLocalMediaSource(arrayOfClips, clipIndex)
-{
-	var postUrl;
-    currentImageDir = "/"+arrayOfClips[clipIndex]+"/";
+function changeLocalMediaSource(arrayOfClips, clipIndex) {
+    var postUrl;
+    currentImageDir = "/" + arrayOfClips[clipIndex] + "/";
     postUrl = "/mediaServer";
     currentClips = arrayOfClips;		//TODO deal with more than one clip
 
-	//clear out all frames
-	$(".frame").remove();
-	
-	//reload frames //TODO: implement caching
+    //clear out all frames
+    $(".frame").remove();
+
+    //reload frames //TODO: implement caching
     $.ajax({
-		type:"POST",
+        type: "POST",
         url: postUrl,
-		data: {"clipName": arrayOfClips[clipIndex]},
+        data: { "clipName": arrayOfClips[clipIndex], "thingToDo": "getImages" },
         success: function (data) {
+            data.clip.plugin = currentPlugin;
+            data.clip.tool = currentTool;
             setUpPlaybackForDataAuthAndDir(data, "", currentImageDir);
 
         },
@@ -201,11 +202,11 @@ function showSharedClips(arrayOfClips) {
     $("#placeholder").hide();
     if (arrayOfClips.length === 0) {
         $("#clipLoading").hide();
-		$("#clipDoesNotExist").hide();
+        $("#clipDoesNotExist").hide();
         $("#requestShare").show();
     }
     else {
-		$("#clipDoesNotExist").hide();
+        $("#clipDoesNotExist").hide();
         $("#requestShare").hide();
         $("#clipLoading").show();
         changeSharedMediaSource(arrayOfClips, 0);		//start with the first clip
@@ -214,15 +215,15 @@ function showSharedClips(arrayOfClips) {
 }
 
 function showLocalClips(arrayOfClips) {
-	stopFramePlayback();
+    stopFramePlayback();
     $("#placeholder").hide();
     if (arrayOfClips.length === 0) {
         $("#clipLoading").hide();
-		$("#requestShare").hide();
+        $("#requestShare").hide();
         $("#clipDoesNotExist").show();
     }
     else {
-		$("#requestShare").hide();
+        $("#requestShare").hide();
         $("#clipDoesNotExist").hide();
         $("#clipLoading").show();
         changeLocalMediaSource(arrayOfClips, 0);		//start with the first clip
@@ -241,8 +242,8 @@ function checkExistanceOfShare(element) {
 
     getUrl = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + "/" + currentTool + authString;
 
-	$("#clipPlayer").hide();
-	
+    $("#clipPlayer").hide();
+
     $.ajax({
         url: getUrl,
         success: function (data) {
@@ -259,26 +260,25 @@ function checkExistanceOfShare(element) {
 }
 
 function checkExistanceOfLocalClips(element) {
-	var target, postUrl, emailToView;
+    var target, postUrl;
     element.preventDefault();
 
     target = $(element.currentTarget);
-    emailToView = peoplesNames[peoplesNamesIndex][1];
     currentTool = target.data("toolName");
 
-   //TODO postUrl = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + "/" + currentTool + authString;
-	postUrl = "/mediaServer"
-   
-	$("#clipPlayer").hide();
-	
+    //TODO postUrl = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + "/" + currentTool + authString;
+    postUrl = "/mediaServer";
+
+    $("#clipPlayer").hide();
+
     $.ajax({
-		type:"POST",
+        type: "POST",
         url: postUrl,
-		data: {"pluginName": currentPlugin, "toolName": currentTool},
+        data: { "pluginName": currentPlugin, "toolName": currentTool, "thingToDo": "queryClipExistance" },
         success: function (data) {
             console.log(data);
             console.log(JSON.stringify(data));
-			//Expecting a {clips: [CLIPID, CLIPID...]}
+            //Expecting a {clips: [CLIPID, CLIPID...]}
             showLocalClips(data.clips);
         },
         error: function () {
@@ -289,7 +289,7 @@ function checkExistanceOfLocalClips(element) {
 }
 
 $(document).ready(function () {
-	var elementPosition;
+    var elementPosition;
     //handles the click on the view buttons to see if a video file exists
     $("table").on('mouseenter', '.clickMe', handleMouseEnter);
     $("table").on('mouseleave', '.clickMe', handleMouseLeave);
@@ -297,7 +297,7 @@ $(document).ready(function () {
     $("#otherUsersPlaceHolder").on('click', rotatePeoplesNamesAndTools);
 
     $("table").on('click', ".addedItem", checkExistanceOfShare);
-	$("table").on('click', ".myItem", checkExistanceOfLocalClips);
+    $("table").on('click', ".myItem", checkExistanceOfLocalClips);
 
     loadPeople();
 
@@ -310,8 +310,8 @@ $(document).ready(function () {
     userToken = $("body").data("token");
     currentPlugin = $("body").data("plugin");
     authString = "?name=" + userName + "&email=" + userEmail + "&token=" + userToken;
-	
-	elementPosition = $('#moreInfo').offset();
+
+    elementPosition = $('#moreInfo').offset();
     //fix it there for scrolling
     $('#moreInfo').css('position', 'fixed').css('top', elementPosition.top).css('left', elementPosition.left);
 });

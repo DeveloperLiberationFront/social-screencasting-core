@@ -142,32 +142,6 @@ public class FileUtilities
 		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + ToolStream.makeUniqueIdentifierForToolUsage(tu, userEmail);
 	}
 	
-	@Deprecated
-	private static String createNumberForMediaOutput(ToolUsage tu)
-	{
-		int startingPoint = FileUtilities.createHashFromToolName(tu.getToolName());
-		return ""+startingPoint +"_"+tu.getTimeStamp().getTime();
-	}
-
-	@Deprecated
-	public static int createHashFromToolName(String toolName)
-	{
-		int retval = toolName.hashCode();
-		if (toolName.hashCode() == Integer.MIN_VALUE)
-			retval = 0;
-		return Math.abs(retval);
-	}
-
-	@Deprecated
-	public static String makeFileNameStemNoDateForToolPluginMedia(String pluginName, String toolName)
-	{
-		if (toolName == null)
-		{
-			logger.info("Got a null toolname, recovering with empty string");
-			toolName = "";
-		}
-		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + pluginName + createHashFromToolName(toolName) + "_";
-	}
 
 	public static File copyFileToDir(File sourceFile, File destFolder) throws IOException
 	{
