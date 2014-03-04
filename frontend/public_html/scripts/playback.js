@@ -123,14 +123,14 @@ function getImageForFrameNumber(frameNumber) {
         retVal += "0";
     }
     retVal += frameNumber;
-    retVal += '.png' + authString + '"></img>';
+    retVal += '.jpg' + authString + '"></img>';
     return $(retVal);
 }
 
 function preloadImages() {
     var p, i;
     p = $("#panel");
-    for (i = 0; i < totalFrames; i++) {
+    for (i = 1; i < totalFrames; i++) {
         getImageForFrameNumber(i).appendTo(p);
     }
 
@@ -215,11 +215,11 @@ function renderPlayback(auth) {
 
     setAnimationOverlaysTo(currentAnimationChoice);
 
-    $(".frame").first().show();	//so the user sees something
+   
     $("#overlay").on("click", goFullScreen);
 
-    $(".playPause").on("click", playOrPause);
-    $(".settings").on("click", rotateAnimationSettings);
+    $("#moreInfo").on("click",".playPause", playOrPause);
+    $("#moreInfo").on("click",".settings", rotateAnimationSettings);
 
     totalFrames = +$("#panel").data("totalFrames");
     if ($("#panel").data("type") == "keystroke") {
@@ -231,8 +231,8 @@ function renderPlayback(auth) {
     setUpSliders();
     setUpDraggableThings();
     preloadImages();
-
+	$(".frame").first().show();
 
 }
 
-$(document).ready(renderPlayback);
+//$(document).ready(renderPlayback);

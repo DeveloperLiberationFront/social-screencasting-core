@@ -269,6 +269,7 @@ function checkExistanceOfShare(element) {
 }
 
 $(document).ready(function () {
+	var elementPosition;
     //handles the click on the view buttons to see if a video file exists
     $("table").on('mouseenter', '.clickMe', handleMouseEnter);
     $("table").on('mouseleave', '.clickMe', handleMouseLeave);
@@ -288,4 +289,8 @@ $(document).ready(function () {
     userToken = $("body").data("token");
     currentPlugin = $("body").data("plugin");
     authString = "?name=" + userName + "&email=" + userEmail + "&token=" + userToken;
+	
+	elementPosition = $('#moreInfo').offset();
+    //fix it there for scrolling
+    $('#moreInfo').css('position', 'fixed').css('top', elementPosition.top).css('left', elementPosition.left);
 });
