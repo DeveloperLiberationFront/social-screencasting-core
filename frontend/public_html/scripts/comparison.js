@@ -3,7 +3,7 @@
 var peoplesNames;
 var peoplesNamesIndex;
 
-var userName, userEmail, userToken, currentPlugin, currentTool;
+var userName, userEmail, userToken, currentPlugin, currentTool, currentClips, currentImageDir;
 var authString;
 function addResponseHTMLToWindow(data) {
     $(".modal").hide();
@@ -126,7 +126,7 @@ function loadPeople() {
         url: "http://screencaster-hub.appspot.com/api/users",
         success: function (data) {
             peoplesNamesIndex = -1;
-            peoplesNames = data["users"];
+            peoplesNames = data.users;
 
             //remove this user from the array
             for (var i = 0; i < peoplesNames.length; i++) {
@@ -140,15 +140,79 @@ function loadPeople() {
     });
 }
 
-function setUpPlaybackForExternalData(data) {
-    console.log(data);
+function setUpAnimations(imageAssets) {
+    //add in animation frames
+    var keyInsertionPoint, firstOptionIconInsertionPoint, secondOptionIconInsertionPoint;
+    keyInsertionPoint = $("#keyAnimationSpot");
+    firstOptionIconInsertionPoint = $("#animationSelectionSpot1");
+    secondOptionIconInsertionPoint = $("#animationSelectionSpot2");
+
+    $(".animationSelection").remove();
+    firstOptionIconInsertionPoint.append('<img class="animationSelection" src="/images/none.png" />');
+    secondOptionIconInsertionPoint.append('<img class="animationSelection" src="/images/none.png" />');
+
+    if (imageAssets.length === 0) {
+        return;
+    }
+    firstOptionIconInsertionPoint.append('<img class="animationSelection" src="/images/imageOnly.png" />');
+    firstOptionIconInsertionPoint.append('<img class="animationSelection" src="/images/textOnly.png" />');
+    firstOptionIconInsertionPoint.append('<img class="animationSelection" src="/images/imageAndText.png" />');
+
+    secondOptionIconInsertionPoint.append('<img class="animationSelection" src="/images/imageOnly.png" />');
+    secondOptionIconInsertionPoint.append('<img class="animationSelection" src="/images/textOnly.png" />');
+    secondOptionIconInsertionPoint.append('<img class="animationSelection" src="/images/imageAndText.png" />');
+
+    keyInsertionPoint.append('<img class="keyAnimation full image" src="' + currentImageDir + '/image.png'+authString+'" />');
+    keyInsertionPoint.append('<img class="keyAnimation blank image" src="' + currentImageDir + '/image_un.png'+authString+'" />');
+
+    keyInsertionPoint.append('<img class="keyAnimation full text" src="' + currentImageDir + '/text.png'+authString+'" />');
+    keyInsertionPoint.append('<img class="keyAnimation blank text" src="' + currentImageDir + '/text_un.png'+authString+'" />');
+
+    keyInsertionPoint.append('<img class="keyAnimation full imageText" src="' + currentImageDir + '/image_text.png'+authString+'" />');
+    keyInsertionPoint.append('<img class="keyAnimation blank imageText" src="' + currentImageDir + '/image_text_un.png'+authString+'" />');
 }
+
+function setUpPlaybackForExternalData(data) {
+    var pluginName, toolName, frames, imageAssets, i;
+    console.log(data);
+
+    pluginName = data.clip.plugin;
+    toolName = data.clip.tool;
+    frames = data.clip.filenames;
+    for (i = frames.length - 1; i > 0; i--) {
+        if (frames[i].lastIndexOf("frame", 0) === 0)	//http://stackoverflow.com/a/4579228/1447621
+        {
+            break;
+        }
+    }
+
+    imageAssets = frames.splice(i + 1, frames.length - i - 1);	//animations
+
+    console.log(frames);
+    console.log(imageAssets);
+
+    $("#mediaTitle").text(toolName);
+    $("#panel").data("totalFrames", frames.length)
+				.data("type", (imageAssets.length === 0 ? "menu" : "keystroke"))
+				.data("playbackDirectory", currentImageDir)
+				.data("auth");
+
+    setUpAnimations(imageAssets);
+
+    renderPlayback(authString);
+	$("#externalMediaLoading").hide();
+	$("#externalMedia").show();
+}
+
 
 function changeSharedMediaSource(arrayOfClips, clipIndex) {
     var getUrl, emailToView;
 
     emailToView = peoplesNames[peoplesNamesIndex][1];
-    getUrl = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + "/" + currentTool + "/" + arrayOfClips[clipIndex] + authString;
+    currentImageDir = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + "/" + currentTool + "/" + arrayOfClips[clipIndex];
+    getUrl = currentImageDir + authString;
+
+    currentClips = arrayOfClips;
 
     $.ajax(getUrl, {
         url: getUrl,
@@ -156,8 +220,8 @@ function changeSharedMediaSource(arrayOfClips, clipIndex) {
         error: function (error, e, f) {
             console.log("error");
             console.log(error);
-			console.log(e);
-			console.log(f);
+            console.log(e);
+            console.log(f);
         }
     });
     //this will return the html to view the media

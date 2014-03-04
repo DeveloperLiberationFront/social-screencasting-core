@@ -43,7 +43,8 @@ td, tr, th{
 	background-color: #ffedd3;
 }
 
-.moreInfoTitle{
+.moreInfoTitle{	
+	/*deprecated*/
 	text-align:center;
 }
 
