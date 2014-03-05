@@ -43,6 +43,11 @@ public class PostProductionHandler
 		File[] allFrames = getSortedFrameFiles();
 
 		int startIndex = findFrameBelongingToDate(startTimeToLookFor, allFrames);
+		if (allFrames.length == 0)
+		{
+			logger.error("Could not extract tool usage because the screencasting folder is empty");
+			return null;
+		}
 		if (startIndex >= allFrames.length)
 		{
 			logger.info("This tool use appears to be in the future, or at least later than "+allFrames[allFrames.length-1]);
@@ -52,6 +57,7 @@ public class PostProductionHandler
 		{
 			if (checkForTooEarlyToolUsage(specificToolUse.getTimeStamp(),allFrames[0]))
 			{
+				logger.info("Tool usage was not extracted because it happens before the screencasting was recorded");
 				return null;
 			}
 		}

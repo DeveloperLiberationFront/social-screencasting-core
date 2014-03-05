@@ -43,4 +43,5 @@ public class UnitTestUserManager extends UserManager {
 		setToken(testToken);
 		
 	}
+
 }

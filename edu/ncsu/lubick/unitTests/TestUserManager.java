@@ -61,10 +61,10 @@ public class TestUserManager {
 		File expectedINIFile = new File(workingDir,UserManager.EXPECTED_USER_SETTINGS);
 		assertFalse(expectedINIFile.exists());
 		
-		UserManager um = new UnitTestUserManager(workingDir);
-		assertTrue(um.needsUserInput());
-		um.promptUserForInfo();
-		UnitTestUserManager testUm = ((UnitTestUserManager) um);
+		UnitTestUserManager testUm = new UnitTestUserManager(workingDir);
+		assertTrue(testUm.needsUserInput());
+		testUm.promptUserForInfo();
+
 		assertTrue(testUm.hadToDeployGUIPrompt());
 		
 		testUm.setData("TestUser", "test@mailinator.com", "[SOME UUID]");

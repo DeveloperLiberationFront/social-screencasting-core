@@ -20,6 +20,8 @@ public class UserManager {
 	private String userEmail;
 	private String userToken;
 	
+	private boolean needsUserInfo = true;
+	
 	private static final Logger logger = Logger.getLogger(UserManager.class);
 
 	
@@ -56,6 +58,7 @@ public class UserManager {
 			writeOutInitFile(initFile);
 			return;
 		}
+		needsUserInfo = false;
 		String fileContents = FileUtilities.readAllFromFile(initFile);
 		try
 		{
@@ -119,7 +122,7 @@ public class UserManager {
 
 	public boolean needsUserInput()
 	{
-		return false;
+		return needsUserInfo;
 	}
 
 
