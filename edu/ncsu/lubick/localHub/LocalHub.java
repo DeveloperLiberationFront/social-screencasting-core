@@ -45,25 +45,27 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	private UserManager userManager;
 	private RemoteToolReporter remoteToolReporter;
 	private NotificationManager notificationManager;
+	private boolean shouldReportToolsRemotely;
 
 	public static LocalHubDebugAccess startTESTINGServerAndReturnDebugAccess(String screencastMonitorLocation)
 	{
-		return startServerAndReturnDebugAccess(screencastMonitorLocation, LocalSQLDatabaseFactory.DEFAULT_SQLITE_LOCATION, false, false);
+		return startServerAndReturnDebugAccess(screencastMonitorLocation, LocalSQLDatabaseFactory.DEFAULT_SQLITE_LOCATION, false, false, false);
 	}
 
 	private static LocalHubDebugAccess startServerAndReturnDebugAccess(String screencastMonitorLocation, String databaseLocation, boolean wantHTTP,
-			boolean wantScreenRecording)
+			boolean wantScreenRecording, boolean wantRemoteToolReporting)
 	{
-		return startServer(screencastMonitorLocation, databaseLocation, wantHTTP, wantScreenRecording, true);
+		return startServer(screencastMonitorLocation, databaseLocation, wantHTTP, wantScreenRecording, wantRemoteToolReporting, true);
 	}
 
 	public static LocalHubDebugAccess startServer(String screencastMonitorLocation, String databaseLocation, boolean wantHTTP, boolean wantScreenRecording,
-			boolean isDebug)
+			boolean wantRemoteToolReporting, boolean isDebug)
 	{
 		if (!singletonHub.isRunning())
 		{
 			singletonHub.enableHTTPServer(wantHTTP);
 			singletonHub.enableScreenRecording(wantScreenRecording);
+			singletonHub.enableRemoteToolReporting(wantRemoteToolReporting);
 			singletonHub.setDatabaseManager(databaseLocation);
 			singletonHub.setScreencastMonitorLocation(screencastMonitorLocation);
 			singletonHub.isDebug = isDebug;
@@ -83,7 +85,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
 	public static LocalHubProcess startServerForUse(String screencastMonitorLocation, String databaseLocation)
 	{
-		return startServer(screencastMonitorLocation, databaseLocation, true, true, false);
+		return startServer(screencastMonitorLocation, databaseLocation, true, true, true, false);
 	}
 
 	// You need to call a static method to initiate this class. It is a
@@ -130,9 +132,12 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		}
 		
 		this.postProductionHandler = new PostProductionHandler(this.screencastMonitorDirectory, userManager);
-		this.notificationManager = new NotificationManager();
-		this.remoteToolReporter = new RemoteToolReporter(this.databaseManager, userManager, this.notificationManager);
-
+		
+		if (shouldReportToolsRemotely)
+		{
+			this.notificationManager = new NotificationManager();
+			this.remoteToolReporter = new RemoteToolReporter(this.databaseManager, userManager, this.notificationManager);
+		}
 	}
 
 	/**
@@ -192,9 +197,15 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		this.databaseManager = BufferedDatabaseManager.createBufferedDatabasemanager(databaseLocation);
 	}
 
-	private void enableHTTPServer(boolean b)
+	private void enableRemoteToolReporting(boolean wantRemoteToolReporting)
 	{
-		this.shouldUseHTTPServer = b;
+		this.shouldReportToolsRemotely = wantRemoteToolReporting;
+		
+	}
+
+	private void enableHTTPServer(boolean wantHTTPServer)
+	{
+		this.shouldUseHTTPServer = wantHTTPServer;
 
 	}
 
