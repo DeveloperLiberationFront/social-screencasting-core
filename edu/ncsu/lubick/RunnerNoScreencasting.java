@@ -16,7 +16,7 @@ public class RunnerNoScreencasting
 
 	public static void main(String[] args) throws Exception
 	{
-		LocalHub.startServer("HF/", "kevinsDatabase.sqlite", true, false, false);
+		LocalHub.startServer("HF/Screencasting/", "kevinsDatabase.sqlite", true, false, false);
 		Thread.sleep(1000);
 		Desktop.getDesktop().browse(new URI("http://localhost:4443/"));
 	}

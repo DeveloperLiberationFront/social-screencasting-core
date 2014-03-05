@@ -22,7 +22,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
 	public static final String LOGGING_FILE_PATH = "/etc/log4j.settings";
 	private static final LocalHub singletonHub;
-	private static final String SCREENCASTING_PATH = "Screencasting";
 	private static Logger logger;
 
 	// Static initializer to get the logging path set up and create the hub
@@ -33,7 +32,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	}
 
 	private boolean isRunning = false;
-	private File monitorDirectory = null;
+	private File screencastMonitorDirectory = null;
 
 	private BufferedDatabaseManager databaseManager = null;
 	private PostProductionHandler postProductionHandler; 
@@ -47,18 +46,18 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	private RemoteToolReporter remoteToolReporter;
 	private NotificationManager notificationManager;
 
-	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, boolean wantHTTP, boolean wantScreenRecording)
+	public static LocalHubDebugAccess startTESTINGServerAndReturnDebugAccess(String screencastMonitorLocation)
 	{
-		return startServerAndReturnDebugAccess(monitorLocation, LocalSQLDatabaseFactory.DEFAULT_SQLITE_LOCATION, wantHTTP, wantScreenRecording);
+		return startServerAndReturnDebugAccess(screencastMonitorLocation, LocalSQLDatabaseFactory.DEFAULT_SQLITE_LOCATION, false, false);
 	}
 
-	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, String databaseLocation, boolean wantHTTP,
+	private static LocalHubDebugAccess startServerAndReturnDebugAccess(String screencastMonitorLocation, String databaseLocation, boolean wantHTTP,
 			boolean wantScreenRecording)
 	{
-		return startServer(monitorLocation, databaseLocation, wantHTTP, wantScreenRecording, true);
+		return startServer(screencastMonitorLocation, databaseLocation, wantHTTP, wantScreenRecording, true);
 	}
 
-	public static LocalHubDebugAccess startServer(String monitorLocation, String databaseLocation, boolean wantHTTP, boolean wantScreenRecording,
+	public static LocalHubDebugAccess startServer(String screencastMonitorLocation, String databaseLocation, boolean wantHTTP, boolean wantScreenRecording,
 			boolean isDebug)
 	{
 		if (!singletonHub.isRunning())
@@ -66,7 +65,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			singletonHub.enableHTTPServer(wantHTTP);
 			singletonHub.enableScreenRecording(wantScreenRecording);
 			singletonHub.setDatabaseManager(databaseLocation);
-			singletonHub.setMonitorLocation(monitorLocation);
+			singletonHub.setScreencastMonitorLocation(screencastMonitorLocation);
 			singletonHub.isDebug = isDebug;
 			singletonHub.start();
 		}
@@ -77,14 +76,14 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		return new LocalHubTesting(singletonHub);
 	}
 
-	public static LocalHubProcess startServerForUse(String monitorLocation)
+	public static LocalHubProcess startServerForUse(String screencastMonitorLocation)
 	{
-		return startServerForUse(monitorLocation, LocalSQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
+		return startServerForUse(screencastMonitorLocation, LocalSQLDatabaseFactory.DEFAULT_SQLITE_LOCATION);
 	}
 
-	public static LocalHubProcess startServerForUse(String monitorLocation, String databaseLocation)
+	public static LocalHubProcess startServerForUse(String screencastMonitorLocation, String databaseLocation)
 	{
-		return startServer(monitorLocation, databaseLocation, true, true, false);
+		return startServer(screencastMonitorLocation, databaseLocation, true, true, false);
 	}
 
 	// You need to call a static method to initiate this class. It is a
@@ -102,7 +101,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
 	private void start()
 	{
-		if (isRunning() || this.monitorDirectory == null)
+		if (isRunning() || this.screencastMonitorDirectory == null)
 		{
 			logger.info("Did not start the server because " + (isRunning() ? "it was already running" : " no monitor directory had been set."));
 			return;
@@ -121,22 +120,16 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			logger.debug("Server started up");
 		}
 
-		File screencastingOutputFolder = new File(this.monitorDirectory, SCREENCASTING_PATH);
 		if (shouldUseScreenRecording)
 		{
 			
-			if (!(screencastingOutputFolder.exists() || screencastingOutputFolder.mkdir()))
-			{
-				logger.fatal("Could not setup screencast output folder");
-				return;
-			}
-			
-			this.screenRecordingModule = new ScreenRecordingModule(screencastingOutputFolder);
+
+			this.screenRecordingModule = new ScreenRecordingModule(this.screencastMonitorDirectory);
 			screenRecordingModule.startRecording();
-			ScreencastManager.startManaging(screencastingOutputFolder);
+			ScreencastManager.startManaging(this.screencastMonitorDirectory);
 		}
 		
-		this.postProductionHandler = new PostProductionHandler(screencastingOutputFolder, userManager);
+		this.postProductionHandler = new PostProductionHandler(this.screencastMonitorDirectory, userManager);
 		this.notificationManager = new NotificationManager();
 		this.remoteToolReporter = new RemoteToolReporter(this.databaseManager, userManager, this.notificationManager);
 
@@ -145,52 +138,52 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	/**
 	 * Takes a file directory and attempts to create
 	 * 
-	 * @param monitorLocation
+	 * @param screencastMonitorLocation
 	 */
-	private void setMonitorLocation(String monitorLocation)
+	private void setScreencastMonitorLocation(String screencastMonitorLocation)
 	{
-		if (monitorLocation == null || monitorLocation.isEmpty())
+		if (screencastMonitorLocation == null || screencastMonitorLocation.isEmpty())
 		{
-			if (monitorDirectory == null)
+			if (screencastMonitorDirectory == null)
 			{
 				logger.fatal("Invalid input into setMonitorLocation");
-				throw new RuntimeException("Could not set the monitorLocation to " + monitorLocation);
+				throw new RuntimeException("Could not set the monitorLocation to " + screencastMonitorLocation);
 			}
 			logger.error("Invalid input into setMonitorLocation.  Continuing with old directory");
 			return;
 		}
-		File newMonitorDirectory = new File(monitorLocation);
+		File newMonitorDirectory = new File(screencastMonitorLocation);
 		if (!newMonitorDirectory.exists())
 		{
-			if (!newMonitorDirectory.mkdir())
+			if (!newMonitorDirectory.mkdirs())
 			{
-				if (monitorDirectory == null)
+				if (screencastMonitorDirectory == null)
 				{
 					logger.fatal("Could not create the monitor directory");
 					throw new RuntimeException("Could not create the monitor directory " + newMonitorDirectory);
 				}
-				logger.error("Could not create the monitor directory " + monitorLocation + ", continuing with old directory");
+				logger.error("Could not create the monitor directory " + screencastMonitorLocation + ", continuing with old directory");
 				return;
 			}
 			// Monitor Directory has been created and now it can be set
 			logger.debug("Setting Monitor Directory to " + newMonitorDirectory);
-			this.monitorDirectory = newMonitorDirectory;
+			this.screencastMonitorDirectory = newMonitorDirectory;
 		}
 		else if (!newMonitorDirectory.isDirectory())
 		{
-			if (monitorDirectory == null)
+			if (screencastMonitorDirectory == null)
 			{
 				logger.fatal("Could not create the monitor directory");
 				throw new RuntimeException("Could not create the monitor directory " + newMonitorDirectory);
 			}
-			logger.error("Could not set the monitor directory to be " + monitorLocation + ", because it is not a directory.  Continuing with old directory.");
+			logger.error("Could not set the monitor directory to be " + screencastMonitorLocation + ", because it is not a directory.  Continuing with old directory.");
 			return;
 		}
 		else
 		{
 			// The monitorDirectory already exists, so simply set it.
 			logger.debug("Setting Monitor Directory to " + newMonitorDirectory);
-			this.monitorDirectory = newMonitorDirectory;
+			this.screencastMonitorDirectory = newMonitorDirectory;
 		}
 	}
 
@@ -290,6 +283,12 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		public List<String> getAllPluginNames()
 		{
 			return hubToDebug.getNamesOfAllPlugins();
+		}
+		
+		@Override
+		public void reportToolStream(ToolStream ts)
+		{
+			hubToDebug.reportToolStream(ts);
 		}
 
 

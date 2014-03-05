@@ -34,7 +34,7 @@ public class TestPostProductionHandler
 	private static final File DUMMY_SCREENCAST_ZIP = new File("sampleScreencastMinute.zip");
 	
 	private static final String WHOMBO_TOOL_1 = "WhomboTool #1";
-	private static final String TEST_PLUGIN_NAME = "Testing";
+	public static final String TEST_PLUGIN_NAME = "Testing";
 	private static final String DEFAULT_TESTING_KEYPRESS = "Ctrl+5";
 	private static final String DEFAULT_TESTING_TOOL_CLASS = "Debug";
 	

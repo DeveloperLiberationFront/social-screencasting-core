@@ -20,6 +20,7 @@ public class UserManager {
 	private String userEmail;
 	private String userToken;
 	
+	//For unit tests
 	private boolean needsUserInfo = true;
 	
 	private static final Logger logger = Logger.getLogger(UserManager.class);
@@ -120,7 +121,7 @@ public class UserManager {
 		return userToken;
 	}
 
-	public boolean needsUserInput()
+	public boolean needsUserInput()		//used for unit tests.  Did the init file exist?
 	{
 		return needsUserInfo;
 	}

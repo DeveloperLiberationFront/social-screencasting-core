@@ -31,7 +31,7 @@ public class Runner
 	public static void main(String[] args) throws Exception
 	{
 		setUpTrayIcon();
-		localHub = LocalHub.startServerForUse("HF/", "kevinsDatabase.sqlite");
+		localHub = LocalHub.startServerForUse("HF/Screencasting/", "kevinsDatabase.sqlite");
 		Thread.sleep(1000);
 		Desktop.getDesktop().browse(new URI("http://localhost:4443/"));
 	}
