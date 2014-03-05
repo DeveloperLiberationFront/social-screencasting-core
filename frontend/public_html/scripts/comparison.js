@@ -24,6 +24,14 @@ function handleMouseLeave() {
     });
 }
 
+function modifyMultipleClipButtonsForLocal() {
+    $("#viewOtherDiv").find("button").data("source", "local");
+}
+
+function modifyMultipleClipButtonsForExternal() {
+    $("#viewOtherDiv").find("button").data("source", "external");
+}
+
 function sortPluginTuples(a, b) {
     return a.count - b.count;		//sorts so that smaller count numbers are better
 }
@@ -135,33 +143,48 @@ function loadPeople() {
     });
 }
 
+function makeButtonsForMultipleClips(arrayOfClips) {
+    var i, newButton, insertionPoint;
+    if (arrayOfClips.length > 1) {
+        //clear out old buttons
+        $("#viewOtherDiv").find("button").remove();
+        $("#viewOtherDiv").show();
+        insertionPoint = $("#viewOtherSpot");
+        for (i = 0; i < arrayOfClips.length; i++) {
+            newButton = $('<button class="viewOther"></button>');
+            newButton.text("Example " + (i + 1));
+            newButton.data("index", i);
+            insertionPoint.before(newButton);
+        }
+    }
+    else {
+        $("#viewOtherDiv").hide();
+    }
+}
+
+function highlightNthButton(n) {
+    if (currentClips.length > 1) {
+        var buttons = $("#viewOtherDiv").find("button");
+        buttons.removeClass("activated");
+        buttons.eq(n).addClass("activated");
+    }
+}
 
 
 
 function changeSharedMediaSource(arrayOfClips, clipIndex) {
-    var getUrl, emailToView, i, newButton, insertionPoint;
+    var getUrl, emailToView;
 
     emailToView = peoplesNames[peoplesNamesIndex][1];
     currentImageDir = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + "/" + currentTool + "/" + arrayOfClips[clipIndex];
     getUrl = currentImageDir + authString;
 
-    currentClips = arrayOfClips;		//TODO deal with more than one clip
+    currentClips = arrayOfClips;
 
-	//'<button class="viewOther" data-display-option="" data-tool-name="" data-plugin-name="">[name]</button>'
-	if (arrayOfClips.length > 1)
-	{
-		$("#viewOtherDiv").show();
-		insertionPoint = $("#viewOtherSpot");
-		for(i = 0;i< arrayOfClips.length; i++)
-		{
-			newButton = $('<button class="viewOther"></button>');
-			newButton.text("Example "+(i+1));
-			newButton.data("index",i);
-			newButton.append(insertionPoint);
-		}
-	}
-	
-	
+    makeButtonsForMultipleClips(currentClips);
+    modifyMultipleClipButtonsForExternal();
+    highlightNthButton(clipIndex);
+
     //clear out all frames
     $(".frame").remove();
 
@@ -182,28 +205,18 @@ function changeSharedMediaSource(arrayOfClips, clipIndex) {
     //this will return the html to view the media
 }
 
+
+
 function changeLocalMediaSource(arrayOfClips, clipIndex) {
-    var postUrl, i, newButton, insertionPoint;
+    var postUrl;
     currentImageDir = "/" + arrayOfClips[clipIndex] + "/";
     postUrl = "/mediaServer";
-    currentClips = arrayOfClips;		//TODO deal with more than one clip
+    currentClips = arrayOfClips;
 
-	
-	
-	//'<button class="viewOther" data-display-option="" data-tool-name="" data-plugin-name="">[name]</button>'
-	if (arrayOfClips.length > 1)
-	{
-		$("#viewOtherDiv").show();
-		insertionPoint = $("#viewOtherSpot");
-		for(i = 0;i< arrayOfClips.length; i++)
-		{
-			newButton = $('<button class="viewOther"></button>');
-			newButton.text("Example "+(i+1));
-			newButton.data("index",i);
-			insertionPoint.before(newButton);
-		}
-	}
-	
+    makeButtonsForMultipleClips(currentClips);
+    modifyMultipleClipButtonsForLocal();
+    highlightNthButton(clipIndex);
+
     //clear out all frames
     $(".frame").remove();
 
@@ -227,6 +240,17 @@ function changeLocalMediaSource(arrayOfClips, clipIndex) {
     });
 }
 
+function viewOtherExample() {
+    var e = $(this);
+
+    if (e.data("source") == "external") {
+        changeSharedMediaSource(currentClips, e.data("index"));
+    }
+    else {
+        changeLocalMediaSource(currentClips, e.data("index"));
+    }
+
+}
 
 function showSharedClips(arrayOfClips) {
     stopFramePlayback();
@@ -297,7 +321,6 @@ function checkExistanceOfLocalClips(element) {
     target = $(element.currentTarget);
     currentTool = target.data("toolName");
 
-    //TODO postUrl = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + "/" + currentTool + authString;
     postUrl = "/mediaServer";
 
     $("#clipPlayer").hide();
@@ -324,6 +347,8 @@ $(document).ready(function () {
     //handles the click on the view buttons to see if a video file exists
     $("table").on('mouseenter', '.clickMe', handleMouseEnter);
     $("table").on('mouseleave', '.clickMe', handleMouseLeave);
+
+    $("#viewOtherDiv").on('click', 'button', viewOtherExample);
 
     $("#otherUsersPlaceHolder").on('click', rotatePeoplesNamesAndTools);
 

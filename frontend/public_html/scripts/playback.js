@@ -8,7 +8,7 @@ var currentAnimationChoice;
 var totalAnimationChoices;
 var rampUp = 22;	//22 frames of ramp up
 var durationOfAnimation = 10;  //10 frames of showing animation
-var authString = "";
+var authToken = "";
 var hasInitializedButtons = false;
 
 function launchFullScreen(element) {  //From davidwalsh.name/fullscreen
@@ -124,7 +124,7 @@ function getImageForFrameNumber(frameNumber) {
         retVal += "0";
     }
     retVal += frameNumber;
-    retVal += '.jpg' + authString + '"></img>';
+    retVal += '.jpg' + authToken + '"></img>';
     return $(retVal);
 }
 
@@ -195,11 +195,11 @@ function rotateAnimationSettings() {
 
 function renderPlayback(auth) {
     if (auth) {
-        authString = auth;
+        authToken = auth;
     }
 	else
 	{
-		authString = "";
+		authToken = "";
 	}
     isPlaying = false;
     currentFrame = 0;
