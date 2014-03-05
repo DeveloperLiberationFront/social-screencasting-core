@@ -1,10 +1,16 @@
 package edu.ncsu.lubick.localHub;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import javax.swing.JOptionPane;
 
 import edu.ncsu.lubick.util.FileUtilities;
 
@@ -67,14 +73,35 @@ public class UserManager {
 
 	protected void writeOutInitFile(File initFile)
 	{
-		// TODO Auto-generated method stub
-		
+		JSONObject json = new JSONObject();
+		try {
+			json.put("name", getUserName());
+			json.put("email", getUserEmail());
+			json.put("token", getUserToken());
+		} catch (JSONException e) {
+			logger.error("Problem serializing user info",e);
+		}
+
+		logger.info("Writing user info to file: " + initFile.getPath());
+		try {
+			FileWriter writer = new FileWriter(initFile);
+			json.write(writer);
+			writer.flush();
+			writer.close();
+		} catch (JSONException | IOException e) {
+			logger.error("Problem writing user info to file",e);
+		}
 	}
 
 	public void promptUserForInfo()
 	{
-		// TODO Auto-generated method stub
-		
+        String name = JOptionPane.showInputDialog(null, "What is your name?");
+        setName(name);
+
+        String email = JOptionPane.showInputDialog(null, "What is your email address?");
+        setEmail(email);
+        
+        setToken(UUID.randomUUID().toString());
 	}
 
 	public String getUserName()
