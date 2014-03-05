@@ -66,6 +66,7 @@ td, tr, th{
 .clickMe{
 	font-size:16px;
 	padding: 5px;
+	cursor: pointer;
 }
 
 .showAll, .showUnique{

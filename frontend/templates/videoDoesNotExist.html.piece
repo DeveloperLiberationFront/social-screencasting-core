@@ -1,2 +1,0 @@
-<p>No video files exist yet for '${toolName}' </p>
-<button class='requestGeneration' data-tool-name='${toolName}' data-plugin-name='${pluginName}'> Click here to generate it</button>
