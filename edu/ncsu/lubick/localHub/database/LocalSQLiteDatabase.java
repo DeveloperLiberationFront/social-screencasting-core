@@ -177,7 +177,8 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 		try
 		{
 			retVal = statement.executeQuery();
-			//statement.closeOnCompletion();  //Not supported by current version of JDBC
+			// statement.closeOnCompletion();  //Not supported by current version of JDBC		
+
 		}
 		catch (SQLException e)
 		{

@@ -139,7 +139,7 @@ function loadPeople() {
 
 
 function changeSharedMediaSource(arrayOfClips, clipIndex) {
-    var getUrl, emailToView;
+    var getUrl, emailToView, i, newButton, insertionPoint;
 
     emailToView = peoplesNames[peoplesNamesIndex][1];
     currentImageDir = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + "/" + currentTool + "/" + arrayOfClips[clipIndex];
@@ -147,6 +147,21 @@ function changeSharedMediaSource(arrayOfClips, clipIndex) {
 
     currentClips = arrayOfClips;		//TODO deal with more than one clip
 
+	//'<button class="viewOther" data-display-option="" data-tool-name="" data-plugin-name="">[name]</button>'
+	if (arrayOfClips.length > 1)
+	{
+		$("#viewOtherDiv").show();
+		insertionPoint = $("#viewOtherSpot");
+		for(i = 0;i< arrayOfClips.length; i++)
+		{
+			newButton = $('<button class="viewOther"></button>');
+			newButton.text("Example "+(i+1));
+			newButton.data("index",i);
+			newButton.append(insertionPoint);
+		}
+	}
+	
+	
     //clear out all frames
     $(".frame").remove();
 
@@ -168,11 +183,27 @@ function changeSharedMediaSource(arrayOfClips, clipIndex) {
 }
 
 function changeLocalMediaSource(arrayOfClips, clipIndex) {
-    var postUrl;
+    var postUrl, i, newButton, insertionPoint;
     currentImageDir = "/" + arrayOfClips[clipIndex] + "/";
     postUrl = "/mediaServer";
     currentClips = arrayOfClips;		//TODO deal with more than one clip
 
+	
+	
+	//'<button class="viewOther" data-display-option="" data-tool-name="" data-plugin-name="">[name]</button>'
+	if (arrayOfClips.length > 1)
+	{
+		$("#viewOtherDiv").show();
+		insertionPoint = $("#viewOtherSpot");
+		for(i = 0;i< arrayOfClips.length; i++)
+		{
+			newButton = $('<button class="viewOther"></button>');
+			newButton.text("Example "+(i+1));
+			newButton.data("index",i);
+			insertionPoint.before(newButton);
+		}
+	}
+	
     //clear out all frames
     $(".frame").remove();
 

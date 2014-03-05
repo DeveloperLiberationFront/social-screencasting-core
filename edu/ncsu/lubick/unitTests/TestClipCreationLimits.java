@@ -92,12 +92,15 @@ public class TestClipCreationLimits {
 		{
 			if (fileName.startsWith("Testing"))
 			{
+				logger.debug("found created clip: "+fileName);
 				assertTrue(expectedToolUsageFiles.contains(fileName));
 				numHits++;
 			}
 		}
 
 		assertEquals(MAX_TOOL_USAGES, numHits);
+		
+		//TODO add one "better" clip and test that it replaces
 	}
 
 

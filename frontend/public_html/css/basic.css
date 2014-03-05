@@ -110,3 +110,7 @@ td, tr, th{
 #clipLoading {
 	display:none;
 }
+
+#viewOtherSpot {
+	display:none
+}

@@ -26,13 +26,13 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 	private static final String POST_COMMAND_PLUGIN_NAME = "pluginName";
 
 	private static final String POST_COMMAND_TOOL_NAME = "toolName";
-	
+
 	private static final String QUERY_CLIP_EXISTANCE = "queryClipExistance";
 	private static final String GET_IMAGES_FOR_CLIP = "getImages";
-	
+
 
 	private static Logger logger;
-	
+
 	// static initializer
 	static
 	{
@@ -87,13 +87,13 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 	private void respondToGetClipImages(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		String clipName = request.getParameter(CLIP_NAME);
-		
+
 		File clipDir = new File("renderedVideos/",clipName);
-		
+
 		JSONObject clipObject = new JSONObject();
 		JSONArray fileNamesArr = new JSONArray();
-		
-		
+
+
 		if (clipDir.exists() && clipDir.isDirectory())
 		{
 			String[] files = clipDir.list();
@@ -103,14 +103,14 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 				fileNamesArr.put(imageFile);
 			}
 		}
-		
-		
+
+
 		try{
 			JSONObject fileNamesObject = new JSONObject();
 			fileNamesObject.put("filenames", fileNamesArr);
 			fileNamesObject.put("name", clipName);
 			clipObject.put("clip", fileNamesObject);
-			
+
 			response.setContentType("application/json");
 			clipObject.write(response.getWriter());
 		}
@@ -119,13 +119,10 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 			logger.error("Problem compiling clip names and writing them out",e);
 		}
 
-	
-	baseRequest.setHandled(true);
-		
-		
-	}
+		baseRequest.setHandled(true);
 
-	
+
+	}
 
 
 	private void respondToDoesMediaExist(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
@@ -133,21 +130,21 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
 		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
 
-		//serveUpNthUsageOfMediaIfExists(response, new InternalToolRepresentation(toolName, pluginName, null, 0));
 		List<File> browserPackages = databaseLink.getBestExamplesOfTool(pluginName, toolName);
-		
+
 		JSONArray jarr = new JSONArray();
 		for(File f: browserPackages)
 		{
 			jarr.put(f.getName());
 		}
 		JSONObject clips = new JSONObject();
-		
+
 		try
 		{
-			clips.put("clips", jarr);
+			jarr.put("Testingfdcb42bc-b6c2-3884-ad3a-4179e19e771d");
+			jarr.put("Testing4115af06-d507-3e79-96ba-9d2c6689ad9b");
 			clips.put("clips",jarr);
-			
+
 			response.setContentType("application/json");
 			clips.write(response.getWriter());
 		}
@@ -155,8 +152,8 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 		{
 			logger.error("Problem compiling clip names and writing them out",e);
 		}
-		
-		
+
+
 		baseRequest.setHandled(true);
 
 	}
@@ -168,6 +165,6 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 	}
 
 
-	
+
 
 }

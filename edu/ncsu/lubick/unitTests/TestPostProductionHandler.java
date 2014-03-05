@@ -202,8 +202,6 @@ public class TestPostProductionHandler
 		
 		timeAssociatedWithScreencasting = new Date(screencastBeginDate.getTime());	//clone this date as the param will be used below
 		
-		//TestingUtils.clearOutDirectory(TEST_SCREENCAST_FOLDER);
-		//TestingUtils.unzipFileToFolder(DUMMY_SCREENCAST_ZIP, TEST_SCREENCAST_FOLDER);
 		File[] files = TEST_SCREENCAST_FOLDER.listFiles();
 		assertTrue(files.length >= 300);
 		Arrays.sort(files);

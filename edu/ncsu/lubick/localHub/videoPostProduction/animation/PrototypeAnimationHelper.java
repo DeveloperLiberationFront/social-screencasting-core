@@ -68,10 +68,6 @@ class PrototypeAnimationHelper extends JPanel implements KeyListener
 		}
 		BufferedImage animatedImage = animationSource.makeNewAnimationForKeyPresses(keycodes, Arrays.toString(keycodes));
 		g.drawImage(animatedImage, 0, 0, null);
-		// for (AnimatedKeyPress animations : activatedAnimations.values())
-		// {
-		// animations.drawAnimatedSegment(g, activatedKeyboard);
-		// }
 	}
 
 	@Override
