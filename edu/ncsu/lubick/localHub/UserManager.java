@@ -3,14 +3,13 @@ package edu.ncsu.lubick.localHub;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.UUID;
+
+import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import javax.swing.JOptionPane;
 
 import edu.ncsu.lubick.util.FileUtilities;
 
@@ -83,11 +82,10 @@ public class UserManager {
 		}
 
 		logger.info("Writing user info to file: " + initFile.getPath());
-		try {
-			FileWriter writer = new FileWriter(initFile);
+		try (FileWriter writer = new FileWriter(initFile);)
+		{
 			json.write(writer);
 			writer.flush();
-			writer.close();
 		} catch (JSONException | IOException e) {
 			logger.error("Problem writing user info to file",e);
 		}

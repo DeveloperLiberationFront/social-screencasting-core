@@ -93,7 +93,7 @@ public class RemoteToolReporter {
 			{
 				String responseBody = HTTPUtils.getResponseBody(response);
 				logger.info("response: " +responseBody);
-				//this.notificationManager.handlePossibleNotification(new JSONObject(responseBody));
+				this.notificationManager.handlePossibleNotification(new JSONObject(responseBody));
 			}
 
 		}

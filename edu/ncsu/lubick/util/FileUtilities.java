@@ -85,7 +85,7 @@ public class FileUtilities
 	// screencasts.ENCODEDDATE.cap
 	// OR
 	// PLUGINNAME.ENCODEDDATE.log
-	private static Date extractStartTime(String fileName, SimpleDateFormat formatter) throws ImproperlyEncodedDateException
+	private static Date extractStartTime(String fileName, DateFormat formatter) throws ImproperlyEncodedDateException
 	{
 		if (fileName.indexOf('.') < 0 || fileName.lastIndexOf('.') == fileName.indexOf('.'))
 		{
@@ -113,7 +113,19 @@ public class FileUtilities
 
 	public static Date parseDateOfMediaFrame(File frame) throws ImproperlyEncodedDateException
 	{
-		return extractStartTime(frame.getName(), makeDateInMillisToNumberFormatter());
+		synchronized (formatterForFrames)
+		{
+			return extractStartTime(frame.getName(), formatterForFrames);
+		}
+	}
+
+	public static Date parseDateOfMediaFrame(String frameName) throws ImproperlyEncodedDateException
+	{
+		synchronized (formatterForFrames)
+		{
+			return extractStartTime(frameName, formatterForFrames);
+		}
+		
 	}
 
 	public static String encodeLogFileName(String pluginName, Date date)

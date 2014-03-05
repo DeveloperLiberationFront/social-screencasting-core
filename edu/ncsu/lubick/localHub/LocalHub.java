@@ -36,8 +36,8 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	private File monitorDirectory = null;
 
 	private BufferedDatabaseManager databaseManager = null;
-	private PostProductionHandler postProductionHandler; // = new PostProductionHandler(new File(".\\HF\\Screencasting"));
-
+	private PostProductionHandler postProductionHandler; 
+	
 	private boolean shouldUseHTTPServer;
 	private boolean shouldUseScreenRecording;
 	private boolean isDebug = false;
@@ -45,6 +45,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	private HTTPServer httpServer;
 	private UserManager userManager;
 	private RemoteToolReporter remoteToolReporter;
+	private NotificationManager notificationManager;
 
 	public static LocalHubDebugAccess startServerAndReturnDebugAccess(String monitorLocation, boolean wantHTTP, boolean wantScreenRecording)
 	{
@@ -132,11 +133,12 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			
 			this.screenRecordingModule = new ScreenRecordingModule(screencastingOutputFolder);
 			screenRecordingModule.startRecording();
+			ScreencastManager.startManaging(screencastingOutputFolder);
 		}
 		
 		this.postProductionHandler = new PostProductionHandler(screencastingOutputFolder, userManager);
-		
-		this.remoteToolReporter = new RemoteToolReporter(this.databaseManager, userManager, null);
+		this.notificationManager = new NotificationManager();
+		this.remoteToolReporter = new RemoteToolReporter(this.databaseManager, userManager, this.notificationManager);
 
 	}
 
@@ -215,20 +217,12 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	}
 
 
-
-	@Deprecated
-	@Override
-	public List<ToolUsage> getLastNInstancesOfToolUsage(int n, String pluginName, String toolName)
-	{
-		return databaseManager.getLastNInstancesOfToolUsage(n, pluginName, toolName);
-	}
-
-
 	public void shutDown()
 	{
 		if (screenRecordingModule != null)
 		{
 			this.screenRecordingModule.stopRecording();
+			ScreencastManager.stopManaging();
 		}
 		if (this.httpServer != null)
 		{

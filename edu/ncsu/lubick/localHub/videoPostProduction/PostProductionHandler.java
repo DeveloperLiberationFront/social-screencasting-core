@@ -27,12 +27,10 @@ public class PostProductionHandler
 	private FramesToBrowserAnimatedPackage browserMediaMaker = null;
 	
 	private File screencastFolder;
-	private UserManager userManager;
 
 	public PostProductionHandler(File sourceOfFrames, UserManager userManager)
 	{
 		this.screencastFolder = sourceOfFrames;
-		this.userManager = userManager;
 		this.browserMediaMaker = new FramesToBrowserAnimatedPackage(sourceOfFrames, userManager);
 
 	}

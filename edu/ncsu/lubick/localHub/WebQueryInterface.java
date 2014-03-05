@@ -11,9 +11,6 @@ public interface WebQueryInterface {
 
 	List<String> getNamesOfAllPlugins();
 
-	@Deprecated
-	List<ToolUsage> getLastNInstancesOfToolUsage(int n, String pluginName, String toolName);
-
 	List<File> getBestExamplesOfTool(String pluginName, String toolName);
 
 }
