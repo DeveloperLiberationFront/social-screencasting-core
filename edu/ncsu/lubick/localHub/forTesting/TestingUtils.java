@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.localHub.forTesting;
 
+import static org.junit.Assert.*;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -24,6 +25,7 @@ public class TestingUtils {
 	private static final File TESTING_ASSETS_DIR = new File("./src/testAssets/");
 	private static final File TESTING_IMAGES_DIR = new File(TESTING_ASSETS_DIR, "test_images/");
 	private static final File TESTING_USER_FILE_DIR = new File(TESTING_ASSETS_DIR, "test_user_files/");
+	public static final String TEST_DB_LOC = "test_toolstreams.sqlite";
 	
 	
 	private TestingUtils()
@@ -217,6 +219,15 @@ public class TestingUtils {
 	public static File getTestUserFile(String testUserFileName)
 	{
 		return new File(TESTING_USER_FILE_DIR, testUserFileName);
+	}
+
+	public static void clearOutTestDB()
+	{
+		File file = new File(TEST_DB_LOC);
+		if (file.exists())
+		{
+			assertTrue(file.delete());
+		}
 	}
 
 }

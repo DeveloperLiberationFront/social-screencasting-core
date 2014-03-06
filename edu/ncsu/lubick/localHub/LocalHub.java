@@ -12,6 +12,7 @@ import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.database.LocalSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.database.RemoteToolReporter;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
+import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 import edu.ncsu.lubick.localHub.http.HTTPServer;
 import edu.ncsu.lubick.localHub.http.WebToolReportingInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
@@ -49,7 +50,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
 	public static LocalHubDebugAccess startTESTINGServerAndReturnDebugAccess(String screencastMonitorLocation)
 	{
-		return startServerAndReturnDebugAccess(screencastMonitorLocation, LocalSQLDatabaseFactory.DEFAULT_SQLITE_LOCATION, false, false, false);
+		return startServerAndReturnDebugAccess(screencastMonitorLocation, TestingUtils.TEST_DB_LOC, false, false, false);
 	}
 
 	private static LocalHubDebugAccess startServerAndReturnDebugAccess(String screencastMonitorLocation, String databaseLocation, boolean wantHTTP,

@@ -21,17 +21,16 @@ import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 
 public class Runner
 {
+	public static final String DEFAULT_DB_LOC = "toolstreams.sqlite";
 	private static LocalHubProcess localHub;
 	private static TrayIcon addedTrayIcon;
 
-	static
-	{
-		TestingUtils.makeSureLoggingIsSetUp();
-	}
+
 	public static void main(String[] args) throws Exception
 	{
+		TestingUtils.makeSureLoggingIsSetUp();
 		setUpTrayIcon();
-		localHub = LocalHub.startServerForUse("HF/Screencasting/", "kevinsDatabase.sqlite");
+		localHub = LocalHub.startServerForUse("HF/Screencasting/", DEFAULT_DB_LOC);
 		Thread.sleep(1000);
 		Desktop.getDesktop().browse(new URI("http://localhost:4443/"));
 	}
