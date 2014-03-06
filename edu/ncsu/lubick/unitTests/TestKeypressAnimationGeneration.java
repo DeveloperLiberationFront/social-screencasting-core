@@ -13,7 +13,6 @@ import javax.imageio.ImageIO;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.AnimatedKeyboardMaker;
 import edu.ncsu.lubick.localHub.videoPostProduction.animation.ShortcutsToKeyCodesConverter;
@@ -24,7 +23,6 @@ public class TestKeypressAnimationGeneration {
 	public static void setUpBeforeAll()
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
-		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
 	}
 
 	@Test

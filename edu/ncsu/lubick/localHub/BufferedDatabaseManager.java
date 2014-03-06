@@ -17,8 +17,6 @@ import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.database.DBAbstractionException;
 import edu.ncsu.lubick.localHub.database.DBAbstractionFactory;
 import edu.ncsu.lubick.localHub.database.LocalDBAbstraction;
-import edu.ncsu.lubick.localHub.database.RemoteDBAbstraction;
-import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.util.FileDateStructs;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
@@ -35,10 +33,9 @@ public class BufferedDatabaseManager
 {
 
 	private LocalDBAbstraction localDB = null;
-	private RemoteDBAbstraction remoteDB = null;
 	
 	private ExecutorService localThreadPool;
-	private ExecutorService remoteThreadPool;
+
 	private static BufferedDatabaseManager singletonBufferedDatabaseManager = null;
 
 	private static Logger logger = Logger.getLogger(BufferedDatabaseManager.class.getName());
@@ -46,7 +43,6 @@ public class BufferedDatabaseManager
 	private BufferedDatabaseManager(String databaseLocation)
 	{
 		this.localDB = DBAbstractionFactory.createAndInitializeDatabase(databaseLocation, DBAbstractionFactory.SQL_IMPLEMENTATION);
-		this.remoteDB = RemoteSQLDatabaseFactory.createMySQLDatabaseUsingUserFile();
 		
 		resetThreadPools();
 	}
@@ -78,15 +74,6 @@ public class BufferedDatabaseManager
 				public void run()
 				{
 					localDB.storeToolUsage(tu, ts.getAssociatedPlugin());
-				}
-			});
-
-			remoteThreadPool.execute(new Runnable() {
-
-				@Override
-				public void run()
-				{
-					remoteDB.storeToolUsage(tu, ts.getAssociatedPlugin());
 				}
 			});
 		}
@@ -123,17 +110,14 @@ public class BufferedDatabaseManager
 	private void resetThreadPools()
 	{
 		this.localThreadPool = Executors.newSingleThreadExecutor();
-		this.remoteThreadPool = Executors.newSingleThreadExecutor();
 	}
 
 	public void shutDown()
 	{
 		localThreadPool.shutdown();
-		remoteThreadPool.shutdown();
 		try
 		{
 			localThreadPool.awaitTermination(30, TimeUnit.SECONDS);
-			remoteThreadPool.awaitTermination(30, TimeUnit.SECONDS);
 		}
 		catch (InterruptedException e)
 		{
@@ -141,7 +125,6 @@ public class BufferedDatabaseManager
 		}
 
 		localDB.close();
-		remoteDB.close();
 		reset();
 	}
 

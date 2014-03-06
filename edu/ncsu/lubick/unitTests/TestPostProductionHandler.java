@@ -16,7 +16,6 @@ import org.junit.Test;
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.UserManager;
-import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 import edu.ncsu.lubick.localHub.forTesting.UnitTestUserManager;
@@ -47,7 +46,6 @@ public class TestPostProductionHandler
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
 		logger = Logger.getLogger(TestPostProductionHandler.class);
-		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
 		
 		
 		if (!TEST_SCREENCAST_FOLDER.exists() && !TEST_SCREENCAST_FOLDER.mkdirs())

@@ -12,7 +12,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.ncsu.lubick.localHub.ToolStream;
-import edu.ncsu.lubick.localHub.database.RemoteSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream.IdealizedToolUsage;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
@@ -24,7 +23,7 @@ public class TestToolStream {
 	public static void setUpBeforeAll()
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
-		RemoteSQLDatabaseFactory.setUpToUseMockDB(true);
+
 	}
 
 	@Before
