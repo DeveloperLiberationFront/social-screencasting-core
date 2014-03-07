@@ -262,5 +262,46 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		}
 		return retVal;
 	}
+	
+	@Override
+	public List<Integer> getTopScoresForToolUsage(int maxToolUsages, String pluginName, String toolName)
+	{
+		List<Integer> scores = new ArrayList<>();
+
+		StringBuilder sqlQueryBuilder = new StringBuilder();
+		sqlQueryBuilder.append("SELECT clip_score FROM ToolUsages ");
+		sqlQueryBuilder.append("WHERE plugin_name=? AND tool_name=? ORDER BY clip_score DESC");
+		sqlQueryBuilder.append(" LIMIT "+maxToolUsages);
+
+		PreparedStatement statement = makePreparedStatement(sqlQueryBuilder.toString());
+		try
+		{
+			statement.setString(1, pluginName);
+			statement.setString(2, toolName);
+		}
+		catch (SQLException e)
+		{
+			throw new DBAbstractionException("There was a problem of the params in getLastNInstancesOfToolUsage()", e);
+		}
+
+
+		try (ResultSet results = executeWithResults(statement);)
+		{
+			// perform the query
+			while (results.next())
+			{
+				int clipScore = results.getInt("clip_score");
+
+				scores.add(clipScore);
+			}
+
+		}
+		catch (SQLException ex)
+		{
+			throw new DBAbstractionException(ex);
+		}
+
+		return scores;
+	}
 
 }

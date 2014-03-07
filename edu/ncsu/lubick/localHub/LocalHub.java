@@ -22,6 +22,8 @@ import edu.ncsu.lubick.util.FileUtilities;
 public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
 	public static final String LOGGING_FILE_PATH = "/etc/log4j.settings";
+	public static final int MAX_TOOL_USAGES = 5;
+	
 	private static final LocalHub singletonHub;
 	private static Logger logger;
 
@@ -47,6 +49,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	private RemoteToolReporter remoteToolReporter;
 	private NotificationManager notificationManager;
 	private boolean shouldReportToolsRemotely;
+	private ClipQualityManager clipQualityManager;
 
 	public static LocalHubDebugAccess startTESTINGServerAndReturnDebugAccess(String screencastMonitorLocation)
 	{
@@ -131,7 +134,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			screenRecordingModule.startRecording();
 			ScreencastManager.startManaging(this.screencastMonitorDirectory);
 		}
-		
+		this.clipQualityManager = new ClipQualityManager(this.databaseManager);
 		this.postProductionHandler = new PostProductionHandler(this.screencastMonitorDirectory, userManager);
 		
 		if (shouldReportToolsRemotely)
@@ -261,13 +264,16 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		this.databaseManager.writeToolStreamToDatabase(ts);
 		for(ToolUsage tu : ts.getAsList())
 		{
-			try
+			if (shouldUseScreenRecording && clipQualityManager.shouldMakeClipForUsage(tu))
 			{
-				this.postProductionHandler.extractBrowserMediaForToolUsage(tu);
-			}
-			catch (MediaEncodingException e)
-			{
-				logger.error("Problem making media for "+tu,e);
+				try
+				{
+					this.postProductionHandler.extractBrowserMediaForToolUsage(tu);
+				}
+				catch (MediaEncodingException e)
+				{
+					logger.error("Problem making media for "+tu,e);
+				}
 			}
 		}
 	}
@@ -286,13 +292,16 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		
 		for (ToolUsage toolUsage : usages)
 		{
-			File potentialFile = new File("renderedVideos/",FileUtilities.makeFolderNameForBrowserMediaPackage(toolUsage, userManager.getUserEmail()));
+			File potentialFile = new File(FileUtilities.makeLocalFolderNameForBrowserMediaPackage(toolUsage, userManager.getUserEmail()));
 			if (potentialFile.exists() && potentialFile.isDirectory())
 			{
 				retVal.add(potentialFile);
 			}
+			else {
+				logger.error("Clip does not exist for "+toolUsage+", but it should...");
+			}
 		}
-		
+		logger.info(retVal+" are the best examples for "+toolName);
 		return retVal;
 		
 	}

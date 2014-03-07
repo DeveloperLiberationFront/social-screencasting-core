@@ -247,4 +247,24 @@ public class BufferedDatabaseManager
 		return retVal;
 	}
 
+	public List<Integer> getTopScoresForToolUsage(ToolUsage tu)
+	{
+		waitForLocalThreadPool();
+		List<Integer> retVal = null;
+		try
+		{
+			retVal = localDB.getTopScoresForToolUsage(LocalHub.MAX_TOOL_USAGES, tu.getPluginName(), tu.getToolName());
+		}
+		catch (DBAbstractionException e)
+		{
+			logger.error("There was a problem in the database query", e);
+		}
+		finally
+		{
+			resetThreadPools();
+		}
+
+		return retVal;
+	}
+
 }

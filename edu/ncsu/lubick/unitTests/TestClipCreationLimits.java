@@ -23,7 +23,7 @@ public class TestClipCreationLimits {
 
 	private static final String TEST_SCREENCASTING_DIR = "test_screencasting/";
 	private static final File renderedVideos = new File("renderedVideos/");
-	private static final int MAX_TOOL_USAGES = 5;
+	private static final int MAX_TOOL_USAGES = LocalHub.MAX_TOOL_USAGES;
 	private LocalHubDebugAccess server;
 	
 	private static final Logger logger = Logger.getLogger(TestClipCreationLimits.class);
@@ -130,7 +130,7 @@ public class TestClipCreationLimits {
 
 	private String getFolderNameForToolUsage(ToolUsage tu)
 	{
-		return FileUtilities.makeFolderNameForBrowserMediaPackage(tu , "kjlubick@ncsu.edu")
+		return FileUtilities.makeLocalFolderNameForBrowserMediaPackage(tu , "kjlubick@ncsu.edu")
 				.substring("renderedVideos/".length());
 	}
 
@@ -180,7 +180,7 @@ public class TestClipCreationLimits {
 	{
 		for(ToolUsage tu :convertedToolStream.getAsList())
 		{
-			String name = FileUtilities.makeFolderNameForBrowserMediaPackage(tu, "kjlubick@ncsu.edu");
+			String name = FileUtilities.makeLocalFolderNameForBrowserMediaPackage(tu, "kjlubick@ncsu.edu");
 			File expectedDir = new File(name);
 			if (expectedDir.exists())
 			{

@@ -47,11 +47,11 @@ public class BrowserMediaPackageUploader {
 
 	public boolean uploadToolUsage(ToolUsage toolUsage)
 	{
-		String expectedPackageRootDir = FileUtilities.makeFolderNameForBrowserMediaPackage(toolUsage, userManager.getUserEmail());
+		String expectedLocationOnDisk = FileUtilities.makeLocalFolderNameForBrowserMediaPackage(toolUsage, userManager.getUserEmail());
 
 		setCurrentToolUsage(toolUsage);
 
-		File packageDirectory = new File(expectedPackageRootDir);
+		File packageDirectory = new File(expectedLocationOnDisk);
 
 		logger.info("Searching for browser package in directory "+packageDirectory);
 

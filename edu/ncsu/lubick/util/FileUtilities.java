@@ -144,12 +144,20 @@ public class FileUtilities
 		}
 	}
 
-	public static String makeFolderNameForBrowserMediaPackage(ToolUsage tu, String userEmail)
+	/**
+	 * Makes a String representing the path name to where this file would exist on disk.
+	 * 
+	 * This includes the reference to the PostProductionHandler.MEDIA_OUTPUT_FOLDER "renderedVideos/"
+	 * @param tu
+	 * @param userEmail
+	 * @return
+	 */
+	public static String makeLocalFolderNameForBrowserMediaPackage(ToolUsage tu, String userEmail)
 	{
 		if (tu == null)
 		{
 			logger.info("Got a null toolusage, recovering with empty string");
-			return PostProductionHandler.MEDIA_OUTPUT_FOLDER;
+			return "";
 		}
 		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + ToolStream.makeUniqueIdentifierForToolUsage(tu, userEmail);
 	}
