@@ -261,19 +261,38 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	{
 		logger.info("ToolStream Reported from Plugin: "+ts.getAssociatedPlugin());
 		logger.debug(ts.toString());
+		
+		//report toolStreams
 		this.databaseManager.writeToolStreamToDatabase(ts);
+		
+		potentiallyMakeClipsFromToolStream(ts);
+		
+	}
+
+	private void potentiallyMakeClipsFromToolStream(ToolStream ts)
+	{
 		for(ToolUsage tu : ts.getAsList())
 		{
-			if (shouldUseScreenRecording && clipQualityManager.shouldMakeClipForUsage(tu))
-			{
-				try
+			if (clipQualityManager.shouldMakeClipForUsage(tu))
+			{	
+				if (shouldUseScreenRecording || isDebug)
 				{
-					this.postProductionHandler.extractBrowserMediaForToolUsage(tu);
+					logger.debug("Going to make clip for "+tu.getToolName());
+					try
+					{
+						this.postProductionHandler.extractBrowserMediaForToolUsage(tu);
+					}
+					catch (MediaEncodingException e)
+					{
+						logger.error("Problem making media for "+tu,e);
+					}
 				}
-				catch (MediaEncodingException e)
-				{
-					logger.error("Problem making media for "+tu,e);
+				else {
+					logger.debug("Not making clip from "+tu+" because screencasting is turned off");
 				}
+			}
+			else {
+				logger.debug("Not making clip from "+tu+" because its score isn't high enough");
 			}
 		}
 	}

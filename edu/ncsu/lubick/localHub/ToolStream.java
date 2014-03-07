@@ -201,6 +201,13 @@ public class ToolStream {
 		{
 			return this.clipScore;
 		}
+
+		@Override
+		public String toString()
+		{
+			return "ToolUsage [" + pluginName + "/" + toolName + ", duration=" + duration + "ms , clipScore=" + clipScore + ", timeStamp="
+					+ timeStamp + "]";
+		}
 	
 	}
 }

@@ -15,8 +15,10 @@ public class ClipQualityManager {
 
 	public boolean shouldMakeClipForUsage(ToolUsage tu)
 	{
-		List<Integer> scores = this.databaseManager.getTopScoresForToolUsage(tu);
-		return scores.size() == 0 || scores.get(scores.size()-1) < tu.getClipScore();
+		//TODO needs to be a bit more complicated.  The tool will already be reported, so we have to see if it's in the
+		//top Max
+		List<Integer> scores = this.databaseManager.getBestNInstancesOfToolUsage(LocalHub.MAX_TOOL_USAGES, tu.getPluginName(), tu.getToolName());
+		return scores.size() < LocalHub.MAX_TOOL_USAGES || scores.get(scores.size()-1) < tu.getClipScore();
 	}
 
 }
