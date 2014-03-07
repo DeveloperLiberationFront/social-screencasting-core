@@ -20,30 +20,9 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	protected void createTables()
 	{
 		createToolUsageTable();
-		createRawVideoCapFiles();
 	}
 
-	private void createRawVideoCapFiles()
-	{
-		/*
-		 * RawVideoCapFiles Schema CREATE TABLE IF NOT EXISTS RawVideoCapFiles ( file_id INTEGER PRIMARY KEY AUTOINCREMENT file_name TEXT, video_start_time
-		 * INTEGER, //The video's start time is only accurate to the nearest second duration INTEGER //This is in seconds
-		 * 
-		 * )
-		 */
-		// build up the sql
-		StringBuilder sqlTableQueryBuilder = new StringBuilder();
-		sqlTableQueryBuilder.append("CREATE TABLE IF NOT EXISTS RawVideoCapFiles ( ");
-		sqlTableQueryBuilder.append("file_id INTEGER PRIMARY KEY AUTOINCREMENT, ");
-		sqlTableQueryBuilder.append("file_name TEXT, ");
-		sqlTableQueryBuilder.append("video_start_time INTEGER, ");
-		sqlTableQueryBuilder.append("duration INTEGER");
-		sqlTableQueryBuilder.append(") ");
 
-		// execute the query
-		PreparedStatement statement = makePreparedStatement(sqlTableQueryBuilder.toString());
-		executeStatementWithNoResults(statement);
-	}
 
 	private void createToolUsageTable()
 	{
@@ -52,36 +31,36 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		 * tool_name TEXT, tool_key_presses TEXT, class_of_tool TEXT, tool_use_duration INTEGER )
 		 */
 		// build up the sql
-		StringBuilder sqlTableQueryBuilder = new StringBuilder();
-		sqlTableQueryBuilder.append("CREATE TABLE IF NOT EXISTS ToolUsages ( ");
-		sqlTableQueryBuilder.append("use_id INTEGER PRIMARY KEY AUTOINCREMENT, ");
-		sqlTableQueryBuilder.append("plugin_name TEXT, ");
-		sqlTableQueryBuilder.append("usage_timestamp INTEGER, ");
-		sqlTableQueryBuilder.append("tool_name TEXT, ");
-		sqlTableQueryBuilder.append("tool_key_presses TEXT, ");
-		sqlTableQueryBuilder.append("class_of_tool TEXT, ");
-		sqlTableQueryBuilder.append("tool_use_duration INTEGER");
-		sqlTableQueryBuilder.append(") ");
+		String sqlTableQuery = 		"CREATE TABLE IF NOT EXISTS ToolUsages ( " +
+									"use_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+									"plugin_name TEXT, " +
+									"usage_timestamp INTEGER, " +
+									"tool_name TEXT, " +
+									"tool_key_presses TEXT, " +
+									"class_of_tool TEXT, " +
+									"tool_use_duration INTEGER," +
+									"clip_score INTEGER" +
+									") ";
 
 		// execute the query
-		PreparedStatement statement = makePreparedStatement(sqlTableQueryBuilder.toString());
+		PreparedStatement statement = makePreparedStatement(sqlTableQuery);
 		executeStatementWithNoResults(statement);
 	}
 
 	@Override
 	public void storeToolUsage(ToolUsage tu, String associatedPlugin)
 	{
-		StringBuilder sqlQueryBuilder = new StringBuilder();
-		sqlQueryBuilder.append("INSERT INTO ToolUsages ( ");
-		sqlQueryBuilder.append("plugin_name, ");
-		sqlQueryBuilder.append("usage_timestamp, ");
-		sqlQueryBuilder.append("tool_name, ");
-		sqlQueryBuilder.append("tool_key_presses, ");
-		sqlQueryBuilder.append("class_of_tool, ");
-		sqlQueryBuilder.append("tool_use_duration ) VALUES (?,?,?,?,?,?)");
+		String sqlQuery = 		"INSERT INTO ToolUsages ( "+
+								"plugin_name, "+
+								"usage_timestamp, "+
+								"tool_name, "+
+								"tool_key_presses, "+
+								"class_of_tool, "+
+								"tool_use_duration,"+
+								"clip_score  ) VALUES (?,?,?,?,?,?,?)";
 
 
-		try (PreparedStatement statement = makePreparedStatement(sqlQueryBuilder.toString());)
+		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
 		{
 			statement.setString(1, associatedPlugin);
 			statement.setLong(2, tu.getTimeStamp().getTime());
@@ -89,6 +68,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			statement.setString(4, tu.getToolKeyPresses());
 			statement.setString(5, tu.getToolClass());
 			statement.setInt(6, tu.getDuration());
+			statement.setInt(7, tu.getClipScore());
 			executeStatementWithNoResults(statement);
 		}
 		catch (SQLException e)
@@ -120,8 +100,9 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 
 					String keyPresses = results.getString("tool_key_presses");
 					int duration = results.getInt("tool_use_duration");
+					int clipScore = results.getInt("clip_score");
 
-					toolUsages.add(new ToolUsage(toolName, toolClass, keyPresses, currentPluginName, timestamp, duration));
+					toolUsages.add(new ToolUsage(toolName, toolClass, keyPresses, currentPluginName, timestamp, duration, clipScore));
 				}
 			}
 		}
@@ -161,13 +142,13 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 
 
 	@Override
-	public List<ToolUsage> getLastNInstancesOfToolUsage(int n, String pluginName, String toolName)
+	public List<ToolUsage> getBestNInstancesOfToolUsage(int n, String pluginName, String toolName)
 	{
 		List<ToolUsage> toolUsages = new ArrayList<>();
 
 		StringBuilder sqlQueryBuilder = new StringBuilder();
 		sqlQueryBuilder.append("SELECT * FROM ToolUsages ");
-		sqlQueryBuilder.append("WHERE plugin_name=? AND tool_name=? ORDER BY usage_timestamp DESC");
+		sqlQueryBuilder.append("WHERE plugin_name=? AND tool_name=? ORDER BY clip_score DESC");
 		sqlQueryBuilder.append(" LIMIT "+n);
 
 		PreparedStatement statement = makePreparedStatement(sqlQueryBuilder.toString());
@@ -192,8 +173,9 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 
 				String keyPresses = results.getString("tool_key_presses");
 				int duration = results.getInt("tool_use_duration");
+				int clipScore = results.getInt("clip_score");
 
-				toolUsages.add(new ToolUsage(toolName, toolClass, keyPresses, pluginName, timestamp, duration));
+				toolUsages.add(new ToolUsage(toolName, toolClass, keyPresses, pluginName, timestamp, duration, clipScore));
 			}
 
 		}

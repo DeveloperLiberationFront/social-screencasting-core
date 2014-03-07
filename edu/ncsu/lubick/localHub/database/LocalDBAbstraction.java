@@ -16,12 +16,15 @@ public abstract class LocalDBAbstraction
 
 	public abstract void close();
 
-	public abstract List<ToolUsage> getLastNInstancesOfToolUsage(int n, String pluginName, String toolName);
+	public abstract List<ToolUsage> getBestNInstancesOfToolUsage(int n, String pluginName, String toolName);
+
+	//public abstract List<ToolUsage> getLastNInstancesOfToolUsage(int n, String pluginName, String toolName);
 
 	public abstract void storeVideoFile(File newVideoFile, Date videoStartTime, int durationOfClip);
 
 	public abstract List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int duration);
 
 	public abstract List<String> getNamesOfAllPlugins();
+
 
 }

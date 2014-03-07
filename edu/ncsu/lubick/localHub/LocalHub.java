@@ -253,63 +253,9 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		return databaseManager.getAllToolUsageHistoriesForPlugin(pluginName);
 	}
 	
-	/**
-	 * A class that allows unit tests to have indirect, controlled access to the inner workings of the LocalHub. This can only be created with a static method
-	 * in LocalHub
-	 * 
-	 * @author kjlubick
-	 * 
-	 */
-	private static class LocalHubTesting implements LocalHubDebugAccess
-	{
-
-		private LocalHub hubToDebug;
-
-		public LocalHubTesting(LocalHub thisHub)
-		{
-			hubToDebug = thisHub;
-		}
-
-		@Override
-		public boolean isRunning()
-		{
-			return hubToDebug.isRunning();
-		}
-
-
-		@Override
-		public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName)
-		{
-			return hubToDebug.getAllToolUsagesForPlugin(currentPluginName);
-		}
-
-		@Override
-		public void shutDown()
-		{
-			hubToDebug.shutDown();
-
-		}
-
-
-		@Override
-		public List<String> getAllPluginNames()
-		{
-			return hubToDebug.getNamesOfAllPlugins();
-		}
-		
-		@Override
-		public void reportToolStream(ToolStream ts)
-		{
-			hubToDebug.reportToolStream(ts);
-		}
-
-
-	}
-
 	@Override
 	public void reportToolStream(ToolStream ts)	//requests coming in from the web
 	{
-		//TODO write unit test for this
 		logger.info("ToolStream Reported from Plugin: "+ts.getAssociatedPlugin());
 		logger.debug(ts.toString());
 		this.databaseManager.writeToolStreamToDatabase(ts);
@@ -334,7 +280,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	@Override
 	public List<File> getBestExamplesOfTool(String pluginName, String toolName)
 	{
-		List<ToolUsage> usages = this.databaseManager.getLastNInstancesOfToolUsage(5, pluginName, toolName);
+		List<ToolUsage> usages = this.databaseManager.getBestNInstancesOfToolUsage(5, pluginName, toolName);
 		
 		List<File> retVal = new ArrayList<>();
 		
@@ -349,6 +295,59 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		
 		return retVal;
 		
+	}
+
+	/**
+	 * A class that allows unit tests to have indirect, controlled access to the inner workings of the LocalHub. This can only be created with a static method
+	 * in LocalHub
+	 * 
+	 * @author kjlubick
+	 * 
+	 */
+	private static class LocalHubTesting implements LocalHubDebugAccess
+	{
+	
+		private LocalHub hubToDebug;
+	
+		public LocalHubTesting(LocalHub thisHub)
+		{
+			hubToDebug = thisHub;
+		}
+	
+		@Override
+		public boolean isRunning()
+		{
+			return hubToDebug.isRunning();
+		}
+	
+	
+		@Override
+		public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName)
+		{
+			return hubToDebug.getAllToolUsagesForPlugin(currentPluginName);
+		}
+	
+		@Override
+		public void shutDown()
+		{
+			hubToDebug.shutDown();
+	
+		}
+	
+	
+		@Override
+		public List<String> getAllPluginNames()
+		{
+			return hubToDebug.getNamesOfAllPlugins();
+		}
+		
+		@Override
+		public void reportToolStream(ToolStream ts)
+		{
+			hubToDebug.reportToolStream(ts);
+		}
+	
+	
 	}
 
 }

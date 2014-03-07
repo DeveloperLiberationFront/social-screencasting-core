@@ -126,26 +126,39 @@ public class ToolStream {
 		private Date timeStamp;
 		private int duration;
 		private String pluginName;
+		private int clipScore;
 	
-		private ToolUsage(String toolName, String toolClass, String keyPresses, Date timeStamp, int duration)
+		private ToolUsage(String toolName, String toolClass, String keyPresses, Date timeStamp, int duration, int clipScore)
 		{
 			this.toolName = toolName.trim();
 			this.toolClass = toolClass.trim();
 			this.keyPresses = keyPresses.trim();
 			this.timeStamp = timeStamp;
 			this.duration = duration;
+			this.clipScore = clipScore;
 		}
 	
+		@Deprecated
 		public ToolUsage(String toolName, String toolClass, String keyPresses, String pluginName, Date timeStamp, int duration)
 		{
-			this(toolName, toolClass, keyPresses, timeStamp, duration);
+			this(toolName, toolClass, keyPresses, timeStamp, duration, duration);
 			setPluginName(pluginName);
 		}
+		
+		public ToolUsage(String toolName, String toolClass, String keyPresses, String pluginName, Date timeStamp, int duration, int score)
+		{
+			this(toolName, toolClass, keyPresses, timeStamp, duration, score);
+			setPluginName(pluginName);
+		}
+		
 	
 		public static ToolUsage buildFromJSONObject(JSONObject jobj) throws JSONException
 		{
+			//TODO change this (eventually) to read the clip_score from the json
 			return new ToolUsage(jobj.getString(ToolStream.TOOL_NAME), jobj.getString(ToolStream.TOOL_CLASS),
 					jobj.getString(ToolStream.TOOL_KEY_PRESSES), new Date(jobj.getLong(ToolStream.TOOL_TIMESTAMP)),
+					jobj.getInt(ToolStream.TOOL_DURATION), 
+					/*just use duration for score */
 					jobj.getInt(ToolStream.TOOL_DURATION));
 		}
 	
@@ -182,6 +195,11 @@ public class ToolStream {
 		public void setPluginName(String pluginName)
 		{
 			this.pluginName = pluginName;
+		}
+
+		public int getClipScore()
+		{
+			return this.clipScore;
 		}
 	
 	}

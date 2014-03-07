@@ -179,13 +179,13 @@ public class BufferedDatabaseManager
 		return getVideoFilesLinkedToTimePeriod(tu.getTimeStamp(), durationInSecondsRoundedUp);
 	}
 
-	public List<ToolUsage> getLastNInstancesOfToolUsage(int n, String pluginName, String toolName)
+	public List<ToolUsage> getBestNInstancesOfToolUsage(int n, String pluginName, String toolName)
 	{
 		waitForLocalThreadPool();
 		List<ToolUsage> retVal = null;
 		try
 		{
-			retVal = localDB.getLastNInstancesOfToolUsage(n, pluginName, toolName);
+			retVal = localDB.getBestNInstancesOfToolUsage(n, pluginName, toolName);
 		}
 		catch (DBAbstractionException e)
 		{
@@ -198,6 +198,7 @@ public class BufferedDatabaseManager
 
 		return retVal;
 	}
+
 
 	public List<String> getNamesOfAllPlugins()
 	{
