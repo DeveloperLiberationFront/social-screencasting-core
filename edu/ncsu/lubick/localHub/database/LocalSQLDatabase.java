@@ -320,7 +320,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			{
 				while (results.next())
 				{
-					pluginToolCombosToThin.add(new PluginNameStruct(results.getString(0),results.getString(1)));
+					pluginToolCombosToThin.add(new PluginNameStruct(results.getString(1),results.getString(2)));
 				}
 			}
 		}
