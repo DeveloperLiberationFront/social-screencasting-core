@@ -51,9 +51,11 @@ public class TestClipCreationLimits {
 		
 		ToolStream toolStreamOfFourTools = makeToolStreamOfFour();
 		ToolStream toolStreamOfTwoTools = makeToolStreamOfMaxPlusOne();
+		ToolStream excellentExample = makeSuperiorExample();
 		
 		clearOutAlreadyCreatedMedia(toolStreamOfFourTools);
 		clearOutAlreadyCreatedMedia(toolStreamOfTwoTools);
+		clearOutAlreadyCreatedMedia(excellentExample);
 		
 		int presize = renderedVideos.list().length;
 		
@@ -62,6 +64,7 @@ public class TestClipCreationLimits {
 		int midSize = renderedVideos.list().length;
 		
 		assertEquals(4, midSize - presize);
+		//fail();
 		
 		server.reportToolStream(toolStreamOfTwoTools);
 		
@@ -72,7 +75,7 @@ public class TestClipCreationLimits {
 		//First 5 instances will have been made, the sixth ignored
 		List<String> verifiedFiles = checkFileNamesForFirstFive(toolStreamOfFourTools, toolStreamOfTwoTools);
 		
-		ToolStream excellentExample = makeSuperiorExample();
+		
 		
 		server.reportToolStream(excellentExample);
 		
@@ -119,7 +122,8 @@ public class TestClipCreationLimits {
 			if (fileName.startsWith(TestPostProductionHandler.TEST_PLUGIN_NAME))
 			{
 				logger.debug("found created clip: "+fileName);
-				assertTrue(expectedNames.contains(fileName));
+				assertTrue("Expecting to find "+fileName, expectedNames.contains(fileName));
+				
 				numHits++;
 			}
 		}

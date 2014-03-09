@@ -9,8 +9,11 @@ import java.util.List;
 
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import freemarker.log.Logger;
 
 public abstract class LocalSQLDatabase extends LocalDBAbstraction {
+	
+	private static final Logger logger = Logger.getLogger(LocalSQLDatabase.class.getName()); 
 
 	protected abstract PreparedStatement makePreparedStatement(String statementQuery);
 	protected abstract void executeStatementWithNoResults(PreparedStatement statement);
@@ -300,22 +303,22 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			this.pluginName = pluginName;
 			this.toolName = toolName;
 		}
-		
+
 	}
-	
+
 	@Override
 	public List<String> getExcesiveTools()
 	{
 		String firstQuery = "SELECT plugin_name,tool_name from(" + 
 				"SELECT plugin_name,tool_name, COUNT(*) AS num_clips FROM Clips Group by plugin_name, tool_name)" + 
 				"WHERE num_clips > ?";
-		
+
 		List<PluginNameStruct> pluginToolCombosToThin = new ArrayList<>();
-		
+
 		try (PreparedStatement statement = makePreparedStatement(firstQuery);)
 		{
 			statement.setInt(1, LocalHub.MAX_TOOL_USAGES);
-			
+
 			try (ResultSet results = executeWithResults(statement);)
 			{
 				while (results.next())
@@ -328,13 +331,13 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		{
 			throw new DBAbstractionException("There was a problem in the first part of finding excess clips", e);
 		}
-		
+
 		List<String> extrasToDelete = new ArrayList<>();
 		for (PluginNameStruct pluginToolCombo : pluginToolCombosToThin)
 		{
 			findExtraClipsFrom(pluginToolCombo.pluginName, pluginToolCombo.toolName, extrasToDelete);
 		}
-		
+
 		return extrasToDelete;
 	}
 	private void findExtraClipsFrom(String pluginName, String toolName, List<String> listToAppendTo)
@@ -344,22 +347,24 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
 		{
 			statement.setString(1, pluginName);
-			statement.setString(1, toolName);
-			
+			statement.setString(2, toolName);
+
 			try (ResultSet results = executeWithResults(statement);)
 			{
-				int numToDelete = results.getFetchSize()-LocalHub.MAX_TOOL_USAGES;
-				for (int i = 0;i<numToDelete;i++)
+				List<String> tempList = new ArrayList<>();
+				while(results.next())
 				{
-					listToAppendTo.add(results.getString(1));
+					tempList.add(results.getString(1));
 				}
+				int numToDelete = tempList.size() - LocalHub.MAX_TOOL_USAGES;
+				listToAppendTo.addAll(tempList.subList(0, numToDelete));
 			}
 		}
 		catch (SQLException e)
 		{
 			throw new DBAbstractionException("There was a problem in the first part of finding excess clips", e);
 		}
-		
+
 	}
 
 }

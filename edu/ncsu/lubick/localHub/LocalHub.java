@@ -275,9 +275,21 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
 	private void cleanUpObsoleteClips()
 	{
-		// TODO Auto-generated method stub
 		// Query database for clips made and update the database with those that don't exist
 		List<String> pathsToDelete = this.databaseManager.getExcesiveTools(MAX_TOOL_USAGES);
+		
+		for (String path: pathsToDelete)
+		{
+			File clipToDelete = new File(path);
+			if (TestingUtils.clearOutDirectory(clipToDelete) && clipToDelete.delete())
+			{
+				logger.info("Deleted clip "+path);
+			}
+			else
+			{
+				logger.error("Could not auto-delete clip - "+path);
+			}
+		}
 	}
 
 	private void potentiallyMakeClipsFromToolStream(ToolStream ts)
@@ -292,8 +304,8 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 					try
 					{
 						this.postProductionHandler.extractBrowserMediaForToolUsage(tu);
-						String toolUsagePath = FileUtilities.makeLocalFolderNameForBrowserMediaPackage(tu, getCurrentUserEmail());
-						this.databaseManager.reportMediaMadeForToolUsage(toolUsagePath);
+						String clipPath = FileUtilities.makeLocalFolderNameForBrowserMediaPackage(tu, getCurrentUserEmail());
+						this.databaseManager.reportMediaMadeForToolUsage(clipPath, tu);
 					}
 					catch (MediaEncodingException e)
 					{
