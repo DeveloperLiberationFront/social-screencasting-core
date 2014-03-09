@@ -17,8 +17,10 @@ public class ClipQualityManager {
 	{
 		//TODO needs to be a bit more complicated.  The tool will already be reported, so we have to see if it's in the
 		//top Max
-		List<Integer> scores = this.databaseManager.getBestNInstancesOfToolUsage(LocalHub.MAX_TOOL_USAGES, tu.getPluginName(), tu.getToolName());
-		return scores.size() < LocalHub.MAX_TOOL_USAGES || scores.get(scores.size()-1) < tu.getClipScore();
+		List<ToolUsage> best = this.databaseManager.getBestNInstancesOfToolUsage(LocalHub.MAX_TOOL_USAGES, tu.getPluginName(), tu.getToolName());
+		
+		
+		return best.contains(tu);
 	}
 
 }

@@ -257,16 +257,27 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	}
 	
 	@Override
-	public void reportToolStream(ToolStream ts)	//requests coming in from the web
+	public void reportToolStream(ToolStream ts)	//requests coming in from the web (usually async)
 	{
-		logger.info("ToolStream Reported from Plugin: "+ts.getAssociatedPlugin());
-		logger.debug(ts.toString());
-		
-		//report toolStreams
-		this.databaseManager.writeToolStreamToDatabase(ts);
-		
-		potentiallyMakeClipsFromToolStream(ts);
-		
+		synchronized (this)
+		{
+			logger.info("ToolStream Reported from Plugin: "+ts.getAssociatedPlugin());
+			logger.debug(ts.toString());
+			
+			//report toolStreams
+			this.databaseManager.writeToolStreamToDatabase(ts);
+			
+			potentiallyMakeClipsFromToolStream(ts);
+			
+			cleanUpObsoleteClips();
+		}	
+	}
+
+	private void cleanUpObsoleteClips()
+	{
+		// TODO Auto-generated method stub
+		// Query database for clips made and update the database with those that don't exist
+		List<String> pathsToDelete = this.databaseManager.getExcesiveTools(MAX_TOOL_USAGES);
 	}
 
 	private void potentiallyMakeClipsFromToolStream(ToolStream ts)
@@ -281,6 +292,8 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 					try
 					{
 						this.postProductionHandler.extractBrowserMediaForToolUsage(tu);
+						String toolUsagePath = FileUtilities.makeLocalFolderNameForBrowserMediaPackage(tu, getCurrentUserEmail());
+						this.databaseManager.reportMediaMadeForToolUsage(toolUsagePath);
 					}
 					catch (MediaEncodingException e)
 					{

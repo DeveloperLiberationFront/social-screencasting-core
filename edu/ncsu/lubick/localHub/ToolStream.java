@@ -208,6 +208,34 @@ public class ToolStream {
 			return "ToolUsage [" + pluginName + "/" + toolName + ", duration=" + duration + "ms , clipScore=" + clipScore + ", timeStamp="
 					+ timeStamp + "]";
 		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + clipScore;
+			result = prime * result + duration;
+			result = prime * result + ((keyPresses == null) ? 0 : keyPresses.hashCode());
+			result = prime * result + ((pluginName == null) ? 0 : pluginName.hashCode());
+			result = prime * result + ((timeStamp == null) ? 0 : timeStamp.hashCode());
+			result = prime * result + ((toolClass == null) ? 0 : toolClass.hashCode());
+			result = prime * result + ((toolName == null) ? 0 : toolName.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (!(obj instanceof ToolUsage))
+				return false;			
+			return this.hashCode() == obj.hashCode();
+			
+		}
 	
 	}
 }

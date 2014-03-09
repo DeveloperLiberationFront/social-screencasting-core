@@ -1,6 +1,8 @@
 package edu.ncsu.lubick.localHub.http;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -21,6 +23,8 @@ public class ToolReportingHandler extends AbstractHandler  {
 	private WebToolReportingInterface toolReportingInterface;
 	
 	private static Logger logger = Logger.getLogger(ToolReportingHandler.class.getName());
+	
+	ExecutorService threadPool = Executors.newCachedThreadPool();
 
 	public ToolReportingHandler(String location, WebToolReportingInterface toolReportingInterface)
 	{
@@ -57,11 +61,23 @@ public class ToolReportingHandler extends AbstractHandler  {
 		String jsonArrayOfToolUsage = request.getParameter(POST_PROPERTY_JSON_ARRAY_TOOL_USAGES);
 		logger.debug(""+ pluginName+ " " +jsonArrayOfToolUsage);
 		
-		//Long timeStamp = Long.decode(request.getParameter(POST_PROPERTY_TOOLSTREAM_TIME));
 		ToolStream ts = ToolStream.generateFromJSON(jsonArrayOfToolUsage);
 		ts.setAssociatedPlugin(pluginName);
-		//ts.setTimeStamp(new Date(timeStamp));
-		toolReportingInterface.reportToolStream(ts);
+		
+		
+		asyncReportToolStream(ts);
+	}
+
+	private void asyncReportToolStream(final ToolStream ts)
+	{
+		threadPool.execute(new Runnable() {
+			
+			@Override
+			public void run()
+			{
+				toolReportingInterface.reportToolStream(ts);
+			}
+		});		
 	}
 
 	private boolean checkIfWeHandleThisRequest(String target)

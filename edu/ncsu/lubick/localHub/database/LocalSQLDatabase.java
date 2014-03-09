@@ -1,6 +1,5 @@
 package edu.ncsu.lubick.localHub.database;
 
-import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,8 +7,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
-import edu.ncsu.lubick.util.FileDateStructs;
 
 public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 
@@ -20,6 +19,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	protected void createTables()
 	{
 		createToolUsageTable();
+		createClipTable();
 	}
 
 
@@ -32,32 +32,45 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		 */
 		// build up the sql
 		String sqlTableQuery = 		"CREATE TABLE IF NOT EXISTS ToolUsages ( " +
-									"use_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-									"plugin_name TEXT, " +
-									"usage_timestamp INTEGER, " +
-									"tool_name TEXT, " +
-									"tool_key_presses TEXT, " +
-									"class_of_tool TEXT, " +
-									"tool_use_duration INTEGER," +
-									"clip_score INTEGER" +
-									") ";
+				"use_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+				"plugin_name TEXT, " +
+				"usage_timestamp INTEGER, " +
+				"tool_name TEXT, " +
+				"tool_key_presses TEXT, " +
+				"class_of_tool TEXT, " +
+				"tool_use_duration INTEGER," +
+				"clip_score INTEGER" +
+				") ";
 
 		// execute the query
 		PreparedStatement statement = makePreparedStatement(sqlTableQuery);
 		executeStatementWithNoResults(statement);
 	}
 
+	private void createClipTable()
+	{
+		String sqlTableQuery = 		"CREATE TABLE IF NOT EXISTS Clips ( " +
+				"folder_name TEXT PRIMARY KEY, " +
+				"plugin_name TEXT, " +
+				"tool_name TEXT, " +
+				"clip_score INTEGER" +
+				") ";
+
+		// execute the query
+		PreparedStatement statement = makePreparedStatement(sqlTableQuery);
+		executeStatementWithNoResults(statement);
+	}
 	@Override
 	public void storeToolUsage(ToolUsage tu, String associatedPlugin)
 	{
 		String sqlQuery = 		"INSERT INTO ToolUsages ( "+
-								"plugin_name, "+
-								"usage_timestamp, "+
-								"tool_name, "+
-								"tool_key_presses, "+
-								"class_of_tool, "+
-								"tool_use_duration,"+
-								"clip_score  ) VALUES (?,?,?,?,?,?,?)";
+				"plugin_name, "+
+				"usage_timestamp, "+
+				"tool_name, "+
+				"tool_key_presses, "+
+				"class_of_tool, "+
+				"tool_use_duration,"+
+				"clip_score  ) VALUES (?,?,?,?,?,?,?)";
 
 
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
@@ -114,32 +127,6 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		return toolUsages;
 	}
 
-	@Override
-	public void storeVideoFile(File newVideoFile, Date videoStartTime, int durationOfClip)
-	{
-		StringBuilder sqlQueryBuilder = new StringBuilder();
-		sqlQueryBuilder.append("INSERT INTO RawVideoCapFiles ( ");
-		sqlQueryBuilder.append("file_name, ");
-		sqlQueryBuilder.append("video_start_time, ");
-		sqlQueryBuilder.append("duration ) VALUES (?,?,?)");
-
-		
-		try (PreparedStatement statement = makePreparedStatement(sqlQueryBuilder.toString());)
-		{
-			statement.setString(1, newVideoFile.getAbsolutePath());
-			statement.setLong(2, videoStartTime.getTime() / 1000);
-			statement.setInt(3, durationOfClip);
-			executeStatementWithNoResults(statement);
-		}
-		catch (SQLException e)
-		{
-			throw new DBAbstractionException("There was a problem of the params in storeVideoFile()", e);
-		}
-
-		
-
-	}
-
 
 	@Override
 	public List<ToolUsage> getBestNInstancesOfToolUsage(int n, String pluginName, String toolName)
@@ -187,56 +174,6 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		return toolUsages;
 	}
 
-	/*
-	 * RawVideoCapFiles Schema CREATE TABLE IF NOT EXISTS RawVideoCapFiles ( file_id INTEGER PRIMARY KEY AUTOINCREMENT file_name TEXT, video_start_time INTEGER,
-	 * //The video's start time is only accurate to the nearest second duration INTEGER //This is in seconds
-	 * 
-	 * )
-	 */
-
-	@Override
-	public List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int durationInSeconds)
-	{
-		List<FileDateStructs> retVal = new ArrayList<>();
-
-		StringBuilder sqlQueryBuilder = new StringBuilder();
-		sqlQueryBuilder.append("SELECT DISTINCT file_name, video_start_time FROM RawVideoCapFiles ");
-		sqlQueryBuilder.append("WHERE (video_start_time<");
-		sqlQueryBuilder.append(timeStamp.getTime() / 1000);
-		sqlQueryBuilder.append(" AND video_start_time+duration>");
-		sqlQueryBuilder.append(timeStamp.getTime() / 1000);
-		sqlQueryBuilder.append(") OR ( video_start_time<");
-		sqlQueryBuilder.append(timeStamp.getTime() / 1000L + durationInSeconds);
-		sqlQueryBuilder.append(" AND video_start_time+duration>");
-		sqlQueryBuilder.append(timeStamp.getTime() / 1000L + durationInSeconds);
-		sqlQueryBuilder.append(") ORDER BY video_start_time");
-
-		PreparedStatement statement = makePreparedStatement(sqlQueryBuilder.toString());	//no need to add params
-		//we trust this data
-
-		try (ResultSet results = executeWithResults(statement);)
-		{
-			// perform the query
-			while (results.next())
-			{
-				Date videoTimestamp = new Date(results.getLong("video_start_time") * 1000); // multiply by 1000 to
-				// convert from seconds to millis
-				File file = new File(results.getString("file_name"));
-
-				FileDateStructs newResult = new FileDateStructs(file, videoTimestamp);
-
-				retVal.add(newResult);
-			}
-
-		}
-		catch (SQLException ex)
-		{
-			throw new DBAbstractionException(ex);
-		}
-
-		return retVal;
-	}
-
 	@Override
 	public List<String> getNamesOfAllPlugins()
 	{
@@ -262,7 +199,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		}
 		return retVal;
 	}
-	
+
 	@Override
 	public List<Integer> getTopScoresForToolUsage(int maxToolUsages, String pluginName, String toolName)
 	{
@@ -302,6 +239,127 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		}
 
 		return scores;
+	}
+
+	/*
+	 * "CREATE TABLE IF NOT EXISTS Clips ( " +
+				"folder_name PRIMARY KEY, " +
+				"plugin_name TEXT, " +
+				"tool_name TEXT, " +
+				"clip_score INTEGER" +
+				") ";
+	 */
+	@Override
+	public void createClipForToolUsage(String clipID, ToolUsage tu)
+	{
+		String sqlQuery = 		"INSERT INTO Clips ( "+
+				"folder_name, "+
+				"plugin_name, "+
+				"tool_name, "+
+				"clip_score  ) VALUES (?,?,?,?)";
+
+
+		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
+		{
+			statement.setString(1, clipID);
+			statement.setString(2, tu.getPluginName());
+			statement.setString(3, tu.getToolName());
+			statement.setInt(4, tu.getClipScore());
+			executeStatementWithNoResults(statement);
+		}
+		catch (SQLException e)
+		{
+			throw new DBAbstractionException("There was a problem of the params in createClip()", e);
+		}
+	}
+
+	@Override
+	public void deleteClipForToolUsage(String clipID)
+	{
+		String sqlQuery = 		"DELETE FROM Clips where folder_name = ?";
+
+
+		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
+		{
+			statement.setString(1, clipID);
+			executeStatementWithNoResults(statement);
+		}
+		catch (SQLException e)
+		{
+			throw new DBAbstractionException("There was a problem in deleteClip()", e);
+		}
+	}
+
+	private class PluginNameStruct {
+
+		public String pluginName;
+		public String toolName;
+
+		public PluginNameStruct(String pluginName, String toolName)
+		{
+			this.pluginName = pluginName;
+			this.toolName = toolName;
+		}
+		
+	}
+	
+	@Override
+	public List<String> getExcesiveTools()
+	{
+		String firstQuery = "SELECT plugin_name,tool_name from(" + 
+				"SELECT plugin_name,tool_name, COUNT(*) AS num_clips FROM Clips Group by plugin_name, tool_name)" + 
+				"WHERE num_clips > ?";
+		
+		List<PluginNameStruct> pluginToolCombosToThin = new ArrayList<>();
+		
+		try (PreparedStatement statement = makePreparedStatement(firstQuery);)
+		{
+			statement.setInt(1, LocalHub.MAX_TOOL_USAGES);
+			
+			try (ResultSet results = executeWithResults(statement);)
+			{
+				while (results.next())
+				{
+					pluginToolCombosToThin.add(new PluginNameStruct(results.getString(0),results.getString(1)));
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			throw new DBAbstractionException("There was a problem in the first part of finding excess clips", e);
+		}
+		
+		List<String> extrasToDelete = new ArrayList<>();
+		for (PluginNameStruct pluginToolCombo : pluginToolCombosToThin)
+		{
+			findExtraClipsFrom(pluginToolCombo.pluginName, pluginToolCombo.toolName, extrasToDelete);
+		}
+		
+		return extrasToDelete;
+	}
+	private void findExtraClipsFrom(String pluginName, String toolName, List<String> listToAppendTo)
+	{
+		String sqlQuery = "SELECT folder_name FROM Clips where plugin_name = ? AND tool_name = ? order by clip_score asc";
+		
+		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
+		{
+			statement.setString(1, pluginName);
+			statement.setString(1, toolName);
+			
+			try (ResultSet results = executeWithResults(statement);)
+			{
+				int numToDelete = results.getFetchSize()-LocalHub.MAX_TOOL_USAGES;
+				for (int i = 0;i<numToDelete;i++)
+				{
+					listToAppendTo.add(results.getString(1));
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			throw new DBAbstractionException("There was a problem in the first part of finding excess clips", e);
+		}
+		
 	}
 
 }

@@ -1,9 +1,7 @@
 package edu.ncsu.lubick.localHub;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +15,6 @@ import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.database.DBAbstractionException;
 import edu.ncsu.lubick.localHub.database.DBAbstractionFactory;
 import edu.ncsu.lubick.localHub.database.LocalDBAbstraction;
-import edu.ncsu.lubick.util.FileDateStructs;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
 /**
@@ -25,6 +22,8 @@ import edu.ncsu.lubick.util.ToolCountStruct;
  * 
  * However, this implementation is NOT completely thread safe. Do not try to send stuff to the database while a request from the database is blocking. There is
  * a good chance things will fail
+ * 
+ * TODO set this up to work with Futures.  I.E. make this thread safe.
  * 
  * @author Kevin Lubick
  * 
@@ -63,6 +62,33 @@ public class BufferedDatabaseManager
 		return singletonBufferedDatabaseManager;
 	}
 
+	public void reportMediaMadeForToolUsage(final String clipID, final ToolUsage toolUsage)
+	{
+		logger.debug("Reporting media exists for "+clipID);
+		localThreadPool.execute(new Runnable() {
+	
+			@Override
+			public void run()
+			{
+				
+				localDB.createClipForToolUsage(clipID, toolUsage);
+			}
+		});
+	}
+
+	public void reportMediaDeletedForToolUsage(final String clipID)
+	{
+		logger.debug("Reporting media was deleted for "+clipID);
+		localThreadPool.execute(new Runnable() {
+	
+			@Override
+			public void run()
+			{
+				localDB.deleteClipForToolUsage(clipID);
+			}
+		});
+	}
+
 	public void writeToolStreamToDatabase(final ToolStream ts)
 	{
 		for (final ToolUsage tu : ts.getAsList())
@@ -80,18 +106,6 @@ public class BufferedDatabaseManager
 
 	}
 
-	public void addVideoFile(final File newVideoFile, final Date videoStartTime, final int durationOfClip)
-	{
-		logger.debug("Adding new video file that starts on " + videoStartTime + "and goes " + durationOfClip + " seconds");
-		localThreadPool.execute(new Runnable() {
-
-			@Override
-			public void run()
-			{
-				localDB.storeVideoFile(newVideoFile, videoStartTime, durationOfClip);
-			}
-		});
-	}
 
 	private void waitForLocalThreadPool()
 	{
@@ -136,48 +150,20 @@ public class BufferedDatabaseManager
 
 	public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName)
 	{
+		List<ToolUsage> retval;
 		waitForLocalThreadPool();
+		synchronized (localDB)
+		{
+			retval = localDB.getAllToolUsageHistoriesForPlugin(currentPluginName);
+		}
 
-		List<ToolUsage> retval = localDB.getAllToolUsageHistoriesForPlugin(currentPluginName);
+		
 
 		resetThreadPools();
 
 		return retval;
 	}
 
-	private List<FileDateStructs> getVideoFilesLinkedToTimePeriod(Date timeStamp, int durationInSeconds)
-	{
-		if (durationInSeconds > 120)
-		{
-			logger.info("WARNING: Duration of Screencast longer than 2 minutes.  Are you sure that you converted milliseconds to seconds?");
-		}
-		waitForLocalThreadPool();
-		List<FileDateStructs> retVal = null;
-		try
-		{
-			logger.debug("Searching for a time frame starting at " + timeStamp + "and going " + durationInSeconds + " seconds");
-
-			retVal = localDB.getVideoFilesLinkedToTimePeriod(timeStamp, durationInSeconds);
-		}
-		catch (DBAbstractionException e)
-		{
-			logger.error("There was a problem in the database query", e);
-		}
-		finally
-		{
-			resetThreadPools();
-		}
-
-		return retVal;
-	}
-
-	public List<FileDateStructs> getVideoFilesLinkedToTimePeriod(ToolUsage tu)
-	{
-		// convert milliseconds to seconds, as that is what the database has
-		// durations for videos stored in
-		int durationInSecondsRoundedUp = (int) Math.ceil(tu.getDuration() / 1000.0);
-		return getVideoFilesLinkedToTimePeriod(tu.getTimeStamp(), durationInSecondsRoundedUp);
-	}
 
 	public List<ToolUsage> getBestNInstancesOfToolUsage(int n, String pluginName, String toolName)
 	{
@@ -203,10 +189,8 @@ public class BufferedDatabaseManager
 	public List<String> getNamesOfAllPlugins()
 	{
 		waitForLocalThreadPool();
-		List<String> retVal = Collections.emptyList(); // avoids the template
-														// from crashing if the
-														// query runs into
-														// trouble
+		List<String> retVal = Collections.emptyList(); // avoids any templates from crashing if the
+														// query runs into trouble
 		try
 		{
 			retVal = localDB.getNamesOfAllPlugins();
@@ -224,6 +208,7 @@ public class BufferedDatabaseManager
 
 	public List<ToolCountStruct> getAllToolAggregateForPlugin(String pluginName)
 	{
+		waitForLocalThreadPool();
 		List<ToolUsage> toolUsages = getAllToolUsageHistoriesForPlugin(pluginName);
 		Map<String, Integer> toolCountsMap = new HashMap<>();
 		// add the toolusages to the map
@@ -244,13 +229,16 @@ public class BufferedDatabaseManager
 		}
 		// sort, using the internal comparator
 		Collections.sort(retVal);
+		
+		resetThreadPools();
+		
 		return retVal;
 	}
 
 	public List<Integer> getTopScoresForToolUsage(ToolUsage tu)
 	{
-		waitForLocalThreadPool();
 		List<Integer> retVal = null;
+		waitForLocalThreadPool();
 		try
 		{
 			retVal = localDB.getTopScoresForToolUsage(LocalHub.MAX_TOOL_USAGES, tu.getPluginName(), tu.getToolName());
@@ -264,6 +252,17 @@ public class BufferedDatabaseManager
 			resetThreadPools();
 		}
 
+		return retVal;
+	}
+
+	public List<String> getExcesiveTools(int maxToolUsages)
+	{
+		waitForLocalThreadPool();
+		
+		List<String> retVal = localDB.getExcesiveTools();
+		
+		resetThreadPools();
+		
 		return retVal;
 	}
 
