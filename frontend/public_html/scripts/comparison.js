@@ -42,21 +42,19 @@ function sortPluginTuplesCount(a, b) {
 }
 
 //JSON tuple {name="name", count=42}
-function sortPluginTupleName(a, b) {
-	return b.name.localeCompare(a.name);
+function sortPluginTuplesName(a, b) {
+    return b.name.localeCompare(a.name);
 }
 
 
 function drawToolTable(tools) {
     var i, newItem;
-	if (sortByCount)
-	{
-		tools.sort(sortPluginTuplesCount);
+    if (sortByCount) {
+        tools.sort(sortPluginTuplesCount);
     }
-	else
-	{
-		tools.sort(sortPluginTuplesName);
-	}
+    else {
+        tools.sort(sortPluginTuplesName);
+    }
 
     //insert them smallest to largest
     for (i = 0; i < tools.length; i++) {
@@ -357,50 +355,46 @@ function checkExistanceOfLocalClips(element) {
     });
 }
 
-function sortTableByToolName()
-{
-	var thisTable = $(this).closest("table");
-	
-	var elements = thisTable.find("tr").filter(".clickMe");
-	
-	elements.sortElements(function(a, b) {
-		
-		var first = $(a.childNodes[0]).text().trim();
-		var second = $(b.childNodes[0]).text().trim();
-		console.log(first +" < "+second+" ?");
-		if (sortAToZ)
-		{
-			return first.localeCompare(second);
-		}
-		else
-		{
-			return second.localeCompare(first);
-		}
-	});
-	sortAToZ = !sortAToZ;
+function sortTableByToolName() {
+    var elements, thisTable;
+    thisTable = $(this).closest("table");
+
+    elements = thisTable.find("tr").filter(".clickMe");
+
+    elements.sortElements(function (a, b) {
+        var first, second;
+        first = $(a.childNodes[0]).text().trim();
+        second = $(b.childNodes[0]).text().trim();
+        console.log(first + " < " + second + " ?");
+        if (sortAToZ) {
+            return first.localeCompare(second);
+        }
+        else {
+            return second.localeCompare(first);
+        }
+    });
+    sortAToZ = !sortAToZ;
 }
 
-function sortTableByCount()
-{
-	var thisTable = $(this).closest("table");
-	
-	var elements = thisTable.find("tr").filter(".clickMe");
-	
-	elements.sortElements(function(a, b) {
-		
-		var first = +$(a.childNodes[1]).text().trim();
-		var second = +$(b.childNodes[1]).text().trim();
-		console.log(first +" < "+second+" ?");
-		if (sortHiToLo)
-		{
-			return first - second;
-		}
-		else
-		{
-			return second - first;
-		}
-	});
-	sortHiToLo = !sortHiToLo;
+function sortTableByCount() {
+    var elements, thisTable;
+    thisTable = $(this).closest("table");
+
+    elements = thisTable.find("tr").filter(".clickMe");
+
+    elements.sortElements(function (a, b) {
+        var first, second;
+        first = +$(a.childNodes[1]).text().trim();
+        second = +$(b.childNodes[1]).text().trim();
+        console.log(first + " < " + second + " ?");
+        if (sortHiToLo) {
+            return first - second;
+        }
+        else {
+            return second - first;
+        }
+    });
+    sortHiToLo = !sortHiToLo;
 }
 
 $(document).ready(function () {
@@ -415,17 +409,17 @@ $(document).ready(function () {
 
     $("table").on('click', ".addedItem", checkExistanceOfShare);
     $("table").on('click', ".myItem", checkExistanceOfLocalClips);
-	
-	$("table").on('click', ".sortByTool", sortTableByToolName);
-	$("table").on('click', ".sortByNum", sortTableByCount);
-	
+
+    $("table").on('click', ".sortByTool", sortTableByToolName);
+    $("table").on('click', ".sortByNum", sortTableByCount);
+
     loadPeople();
 
 
     $(".showUnique").on("click", showUniqueTools);
     $(".showAll").on("click", showAllTools);
 
-	//global variables
+    //global variables
     userName = $("body").data("name");
     userEmail = $("body").data("email");
     userToken = $("body").data("token");
