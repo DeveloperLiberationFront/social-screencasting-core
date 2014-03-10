@@ -10,7 +10,8 @@ import org.apache.log4j.Logger;
 
 public class LocalSQLiteDatabase extends LocalSQLDatabase
 {
-	private static Logger logger = Logger.getLogger(LocalSQLiteDatabase.class.getName());
+	
+	private static final Logger logger = Logger.getLogger(LocalSQLiteDatabase.class);
 	private static final String DB_EXTENSION_NAME = ".sqlite";
 	private String pathToFile;
 	private Connection connection;
@@ -117,6 +118,12 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 		}
 		return retVal;
 		
+	}
+
+	@Override
+	protected Logger getLogger()
+	{
+		return logger;
 	}
 
 

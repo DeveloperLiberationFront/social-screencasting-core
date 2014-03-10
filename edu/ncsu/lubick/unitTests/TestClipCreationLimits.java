@@ -17,7 +17,6 @@ import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
-import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.FileUtilities;
 
 public class TestClipCreationLimits {
@@ -201,19 +200,5 @@ public class TestClipCreationLimits {
 		return convertedToolStream;
 	}
 
-
-	private void clearOutAlreadyCreatedMedia(ToolStream convertedToolStream)
-	{
-		for(ToolUsage tu :convertedToolStream.getAsList())
-		{
-			String name = FileUtilities.makeLocalFolderNameForBrowserMediaPackage(tu, "kjlubick@ncsu.edu");
-			File expectedDir = new File(name);
-			if (expectedDir.exists())
-			{
-				assertTrue(TestingUtils.clearOutDirectory(expectedDir));
-				assertTrue(expectedDir.delete());
-			}
-		}
-	}
 
 }

@@ -18,6 +18,7 @@ public class NoAnimationStrategy implements PostProductionAnimationStrategy {
 	@Override
 	public void addAnimationToImagesInScratchFolderForToolStream(ToolUsage currentToolStream)
 	{
+		//No animation required
 	}
 
 }

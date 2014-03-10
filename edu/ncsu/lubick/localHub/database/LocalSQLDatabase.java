@@ -7,13 +7,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
-import freemarker.log.Logger;
 
 public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	
-	private static final Logger logger = Logger.getLogger(LocalSQLDatabase.class.getName()); 
+	protected abstract Logger getLogger();
 
 	protected abstract PreparedStatement makePreparedStatement(String statementQuery);
 	protected abstract void executeStatementWithNoResults(PreparedStatement statement);

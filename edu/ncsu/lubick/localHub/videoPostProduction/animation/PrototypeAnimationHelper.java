@@ -91,7 +91,7 @@ class PrototypeAnimationHelper extends JPanel implements KeyListener
 	@Override
 	public void keyTyped(KeyEvent e)
 	{
-
+		//ignore this
 	}
 
 }

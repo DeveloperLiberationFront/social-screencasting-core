@@ -6,7 +6,8 @@ var peoplesNamesIndex;
 var userName, userEmail, userToken, currentPlugin, currentTool, currentClips, currentImageDir;
 var authString;
 
-var sortByCount = true;
+var sortByCount = true;		//TODO update based on user preferences...
+
 var sortHiToLo = false;		//we start sorted like this so next click will sort lo to hi
 var sortAToZ = true;
 

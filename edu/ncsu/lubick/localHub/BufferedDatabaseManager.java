@@ -5,14 +5,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
-import edu.ncsu.lubick.localHub.database.DBAbstractionException;
 import edu.ncsu.lubick.localHub.database.DBAbstractionFactory;
 import edu.ncsu.lubick.localHub.database.LocalDBAbstraction;
 import edu.ncsu.lubick.util.ToolCountStruct;
@@ -43,7 +45,7 @@ public class BufferedDatabaseManager
 	{
 		this.localDB = DBAbstractionFactory.createAndInitializeDatabase(databaseLocation, DBAbstractionFactory.SQL_IMPLEMENTATION);
 		
-		resetThreadPools();
+		startThreadPools();
 	}
 
 	// This is synchronized to appease FindBugs. I doubt this will ever be
@@ -106,7 +108,7 @@ public class BufferedDatabaseManager
 
 	}
 
-
+	@Deprecated
 	private void waitForLocalThreadPool()
 	{
 		localThreadPool.shutdown();
@@ -120,7 +122,13 @@ public class BufferedDatabaseManager
 			logger.error("was interrupted trying to wait for the threadpool to complete all transactions");
 		}
 	}
+	
+	private void startThreadPools()
+	{
+		this.localThreadPool = Executors.newSingleThreadExecutor();
+	}
 
+	@Deprecated
 	private void resetThreadPools()
 	{
 		this.localThreadPool = Executors.newSingleThreadExecutor();
@@ -148,67 +156,84 @@ public class BufferedDatabaseManager
 													// next time
 	}
 
-	public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName)
+	public List<ToolUsage> getAllToolUsageHistoriesForPlugin(final String currentPluginName)
 	{
-		List<ToolUsage> retval;
-		waitForLocalThreadPool();
-		synchronized (localDB)
-		{
-			retval = localDB.getAllToolUsageHistoriesForPlugin(currentPluginName);
-		}
+		FutureTask<List<ToolUsage> > future = new FutureTask<List<ToolUsage>>(new Callable<List<ToolUsage>>() {
 
+			@Override
+			public List<ToolUsage> call() throws Exception
+			{
+				return localDB.getAllToolUsageHistoriesForPlugin(currentPluginName);
+			}
+		});
 		
-
-		resetThreadPools();
-
-		return retval;
+		this.localThreadPool.execute(future);
+		
+		try
+		{
+			return future.get();
+		}
+		catch (InterruptedException | ExecutionException e)
+		{
+			logger.error("Problem with query", e);
+			return Collections.emptyList();
+		}
+		
 	}
 
 
-	public List<ToolUsage> getBestNInstancesOfToolUsage(int n, String pluginName, String toolName)
+	public List<ToolUsage> getBestNInstancesOfToolUsage(final int n, final String pluginName, final String toolName)
 	{
-		waitForLocalThreadPool();
-		List<ToolUsage> retVal = null;
+		FutureTask<List<ToolUsage> > future = new FutureTask<List<ToolUsage>>(new Callable<List<ToolUsage>>() {
+
+			@Override
+			public List<ToolUsage> call() throws Exception
+			{
+				return localDB.getBestNInstancesOfToolUsage(n, pluginName, toolName);
+			}
+		});
+		
+		this.localThreadPool.execute(future);
+		
 		try
 		{
-			retVal = localDB.getBestNInstancesOfToolUsage(n, pluginName, toolName);
+			return future.get();
 		}
-		catch (DBAbstractionException e)
+		catch (InterruptedException | ExecutionException e)
 		{
-			logger.error("There was a problem in the database query", e);
+			logger.error("Problem with query", e);
+			return Collections.emptyList();
 		}
-		finally
-		{
-			resetThreadPools();
-		}
-
-		return retVal;
 	}
 
 
 	public List<String> getNamesOfAllPlugins()
 	{
-		waitForLocalThreadPool();
-		List<String> retVal = Collections.emptyList(); // avoids any templates from crashing if the
-														// query runs into trouble
+		FutureTask<List<String> > future = new FutureTask<List<String>>(new Callable<List<String>>() {
+
+			@Override
+			public List<String> call() throws Exception
+			{
+				return localDB.getNamesOfAllPlugins();
+			}
+		});
+			
+		this.localThreadPool.execute(future);
+		
 		try
 		{
-			retVal = localDB.getNamesOfAllPlugins();
+			return future.get();
 		}
-		catch (DBAbstractionException e)
+		catch (InterruptedException | ExecutionException e)
 		{
-			logger.error("There was a problem in the database query", e);
+			logger.error("Problem with query", e);
+			return Collections.emptyList();
 		}
-		finally
-		{
-			resetThreadPools();
-		}
-		return retVal;
 	}
 
 	public List<ToolCountStruct> getAllToolAggregateForPlugin(String pluginName)
 	{
-		waitForLocalThreadPool();
+		//Note: doesn't hit the database at all
 		List<ToolUsage> toolUsages = getAllToolUsageHistoriesForPlugin(pluginName);
 		Map<String, Integer> toolCountsMap = new HashMap<>();
 		// add the toolusages to the map
@@ -230,40 +255,56 @@ public class BufferedDatabaseManager
 		// sort, using the internal comparator
 		Collections.sort(retVal);
 		
-		resetThreadPools();
-		
 		return retVal;
 	}
 
-	public List<Integer> getTopScoresForToolUsage(ToolUsage tu)
+	public List<Integer> getTopScoresForToolUsage(final ToolUsage tu)
 	{
-		List<Integer> retVal = null;
-		waitForLocalThreadPool();
+		FutureTask<List<Integer> > future = new FutureTask<List<Integer>>(new Callable<List<Integer>>() {
+
+			@Override
+			public List<Integer> call() throws Exception
+			{
+				return localDB.getTopScoresForToolUsage(LocalHub.MAX_TOOL_USAGES, tu.getPluginName(), tu.getToolName());
+			}
+		});
+			
+		this.localThreadPool.execute(future);
+		
 		try
 		{
-			retVal = localDB.getTopScoresForToolUsage(LocalHub.MAX_TOOL_USAGES, tu.getPluginName(), tu.getToolName());
+			return future.get();
 		}
-		catch (DBAbstractionException e)
+		catch (InterruptedException | ExecutionException e)
 		{
-			logger.error("There was a problem in the database query", e);
+			logger.error("Problem with query", e);
+			return Collections.emptyList();
 		}
-		finally
-		{
-			resetThreadPools();
-		}
-
-		return retVal;
 	}
 
-	public List<String> getExcesiveTools(int maxToolUsages)
+	public List<String> getExcesiveTools()
 	{
-		waitForLocalThreadPool();
+		FutureTask<List<String> > future = new FutureTask<List<String>>(new Callable<List<String>>() {
+
+			@Override
+			public List<String> call() throws Exception
+			{
+				return localDB.getExcesiveTools();
+			}
+		});
+			
+		this.localThreadPool.execute(future);
 		
-		List<String> retVal = localDB.getExcesiveTools();
+		try
+		{
+			return future.get();
+		}
+		catch (InterruptedException | ExecutionException e)
+		{
+			logger.error("Problem with query", e);
+			return Collections.emptyList();
+		}
 		
-		resetThreadPools();
-		
-		return retVal;
 	}
 
 }

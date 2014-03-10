@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -24,11 +23,6 @@ public class TestToolStream {
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
 
-	}
-
-	@Before
-	public void setUp() throws Exception
-	{
 	}
 
 	@Test

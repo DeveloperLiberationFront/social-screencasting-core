@@ -276,7 +276,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	private void cleanUpObsoleteClips()
 	{
 		// Query database for clips made and update the database with those that don't exist
-		List<String> pathsToDelete = this.databaseManager.getExcesiveTools(MAX_TOOL_USAGES);
+		List<String> pathsToDelete = this.databaseManager.getExcesiveTools();
 		
 		for (String path: pathsToDelete)
 		{
