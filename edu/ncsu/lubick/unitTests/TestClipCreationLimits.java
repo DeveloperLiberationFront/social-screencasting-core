@@ -59,7 +59,7 @@ public class TestClipCreationLimits {
 					assertTrue(expectedDir.delete());
 				}
 				else {
-					logger.error(packageName+" really should exist... ["+expectedDir+"]");
+					fail(packageName+" really should exist... ["+expectedDir+"]");
 				}
 			}
 		}

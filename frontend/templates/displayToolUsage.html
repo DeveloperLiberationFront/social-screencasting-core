@@ -11,18 +11,18 @@
 
     <table border="1" class="resultsTable myTools">
         <tr>
-            <th colspan="2">My Tools<br>
+            <th colspan="2" class="header">My Tools<br>
                 <button class="showUnique">Show Unique Tools Only</button>
                 <button class="showAll">Show All Tools</button>
-            <tr>
-                <th>
-                Tool Name<th>
+            <tr class="header">
+                <th class="sort sortByTool">
+                Tool Name
+				<th class="sort sortByNum">
                 Number of Occurrences
             </tr>
 
         <#list myToolsAndCounts as thisToolCount>
-  <tr class='clickMe myItem' data-tool-name="${thisToolCount.toolName}">
-      <td>
+  <tr class='clickMe myItem' data-tool-name="${thisToolCount.toolName}"><td>
       ${thisToolCount.toolName}
 	  <td>
       ${thisToolCount.toolCount}
@@ -33,23 +33,24 @@
     <table border="1" class="resultsTable otherPersonsTable">
         <tr class="changeName" title="click to change person">
             <th colspan="2" id="otherPeoplesTools"><span id="otherUsersPlaceHolder" data-email="">Loading Team-mates</span><br>
-                <button class="showUnique">Show Unique Tools Only</button>
+                <button class="showUnique" class="header">Show Unique Tools Only</button>
                 <button class="showAll">Show All Tools</button>
-            <tr id="dynamicToolInsertionPoint">
-                <th>
-                Tool Name<th>
+            <tr id="dynamicToolInsertionPoint" class="header">
+                <th class="sort sortByTool">
+                Tool Name
+				<th class="sort sortByNum">
                 Number of Occurrences
             </tr>
 
     </table>
     <div id="moreInfo">
         <div id="placeholder">Select a tool for more info.</div>
-		<div id="clipDoesNotExist">No clips exist locally for this tool.  This is unexpected...</div>
+        <div id="clipDoesNotExist">No clips exist locally for this tool.  This is unexpected...</div>
         <div id="requestShare">You do not have permission to view...</div>
 
         <div id="clipLoading">Loading clips</div>
         <div id="clipPlayer">
-            <div id="mediaTitle">"toolName"</div>
+            <div id="mediaTitle"></div>
             <div id="panelAndOverlay">
                 <div id="overlay">
                     <span>Click for Full Screen</span>
@@ -62,10 +63,7 @@
                             <img class="playbackCommand pauseImage pause" src="/images/playback/pause.svg" />
                         </button>
                         <div class="settings">
-                            <!-- <if keypress != "MENU"> -->
                             <div id="animationSelectionSpot1" class="staging"></div>
-
-                            <!-- <if> -->
                             <img class="animationSelection" src="/images/none.png" />
                         </div>
                         <div id="dockedSliderHolder">
@@ -74,14 +72,8 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- <if keypress != "MENU">  -->
                     <div id="keyAnimationSpot" class="staging"></div>
-
-                    <!--  <if>  -->
-
                     <div id="frameSpot" class="staging"></div>
-                    <!--<img class="frame" data-img-name="frame0000.png" /> -->
                 </div>
             </div>
 
@@ -91,41 +83,35 @@
                     <img class="playbackCommand pauseImage pause" src="/images/playback/pause.svg" />
                 </button>
                 <div class="settings">
-                    <!--<if keypress != "MENU">-->
                     <div id="animationSelectionSpot2" class="staging"></div>
-                    <!-- <if>-->
                     <img class="animationSelection" src="/images/none.png" />
-    </div>
-    <div id="staticSliderHolder">
-                                    <div id="staticSlider" class="slider">
-                                        <label class="startLabel" title="The tool gets used here">&nbsp;</label>
-                                    </div>
-                                </div>
-                            </div>
-
-
-    <div id="viewOtherDiv" > </br>View More Usages</br>
-		<div id="viewOtherSpot" class="staging"></div>
-      
-    </div>
-
-
-
-
-                        </div>
-    </div>
-
-                    <div class="modal">
-                        <!-- Place at bottom of page -->
+                </div>
+                <div id="staticSliderHolder">
+                    <div id="staticSlider" class="slider">
+                        <label class="startLabel" title="The tool gets used here">&nbsp;</label>
                     </div>
+                </div>
+            </div>
+            <div id="viewOtherDiv">
+                <br/>View More Usages
+                <br/>
+		        <div id="viewOtherSpot" class="staging"></div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal">
+    </div>
 
 
-                    <script src="jquery/jquery.min.js"></script>
-                    <script src="scripts/playback.js"></script>
-					<script src="scripts/setUpPlayback.js"></script>
-                    <script src="scripts/comparison.js"></script>
+    <script src="jquery/jquery.min.js"></script>
+	<script src="scripts/sortElements.js"></script>
+    <script src="scripts/playback.js"></script>
+    <script src="scripts/setUpPlayback.js"></script>
+    <script src="scripts/comparison.js"></script>
 
-                    <link rel="stylesheet" href="jquery/jquery-ui.min.css">
-                    <script src="jquery/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="jquery/jquery-ui.min.css">
+    <script src="jquery/jquery-ui.min.js"></script>
 </body>
 </html>

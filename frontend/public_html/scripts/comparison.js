@@ -6,6 +6,10 @@ var peoplesNamesIndex;
 var userName, userEmail, userToken, currentPlugin, currentTool, currentClips, currentImageDir;
 var authString;
 
+var sortByCount = true;
+var sortHiToLo = false;		//we start sorted like this so next click will sort lo to hi
+var sortAToZ = true;
+
 function handleMouseEnter() {
     var highlightedToolName = $(this).data("toolName");
     $(".clickMe").each(function () {
@@ -32,16 +36,27 @@ function modifyMultipleClipButtonsForExternal() {
     $("#viewOtherDiv").find("button").data("source", "external");
 }
 
-function sortPluginTuples(a, b) {
-    return a.count - b.count;		//sorts so that smaller count numbers are better
+//JSON tuple {name="name", count=42}
+function sortPluginTuplesCount(a, b) {
+    return a.count - b.count;		//sorts so that smaller count numbers come first because we insert smallest elements first
 }
 
+//JSON tuple {name="name", count=42}
+function sortPluginTupleName(a, b) {
+	return b.name.localeCompare(a.name);
+}
 
 
 function drawToolTable(tools) {
     var i, newItem;
-    tools.sort(sortPluginTuples);
-    //console.log(tools);
+	if (sortByCount)
+	{
+		tools.sort(sortPluginTuplesCount);
+    }
+	else
+	{
+		tools.sort(sortPluginTuplesName);
+	}
 
     //insert them smallest to largest
     for (i = 0; i < tools.length; i++) {
@@ -342,6 +357,23 @@ function checkExistanceOfLocalClips(element) {
     });
 }
 
+function sortTableByToolName()
+{
+	var thisTable = $(this).closest("table");
+	
+	var elements = thisTable.find("tr").filter(".clickMe");
+	
+	console.log(elements);
+	
+	elements.sortElements(function(a, b) {
+		
+		var first = $(a.childNodes[0]).text().trim();
+		var second = $(b.childNodes[0]).text().trim();
+		console.log(first +" < "+second+" ?");
+		return first.localeCompare(second);
+	});
+}
+
 $(document).ready(function () {
     var elementPosition;
     //handles the click on the view buttons to see if a video file exists
@@ -354,6 +386,8 @@ $(document).ready(function () {
 
     $("table").on('click', ".addedItem", checkExistanceOfShare);
     $("table").on('click', ".myItem", checkExistanceOfLocalClips);
+	
+	$("table").on('click', ".sortByTool", sortTableByToolName);
 
     loadPeople();
 
@@ -361,6 +395,7 @@ $(document).ready(function () {
     $(".showUnique").on("click", showUniqueTools);
     $(".showAll").on("click", showAllTools);
 
+	//global variables
     userName = $("body").data("name");
     userEmail = $("body").data("email");
     userToken = $("body").data("token");

@@ -114,3 +114,7 @@ td, tr, th{
 #viewOtherSpot {
 	display:none
 }
+
+.sort {
+	cursor:pointer;
+}
