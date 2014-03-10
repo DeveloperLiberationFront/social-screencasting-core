@@ -363,15 +363,44 @@ function sortTableByToolName()
 	
 	var elements = thisTable.find("tr").filter(".clickMe");
 	
-	console.log(elements);
-	
 	elements.sortElements(function(a, b) {
 		
 		var first = $(a.childNodes[0]).text().trim();
 		var second = $(b.childNodes[0]).text().trim();
 		console.log(first +" < "+second+" ?");
-		return first.localeCompare(second);
+		if (sortAToZ)
+		{
+			return first.localeCompare(second);
+		}
+		else
+		{
+			return second.localeCompare(first);
+		}
 	});
+	sortAToZ = !sortAToZ;
+}
+
+function sortTableByCount()
+{
+	var thisTable = $(this).closest("table");
+	
+	var elements = thisTable.find("tr").filter(".clickMe");
+	
+	elements.sortElements(function(a, b) {
+		
+		var first = +$(a.childNodes[1]).text().trim();
+		var second = +$(b.childNodes[1]).text().trim();
+		console.log(first +" < "+second+" ?");
+		if (sortHiToLo)
+		{
+			return first - second;
+		}
+		else
+		{
+			return second - first;
+		}
+	});
+	sortHiToLo = !sortHiToLo;
 }
 
 $(document).ready(function () {
@@ -388,7 +417,8 @@ $(document).ready(function () {
     $("table").on('click', ".myItem", checkExistanceOfLocalClips);
 	
 	$("table").on('click', ".sortByTool", sortTableByToolName);
-
+	$("table").on('click', ".sortByNum", sortTableByCount);
+	
     loadPeople();
 
 
