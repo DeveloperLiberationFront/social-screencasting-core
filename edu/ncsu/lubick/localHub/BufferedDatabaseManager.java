@@ -108,28 +108,7 @@ public class BufferedDatabaseManager
 
 	}
 
-	@Deprecated
-	private void waitForLocalThreadPool()
-	{
-		localThreadPool.shutdown();
-		logger.debug("Waiting for the threadpool to finish tabulating");
-		try
-		{
-			localThreadPool.awaitTermination(30, TimeUnit.SECONDS);
-		}
-		catch (InterruptedException e)
-		{
-			logger.error("was interrupted trying to wait for the threadpool to complete all transactions");
-		}
-	}
-	
 	private void startThreadPools()
-	{
-		this.localThreadPool = Executors.newSingleThreadExecutor();
-	}
-
-	@Deprecated
-	private void resetThreadPools()
 	{
 		this.localThreadPool = Executors.newSingleThreadExecutor();
 	}
