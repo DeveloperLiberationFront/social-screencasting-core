@@ -5,7 +5,7 @@
 	position:relative;  /*allows the overlay to be absolute, relative to this div*/	
 }
 
-#panel:-webkit-full-screen {
+#panel:-webkit-full-screen {	/*work around for webkit*/
 	width:100%;
 }
 

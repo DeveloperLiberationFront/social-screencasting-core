@@ -1,5 +1,18 @@
 /*global renderPlayback */  // needs playback.js
 
+/*
+	The meat and potatoes of this script is function setUpPlaybackForDataAuthAndDir(data, auth, imageDir),
+	which will prepare the video html piece (#clipPlayer) to have the correct animation selections and
+	the correct data (like num frames).  This use to be done local-server side, but was changed to client-side
+	so we can handle multiple sources.
+	
+	Will set up Playback given an auth token (can be blank for local service), an image dir (can be screencaster-hub.appspot.com/whatever for
+	external or a /renderedVideos/whatever for local) and a data package that looks like
+	{clip: { filenames : ["frame0000.jpg", "frame0001.jpg"...], name: "CLIP ID", plugin: "Eclipse", tool: "Organize Imports"}}
+
+
+*/
+
 var authToken, refToImages;
 
 function setUpAnimations(imageAssets) {
@@ -39,12 +52,6 @@ function setUpPlaybackForDataAuthAndDir(data, auth, imageDir) {
     var pluginName, toolName, frames, imageAssets, i;
     authToken = auth;
     refToImages = imageDir;
-	
-	/*
-		Will set up Playback given an auth token (can be blank for local service), an image dir (can be screencaster-hub.appspot.com/whatever for
-		external) and a data package that looks like
-		{clip: { filenames : ["frame0000.jpg", "frame0001.jpg"...], name: "CLIP ID", plugin: "Eclipse", tool: "Organize Imports"}}
-	*/
 
     //console.log(data);
 
