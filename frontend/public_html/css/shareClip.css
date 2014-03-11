@@ -1,0 +1,40 @@
+#moreInfo {
+	float:left;
+	margin-left:20%;
+	margin-right:0;
+	width: 60%;
+}
+
+#sidebar {
+	background:#ffdfb1;
+	border:1px solid black;
+	width:200px;
+	height:200px;
+	float:right;
+	position:relative;
+}
+
+.shareClipButton {
+    color: green;
+    background-color: white;
+	margin:5px;
+	font-size:16px;
+	padding: 5px;
+
+}
+
+.shareClipButton:hover{
+	border: 3px solid green;
+	margin:4px;
+}
+
+.noClips {
+	position:absolute;
+	bottom:0;
+	color: red;
+}
+
+.noClips:hover{
+	border: 3px solid red;
+	margin:4px;
+}

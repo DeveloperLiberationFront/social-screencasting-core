@@ -8,8 +8,7 @@
 	<link rel="stylesheet" href="css/shareClip.css" />
 </head>
 <body data-name="${userName}" data-email="${userEmail}" data-token="${userToken}">
-    <h1>Select a clip to share with <span id="userHeader"></span></h1>
-
+    <h1>Select one or more clips to share with <span id="userHeader"></span></h1>
     
     <div id="moreInfo">
         <div id="clipDoesNotExist">No clips exist locally for this tool.  This is unexpected...</div>
@@ -66,7 +65,10 @@
         </div>
     </div>
 
-    <div class="modal">
+    <div id = "sidebar">
+		<button class="shareClipButton">Share This Clip</button>
+		<br/>
+		<button class="shareClipButton noClips">Share No Clips</button>
     </div>
 
 
