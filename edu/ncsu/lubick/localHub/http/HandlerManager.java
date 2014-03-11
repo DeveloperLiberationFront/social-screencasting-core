@@ -39,6 +39,7 @@ public class HandlerManager
 		makeAndAddHandlersForBrowsing(h, wqi);
 		makeAndAddHandlersForMediaResources(h, wqi);
 		makeAndAddHandlersForWebReporting(h, wqi);
+		makeAndAddHandlerForClipSharing(h, wqi);
 
 		Resource[] staticWebResources = setUpWebResources(h.getClass());
 		Resource[] allWebResources = setUpLocalMediaAssets(staticWebResources);
@@ -49,6 +50,12 @@ public class HandlerManager
 
 		logger.debug("logger for HTTP Handlers set up with "+h.getChildHandlers().length+" handlers");
 		return h;
+	}
+
+	private static void makeAndAddHandlerForClipSharing(HandlerCollection h, WebQueryInterface wqi)
+	{
+		h.addHandler(new HTTPClipSharer("/shareClip"));	//for basic html
+		h.addHandler(new HTTPClipSharingInfo("/shareClipInfo", wqi)); //to get clip info needed by page
 	}
 
 	private static void makeAndAddHandlersForBrowsing(HandlerCollection h, WebQueryInterface wqi)
