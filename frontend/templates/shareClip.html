@@ -1,53 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Co-worker Tool Comparison</title>
+    <title>Share Clips</title>
     <link rel="stylesheet" href="css/basic.css" />
     <link rel="stylesheet" href="css/loading.css" />
     <link rel="stylesheet" href="css/playback.css" />
+	<link rel="stylesheet" href="css/shareClip.css" />
 </head>
-<body data-name="${userName}" data-email="${userEmail}" data-token="${userToken}" data-plugin="${plugin}">
-    <h1>The following tool usages are for plugin "${plugin}"</h1>
+<body data-name="${userName}" data-email="${userEmail}" data-token="${userToken}">
+    <h1>Select a clip to share with <span id="userHeader"></span></h1>
 
-    <table border="1" class="resultsTable myTools">
-        <tr>
-            <th colspan="2" class="header">My Tools<br>
-                <button class="showUnique">Show Unique Tools Only</button>
-                <button class="showAll">Show All Tools</button>
-            <tr class="header">
-                <th class="sort sortByTool">
-                Tool Name
-				<th class="sort sortByNum">
-                Number of Occurrences
-            </tr>
-
-        <#list myToolsAndCounts as thisToolCount>
-  <tr class='clickMe myItem' data-tool-name="${thisToolCount.toolName}"><td>
-      ${thisToolCount.toolName}
-	  <td>
-      ${thisToolCount.toolCount}
-  </#list>
-
-    </table>
-
-    <table border="1" class="resultsTable otherPersonsTable">
-        <tr class="changeName" title="click to change person">
-            <th colspan="2" id="otherPeoplesTools"><span id="otherUsersPlaceHolder" data-email="">Loading Team-mates</span><br>
-                <button class="showUnique" class="header">Show Unique Tools Only</button>
-                <button class="showAll">Show All Tools</button>
-            <tr id="dynamicToolInsertionPoint" class="header">
-                <th class="sort sortByTool">
-                Tool Name
-				<th class="sort sortByNum">
-                Number of Occurrences
-            </tr>
-
-    </table>
+    
     <div id="moreInfo">
-        <div id="placeholder">Select a tool for more info.</div>
         <div id="clipDoesNotExist">No clips exist locally for this tool.  This is unexpected...</div>
-        <div id="requestShare">You do not have permission to view...</div>
-
         <div id="clipLoading">Loading clips</div>
         <div id="clipPlayer">
             <div id="mediaTitle"></div>
@@ -106,10 +71,9 @@
 
 
     <script src="jquery/jquery.min.js"></script>
-	<script src="scripts/sortElements.js"></script>
     <script src="scripts/playback.js"></script>
     <script src="scripts/setUpPlayback.js"></script>
-    <script src="scripts/comparison.js"></script>
+    <script src="scripts/shareClip.js"></script>
 
     <link rel="stylesheet" href="jquery/jquery-ui.min.css">
     <script src="jquery/jquery-ui.min.js"></script>
