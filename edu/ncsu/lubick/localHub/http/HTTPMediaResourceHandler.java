@@ -47,7 +47,7 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 	@Override
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
-		if (!checkIfWeHandleThisRequest(target))
+		if (!strictCheckIfWeHandleThisRequest(target))
 		{
 			return;
 		}

@@ -83,16 +83,25 @@ public abstract class TemplateHandlerWithDatabaseLink extends AbstractHandler {
 		}
 	}
 
-	protected boolean checkIfWeHandleThisRequest(String target)
+	protected boolean strictCheckIfWeHandleThisRequest(String target)
 	{
-		if (!target.equals(httpRequestPattern))
+		getLogger().debug("Does "+target+" equal "+httpRequestPattern);
+		if (!httpRequestPattern.equals(target))
 		{
-			getLogger().debug("LookupHandler passing on target " + target);
+			getLogger().debug("passing on target " + target);
 			return false;
 		}
 		return true;
 	}
 
 	protected abstract Logger getLogger();
+
+	protected Map<Object, Object> addThisUserInfoToModel(Map<Object, Object> model)
+	{
+		model.put("userName", userManager.getUserName());
+		model.put("userEmail", userManager.getUserEmail());
+		model.put("userToken", userManager.getUserToken());
+		return model;
+	}
 
 }

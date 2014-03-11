@@ -50,7 +50,7 @@ public class LookupHandler extends TemplateHandlerWithDatabaseLink {
 	@Override
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
-		if (!checkIfWeHandleThisRequest(target))
+		if (!strictCheckIfWeHandleThisRequest(target))
 		{
 			return;
 		}
@@ -85,7 +85,7 @@ public class LookupHandler extends TemplateHandlerWithDatabaseLink {
 		logger.debug("POST parameters recieved " + request.getParameterMap());
 		logger.debug("PluginName: " + request.getParameter(POST_COMMAND_PLUGIN_NAME));
 
-		if (request.getParameter("thingToDo").equals(POST_COMMAND_GET_TOOL_USAGE_FOR_PLUGIN))
+		if (POST_COMMAND_GET_TOOL_USAGE_FOR_PLUGIN.equals(request.getParameter("thingToDo")))
 		{
 			respondToGetToolUsageForPlugin(baseRequest, request, response);
 		}
@@ -108,9 +108,7 @@ public class LookupHandler extends TemplateHandlerWithDatabaseLink {
 		Map<Object, Object> retval = new HashMap<>();
 		retval.put("myToolsAndCounts", toolsAndCounts);
 		retval.put("plugin", pluginName);
-		retval.put("userName", userManager.getUserName());
-		retval.put("userEmail", userManager.getUserEmail());
-		retval.put("userToken", userManager.getUserToken()); 	
+		addThisUserInfoToModel(retval); 	
 		return retval; 
 	}
 
