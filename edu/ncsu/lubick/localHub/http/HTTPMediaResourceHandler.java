@@ -141,6 +141,7 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 
 		try
 		{
+			//TODO remove testing data
 			jarr.put("Testingfdcb42bc-b6c2-3884-ad3a-4179e19e771d");
 			jarr.put("Testing4115af06-d507-3e79-96ba-9d2c6689ad9b");
 			clips.put("clips",jarr);

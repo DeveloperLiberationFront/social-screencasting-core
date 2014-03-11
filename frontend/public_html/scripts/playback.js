@@ -238,5 +238,3 @@ function renderPlayback(auth) {
 	$(".frame").first().show();
 
 }
-
-//$(document).ready(renderPlayback);

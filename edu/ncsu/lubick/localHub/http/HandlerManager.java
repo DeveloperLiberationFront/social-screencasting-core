@@ -55,7 +55,6 @@ public class HandlerManager
 	private static void makeAndAddHandlerForClipSharing(HandlerCollection h, WebQueryInterface wqi)
 	{
 		h.addHandler(new HTTPClipSharer("/shareClip"));	//for basic html
-		h.addHandler(new HTTPClipSharingInfo("/shareClipInfo", wqi)); //to get clip info needed by page
 	}
 
 	private static void makeAndAddHandlersForBrowsing(HandlerCollection h, WebQueryInterface wqi)
