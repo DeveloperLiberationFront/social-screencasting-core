@@ -13,4 +13,6 @@ public interface WebQueryInterface {
 
 	List<File> getBestExamplesOfTool(String pluginName, String toolName);
 
+	void shareClipWithUser(String clipId, String recipient);
+
 }

@@ -15,6 +15,7 @@ import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 import edu.ncsu.lubick.localHub.http.HTTPServer;
 import edu.ncsu.lubick.localHub.http.WebToolReportingInterface;
+import edu.ncsu.lubick.localHub.videoPostProduction.BrowserMediaPackageSharer;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.FileUtilities;
@@ -50,6 +51,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	private NotificationManager notificationManager;
 	private boolean shouldReportToolsRemotely;
 	private ClipQualityManager clipQualityManager;
+	private BrowserMediaPackageSharer clipSharingManager;
 
 	public static LocalHubDebugAccess startTESTINGServerAndReturnDebugAccess(String screencastMonitorLocation)
 	{
@@ -128,14 +130,13 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
 		if (shouldUseScreenRecording)
 		{
-			
-
 			this.screenRecordingModule = new ScreenRecordingModule(this.screencastMonitorDirectory);
 			screenRecordingModule.startRecording();
 			ScreencastManager.startManaging(this.screencastMonitorDirectory);
 		}
 		this.clipQualityManager = new ClipQualityManager(this.databaseManager);
 		this.postProductionHandler = new PostProductionHandler(this.screencastMonitorDirectory, userManager);
+		this.clipSharingManager = new BrowserMediaPackageSharer(userManager);
 		
 		if (shouldReportToolsRemotely)
 		{
@@ -401,6 +402,16 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		}
 	
 	
+	}
+
+	@Override
+	public void shareClipWithUser(String clipId, String recipient)
+	{
+		// TODO Auto-generated method stub
+		// Query database to see if clip was uploaded
+		// upload if needed (make a BrowserMediaPackageUploader
+		// share
+		
 	}
 
 }

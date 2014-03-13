@@ -28,6 +28,14 @@
 	margin:4px;
 }
 
+.shareClipButton.disabled {
+	border:none;
+}
+.shareClipButton.disabled:hover{
+	border:none;
+	margin:5px;
+}
+
 .noClips {
 	position:absolute;
 	bottom:0;
@@ -37,4 +45,17 @@
 .noClips:hover{
 	border: 3px solid red;
 	margin:4px;
+}
+
+.shared {
+	margin:0;
+	border: 3px solid #5db535;
+}
+
+.shared:hover{
+	border-color: #8cd46b;
+}
+
+.activated.shared {
+	border-color:#3b7421;
 }

@@ -1,8 +1,11 @@
 /*global stopFramePlayback, setUpPlaybackForDataAuthAndDir */
 
 var urlParams;
+var madeButtons = false;
 
 var currentClips;
+
+var currentView = 0;
 
 function highlightNthButton(n) {
     if (currentClips.length > 1) {
@@ -16,23 +19,27 @@ function modifyMultipleClipButtonsForLocal() {
     $("#viewOtherDiv").find("button").data("source", "local");
 }
 
-function makeButtonsForMultipleClips(arrayOfClips) {
+function makeButtonsOnceForMultipleClips(arrayOfClips) {
     var i, newButton, insertionPoint;
-    if (arrayOfClips.length > 1) {
-        //clear out old buttons
-        $("#viewOtherDiv").find("button").remove();
-        $("#viewOtherDiv").show();
-        insertionPoint = $("#viewOtherSpot");
-        for (i = 0; i < arrayOfClips.length; i++) {
-            newButton = $('<button class="viewOther"></button>');
-            newButton.text("Example " + (i + 1));
-            newButton.data("index", i);
-            insertionPoint.before(newButton);
-        }
-    }
-    else {
-        $("#viewOtherDiv").hide();
-    }
+	if (!madeButtons)
+	{
+		if (arrayOfClips.length > 1) {
+			//clear out old buttons
+			$("#viewOtherDiv").find("button").remove();
+			$("#viewOtherDiv").show();
+			insertionPoint = $("#viewOtherSpot");
+			for (i = 0; i < arrayOfClips.length; i++) {
+				newButton = $('<button class="viewOther"></button>');
+				newButton.text("Example " + (i + 1));
+				newButton.data("index", i);
+				insertionPoint.before(newButton);
+			}
+		}
+		else {
+			$("#viewOtherDiv").hide();
+		}
+	}
+	madeButtons = true;
 }
 
 function changeLocalMediaSource(arrayOfClips, clipIndex) {
@@ -41,7 +48,7 @@ function changeLocalMediaSource(arrayOfClips, clipIndex) {
     postUrl = "/mediaServer";
     currentClips = arrayOfClips;
 
-    makeButtonsForMultipleClips(currentClips);
+	makeButtonsOnceForMultipleClips(currentClips);
     modifyMultipleClipButtonsForLocal();
     highlightNthButton(clipIndex);
 
@@ -98,6 +105,7 @@ function checkExistanceOfLocalClips(pluginName, toolName) {
             console.log(JSON.stringify(data));
             //Expecting a {clips: [CLIPID, CLIPID...]}
             showLocalClips(data.clips);
+			
         },
         error: function () {
             console.log("There was a problem");
@@ -109,12 +117,25 @@ function checkExistanceOfLocalClips(pluginName, toolName) {
 function viewOtherExample() {
     var e = $(this);
 
+	currentView = e.data("index");
     changeLocalMediaSource(currentClips, e.data("index"));
-
+	
+	if ($(".viewOther").eq(currentView).hasClass("shared"))
+	{
+		$("#sidebar .shareClip").prop("disabled",true);
+		$("#sidebar .shareClip").addClass("disabled");
+		$("#sidebar .shareClip").text("Shared!");
+	}
+	else
+	{
+		$("#sidebar .shareClip").prop("disabled",false);
+		$("#sidebar .shareClip").removeClass("disabled");
+		$("#sidebar .shareClip").text("Share This Clip");
+	}
 
 }
 
-
+//pulls the params from the url bar to the global variable urlParams
 //http://stackoverflow.com/a/2880929/1447621
 (window.onpopstate = function () {
     var match,
@@ -129,6 +150,28 @@ function viewOtherExample() {
     }
 })();
 
+function shareNoClips()
+{
+	$("#moreInfo").hide();
+	$("#sidebar").html("<h2>Thanks for your input</h2");
+	
+	//TODO report that no clips where shared?
+}
+
+function shareClip()
+{
+	$(".viewOther").eq(currentView).addClass("shared");
+	$("#sidebar .shareClip").prop("disabled",true);
+	$("#sidebar .shareClip").addClass("disabled");
+	$("#sidebar .shareClip").text("Shared!");
+	
+	$.ajax({
+		type:"post",
+		url:"/shareClip",
+		data:{clipId: currentClips[currentView], recipient: urlParams.shareWithEmail}
+		});
+}
+
 $(document).ready(function () {
 
     console.log(urlParams);
@@ -137,6 +180,8 @@ $(document).ready(function () {
     userHeader.text(urlParams.shareWithName + " [" + urlParams.shareWithEmail + "]");
 
 	$("#viewOtherDiv").on('click', 'button', viewOtherExample);
+	$("#sidebar").on('click', '.noClips', shareNoClips);
+	$("#sidebar").on('click', '.shareClip', shareClip);
 	
     checkExistanceOfLocalClips(urlParams.pluginName, urlParams.toolName);
 

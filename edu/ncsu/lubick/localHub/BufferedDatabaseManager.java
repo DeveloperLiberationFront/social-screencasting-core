@@ -22,10 +22,7 @@ import edu.ncsu.lubick.util.ToolCountStruct;
 /**
  * An implementation of a database that prioritizes quick writes at the expenses of blocking on data pulls.
  * 
- * However, this implementation is NOT completely thread safe. Do not try to send stuff to the database while a request from the database is blocking. There is
- * a good chance things will fail
- * 
- * TODO set this up to work with Futures.  I.E. make this thread safe.
+ * This implementation should be thread safe as the database is controlled by a single thread.
  * 
  * @author Kevin Lubick
  * 
