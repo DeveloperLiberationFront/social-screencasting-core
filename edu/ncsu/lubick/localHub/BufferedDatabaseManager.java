@@ -38,9 +38,9 @@ public class BufferedDatabaseManager
 
 	private static Logger logger = Logger.getLogger(BufferedDatabaseManager.class.getName());
 
-	private BufferedDatabaseManager(String databaseLocation)
+	private BufferedDatabaseManager(String databaseLocation, UserManager um)
 	{
-		this.localDB = DBAbstractionFactory.createAndInitializeDatabase(databaseLocation, DBAbstractionFactory.SQL_IMPLEMENTATION);
+		this.localDB = DBAbstractionFactory.createAndInitializeDatabase(databaseLocation, DBAbstractionFactory.SQL_IMPLEMENTATION, um);
 		
 		startThreadPools();
 	}
@@ -49,14 +49,14 @@ public class BufferedDatabaseManager
 	// called from a multi thread environment, but
 	// this is a bit more bullet proof. It's not time critical, so we should be
 	// all right.
-	public static synchronized BufferedDatabaseManager createBufferedDatabasemanager(String localDatabaseLocation)
+	public static synchronized BufferedDatabaseManager createBufferedDatabasemanager(String localDatabaseLocation, UserManager um)
 	{
 		if (singletonBufferedDatabaseManager != null)
 		{
 			return singletonBufferedDatabaseManager;
 		}
 
-		singletonBufferedDatabaseManager = new BufferedDatabaseManager(localDatabaseLocation);
+		singletonBufferedDatabaseManager = new BufferedDatabaseManager(localDatabaseLocation, um);
 
 		return singletonBufferedDatabaseManager;
 	}
@@ -281,6 +281,66 @@ public class BufferedDatabaseManager
 			return Collections.emptyList();
 		}
 		
+	}
+
+	public boolean isClipUploaded(final String clipId)
+	{
+		FutureTask<Boolean> future = new FutureTask<Boolean>(new Callable<Boolean>() {
+
+			@Override
+			public Boolean call() throws Exception
+			{
+				return localDB.isClipUploaded(clipId);
+			}
+		});
+		
+		this.localThreadPool.execute(future);
+		
+		try
+		{
+			return future.get();
+		}
+		catch (InterruptedException | ExecutionException e)
+		{
+			logger.error("Problem with query", e);
+			return false;		//assume it hasn't
+		}
+	}
+
+	public ToolUsage getToolUsageById(final String clipId)
+	{
+		FutureTask<ToolUsage> future = new FutureTask<ToolUsage>(new Callable<ToolUsage>() {
+
+			@Override
+			public ToolUsage call() throws Exception
+			{
+				return localDB.getToolUsageById(clipId);
+			}
+		});
+		
+		this.localThreadPool.execute(future);
+		
+		try
+		{
+			return future.get();
+		}
+		catch (InterruptedException | ExecutionException e)
+		{
+			logger.error("Problem with query", e);
+			return null;		//assume it hasn't
+		}
+	}
+
+	public void setClipUploaded(final String clipId, final boolean b)
+	{
+		localThreadPool.execute(new Runnable() {
+
+			@Override
+			public void run()
+			{
+				localDB.setClipUploaded(clipId, b);
+			}
+		});
 	}
 
 }

@@ -16,6 +16,7 @@ import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 import edu.ncsu.lubick.localHub.http.HTTPServer;
 import edu.ncsu.lubick.localHub.http.WebToolReportingInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.BrowserMediaPackageSharer;
+import edu.ncsu.lubick.localHub.videoPostProduction.BrowserMediaPackageUploader;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.FileUtilities;
@@ -52,6 +53,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	private boolean shouldReportToolsRemotely;
 	private ClipQualityManager clipQualityManager;
 	private BrowserMediaPackageSharer clipSharingManager;
+	private BrowserMediaPackageUploader clipUploader;
 
 	public static LocalHubDebugAccess startTESTINGServerAndReturnDebugAccess(String screencastMonitorLocation)
 	{
@@ -72,6 +74,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			singletonHub.enableHTTPServer(wantHTTP);
 			singletonHub.enableScreenRecording(wantScreenRecording);
 			singletonHub.enableRemoteToolReporting(wantRemoteToolReporting);
+			singletonHub.setUpUserManager();
 			singletonHub.setDatabaseManager(databaseLocation);
 			singletonHub.setScreencastMonitorLocation(screencastMonitorLocation);
 			singletonHub.isDebug = isDebug;
@@ -116,7 +119,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		}
 		isRunning = true;
 		
-		userManager = new UserManager(new File("."));
+		
 		if (userManager.needsUserInput())
 		{
 			userManager.promptUserForInfo();
@@ -137,12 +140,18 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		this.clipQualityManager = new ClipQualityManager(this.databaseManager);
 		this.postProductionHandler = new PostProductionHandler(this.screencastMonitorDirectory, userManager);
 		this.clipSharingManager = new BrowserMediaPackageSharer(userManager);
+		this.clipUploader = new BrowserMediaPackageUploader(userManager);
 		
 		if (shouldReportToolsRemotely)
 		{
 			this.notificationManager = new NotificationManager();
 			this.remoteToolReporter = new RemoteToolReporter(this.databaseManager, userManager, this.notificationManager);
 		}
+	}
+
+	private void setUpUserManager()
+	{
+		userManager = new UserManager(new File("."));
 	}
 
 	/**
@@ -199,7 +208,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
 	private void setDatabaseManager(String databaseLocation)
 	{
-		this.databaseManager = BufferedDatabaseManager.createBufferedDatabasemanager(databaseLocation);
+		this.databaseManager = BufferedDatabaseManager.createBufferedDatabasemanager(databaseLocation, this.userManager);
 	}
 
 	private void enableRemoteToolReporting(boolean wantRemoteToolReporting)
@@ -407,11 +416,13 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	@Override
 	public void shareClipWithUser(String clipId, String recipient)
 	{
-		// TODO Auto-generated method stub
-		// Query database to see if clip was uploaded
-		// upload if needed (make a BrowserMediaPackageUploader
-		// share
-		
+		if (!this.databaseManager.isClipUploaded(clipId))
+		{
+			ToolUsage toolUsage = databaseManager.getToolUsageById(clipId);
+			this.clipUploader.uploadToolUsage(toolUsage);
+			this.databaseManager.setClipUploaded(clipId, true);
+		}
+		this.clipSharingManager.shareClipWithUser(clipId, recipient);
 	}
 
 }

@@ -10,11 +10,13 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.LocalHub;
+import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 
 public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	
 	protected abstract Logger getLogger();
+	protected abstract String getUserEmail();
 
 	protected abstract PreparedStatement makePreparedStatement(String statementQuery);
 	protected abstract void executeStatementWithNoResults(PreparedStatement statement);
@@ -36,7 +38,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		 */
 		// build up the sql
 		String sqlTableQuery = 		"CREATE TABLE IF NOT EXISTS ToolUsages ( " +
-				"use_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+				"use_id TEXT PRIMARY KEY, " +
 				"plugin_name TEXT, " +
 				"usage_timestamp INTEGER, " +
 				"tool_name TEXT, " +
@@ -58,6 +60,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				"plugin_name TEXT, " +
 				"tool_name TEXT, " +
 				"clip_score INTEGER" +
+				"uploaded_date INTEGER" +
 				") ";
 
 		// execute the query
@@ -68,31 +71,70 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	public void storeToolUsage(ToolUsage tu, String associatedPlugin)
 	{
 		String sqlQuery = 		"INSERT INTO ToolUsages ( "+
+				"use_id, "+
 				"plugin_name, "+
 				"usage_timestamp, "+
 				"tool_name, "+
 				"tool_key_presses, "+
 				"class_of_tool, "+
 				"tool_use_duration,"+
-				"clip_score  ) VALUES (?,?,?,?,?,?,?)";
+				"clip_score  ) VALUES (?,?,?,?,?,?,?,?)";
 
 
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
 		{
-			statement.setString(1, associatedPlugin);
-			statement.setLong(2, tu.getTimeStamp().getTime());
-			statement.setString(3, tu.getToolName());
-			statement.setString(4, tu.getToolKeyPresses());
-			statement.setString(5, tu.getToolClass());
-			statement.setInt(6, tu.getDuration());
-			statement.setInt(7, tu.getClipScore());
+			statement.setString(1, ToolStream.makeUniqueIdentifierForToolUsage(tu, getUserEmail()));
+			statement.setString(2, associatedPlugin);
+			statement.setLong(3, tu.getTimeStamp().getTime());
+			statement.setString(4, tu.getToolName());
+			statement.setString(5, tu.getToolKeyPresses());
+			statement.setString(6, tu.getToolClass());
+			statement.setInt(7, tu.getDuration());
+			statement.setInt(8, tu.getClipScore());
 			executeStatementWithNoResults(statement);
 		}
 		catch (SQLException e)
 		{
-			throw new DBAbstractionException("There was a problem of the params in storeToolUsage()", e);
+			throw new DBAbstractionException("There was a problem in storeToolUsage()", e);
 		}
 
+	}
+
+	@Override
+	public ToolUsage getToolUsageById(String clipId)
+	{
+		String sqlQuery = "SELECT * FROM ToolUsages WHERE use_id = ?";
+		
+		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
+		{
+			statement.setString(1, clipId);
+
+			try (ResultSet results = executeWithResults(statement);)
+			{
+				// perform the query
+				if (results.next())
+				{
+					String toolName = results.getString("tool_name");
+					String pluginName = results.getString("plugin_name");
+					Date timestamp = new Date(results.getLong("usage_timestamp"));
+					String toolClass = results.getString("class_of_tool");
+
+					String keyPresses = results.getString("tool_key_presses");
+					int duration = results.getInt("tool_use_duration");
+					int clipScore = results.getInt("clip_score");
+
+					return new ToolUsage(toolName, toolClass, keyPresses, pluginName, timestamp, duration, clipScore);
+				}
+
+			}
+		}
+		catch (SQLException ex)
+		{
+			throw new DBAbstractionException(ex);
+		}
+
+		return null;
+		
 	}
 
 	@Override
@@ -336,12 +378,12 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		List<String> extrasToDelete = new ArrayList<>();
 		for (PluginNameStruct pluginToolCombo : pluginToolCombosToThin)
 		{
-			findExtraClipsFrom(pluginToolCombo.pluginName, pluginToolCombo.toolName, extrasToDelete);
+			findExcessiveClipsFrom(pluginToolCombo.pluginName, pluginToolCombo.toolName, extrasToDelete);
 		}
 
 		return extrasToDelete;
 	}
-	private void findExtraClipsFrom(String pluginName, String toolName, List<String> listToAppendTo)
+	private void findExcessiveClipsFrom(String pluginName, String toolName, List<String> listToAppendTo)
 	{
 		String sqlQuery = "SELECT folder_name FROM Clips where plugin_name = ? AND tool_name = ? order by clip_score asc";
 		
@@ -366,6 +408,51 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			throw new DBAbstractionException("There was a problem in the first part of finding excess clips", e);
 		}
 
+	}
+	
+	@Override
+	public boolean isClipUploaded(String clipId)
+	{
+		String sqlQuery = "SELECT uploaded_date FROM Clips where folder_name = ?";
+		
+		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
+		{
+			statement.setString(1, clipId);
+
+			try (ResultSet results = executeWithResults(statement);)
+			{
+				if(results.next())
+				{
+					return results.getLong(1) != 0;	//if the date is not set, it will return 0
+				}
+
+			}
+		}
+		catch (SQLException e)
+		{
+			throw new DBAbstractionException("There was a problem checking if this clip was uploaded", e);
+		}
+		return false;
+	}
+
+	@Override
+	public void setClipUploaded(String clipId, boolean b)
+	{
+		long uploadedDate = b?new Date().getTime():0;
+		
+		String sqlQuery = "UPDATE Clips SET uploaded_date = ? where folder_name = ?";
+		
+		
+		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
+		{
+			statement.setLong(1, uploadedDate);
+			statement.setString(2, clipId);
+			executeStatementWithNoResults(statement);
+		}
+		catch (SQLException e)
+		{
+			throw new DBAbstractionException("There was a problem marking clip as uploaded or not", e);
+		}
 	}
 
 }

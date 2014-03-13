@@ -8,6 +8,8 @@ import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 
+import edu.ncsu.lubick.localHub.UserManager;
+
 public class LocalSQLiteDatabase extends LocalSQLDatabase
 {
 	
@@ -15,9 +17,11 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 	private static final String DB_EXTENSION_NAME = ".sqlite";
 	private String pathToFile;
 	private Connection connection;
+	private UserManager userManager;
 
-	public LocalSQLiteDatabase(String databaseLocation)
+	public LocalSQLiteDatabase(String databaseLocation, UserManager um)
 	{
+		this.userManager = um;
 		// check the filename has the right extension
 		if (databaseLocation.endsWith(DB_EXTENSION_NAME))
 		{
@@ -124,6 +128,12 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 	protected Logger getLogger()
 	{
 		return logger;
+	}
+
+	@Override
+	protected String getUserEmail()
+	{
+		return userManager.getUserEmail();
 	}
 
 

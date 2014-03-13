@@ -41,8 +41,23 @@ public class BrowserMediaPackageSharer {
 		sharer.shareClipWithUser("Eclipsedc3a37d4-4469-391f-bd62-0324ac2b7091", "kjlubick@ncsu.edu");
 		
 	}
+	
+	public boolean shareClipWithUser(String clipId, String email)
+	{
+		try
+		{
+			shareClipWithUserThrowingException(clipId, email);
+			return true;
+		}
+		catch (URISyntaxException | JSONException e)
+		{
+			logger.error("Problem sharing clip", e);
+			return false;
+		}
+		
+	}
 
-	public void shareClipWithUser(String clipId, String email) throws URISyntaxException, JSONException
+	private void shareClipWithUserThrowingException(String clipId, String email) throws URISyntaxException, JSONException
 	{
 		URI putUrl = preparePutURI();
 		
