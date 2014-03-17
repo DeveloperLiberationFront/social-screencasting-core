@@ -55,7 +55,7 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 		}
 		catch (ClassNotFoundException e)
 		{
-			throw new DBAbstractionException("Problem with Class.forName in SQLiteDatabase");
+			throw new DBAbstractionException("Problem with Class.forName in SQLiteDatabase", e);
 		}
 		catch (SQLException e)
 		{
