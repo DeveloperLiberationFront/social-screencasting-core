@@ -49,9 +49,9 @@ public class TestUserManager {
 		
 		UserManager um = new UnitTestUserManager(workingDir);
 		assertFalse(um.needsUserInput());
-		assertEquals(um.getUserName(), "Kevin Lubick");
-		assertEquals(um.getUserEmail(), "kjlubick@ncsu.edu");
-		assertEquals(um.getUserToken(), "221ed3d8-6a09-4967-91b6-482783ec5313");
+		assertEquals("Kevin Lubick", um.getUserName());
+		assertEquals("kjlubick@ncsu.edu", um.getUserEmail());
+		assertEquals("221ed3d8-6a09-4967-91b6-482783ec5313", um.getUserToken());
 		assertFalse(((UnitTestUserManager) um).hadToDeployGUIPrompt());
 	}
 	
@@ -76,11 +76,11 @@ public class TestUserManager {
 		assertNotNull(fileContents);
 		JSONObject jobj = new JSONObject(fileContents);
 		assertTrue(jobj.has("name"));
-		assertEquals(jobj.get("name"), "TestUser"); 
+		assertEquals( "TestUser", jobj.get("name")); 
 		assertTrue(jobj.has("email"));
-		assertEquals(jobj.get("email"), "test@mailinator.com");
+		assertEquals("test@mailinator.com", jobj.get("email"));
 		assertTrue(jobj.has("token"));
-		assertEquals(jobj.get("token"), "[SOME UUID]");
+		assertEquals("[SOME UUID]", jobj.get("token"));
 		
 	}
 
