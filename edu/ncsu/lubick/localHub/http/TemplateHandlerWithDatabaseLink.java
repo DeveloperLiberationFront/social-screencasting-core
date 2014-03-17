@@ -39,7 +39,7 @@ public abstract class TemplateHandlerWithDatabaseLink extends AbstractHandler {
 		setUpTemplates();
 	}
 
-	public void setUpTemplates()
+	public final void setUpTemplates()
 	{
 		try
 		{

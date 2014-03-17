@@ -195,7 +195,7 @@ public class ToolStream {
 			return this.pluginName;
 		}
 	
-		public void setPluginName(String pluginName)
+		public final void setPluginName(String pluginName)
 		{
 			this.pluginName = pluginName;
 		}

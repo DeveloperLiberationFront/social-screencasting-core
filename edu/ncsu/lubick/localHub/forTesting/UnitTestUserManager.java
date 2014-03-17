@@ -36,7 +36,7 @@ public class UnitTestUserManager extends UserManager {
 		deployedGUI = true;
 	}
 
-	public void setData(String testName, String testEmail, String testToken)
+	public final void setData(String testName, String testEmail, String testToken)
 	{
 		setName(testName);
 		setEmail(testEmail);
