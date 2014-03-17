@@ -80,7 +80,7 @@ public class TestingUtils {
 			logger.debug(newFile.toString() + " already exists, deleting first");
 			if (!newFile.delete())
 			{
-				logger.info("Could not overwrite file " + newFile.toString());
+				logger.info("Could not overwrite file " + newFile);
 			}
 		}
 		try
