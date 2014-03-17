@@ -72,9 +72,9 @@ public class Runner
 
 	private static void cleanUpSystemTray()
 	{
-		if (addedTrayIcon != null)
+		if (getTrayIcon() != null)
 		{
-			SystemTray.getSystemTray().remove(addedTrayIcon);
+			SystemTray.getSystemTray().remove(getTrayIcon());
 		}
 	}
 
@@ -85,7 +85,7 @@ public class Runner
 		{
 			final SystemTray tray = SystemTray.getSystemTray();
 			tray.add(trayIcon);
-			addedTrayIcon = trayIcon;
+			setTrayIcon(trayIcon);
 		}
 		catch (AWTException e)
 		{
@@ -104,5 +104,13 @@ public class Runner
 
 		return img;
 
+	}
+
+	public static TrayIcon getTrayIcon() {
+		return addedTrayIcon;
+	}
+
+	public static void setTrayIcon(TrayIcon addedTrayIcon) {
+		Runner.addedTrayIcon = addedTrayIcon;
 	}
 }
