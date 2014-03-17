@@ -20,6 +20,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.FileUtilities;
 import externalAPI.BrowserMediaPackageSharer;
 import externalAPI.BrowserMediaPackageUploader;
+import externalAPI.ExternalClipRequester;
 
 public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
@@ -54,6 +55,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	private ClipQualityManager clipQualityManager;
 	private BrowserMediaPackageSharer clipSharingManager;
 	private BrowserMediaPackageUploader clipUploader;
+	private ExternalClipRequester clipShareRequester;
 
 	public static LocalHubDebugAccess startTESTINGServerAndReturnDebugAccess(String screencastMonitorLocation)
 	{
@@ -141,6 +143,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		this.postProductionHandler = new PostProductionHandler(this.screencastMonitorDirectory, userManager);
 		this.clipSharingManager = new BrowserMediaPackageSharer(userManager);
 		this.clipUploader = new BrowserMediaPackageUploader(userManager);
+		this.clipShareRequester = new ExternalClipRequester(userManager);
 		
 		if (shouldReportToolsRemotely)
 		{
@@ -428,8 +431,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	@Override
 	public void requestClipsFromUser(String owner, String pluginName, String toolName)
 	{
-		// TODO Auto-generated method stub
-		
+		this.clipShareRequester.requestClipsFromUser(owner, pluginName, toolName);
 	}
 
 }
