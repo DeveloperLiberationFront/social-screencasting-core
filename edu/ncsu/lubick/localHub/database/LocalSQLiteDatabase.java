@@ -50,7 +50,7 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 			// exists and create a new sqlite database if it does not exist
 			this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.pathToFile);
 
-			// create the tables (if they do not already exist)
+			// create the tables (if they do not already exist) 
 			createTables();
 		}
 		catch (ClassNotFoundException e)
