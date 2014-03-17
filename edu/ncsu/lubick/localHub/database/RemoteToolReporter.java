@@ -77,7 +77,16 @@ public class RemoteToolReporter {
 
 	private void reportTools() throws JSONException
 	{
-		JSONObject reportingObject = assembleReportingJSONObject();
+		JSONObject reportingObject;
+		try
+		{
+			reportingObject = assembleReportingJSONObject();
+		}
+		catch (NoToolDataException e)
+		{
+			logger.info("No tools to report.  Not reporting");
+			return;
+		}
 		
 		logger.debug("preparing to report data "+reportingObject.toString(2));
 
@@ -124,7 +133,7 @@ public class RemoteToolReporter {
 	}
 
 
-	private JSONObject assembleReportingJSONObject() throws JSONException
+	private JSONObject assembleReportingJSONObject() throws JSONException, NoToolDataException
 	{
 		JSONObject pluginAggregate = makeAggregateForAllPlugins();
 		
@@ -134,9 +143,13 @@ public class RemoteToolReporter {
 	}
 
 	
-	private JSONObject makeAggregateForAllPlugins()
+	private JSONObject makeAggregateForAllPlugins() throws NoToolDataException
 	{
 		List<String> plugins = databaseManager.getNamesOfAllPlugins();
+		if (plugins.size() == 0)
+		{
+			throw new NoToolDataException();
+		}
 		JSONObject allPlugins = new JSONObject();
 		
 		for(String pluginName: plugins)
@@ -178,6 +191,12 @@ public class RemoteToolReporter {
 	public void shutDown()
 	{
 		this.reportingTimer.cancel();
+	}
+	
+	
+	private class NoToolDataException extends Exception {
+		private static final long serialVersionUID = 1L;
+		
 	}
 	
 	

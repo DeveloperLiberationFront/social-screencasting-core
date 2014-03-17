@@ -118,3 +118,25 @@ td, tr, th{
 .sort {
 	cursor:pointer;
 }
+
+.requestPermissions {
+    color: green;
+    background-color: white;
+	margin:5px;
+	font-size:16px;
+	padding: 5px;
+}
+
+.requestPermissions:hover{
+	border: 3px solid green;
+	margin:4px;
+}
+
+.requestPermissions.requested {
+	border:none;
+}
+.requestPermissions.requested:hover{
+	border:none;
+	margin:5px;
+}
+

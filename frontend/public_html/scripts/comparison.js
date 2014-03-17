@@ -11,6 +11,8 @@ var sortByCount = true;		//TODO update based on user preferences...
 var sortHiToLo = false;		//we start sorted like this so next click will sort lo to hi
 var sortAToZ = true;
 
+var requested = {};
+
 function handleMouseEnter() {
     var highlightedToolName = $(this).data("toolName");
     $(".clickMe").each(function () {
@@ -28,6 +30,40 @@ function handleMouseLeave() {
         }
     });
 }
+
+function updateShareRequestButton() {
+
+    var currentEmail = peoplesNames[peoplesNamesIndex][1];
+
+    if (requested[currentEmail + currentPlugin + currentTool] === true) {
+        $(".requestPermissions").addClass("requested");
+        $(".requestPermissions").prop("disabled", true);
+    }
+    else {
+        $(".requestPermissions").removeClass("requested");
+        $(".requestPermissions").prop("disabled", false);
+    }
+}
+
+function requestSharingPermission() {
+    var postURL, emailToRequest;
+
+    emailToRequest = peoplesNames[peoplesNamesIndex][1];
+    postURL = "/shareRequest";
+
+    $.ajax({
+        type: "POST",
+        url: postURL,
+        data: { "pluginName": currentPlugin, "toolName": currentTool, "ownerEmail": emailToRequest }
+
+    });
+
+    requested[emailToRequest + currentPlugin + currentTool] = true;
+
+    updateShareRequestButton();
+
+}
+
 
 function modifyMultipleClipButtonsForLocal() {
     $("#viewOtherDiv").find("button").data("source", "local");
@@ -281,6 +317,7 @@ function showSharedClips(arrayOfClips) {
         changeSharedMediaSource(arrayOfClips, 0);		//start with the first clip
 
     }
+    updateShareRequestButton();
 }
 
 function showLocalClips(arrayOfClips) {

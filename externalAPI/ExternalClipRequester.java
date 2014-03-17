@@ -90,7 +90,7 @@ public class ExternalClipRequester {
 		JSONObject permissionsObject = new JSONObject();
 		permissionsObject.put("plugin", pluginName);
 		permissionsObject.put("creator", owner);
-		permissionsObject.put("toolName", toolName);
+		permissionsObject.put("tool", toolName);
 
 		dataWrapper.put("data", permissionsObject);
 		return dataWrapper;
