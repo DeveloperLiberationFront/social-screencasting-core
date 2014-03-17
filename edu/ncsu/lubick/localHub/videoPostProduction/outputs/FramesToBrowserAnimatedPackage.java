@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.WritableRenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -97,7 +98,7 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 		
 	}
 
-	private int duplicateLastFrame5Times(BufferedImage lastFrame, int numFramesSoFar) throws IOException
+	private int duplicateLastFrame5Times(WritableRenderedImage lastFrame, int numFramesSoFar) throws IOException
 	{
 		this.size = new Dimension(lastFrame.getWidth(), lastFrame.getHeight()); 
 		for(int i = numFramesSoFar;i<numFramesSoFar+5;i++)

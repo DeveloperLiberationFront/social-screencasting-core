@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.awt.image.WritableRenderedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -132,7 +133,7 @@ public class TestKeypressAnimationGeneration {
 
 	}
 	
-	public static void debugWriteImageToFile(BufferedImage bufferedImage, String outputFileName) throws IOException
+	public static void debugWriteImageToFile(WritableRenderedImage bufferedImage, String outputFileName) throws IOException
 	{
 		File outputFile = new File(outputFileName);
 		if (outputFile.exists() && !outputFile.delete())
