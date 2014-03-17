@@ -230,8 +230,8 @@ public class ToolStream {
 			result = prime * result + ((pluginName == null) ? 0 : pluginName.hashCode());
 			result = prime * result + ((timeStamp == null) ? 0 : timeStamp.hashCode());
 			result = prime * result + ((toolClass == null) ? 0 : toolClass.hashCode());
-			result = prime * result + ((toolName == null) ? 0 : toolName.hashCode());
-			return result;
+			return prime * result + ((toolName == null) ? 0 : toolName.hashCode());
+
 		}
 
 		@Override

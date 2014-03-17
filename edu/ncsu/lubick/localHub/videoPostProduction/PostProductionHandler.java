@@ -69,10 +69,7 @@ public class PostProductionHandler
 		logger.debug("The last frame needed is at index " + endIndex + ", which corresponds to frame/file " + allFrames[endIndex]);
 		
 		browserMediaMaker.setSortedFrames(allFrames);
-		File createdPackage = browserMediaMaker.combineImageFilesToMakeMedia(specificToolUse, startIndex, endIndex);
-
-		return createdPackage;
-
+		return browserMediaMaker.combineImageFilesToMakeMedia(specificToolUse, startIndex, endIndex);
 	}
 
 	private boolean checkForTooEarlyToolUsage(Date timeStamp, File firstFrame)
@@ -119,16 +116,14 @@ public class PostProductionHandler
 	private int findFrameBelongingToDate(Date date, File[] allFrames)
 	{
 		File goalFile = new File(this.screencastFolder, FileUtilities.encodeMediaFrameName(date));
-		int startIndex = findIndexOfGoalFile(allFrames, goalFile);
-		return startIndex;
+		return findIndexOfGoalFile(allFrames, goalFile);
 	}
 
 	private int findIndexOfGoalFile(File[] allFrames, File goalFile)
 	{
 		int startIndex = Arrays.binarySearch(allFrames, goalFile);
 
-		startIndex = startIndex >= 0 ? startIndex : -1 - startIndex;
-		return startIndex;
+		return startIndex >= 0 ? startIndex : -1 - startIndex;
 	}
 
 }

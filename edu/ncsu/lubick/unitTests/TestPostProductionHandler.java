@@ -167,8 +167,7 @@ public class TestPostProductionHandler
 	{
 		setUpScreencastingFolderForDate(screencastBeginDate);
 		
-		PostProductionHandler pph = new PostProductionHandler(TEST_SCREENCAST_FOLDER, fakeUserManager);
-		return pph;
+		return new PostProductionHandler(TEST_SCREENCAST_FOLDER, fakeUserManager);
 	}
 
 
@@ -290,8 +289,7 @@ public class TestPostProductionHandler
 		toolStream.setAssociatedPlugin(TEST_PLUGIN_NAME);
 		assertEquals(1, toolStream.getAsList().size());
 
-		ToolUsage testToolUsage = toolStream.getAsList().get(0);
-		return testToolUsage;
+		return toolStream.getAsList().get(0);
 	}
 
 
@@ -306,8 +304,7 @@ public class TestPostProductionHandler
 		toolStream.setAssociatedPlugin(TEST_PLUGIN_NAME);
 		assertEquals(1, toolStream.getAsList().size());
 
-		ToolUsage testToolUsage = toolStream.getAsList().get(0);
-		return testToolUsage;
+		return toolStream.getAsList().get(0);
 	}
 
 }

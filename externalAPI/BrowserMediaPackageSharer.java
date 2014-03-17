@@ -98,7 +98,6 @@ public class BrowserMediaPackageSharer {
 	{
 		StringBuilder pathBuilder = new StringBuilder("/api/share");
 
-		URI u = new URI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), HTTPUtils.getUnEscapedUserAuthURL(userManager), null);
-		return u;
+		return new URI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), HTTPUtils.getUnEscapedUserAuthURL(userManager), null);
 	}
 }

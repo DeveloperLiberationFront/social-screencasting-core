@@ -118,11 +118,9 @@ public class RemoteToolReporter {
 	{
 		StringBuilder pathBuilder = new StringBuilder("/api/");
 		pathBuilder.append(userManager.getUserEmail());
-		URI u;
 		try
 		{
-			u = new URI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), HTTPUtils.getUnEscapedUserAuthURL(userManager), null);
-			return u; 
+			return new URI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), HTTPUtils.getUnEscapedUserAuthURL(userManager), null);
 		}
 		catch (URISyntaxException e)
 		{

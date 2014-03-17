@@ -100,9 +100,7 @@ public class Runner
 			System.err.println("Resource not found: " + path);
 			return null;
 		} 
-		Image img = Toolkit.getDefaultToolkit().getImage(imageURL);
-
-		return img;
+		return Toolkit.getDefaultToolkit().getImage(imageURL);
 
 	}
 

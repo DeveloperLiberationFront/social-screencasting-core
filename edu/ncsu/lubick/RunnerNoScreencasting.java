@@ -20,9 +20,8 @@ public class RunnerNoScreencasting
 
 	private static URI buildStartingURI() throws URISyntaxException
 	{
-		//For testing sharing: URI u = new URI("http", null, "localhost", 4443, "/shareClip", "pluginName=Testing&toolName=Whombo #5&shareWithName=Test User&shareWithEmail=test@mailinator.com", null);
-		URI u = new URI("http", null, "localhost", 4443, "/", null, null);
-		return u;
+		//For testing sharing: return new URI("http", null, "localhost", 4443, "/shareClip", "pluginName=Testing&toolName=Whombo #5&shareWithName=Test User&shareWithEmail=test@mailinator.com", null);
+		return new URI("http", null, "localhost", 4443, "/", null, null);
 	}
 
 }

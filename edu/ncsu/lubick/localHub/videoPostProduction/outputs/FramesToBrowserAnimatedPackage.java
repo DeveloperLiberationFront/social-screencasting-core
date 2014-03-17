@@ -166,8 +166,7 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 			frameIndex++;
 		}
 
-		BufferedImage lastFrame = ImageIO.read(sortedFrameFiles[sortedFrameFiles.length-1]);
-		return lastFrame;
+		return ImageIO.read(sortedFrameFiles[sortedFrameFiles.length-1]);
 	}
 
 	@Override
