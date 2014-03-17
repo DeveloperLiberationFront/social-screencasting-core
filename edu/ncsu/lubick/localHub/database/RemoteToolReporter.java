@@ -122,7 +122,7 @@ public class RemoteToolReporter {
 		try
 		{
 			u = new URI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), HTTPUtils.getUnEscapedUserAuthURL(userManager), null);
-			return u;
+			return u; 
 		}
 		catch (URISyntaxException e)
 		{
