@@ -25,7 +25,7 @@ public class ToolCountStruct implements Comparable<ToolCountStruct> {
 	@Override
 	public int hashCode()
 	{
-		return (toolName + toolCount.toString()).hashCode();
+		return (toolName + toolCount).hashCode();
 	}
 
 	@Override

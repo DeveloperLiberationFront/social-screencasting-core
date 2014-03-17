@@ -87,7 +87,7 @@ public class TestingUtils {
 		{
 			if (!newFile.createNewFile())
 			{
-				logger.error("Could not create file " + newFile.toString());
+				logger.error("Could not create file " + newFile);
 			}
 		}
 		catch (IOException e)

@@ -66,7 +66,7 @@ public class ExternalClipRequester {
 		
 		JSONObject dataWrapper = prepareDataWrapper(owner, pluginName, toolName);
 		
-		logger.debug("Requesting share: "+dataWrapper.toString());
+		logger.debug("Requesting share: "+dataWrapper);
 		try
 		{
 			StringEntity content = new StringEntity(dataWrapper.toString());

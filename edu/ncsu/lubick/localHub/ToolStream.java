@@ -43,7 +43,7 @@ public class ToolStream {
 		
 		//add a truncatedName for readability
 		String truncatedName = name.substring(0, name.length()>=8?8:name.length());
-		return truncatedName+u.toString();
+		return truncatedName+u;
 	}
 
 	public static ToolStream generateFromJSON(String fileContents)

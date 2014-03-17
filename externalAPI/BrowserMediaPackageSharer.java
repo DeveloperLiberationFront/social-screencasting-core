@@ -66,7 +66,7 @@ public class BrowserMediaPackageSharer {
 		
 		JSONObject dataWrapper = prepareDataWrapper(clipId, email);
 		
-		logger.debug("Sharing: "+dataWrapper.toString());
+		logger.debug("Sharing: "+dataWrapper);
 		try
 		{
 			StringEntity content = new StringEntity(dataWrapper.toString());
