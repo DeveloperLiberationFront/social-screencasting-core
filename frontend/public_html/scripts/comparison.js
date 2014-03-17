@@ -34,14 +34,18 @@ function handleMouseLeave() {
 function updateShareRequestButton() {
 
     var currentEmail = peoplesNames[peoplesNamesIndex][1];
+	
+	$("#requestText").text("You do not have permission to view this user's usages of the tool " + currentTool);
 
     if (requested[currentEmail + currentPlugin + currentTool] === true) {
         $(".requestPermissions").addClass("requested");
         $(".requestPermissions").prop("disabled", true);
+		$(".requestPermissions").text("Requested!");
     }
     else {
         $(".requestPermissions").removeClass("requested");
         $(".requestPermissions").prop("disabled", false);
+		$(".requestPermissions").text("Click to Request Permission");
     }
 }
 
@@ -450,6 +454,8 @@ $(document).ready(function () {
 
     $("table").on('click', ".sortByTool", sortTableByToolName);
     $("table").on('click', ".sortByNum", sortTableByCount);
+	
+	$(".requestPermissions").on('click', requestSharingPermission);
 
     loadPeople();
 

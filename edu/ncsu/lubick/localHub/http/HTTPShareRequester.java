@@ -54,6 +54,7 @@ public class HTTPShareRequester extends TemplateHandlerWithDatabaseLink implemen
 			logger.info("pluginName = "+pluginName +", toolName = "+toolName+", owner = "+owner+", so cancelling request");
 			return;
 		}
+		logger.debug(String.format("Passing along clip request for %s/%s from user %s",pluginName, toolName, owner));
 		this.databaseLink.requestClipsFromUser(owner, pluginName, toolName);
 	}
 

@@ -127,16 +127,18 @@ td, tr, th{
 	padding: 5px;
 }
 
+.requested {
+	background-color: #FFE;
+}
+
 .requestPermissions:hover{
 	border: 3px solid green;
-	margin:4px;
 }
 
 .requestPermissions.requested {
-	border:none;
+	border:3px solid black;
 }
 .requestPermissions.requested:hover{
-	border:none;
-	margin:5px;
+	border:3px solid black;
 }
 
