@@ -100,7 +100,7 @@ public class TestingUtils {
 		// ignoring(?) thrown exception
 		try (FileOutputStream fos = new FileOutputStream(newFile);)
 		{
-			fos.write(fileContents.getBytes());  
+			fos.write(fileContents.getBytes("UTF-8"));  
 		}
 		catch (IOException e)
 		{

@@ -2,6 +2,7 @@ package edu.ncsu.lubick.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
@@ -35,13 +36,13 @@ public class FileUtilities
 		try
 		{
 			bytes = Files.readAllBytes(fileToParse.toPath());
+			return new String(bytes, "UTF-8");
 		}
 		catch (IOException e)
 		{
 			logger.error("Error reading in file", e);
-			bytes = "There was a problem reading the file".getBytes();
+			return "There was a problem reading the file";
 		}
-		return new String(bytes);
 	}
 
 	public static String padIntTo4Digits(int i)

@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.localHub;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -39,11 +40,20 @@ public class ToolStream {
 		sb.append(toolUsage.getToolName());
 		sb.append(toolUsage.getTimeStamp().getTime());
 		
-		UUID u = UUID.nameUUIDFromBytes(sb.toString().getBytes());
+		UUID u;
+		try
+		{
+			u = UUID.nameUUIDFromBytes(sb.toString().getBytes("UTF-8"));
+			//add a truncatedName for readability
+			String truncatedName = name.substring(0, name.length()>=8?8:name.length());
+			return truncatedName+u;
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			logger.fatal("Severly wrong encoding",e);
+		}
+		return null;
 		
-		//add a truncatedName for readability
-		String truncatedName = name.substring(0, name.length()>=8?8:name.length());
-		return truncatedName+u;
 	}
 
 	public static ToolStream generateFromJSON(String fileContents)
