@@ -114,7 +114,7 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 
 	private void lazyLoadAnimationSources() throws IOException
 	{
-		if (animationSources.size() == 0)
+		if (animationSources.isEmpty())
 		{
 			animationSources.add(new AnimatedKeyboardMaker());
 			animationSources.add(new AnimatedTextAndKeyboardMaker());
