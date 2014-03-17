@@ -76,7 +76,7 @@ public class TestUserManager {
 		assertNotNull(fileContents);
 		JSONObject jobj = new JSONObject(fileContents);
 		assertTrue(jobj.has("name"));
-		assertEquals(jobj.get("name"), "TestUser");
+		assertEquals(jobj.get("name"), "TestUser"); 
 		assertTrue(jobj.has("email"));
 		assertEquals(jobj.get("email"), "test@mailinator.com");
 		assertTrue(jobj.has("token"));
