@@ -36,6 +36,11 @@ public abstract class TemplateHandlerWithDatabaseLink extends AbstractHandler {
 	{
 		this.httpRequestPattern = matchPattern;
 		this.databaseLink = databaseLink;
+		setUpTemplates();
+	}
+
+	public void setUpTemplates()
+	{
 		try
 		{
 			getLogger().trace("Setting up template configuration");

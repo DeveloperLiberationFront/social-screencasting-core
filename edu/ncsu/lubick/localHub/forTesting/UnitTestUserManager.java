@@ -16,7 +16,7 @@ public class UnitTestUserManager extends UserManager {
 	
 	public UnitTestUserManager(String testName, String testEmail, String testToken)
 	{
-		setData(testName, testEmail, testToken);
+		setData(testName, testEmail, testToken); 
 	}
 	
 	public boolean hadToDeployGUIPrompt()

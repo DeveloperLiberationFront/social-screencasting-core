@@ -147,13 +147,6 @@ public class ToolStream {
 			this.duration = duration;
 			this.clipScore = clipScore;
 		}
-	
-		@Deprecated
-		public ToolUsage(String toolName, String toolClass, String keyPresses, String pluginName, Date timeStamp, int duration)
-		{
-			this(toolName, toolClass, keyPresses, timeStamp, duration, duration);
-			setPluginName(pluginName);
-		}
 		
 		public ToolUsage(String toolName, String toolClass, String keyPresses, String pluginName, Date timeStamp, int duration, int score)
 		{
