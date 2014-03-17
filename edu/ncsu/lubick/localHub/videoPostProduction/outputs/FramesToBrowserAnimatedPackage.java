@@ -99,7 +99,7 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 
 	private int duplicateLastFrame5Times(BufferedImage lastFrame, int numFramesSoFar) throws IOException
 	{
-		this.size = new Dimension(lastFrame.getWidth(), lastFrame.getHeight());
+		this.size = new Dimension(lastFrame.getWidth(), lastFrame.getHeight()); 
 		for(int i = numFramesSoFar;i<numFramesSoFar+5;i++)
 		{
 			String newFileName = "frame" + FileUtilities.padIntTo4Digits(i) + "." + PostProductionHandler.INTERMEDIATE_FILE_FORMAT;
