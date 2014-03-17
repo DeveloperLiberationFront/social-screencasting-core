@@ -16,6 +16,8 @@ import edu.ncsu.lubick.localHub.WebQueryInterface;
 public class HTTPClipSharer extends TemplateHandlerWithDatabaseLink {
 
 	
+	private static final String PARAM_RECIPIENT = "recipient";
+	private static final String PARAM_CLIP_ID = "clipId";
 	private static final String TEMPLATE_NAME = "shareClip.html";
 	private static final Logger logger = Logger.getLogger(HTTPClipSharer.class);
 
@@ -52,8 +54,8 @@ public class HTTPClipSharer extends TemplateHandlerWithDatabaseLink {
 	private void handlePost(Request baseRequest, HttpServletRequest request)
 	{
 		baseRequest.setHandled(true);
-		String clipId = request.getParameter("clipId");
-		String recipient = request.getParameter("recipient");
+		String clipId = request.getParameter(PARAM_CLIP_ID);
+		String recipient = request.getParameter(PARAM_RECIPIENT);
 		if (clipId == null || recipient == null)
 		{
 			logger.info("clipId = "+clipId +", recipient = "+recipient+", so cancelling");

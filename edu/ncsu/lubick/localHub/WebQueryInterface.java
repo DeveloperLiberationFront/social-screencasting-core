@@ -15,4 +15,6 @@ public interface WebQueryInterface {
 
 	void shareClipWithUser(String clipId, String recipient);
 
+	void requestClipsFromUser(String owner, String pluginName, String toolName);
+
 }

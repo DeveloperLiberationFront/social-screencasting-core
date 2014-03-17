@@ -20,12 +20,8 @@ import edu.ncsu.lubick.localHub.WebQueryInterface;
 
 public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink implements Handler {
 
-	private static final String CLIP_NAME = "clipName";
+	private static final String PARAM_CLIP_NAME = "clipName";
 	private static final String PERFORM_ACTION = "thingToDo";
-
-	private static final String POST_COMMAND_PLUGIN_NAME = "pluginName";
-
-	private static final String POST_COMMAND_TOOL_NAME = "toolName";
 
 	private static final String QUERY_CLIP_EXISTANCE = "queryClipExistance";
 	private static final String GET_IMAGES_FOR_CLIP = "getImages";
@@ -68,7 +64,7 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 	private void respondToPost(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		logger.debug("POST parameters recieved " + request.getParameterMap());
-		logger.debug("PluginName: " + request.getParameter(POST_COMMAND_PLUGIN_NAME));
+		logger.debug("PluginName: " + request.getParameter(PARAM_PLUGIN_NAME));
 
 		if (request.getParameter(PERFORM_ACTION).equals(QUERY_CLIP_EXISTANCE))
 		{
@@ -86,7 +82,7 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 
 	private void respondToGetClipImages(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
-		String clipName = request.getParameter(CLIP_NAME);
+		String clipName = request.getParameter(PARAM_CLIP_NAME);
 
 		File clipDir = new File("renderedVideos/",clipName);
 
@@ -127,8 +123,8 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 
 	private void respondToDoesMediaExist(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
-		String pluginName = request.getParameter(POST_COMMAND_PLUGIN_NAME);
-		String toolName = request.getParameter(POST_COMMAND_TOOL_NAME);
+		String pluginName = request.getParameter(PARAM_PLUGIN_NAME);
+		String toolName = request.getParameter(PARAM_TOOL_NAME);
 
 		List<File> browserPackages = databaseLink.getBestExamplesOfTool(pluginName, toolName);
 
