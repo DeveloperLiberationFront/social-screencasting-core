@@ -1,4 +1,4 @@
-package edu.ncsu.lubick.localHub.videoPostProduction;
+package externalAPI;
 
 import java.io.IOException;
 import java.net.URI;
@@ -30,7 +30,8 @@ public class BrowserMediaPackageSharer {
 		this.userManager = userManager;
 	}
 
-	public static void main(String[] args) throws Exception
+	@SuppressWarnings("unused")
+	private static void main(String[] args) throws Exception
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
 		UserManager userManager = new UnitTestUserManager("Test User", "test@mailinator.com", "123");
@@ -59,9 +60,9 @@ public class BrowserMediaPackageSharer {
 
 	private void shareClipWithUserThrowingException(String clipId, String email) throws URISyntaxException, JSONException
 	{
-		URI putUrl = preparePutURI();
+		URI postUrl = preparePostURI();
 		
-		HttpPost httpPost = new HttpPost(putUrl);
+		HttpPost httpPost = new HttpPost(postUrl);
 		
 		JSONObject dataWrapper = prepareDataWrapper(clipId, email);
 		
@@ -93,7 +94,7 @@ public class BrowserMediaPackageSharer {
 		return dataWrapper;
 	}
 
-	private URI preparePutURI() throws URISyntaxException
+	private URI preparePostURI() throws URISyntaxException
 	{
 		StringBuilder pathBuilder = new StringBuilder("/api/share");
 

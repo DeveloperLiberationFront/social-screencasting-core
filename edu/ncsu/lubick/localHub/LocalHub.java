@@ -15,11 +15,11 @@ import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 import edu.ncsu.lubick.localHub.http.HTTPServer;
 import edu.ncsu.lubick.localHub.http.WebToolReportingInterface;
-import edu.ncsu.lubick.localHub.videoPostProduction.BrowserMediaPackageSharer;
-import edu.ncsu.lubick.localHub.videoPostProduction.BrowserMediaPackageUploader;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.FileUtilities;
+import externalAPI.BrowserMediaPackageSharer;
+import externalAPI.BrowserMediaPackageUploader;
 
 public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
@@ -423,6 +423,13 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			this.databaseManager.setClipUploaded(clipId, true);
 		}
 		this.clipSharingManager.shareClipWithUser(clipId, recipient);
+	}
+
+	@Override
+	public void requestClipsFromUser(String owner, String pluginName, String toolName)
+	{
+		// TODO Auto-generated method stub
+		
 	}
 
 }

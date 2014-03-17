@@ -1,4 +1,4 @@
-package edu.ncsu.lubick.localHub.videoPostProduction;
+package externalAPI;
 
 import java.io.File;
 import java.io.IOException;
