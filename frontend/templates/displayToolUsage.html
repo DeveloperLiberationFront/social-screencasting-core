@@ -10,39 +10,53 @@
     <h1>The following tool usages are for plugin "${plugin}"</h1>
 
     <table border="1" class="resultsTable myTools">
+      <tr>
+        <th colspan="2" class="header">My Tools</th>
+      </tr>
+      <tr class="header">
+        <th class="sort sortByTool">Tool Name</th>
+		<th class="sort sortByNum">Number of Occurrences</th>
+      </tr>
+
+      <#list myToolsAndCounts as thisToolCount>
+      <tr class='clickMe myItem' data-tool-name="${thisToolCount.toolName}">
+        <td>${thisToolCount.toolName}</td>
+	    <td>${thisToolCount.toolCount}</td>
+      </tr>
+      </#list>
+    </table>
+
+    <table border="1" id="usersTable" class="resultsTable tablesorter">
+      <thead>
         <tr>
-            <th colspan="2" class="header">My Tools<br>
-                <button class="showUnique">Show Unique Tools Only</button>
-                <button class="showAll">Show All Tools</button>
-            <tr class="header">
-                <th class="sort sortByTool">
-                Tool Name
-				<th class="sort sortByNum">
-                Number of Occurrences
-            </tr>
-
-        <#list myToolsAndCounts as thisToolCount>
-  <tr class='clickMe myItem' data-tool-name="${thisToolCount.toolName}"><td>
-      ${thisToolCount.toolName}
-	  <td>
-      ${thisToolCount.toolCount}
-  </#list>
-
+          <th colspan="2" id="otherUsers">Other users of ${plugin}</th>
+        </tr>
+        <tr class='header'>
+          <th class="sort sortByName">User Name</th>
+		  <th class="sort sortByEmail">Email</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
     </table>
 
-    <table border="1" class="resultsTable otherPersonsTable">
-        <tr class="changeName" title="click to change person">
-            <th colspan="2" id="otherPeoplesTools"><span id="otherUsersPlaceHolder" data-email="">Loading Team-mates</span><br>
-                <button class="showUnique" class="header">Show Unique Tools Only</button>
-                <button class="showAll">Show All Tools</button>
-            <tr id="dynamicToolInsertionPoint" class="header">
-                <th class="sort sortByTool">
-                Tool Name
-				<th class="sort sortByNum">
-                Number of Occurrences
-            </tr>
-
+    <table border="1" id='otherPersonsTable' class="resultsTable tablesorter" style='display:none'>
+      <thead>
+        <tr class="changeName">
+          <th colspan="2" id="otherPeoplesTools">
+            <button id='prevUser'>&laquo;</button>
+            <span id="otherUsersPlaceHolder" data-email="">Loading Team-mates</span>
+            <button id='nextUser'>&raquo;</button>
+          </th>
+        </tr>
+        <tr class="header">
+          <th class="sort sortByTool">Tool Name</th>
+		  <th class="sort sortByNum">Number of Occurrences</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
     </table>
+
     <div id="moreInfo">
         <div id="placeholder">Select a tool for more info.</div>
         <div id="clipDoesNotExist">No clips exist locally for this tool.  This is unexpected...</div>
@@ -96,7 +110,6 @@
                 <br/>View More Usages
                 <br/>
 		        <div id="viewOtherSpot" class="staging"></div>
-
             </div>
         </div>
     </div>
