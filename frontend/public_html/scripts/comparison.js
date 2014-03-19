@@ -94,7 +94,8 @@ function drawToolTable(tools, comparison) {
 
     //insert them smallest to largest
     for (i = 0; i < tools.length; i++) {
-        newItem = $("<tr class='clickMe addedItem' data-tool-name='" + tools[i].name + "'><td>" + tools[i].name + "<td>" + tools[i].count + "</tr>");
+        newItem = $("<tr class='clickMe addedItem'><td>" + tools[i].name + "<td>" + tools[i].count + "</tr>");
+		newItem.data("toolName", tools[i].name);
         newItem.appendTo($("#otherPersonsTable tbody"));
     }
 }
@@ -202,7 +203,11 @@ function listUsers() {
         email = pluginUsers[i];
         name = namesByEmail[email];
 
-        newItem = $("<tr class='clickMe addedUser' data-index='"+i+"' data-email='" + email + "'><td>" + name + "<td>" + email + "</tr>");
+        newItem = $("<tr class='clickMe addedUser'><td>" + name + "<td>" + email + "</tr>");
+		
+		newItem.data("index", i);
+		newItem.data("email", email);
+		
         newItem.appendTo($("#usersTable tbody"));
     }
 }

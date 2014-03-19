@@ -156,7 +156,7 @@ public class LookupHandler extends TemplateHandlerWithDatabaseLink {
 	{
 		public ToolCountTemplateModel(String toolName, int toolCount)
 		{
-			super(toolName, toolCount);
+			super(toolName.replace("'","&#39").replace("\"", "&#34"), toolCount);
 		}
 
 
