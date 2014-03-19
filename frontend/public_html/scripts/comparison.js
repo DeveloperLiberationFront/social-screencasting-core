@@ -1,40 +1,42 @@
 /*global stopFramePlayback, setUpPlaybackForDataAuthAndDir */       //depends on playback.js and setUpPlayback.js
 
-var peoplesNames;
-var peoplesNamesIndex;
+var pluginUsers = []; //list of user ids (emails) for users of currentPlugin
+var namesByEmail = {}; //map of email -> name
+var userData = {}; //cache user tool data
 
-var userName, userEmail, userToken, currentPlugin, currentTool, currentClips, currentImageDir;
+var userName, userEmail, userToken;
+var currentPlugin, currentTool, currentClips, currentImageDir, currentEmail;
 var authString;
 
-var sortByCount = true;		//TODO update based on user preferences...
+var emailIndex; //index of current email; for rotation purposes
 
-var sortHiToLo = false;		//we start sorted like this so next click will sort lo to hi
-var sortAToZ = true;
+var ascending; //sort order for tables
 
 var requested = {};
 
 function handleMouseEnter() {
+    $(this).addClass("rowHover");
     var highlightedToolName = $(this).data("toolName");
     $(".clickMe").each(function () {
-        if ($(this).data("toolName") == highlightedToolName) {
+        if ($(this).data("toolName") &&
+            $(this).data("toolName") == highlightedToolName) {
             $(this).addClass("rowHover");
         }
     });
 }
 
 function handleMouseLeave() {
+    $(this).removeClass("rowHover");
     var highlightedToolName = $(this).data("toolName");
     $(".clickMe").each(function () {
-        if ($(this).data("toolName") == highlightedToolName) {
+        if ($(this).data("toolName") &&
+            $(this).data("toolName") == highlightedToolName) {
             $(this).removeClass("rowHover");
         }
     });
 }
 
 function updateShareRequestButton() {
-
-    var currentEmail = peoplesNames[peoplesNamesIndex][1];
-	
 	$("#requestText").text("You do not have permission to view this user's usages of the tool " + currentTool);
 
     if (requested[currentEmail + currentPlugin + currentTool] === true) {
@@ -52,20 +54,18 @@ function updateShareRequestButton() {
 function requestSharingPermission() {
     var postURL, emailToRequest;
 
-    emailToRequest = peoplesNames[peoplesNamesIndex][1];
     postURL = "/shareRequest";
 
     $.ajax({
         type: "POST",
         url: postURL,
-        data: { "pluginName": currentPlugin, "toolName": currentTool, "ownerEmail": emailToRequest }
+        data: { "pluginName": currentPlugin, "toolName": currentTool, "ownerEmail": currentEmail }
 
     });
 
-    requested[emailToRequest + currentPlugin + currentTool] = true;
+    requested[currentEmail + currentPlugin + currentTool] = true;
 
     updateShareRequestButton();
-
 }
 
 
@@ -78,123 +78,133 @@ function modifyMultipleClipButtonsForExternal() {
 }
 
 //JSON tuple {name="name", count=42}
-function sortPluginTuplesCount(a, b) {
+function sortCount(a, b) {
     return a.count - b.count;		//sorts so that smaller count numbers come first because we insert smallest elements first
 }
 
 //JSON tuple {name="name", count=42}
-function sortPluginTuplesName(a, b) {
+function sortName(a, b) {
     return b.name.localeCompare(a.name);
 }
 
 
-function drawToolTable(tools) {
+function drawToolTable(tools, comparison) {
     var i, newItem;
-    if (sortByCount) {
-        tools.sort(sortPluginTuplesCount);
-    }
-    else {
-        tools.sort(sortPluginTuplesName);
-    }
+    comparison = typeof comparison !== 'undefined' ? comparison : sortCount
 
     //insert them smallest to largest
     for (i = 0; i < tools.length; i++) {
         newItem = $("<tr class='clickMe addedItem' data-tool-name='" + tools[i].name + "'><td>" + tools[i].name + "<td>" + tools[i].count + "</tr>");
-        newItem.insertAfter($("#dynamicToolInsertionPoint"));
+        newItem.appendTo($("#otherPersonsTable tbody"));
     }
 }
 
+function nextIndex(i) {
+    i++;
+    return i % pluginUsers.length;
+}
 
-function rotatePeoplesNamesAndTools() {
-    var emailToView, getUrl;
-    peoplesNamesIndex++;
-    peoplesNamesIndex = peoplesNamesIndex % peoplesNames.length;
-    $("#otherUsersPlaceHolder").text(peoplesNames[peoplesNamesIndex][0] + "'s Tools");
-    emailToView = peoplesNames[peoplesNamesIndex][1];
-    $("#otherUsersPlaceHolder").data("email", emailToView);
+function prevIndex(i) {
+    i--;
+    i %= pluginUsers.length;
+    return i < 0 ? i + pluginUsers.length : i;
+}
+
+function updateNext() {
+    var next = namesByEmail[pluginUsers[nextIndex(emailIndex)]];
+    $("#nextUser").attr("title", "Next: " + next);
+}
+
+function updatePrev() {
+    var previous = namesByEmail[pluginUsers[prevIndex(emailIndex)]];
+    $("#prevUser").attr("title", "Previous: " + previous);
+}
+
+function nextUser() {
+    var getUrl;
+    emailIndex = nextIndex(emailIndex);
+    currentEmail = pluginUsers[emailIndex];
+    showUserTools(currentEmail);
+    updateNext();
+}
+
+function prevUser() {
+    var getUrl;
+    emailIndex = prevIndex(emailIndex);
+    currentEmail = pluginUsers[emailIndex];
+    showUserTools(currentEmail);
+    updatePrev();
+}
+
+function selectUser() {
+    emailIndex = $(this).data('index');
+    currentEmail = $(this).data('email');
+    showUserTools(currentEmail);
+    updateNext();
+    updatePrev();
+}
+
+function showUserTools(email) {
+    var index, getUrl;
+    $("#otherUsersPlaceHolder").text(namesByEmail[currentEmail] + "'s Tools");
+    $("#usersTable").hide();
+    $("#otherPersonsTable").show();
 
     $(".addedItem").remove();
-    getUrl = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + authString;
+    getUrl = "http://screencaster-hub.appspot.com/api/" + currentEmail + "/" + currentPlugin + authString;
 
-    $.ajax({
-        url: getUrl,
-        success: function (data) {
-            var keys, theseTools;
-            console.log(data);
-            console.log(JSON.stringify(data));
-            keys = Object.keys(data[currentPlugin]);
-            //turn map data[currentPlugin] to theseTools array
-            theseTools = keys.map(function (key) {
-                return { name: key, count: data[currentPlugin][key] };
+    if (email in userData) {
+        drawToolTable(userData[email]);
+    } else {
+        $.ajax({
+            url: getUrl,
+            success: function (data) {
+                var keys, theseTools;
+                keys = Object.keys(data[currentPlugin]);
+                //turn map data[currentPlugin] to theseTools array
+                theseTools = keys.map(function (key) {
+                    return { name: key, count: data[currentPlugin][key] };
+                });
+                userData[email] = theseTools;
+                drawToolTable(theseTools);
+
+            },
+            error: function () {
+                console.log("There was a problem displaying user " + email + "'s tools");
             }
-			);
-            drawToolTable(theseTools);
-
-        },
-        error: function () {
-            console.log("There was a problem");
-        }
-
-    });
-
-}
-
-function showUniqueTools(event) {
-    var parentTable, otherTable;
-    //TODO FIX
-
-    event.preventDefault();
-    parentTable = $(this).closest("table");
-
-    if (parentTable.hasClass("myTools")) {
-        otherTable = $("table.otherPersonsTable");
+        });
     }
-    else {
-        otherTable = $("table.myTools");
-    }
-    $(this).hide();
-    parentTable.find(".showAll").show();
-
-    parentTable.find(".clickMe").each(function () {
-        var classToFind = "." + $(this).data("toolName");
-        if (otherTable.find(classToFind).length > 0) {
-            $(this).hide();
-        }
-        else {
-            $(this).show();
-        }
-    });
-}
-
-function showAllTools(event) {
-    var parentTable;
-    //TODO FIX
-
-    event.preventDefault();
-    parentTable = $(this).closest("table");
-    $(this).hide();
-    parentTable.find(".showUnique").show();
-    //now just show everything
-    parentTable.find(".clickMe").show();
 }
 
 function loadPeople() {
     $.ajax({
-        url: "http://screencaster-hub.appspot.com/api/users",
+        url: "http://screencaster-hub.appspot.com/api/plugin/"+currentPlugin,
         success: function (data) {
-            peoplesNamesIndex = -1;
-            peoplesNames = data.users;
+            emailIndex = -1;
 
             //remove this user from the array
-            for (var i = 0; i < peoplesNames.length; i++) {
-                if (peoplesNames[i][1] == userEmail) {
-                    peoplesNames.splice(i, 1);
-                    break;
-                }
-            }
+            pluginUsers = Object.keys(data.users).filter(function(e) {
+                return e != userEmail;
+            });
+
+            pluginUsers.forEach(function(email) {
+                namesByEmail[email] = data.users[email];
+            });
+
             $("#otherUsersPlaceHolder").text("Click to view Co-workers' Tools");
+            listUsers();
         }
     });
+}
+
+function listUsers() {
+    for (var i = 0; i < pluginUsers.length; i++) {
+        email = pluginUsers[i];
+        name = namesByEmail[email];
+
+        newItem = $("<tr class='clickMe addedUser' data-index='"+i+"' data-email='" + email + "'><td>" + name + "<td>" + email + "</tr>");
+        newItem.appendTo($("#usersTable tbody"));
+    }
 }
 
 function makeButtonsForMultipleClips(arrayOfClips) {
@@ -227,10 +237,8 @@ function highlightNthButton(n) {
 
 
 function changeSharedMediaSource(arrayOfClips, clipIndex) {
-    var getUrl, emailToView;
-
-    emailToView = peoplesNames[peoplesNamesIndex][1];
-    currentImageDir = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + "/" + currentTool + "/" + arrayOfClips[clipIndex];
+    var getUrl;
+    currentImageDir = "http://screencaster-hub.appspot.com/api/" + currentEmail + "/" + currentPlugin + "/" + currentTool + "/" + arrayOfClips[clipIndex];
     getUrl = currentImageDir + authString;
 
     currentClips = arrayOfClips;
@@ -343,14 +351,13 @@ function showLocalClips(arrayOfClips) {
 
 
 function checkExistanceOfShare(element) {
-    var target, getUrl, emailToView;
+    var target, getUrl;
     element.preventDefault();
 
     target = $(element.currentTarget);
-    emailToView = peoplesNames[peoplesNamesIndex][1];
     currentTool = target.data("toolName");
 
-    getUrl = "http://screencaster-hub.appspot.com/api/" + emailToView + "/" + currentPlugin + "/" + currentTool + authString;
+    getUrl = "http://screencaster-hub.appspot.com/api/" + currentEmail + "/" + currentPlugin + "/" + currentTool + authString;
 
     $("#clipPlayer").hide();
 
@@ -407,15 +414,13 @@ function sortTableByToolName() {
         var first, second;
         first = $(a.childNodes[0]).text().trim();
         second = $(b.childNodes[0]).text().trim();
-        console.log(first + " < " + second + " ?");
-        if (sortAToZ) {
+        if (ascending) {
             return first.localeCompare(second);
-        }
-        else {
+        } else {
             return second.localeCompare(first);
         }
     });
-    sortAToZ = !sortAToZ;
+    ascending = !ascending;
 }
 
 function sortTableByCount() {
@@ -428,41 +433,20 @@ function sortTableByCount() {
         var first, second;
         first = +$(a.childNodes[1]).text().trim();
         second = +$(b.childNodes[1]).text().trim();
-        console.log(first + " < " + second + " ?");
-        if (sortHiToLo) {
+        if (ascending) {
             return first - second;
-        }
-        else {
+        } else {
             return second - first;
         }
     });
-    sortHiToLo = !sortHiToLo;
+    ascending = !ascending;
 }
+
+function sortUsersByEmail() {}
+function sortUsersByName() {}
 
 $(document).ready(function () {
     var elementPosition;
-    //handles the click on the view buttons to see if a video file exists
-    $("table").on('mouseenter', '.clickMe', handleMouseEnter);
-    $("table").on('mouseleave', '.clickMe', handleMouseLeave);
-
-    $("#viewOtherDiv").on('click', 'button', viewOtherExample);
-
-    $("#otherUsersPlaceHolder").on('click', rotatePeoplesNamesAndTools);
-
-    $("table").on('click', ".addedItem", checkExistanceOfShare);
-    $("table").on('click', ".myItem", checkExistanceOfLocalClips);
-
-    $("table").on('click', ".sortByTool", sortTableByToolName);
-    $("table").on('click', ".sortByNum", sortTableByCount);
-	
-	$(".requestPermissions").on('click', requestSharingPermission);
-
-    loadPeople();
-
-
-    $(".showUnique").on("click", showUniqueTools);
-    $(".showAll").on("click", showAllTools);
-
     //global variables
     userName = $("body").data("name");
     userEmail = $("body").data("email");
@@ -473,4 +457,29 @@ $(document).ready(function () {
     elementPosition = $('#moreInfo').offset();
     //fix it there for scrolling
     $('#moreInfo').css('position', 'fixed').css('top', elementPosition.top).css('left', elementPosition.left);
+
+    //handles the click on the view buttons to see if a video file exists
+    $("table").on('mouseenter', '.clickMe', handleMouseEnter);
+    $("table").on('mouseleave', '.clickMe', handleMouseLeave);
+
+    $("#viewOtherDiv").on('click', 'button', viewOtherExample);
+
+    $("#nextUser").on('click', nextUser);
+    $("#prevUser").on('click', prevUser);
+
+    //users table
+    $("table").on('click', ".addedUser", selectUser);
+    $("table").on('click', ".sortByName", sortUsersByName);
+    $("table").on('click', ".sortByEmail", sortUsersByEmail);
+
+    //items table
+    $("table").on('click', ".addedItem", checkExistanceOfShare);
+    $("table").on('click', ".myItem", checkExistanceOfLocalClips);
+
+    $("table").on('click', ".sortByTool", sortTableByToolName);
+    $("table").on('click', ".sortByNum", sortTableByCount);
+
+	$(".requestPermissions").on('click', requestSharingPermission);
+
+    loadPeople();
 });
