@@ -59,7 +59,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				"folder_name TEXT PRIMARY KEY, " +
 				"plugin_name TEXT, " +
 				"tool_name TEXT, " +
-				"clip_score INTEGER" +
+				"clip_score INTEGER," +
 				"uploaded_date INTEGER" +
 				") ";
 
