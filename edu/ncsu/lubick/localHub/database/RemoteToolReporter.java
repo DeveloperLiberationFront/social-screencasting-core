@@ -47,6 +47,7 @@ public class RemoteToolReporter {
 		this.userManager = userManager;
 		this.notificationManager = notificationManager;
 		
+		
 		beginReportingTools();
 		
 	}
@@ -54,6 +55,7 @@ public class RemoteToolReporter {
 	
 	private void beginReportingTools()
 	{
+		logger.info("Starting the reporting of tools.  Expect the first to happen in 10 seconds");
 		TimerTask reportingTask = new TimerTask() {
 			
 			@Override

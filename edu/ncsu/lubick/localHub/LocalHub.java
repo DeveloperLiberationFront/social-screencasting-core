@@ -121,12 +121,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		}
 		isRunning = true;
 		
-		
-		if (userManager.needsUserInput())
-		{
-			userManager.promptUserForInfo();
-		}
-
 		if (shouldUseHTTPServer)
 		{
 			this.httpServer = HTTPServer.startUpAnHTTPServer(this, userManager);
@@ -154,7 +148,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
 	private void setUpUserManager()
 	{
-		userManager = new UserManager(new File("."));
+		userManager = new UserManager(new File("."));		//this will block and prompt for use input if needed
 	}
 
 	/**

@@ -48,7 +48,7 @@ public class TestUserManager {
 		moveTestUserFileIntoPlace("existingUserFile.txt");
 		
 		UserManager um = new UnitTestUserManager(workingDir);
-		assertFalse(um.needsUserInput());
+		assertFalse(((UnitTestUserManager) um).needsUserInput());
 		assertEquals("Kevin Lubick", um.getUserName());
 		assertEquals("kjlubick@ncsu.edu", um.getUserEmail());
 		assertEquals("221ed3d8-6a09-4967-91b6-482783ec5313", um.getUserToken());

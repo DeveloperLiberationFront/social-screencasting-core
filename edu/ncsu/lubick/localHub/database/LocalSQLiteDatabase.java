@@ -15,7 +15,6 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 	
 	private static final Logger logger = Logger.getLogger(LocalSQLiteDatabase.class);
 	private static final String DB_EXTENSION_NAME = ".sqlite";
-	private String pathToFile;
 	private Connection connection;
 	private UserManager userManager;
 
@@ -43,12 +42,9 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 			// load the sqlite-JDBC driver using the class loader
 			Class.forName("org.sqlite.JDBC");
 
-			// set the path to the sqlite database file
-			this.pathToFile = path;
-
 			// create a database connection, will open the sqlite db if it
 			// exists and create a new sqlite database if it does not exist
-			this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.pathToFile);
+			this.connection = DriverManager.getConnection("jdbc:sqlite:" + path);
 
 			// create the tables (if they do not already exist) 
 			createTables();

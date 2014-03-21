@@ -24,7 +24,6 @@ public class TestClipCreationLimits {
 	private static final String TEST_SCREENCASTING_DIR = "test_screencasting/";
 	private static final File renderedVideos = new File("renderedVideos/");
 	private static final int MAX_TOOL_USAGES = LocalHub.MAX_TOOL_USAGES;
-	private LocalHubDebugAccess server;
 
 	private static final Logger logger = Logger.getLogger(TestClipCreationLimits.class);
 
@@ -69,7 +68,7 @@ public class TestClipCreationLimits {
 	public void testEndToEndCreationAndLimit() throws Exception
 	{
 		TestingUtils.clearOutTestDB();
-		this.server = LocalHub.startTESTINGServerAndReturnDebugAccess(TEST_SCREENCASTING_DIR);
+		LocalHubDebugAccess server = LocalHub.startTESTINGServerAndReturnDebugAccess(TEST_SCREENCASTING_DIR);
 		assertNotNull(server);
 		assertTrue(server.isRunning());
 

@@ -33,14 +33,8 @@ public class LookupHandler extends TemplateHandlerWithDatabaseLink {
 
 	private static final String POST_COMMAND_PLUGIN_NAME = "pluginName";
 	private static final String POST_COMMAND_GET_TOOL_USAGE_FOR_PLUGIN = "getToolUsageForPlugin";
-	private static Logger logger;
-
-	// static initializer
-	static
-	{
-		logger = Logger.getLogger(LookupHandler.class.getName());
-
-	}
+	
+	private static final Logger logger = Logger.getLogger(LookupHandler.class);
 
 	public LookupHandler(String matchPattern, WebQueryInterface databaseLink)
 	{

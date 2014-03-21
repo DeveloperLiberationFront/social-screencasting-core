@@ -16,15 +16,15 @@ import edu.ncsu.lubick.util.FileUtilities;
 public class UserManager {
 
 	public static final String EXPECTED_USER_SETTINGS = "user.ini";
+	
 	private String userName;
 	private String userEmail;
 	private String userToken;
 	
 	//For unit tests
-	private boolean needsUserInfo = true;
+	protected boolean needsUserInfo = true;
 	
 	private static final Logger logger = Logger.getLogger(UserManager.class);
-
 	
 	protected UserManager()
 	{
@@ -95,13 +95,16 @@ public class UserManager {
 		}
 	}
 
-	public void promptUserForInfo()
+	protected void promptUserForInfo()
 	{
+		logger.info("Prompting user for name and email");
         String name = JOptionPane.showInputDialog(null, "What is your name?");
         setName(name);
 
         String email = JOptionPane.showInputDialog(null, "What is your email address?");
         setEmail(email);
+        
+        logger.debug("welcomed new user "+name+" "+email);
         
         setToken(UUID.randomUUID().toString());
 	}
@@ -119,11 +122,6 @@ public class UserManager {
 	public String getUserToken()
 	{
 		return userToken;
-	}
-
-	public boolean needsUserInput()		//used for unit tests.  Did the init file exist?
-	{
-		return needsUserInfo;
 	}
 
 

@@ -44,4 +44,9 @@ public class UnitTestUserManager extends UserManager {
 		
 	}
 
+	public boolean needsUserInput()
+	{
+		return needsUserInfo;
+	}
+
 }
