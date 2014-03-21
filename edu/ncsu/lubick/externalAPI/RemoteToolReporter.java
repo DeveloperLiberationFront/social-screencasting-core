@@ -1,4 +1,4 @@
-package edu.ncsu.lubick.localHub.database;
+package edu.ncsu.lubick.externalAPI;
 
 import java.io.IOException;
 import java.net.URI;
@@ -16,9 +16,9 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.ncsu.lubick.localHub.BufferedDatabaseManager;
 import edu.ncsu.lubick.localHub.NotificationManager;
 import edu.ncsu.lubick.localHub.UserManager;
+import edu.ncsu.lubick.localHub.database.BufferedDatabaseManager;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 import edu.ncsu.lubick.localHub.forTesting.UnitTestUserManager;
 import edu.ncsu.lubick.localHub.http.HTTPUtils;

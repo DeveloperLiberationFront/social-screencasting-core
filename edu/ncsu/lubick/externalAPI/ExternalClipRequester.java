@@ -1,4 +1,4 @@
-package externalAPI;
+package edu.ncsu.lubick.externalAPI;
 
 import java.io.IOException;
 import java.net.URI;
@@ -31,18 +31,6 @@ public class ExternalClipRequester {
 	}
 	
 
-	public static void main(String[] args) throws Exception
-	{
-		TestingUtils.makeSureLoggingIsSetUp();
-		UserManager userManager = new UnitTestUserManager("Test User", "test@mailinator.com", "123");
-		
-		
-		ExternalClipRequester sharer = new ExternalClipRequester(userManager);
-		
-		sharer.requestClipsFromUser("kjlubick@ncsu.edu", "Eclipse", "Organize Imports");
-		
-	}
-	
 	public boolean requestClipsFromUser(String owner, String pluginName, String toolName)
 	{
 		try
@@ -102,6 +90,20 @@ public class ExternalClipRequester {
 		StringBuilder pathBuilder = new StringBuilder("/api/request-share");
 
 		return new URI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), HTTPUtils.getUnEscapedUserAuthURL(userManager), null);
+	}
+
+
+	@SuppressWarnings("unused")
+	private static void main(String[] args) throws Exception
+	{
+		TestingUtils.makeSureLoggingIsSetUp();
+		UserManager userManager = new UnitTestUserManager("Test User", "test@mailinator.com", "123");
+		
+		
+		ExternalClipRequester sharer = new ExternalClipRequester(userManager);
+		
+		sharer.requestClipsFromUser("kjlubick@ncsu.edu", "Eclipse", "Organize Imports");
+		
 	}
 
 }

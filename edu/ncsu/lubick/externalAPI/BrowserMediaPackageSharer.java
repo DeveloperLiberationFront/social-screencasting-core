@@ -1,4 +1,4 @@
-package externalAPI;
+package edu.ncsu.lubick.externalAPI;
 
 import java.io.IOException;
 import java.net.URI;

@@ -1,4 +1,4 @@
-package edu.ncsu.lubick.localHub;
+package edu.ncsu.lubick.localHub.database;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,9 +14,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
+import edu.ncsu.lubick.localHub.LocalHub;
+import edu.ncsu.lubick.localHub.ToolStream;
+import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
-import edu.ncsu.lubick.localHub.database.DBAbstractionFactory;
-import edu.ncsu.lubick.localHub.database.LocalDBAbstraction;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
 /**
@@ -31,8 +32,10 @@ public class BufferedDatabaseManager
 {
 
 	private LocalDBAbstraction localDB = null;
+	private ExternalDBAbstraction externalDB = null;
 	
 	private ExecutorService localThreadPool;
+	private ExecutorService remoteThreadPool;
 
 	private static BufferedDatabaseManager singletonBufferedDatabaseManager = null;
 
@@ -40,7 +43,9 @@ public class BufferedDatabaseManager
 
 	private BufferedDatabaseManager(String databaseLocation, UserManager um)
 	{
-		this.localDB = DBAbstractionFactory.createAndInitializeDatabase(databaseLocation, DBAbstractionFactory.SQL_IMPLEMENTATION, um);
+		this.localDB = DBAbstractionFactory.createAndInitializeLocalDatabase(databaseLocation, DBAbstractionFactory.SQL_IMPLEMENTATION, um);
+		this.externalDB = DBAbstractionFactory.createAndInitializeExternalDatabase(um);
+		
 		
 		startThreadPools();
 	}
@@ -92,7 +97,7 @@ public class BufferedDatabaseManager
 	{
 		for (final ToolUsage tu : ts.getAsList())
 		{
-			logger.debug("Queueing up tool usage store");
+			logger.debug("Queueing up tool usage store to local");
 			localThreadPool.execute(new Runnable() {
 
 				@Override
@@ -101,6 +106,15 @@ public class BufferedDatabaseManager
 					localDB.storeToolUsage(tu, ts.getAssociatedPlugin());
 				}
 			});
+			
+			remoteThreadPool.execute(new Runnable() {
+				@Override
+				public void run()
+				{
+					externalDB.storeToolUsage(tu, ts.getAssociatedPlugin());
+				}
+			});
+			
 		}
 
 	}
@@ -108,14 +122,17 @@ public class BufferedDatabaseManager
 	private void startThreadPools()
 	{
 		this.localThreadPool = Executors.newSingleThreadExecutor();
+		this.remoteThreadPool = Executors.newSingleThreadExecutor();
 	}
 
 	public void shutDown()
 	{
 		localThreadPool.shutdown();
+		remoteThreadPool.shutdown();
 		try
 		{
 			localThreadPool.awaitTermination(30, TimeUnit.SECONDS);
+			remoteThreadPool.awaitTermination(30, TimeUnit.SECONDS);
 		}
 		catch (InterruptedException e)
 		{
