@@ -40,7 +40,8 @@ public class NotificationManager {
 				
 				icon.displayMessage(title, message, MessageType.INFO);
 				icon.addActionListener(new ActionListener() {
-	                public void actionPerformed(ActionEvent e) {
+	                @Override
+					public void actionPerformed(ActionEvent e) {
 	                	//if the user clicks on the bubble, navigate to 'notifications'
 	            		try {
 	            			URI u = new URI("http", null, "localhost", 4443, "/shareClip",

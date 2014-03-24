@@ -17,8 +17,7 @@ public class DBAbstractionFactory {
 
 	public static ExternalDBAbstraction createAndInitializeExternalDatabase(UserManager um)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return ExternalDBFactory.createDatabase(um, ExternalDBFactory.MYSQL_IMPLEMENTATION);
 	}
 
 }

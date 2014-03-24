@@ -70,7 +70,7 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 		{
 			respondToDoesMediaExist(baseRequest, request, response);
 		}
-		else if (request.getParameter(PERFORM_ACTION).equals(GET_IMAGES_FOR_CLIP))
+		else if (request.getParameter(PERFORM_ACTION).equals(GET_IMAGES_FOR_CLIP)) 
 		{
 			respondToGetClipImages(baseRequest, request, response);
 		}

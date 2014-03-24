@@ -16,8 +16,8 @@ import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolStream;
-import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
 /**
