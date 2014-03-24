@@ -155,14 +155,20 @@ public class ToolStream {
 		}
 		
 	
-		public static ToolUsage buildFromJSONObject(JSONObject jobj) throws JSONException
+		public static ToolUsage buildFromJSONObject(JSONObject jobj)
 		{
 			//TODO change this (eventually) to read the clip_score from the json
-			return new ToolUsage(jobj.getString(ToolStream.TOOL_NAME), jobj.getString(ToolStream.TOOL_CLASS),
-					jobj.getString(ToolStream.TOOL_KEY_PRESSES), new Date(jobj.getLong(ToolStream.TOOL_TIMESTAMP)),
-					jobj.getInt(ToolStream.TOOL_DURATION), 
-					/*just use duration for score */
-					jobj.getInt(ToolStream.TOOL_DURATION));
+			
+			
+			String newToolName = jobj.optString(ToolStream.TOOL_NAME, "[No Name]");
+			String newToolClass = jobj.optString(ToolStream.TOOL_CLASS, "");
+			String newToolKeyPress = jobj.optString(ToolStream.TOOL_KEY_PRESSES, MENU_KEY_PRESS);
+			Date newToolTimeStamp = new Date(jobj.optLong(ToolStream.TOOL_TIMESTAMP, 0));
+			int newToolDuration = jobj.optInt(ToolStream.TOOL_DURATION, 0);
+			
+			
+			return new ToolUsage(newToolName, newToolClass, newToolKeyPress, newToolTimeStamp,
+					newToolDuration, /*just use duration for score */ newToolDuration);
 		}
 	
 		public String getToolName()

@@ -23,6 +23,9 @@ import edu.ncsu.lubick.localHub.UserManager;
 
 public class RemoteMySQLDatabase implements ExternalDBAbstraction {
 
+	private static final Logger logger = Logger.getLogger(RemoteMySQLDatabase.class);
+	private static final long TIME_BETWEEN_RECONNECTS = 30*1000;	//30 seconds for reconnects
+	
 	private UserManager userManager;
 	private Connection connection;
 	private Date lastConnectionAttemptTime = new Date(0);
@@ -30,8 +33,7 @@ public class RemoteMySQLDatabase implements ExternalDBAbstraction {
 	private Queue<SerializablePreparedStatement> queuedStatements = new LinkedList<>();
 	private File serializedStatementsFile;
 
-	private static final Logger logger = Logger.getLogger(RemoteMySQLDatabase.class);
-	private static final long TIME_BETWEEN_RECONNECTS = 0;
+	
 
 	public RemoteMySQLDatabase(UserManager um)
 	{
@@ -65,9 +67,19 @@ public class RemoteMySQLDatabase implements ExternalDBAbstraction {
 			if (logger.isTraceEnabled()) logger.trace(supposedQueue);
 			if (supposedQueue == null || !(supposedQueue instanceof Queue<?>))
 			{
+				logger.error("What I thought to be a queue was actually "+supposedQueue);
 				return;
 			}
-			extractObjectToExecutionQueue(supposedQueue);
+			try {
+				@SuppressWarnings("unchecked")
+				Queue<SerializablePreparedStatement> tempQueue = (Queue<SerializablePreparedStatement>) supposedQueue;
+				this.queuedStatements.addAll(tempQueue);
+			}
+			catch (ClassCastException e)
+			{
+				logger.error("Could not extract queue from disk",e);
+			}
+				
 		}
 		catch (FileNotFoundException e)
 		{
@@ -92,7 +104,7 @@ public class RemoteMySQLDatabase implements ExternalDBAbstraction {
 
 	private boolean maybeTryConnectionReset()
 	{
-		if ((new Date().getTime() - lastConnectionAttemptTime.getTime()) > TIME_BETWEEN_RECONNECTS)
+		if (isTimeForNewAttempt())
 		{
 			if (openRemoteConnection())
 			{
@@ -105,6 +117,35 @@ public class RemoteMySQLDatabase implements ExternalDBAbstraction {
 			return false;
 		}
 		logger.debug("Not attempting reconnect because the time isn't right yet");
+		return false;
+	}
+
+	private boolean isTimeForNewAttempt()
+	{
+		return (new Date().getTime() - lastConnectionAttemptTime.getTime()) > TIME_BETWEEN_RECONNECTS;
+	}
+
+	private boolean openRemoteConnection()
+	{
+		if (this.connection != null)
+		{
+			return false;
+		}
+		Connection newConnection = null;
+		try
+		{
+			newConnection = DriverManager.getConnection("jdbc:mysql://eb2-2291-fas01.csc.ncsu.edu:4747/screencast?user=screencast_user&password=screencast");
+		}
+		catch (SQLException e)
+		{
+			logger.error("Problem connecting to remote MySQLDatabase", e);
+		}
+	
+		if (newConnection != null)
+		{
+			this.connection = newConnection;
+			return true;
+		}
 		return false;
 	}
 
@@ -169,12 +210,6 @@ public class RemoteMySQLDatabase implements ExternalDBAbstraction {
 
 	}
 
-	@SuppressWarnings("unchecked")
-	private void extractObjectToExecutionQueue(Object supposedQueue)
-	{
-		Queue<SerializablePreparedStatement> tempQueue = (Queue<SerializablePreparedStatement>) supposedQueue;
-		this.queuedStatements.addAll(tempQueue);
-	}
 
 	private void setupSerializedStatementsFile()
 	{
@@ -194,30 +229,6 @@ public class RemoteMySQLDatabase implements ExternalDBAbstraction {
 	private PreparedStatement makePreparedStatement(String statementQuery)
 	{
 		return new SerializablePreparedStatement(statementQuery);
-	}
-
-	private boolean openRemoteConnection()
-	{
-		if (this.connection != null)
-		{
-			return false;
-		}
-		java.sql.Connection newConnection = null;
-		try
-		{
-			newConnection = DriverManager.getConnection("jdbc:mysql://eb2-2291-fas01.csc.ncsu.edu:4747/screencast?user=screencast_user&password=screencast");
-		}
-		catch (SQLException e)
-		{
-			logger.error("Problem connecting to MySQLDatabase", e);
-		}
-
-		if (newConnection != null)
-		{
-			this.connection = newConnection;
-			return true;
-		}
-		return false;
 	}
 
 	public void close()

@@ -41,10 +41,10 @@ public class BufferedDatabaseManager
 
 	private static Logger logger = Logger.getLogger(BufferedDatabaseManager.class.getName());
 
-	private BufferedDatabaseManager(String databaseLocation, UserManager um)
+	private BufferedDatabaseManager(String databaseLocation, UserManager um, boolean isDebug)
 	{
 		this.localDB = DBAbstractionFactory.createAndInitializeLocalDatabase(databaseLocation, DBAbstractionFactory.SQL_IMPLEMENTATION, um);
-		this.externalDB = DBAbstractionFactory.createAndInitializeExternalDatabase(um);
+		this.externalDB = DBAbstractionFactory.createAndInitializeExternalDatabase(um, !isDebug);
 		
 		
 		startThreadPools();
@@ -54,14 +54,14 @@ public class BufferedDatabaseManager
 	// called from a multi thread environment, but
 	// this is a bit more bullet proof. It's not time critical, so we should be
 	// all right.
-	public static synchronized BufferedDatabaseManager createBufferedDatabasemanager(String localDatabaseLocation, UserManager um)
+	public static synchronized BufferedDatabaseManager createBufferedDatabasemanager(String localDatabaseLocation, UserManager um, boolean isDebug)
 	{
 		if (singletonBufferedDatabaseManager != null)
 		{
 			return singletonBufferedDatabaseManager;
 		}
 
-		singletonBufferedDatabaseManager = new BufferedDatabaseManager(localDatabaseLocation, um);
+		singletonBufferedDatabaseManager = new BufferedDatabaseManager(localDatabaseLocation, um, isDebug);
 
 		return singletonBufferedDatabaseManager;
 	}

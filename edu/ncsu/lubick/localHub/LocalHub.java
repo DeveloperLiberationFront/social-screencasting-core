@@ -74,13 +74,13 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	{
 		if (!singletonHub.isRunning())
 		{
+			singletonHub.isDebug = isDebug;
 			singletonHub.enableHTTPServer(wantHTTP);
 			singletonHub.enableScreenRecording(wantScreenRecording);
 			singletonHub.enableRemoteToolReporting(wantRemoteToolReporting);
 			singletonHub.setUpUserManager();
 			singletonHub.setDatabaseManager(databaseLocation);
 			singletonHub.setScreencastMonitorLocation(screencastMonitorLocation);
-			singletonHub.isDebug = isDebug;
 			singletonHub.start();
 		}
 
@@ -206,7 +206,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
 	private void setDatabaseManager(String databaseLocation)
 	{
-		this.databaseManager = BufferedDatabaseManager.createBufferedDatabasemanager(databaseLocation, this.userManager);
+		this.databaseManager = BufferedDatabaseManager.createBufferedDatabasemanager(databaseLocation, this.userManager, this.isDebug);
 	}
 
 	private void enableRemoteToolReporting(boolean wantRemoteToolReporting)
