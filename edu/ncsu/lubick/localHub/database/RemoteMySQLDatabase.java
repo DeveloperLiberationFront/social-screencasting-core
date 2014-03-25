@@ -174,7 +174,7 @@ public class RemoteMySQLDatabase implements ExternalDBAbstraction {
 		}
 	}
 
-	protected void executeStatementWithNoResults(PreparedStatement statement)
+	private void executeStatementWithNoResults(PreparedStatement statement)
 	{
 		if (statement instanceof SerializablePreparedStatement)
 		{
@@ -190,6 +190,11 @@ public class RemoteMySQLDatabase implements ExternalDBAbstraction {
 		}
 	}
 
+	private void addToExecutionQueue(SerializablePreparedStatement statement)
+	{
+		this.queuedStatements.add(statement);
+	}
+
 	private void emptyExectutionQueue()
 	{
 		for(SerializablePreparedStatement s:queuedStatements)
@@ -197,11 +202,6 @@ public class RemoteMySQLDatabase implements ExternalDBAbstraction {
 			handleExecutionWhileConnected(s);
 		}
 		queuedStatements.clear();
-	}
-
-	private void addToExecutionQueue(SerializablePreparedStatement statement)
-	{
-		this.queuedStatements.add(statement);
 	}
 
 	private void handleExecutionWhileConnected(SerializablePreparedStatement statement)

@@ -51,7 +51,7 @@ public class UserManager {
 		this.userEmail = userEmail;
 	}
 
-	private void parseOutFile(File initFile)
+	private final void parseOutFile(File initFile)
 	{
 		if (!initFile.exists())
 		{
