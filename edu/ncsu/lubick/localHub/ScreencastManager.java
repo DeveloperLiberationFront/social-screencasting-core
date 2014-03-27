@@ -41,7 +41,7 @@ public class ScreencastManager extends TimerTask{
 			
 			logger.info("Scheduling new screencast monitor");
 			
-			t = new Timer();
+			t = new Timer(true);
 			ScreencastManager sm = new ScreencastManager(folderToMonitor);
 
 

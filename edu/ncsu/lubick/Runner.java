@@ -29,18 +29,19 @@ public class Runner
 	public static void main(String[] args) throws Exception
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
-		setUpTrayIcon();
+		PopupMenu pm = setUpTrayIcon();
 		localHub = LocalHub.startServerForUse("HF/Screencasting/", DEFAULT_DB_LOC);
+		localHub.setTrayIconMenu(pm);
 		Thread.sleep(1000);
 		Desktop.getDesktop().browse(new URI("http://localhost:4443/"));
 	}
 
 
-	private static void setUpTrayIcon()
+	private static PopupMenu setUpTrayIcon()
 	{
 		if (!SystemTray.isSupported()) {
 			Logger.getRootLogger().info("SystemTray is not supported");
-			return;
+			return null;
 		}
 		final TrayIcon trayIcon = new TrayIcon(createImage("/imageAssets/tray_icon_small.png"));
 		trayIcon.setImageAutoSize(true); 
@@ -61,6 +62,8 @@ public class Runner
 
 
 		addTrayIconToSystemTray(trayIcon);
+		
+		return pm;
 	}
 
 	public static void shutDown()

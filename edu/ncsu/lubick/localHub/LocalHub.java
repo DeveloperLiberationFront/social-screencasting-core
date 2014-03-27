@@ -1,5 +1,7 @@
 package edu.ncsu.lubick.localHub;
 
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -411,6 +413,12 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		{
 			hubToDebug.reportToolStream(ts);
 		}
+
+		@Override
+		public void setTrayIconMenu(PopupMenu pm)
+		{
+			hubToDebug.setTrayIconMenu(pm);
+		}
 	
 	
 	}
@@ -425,6 +433,11 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			this.databaseManager.setClipUploaded(clipId, true);
 		}
 		this.clipSharingManager.shareClipWithUser(clipId, recipient);
+	}
+
+	public void setTrayIconMenu(PopupMenu pm)
+	{
+		this.notificationManager.setTrayIconMenu(pm);
 	}
 
 	@Override

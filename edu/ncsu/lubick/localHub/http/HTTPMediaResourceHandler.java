@@ -50,7 +50,7 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 		logger.debug(String.format("HTML Request %s, with target %s", baseRequest.toString(), target));
 		String type = baseRequest.getMethod();
 
-		if (type.equals("POST"))
+		if ("POST".equals(type))
 		{
 			respondToPost(baseRequest, request, response);
 		}
