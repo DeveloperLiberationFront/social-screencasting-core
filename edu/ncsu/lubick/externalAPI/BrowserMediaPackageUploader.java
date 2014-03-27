@@ -98,15 +98,19 @@ public class BrowserMediaPackageUploader {
 		}
 
 		HttpPut httpPut = new HttpPut(putUri);
-		MultipartEntityBuilder mpeBuilder = MultipartEntityBuilder.create();
+		try {
+			MultipartEntityBuilder mpeBuilder = MultipartEntityBuilder.create();
 
-		mpeBuilder.addBinaryBody("image", file);
+			mpeBuilder.addBinaryBody("image", file);
 
-		HttpEntity content = mpeBuilder.build();
+			HttpEntity content = mpeBuilder.build();
 
-		httpPut.setEntity(content);
-		client.execute(httpPut);
-		httpPut.abort();
+			httpPut.setEntity(content);
+			client.execute(httpPut);
+		}
+		finally {
+		httpPut.reset();
+		}
 
 	}
 

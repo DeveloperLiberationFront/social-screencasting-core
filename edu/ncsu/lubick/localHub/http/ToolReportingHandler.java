@@ -24,7 +24,7 @@ public class ToolReportingHandler extends AbstractHandler  {
 	
 	private static Logger logger = Logger.getLogger(ToolReportingHandler.class.getName());
 	
-	ExecutorService threadPool = Executors.newCachedThreadPool();
+	ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
 	public ToolReportingHandler(String location, WebToolReportingInterface toolReportingInterface)
 	{
@@ -50,6 +50,7 @@ public class ToolReportingHandler extends AbstractHandler  {
 		{
 			logger.info("I don't know how to handle a GET like this");
 		}
+		logger.info("Finished handling tools");
 		response.setStatus(HttpServletResponse.SC_ACCEPTED);
 		baseRequest.setHandled(true);
 	}
@@ -61,11 +62,17 @@ public class ToolReportingHandler extends AbstractHandler  {
 		String jsonArrayOfToolUsage = request.getParameter(POST_PROPERTY_JSON_ARRAY_TOOL_USAGES);
 		logger.debug(""+ pluginName+ " " +jsonArrayOfToolUsage);
 		
+		if (pluginName == null || jsonArrayOfToolUsage == null) {
+			logger.info("Bad parameters... not reporting");
+			return;
+		}
+		
 		ToolStream ts = ToolStream.generateFromJSON(jsonArrayOfToolUsage);
 		ts.setAssociatedPlugin(pluginName);
 		
 		
 		asyncReportToolStream(ts);
+		
 	}
 
 	private void asyncReportToolStream(final ToolStream ts)

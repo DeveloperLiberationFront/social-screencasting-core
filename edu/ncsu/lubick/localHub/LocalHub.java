@@ -267,6 +267,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	@Override
 	public void reportToolStream(ToolStream ts)	//requests coming in from the web (usually async)
 	{
+		logger.debug("waiting in line at localHub");
 		synchronized (this)
 		{
 			logger.info("ToolStream Reported from Plugin: "+ts.getAssociatedPlugin());
@@ -289,14 +290,17 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		for (String path: pathsToDelete)
 		{
 			File clipToDelete = new File(path);
-			if (TestingUtils.clearOutDirectory(clipToDelete) && clipToDelete.delete())
-			{
-				logger.info("Deleted clip "+path);
+			if (clipToDelete.exists()) {
+				if (TestingUtils.clearOutDirectory(clipToDelete) && clipToDelete.delete())
+				{
+					logger.info("Deleted clip "+path);
+				}
+				else
+				{
+					logger.error("Could not auto-delete clip - "+path+", maybe it doesn't exist?");
+				}
 			}
-			else
-			{
-				logger.error("Could not auto-delete clip - "+path);
-			}
+			this.databaseManager.reportMediaDeletedForToolUsage(path);
 		}
 	}
 

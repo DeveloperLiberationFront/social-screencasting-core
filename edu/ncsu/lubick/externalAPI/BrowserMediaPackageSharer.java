@@ -81,6 +81,9 @@ public class BrowserMediaPackageSharer {
 		{
 			logger.error("Problem reporting tool info",e);
 		}
+		finally {
+			httpPost.reset();
+		}
 	}
 
 	private JSONObject prepareDataWrapper(String clipId, String email) throws JSONException

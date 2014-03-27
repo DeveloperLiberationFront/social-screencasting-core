@@ -69,6 +69,9 @@ public class ExternalClipRequester {
 		{
 			logger.error("Problem reporting tool info",e);
 		}
+		finally {
+			httpPost.reset();
+		}
 	}
 
 
