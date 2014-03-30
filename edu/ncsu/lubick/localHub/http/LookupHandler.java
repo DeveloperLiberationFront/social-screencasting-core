@@ -67,15 +67,20 @@ public class LookupHandler extends TemplateHandlerWithDatabaseLink {
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_OK);
 		baseRequest.setHandled(true);
-
-		Map<Object, Object> root = getPluginsFollowedDataModelFromDatabase();
-
-		processTemplate(response, root, PLUGIN_VIEWER);
+		
+		List<String> pluginNames = this.databaseLink.getNamesOfAllPlugins();
+		
+		String pluginName = baseRequest.getParameter("pluginName");
+		if (pluginName == null) {
+			pluginName = pluginNames.get(0);
+		}
+		Map<Object,Object> dataModel = getToolUsagesAndCountsFromDatabase(pluginName);
+		
+		processTemplate(response, dataModel, DISPLAY_TOOL_USAGE);
 	}
 
 	private void respondToPost(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
-
 		logger.debug("POST parameters recieved " + request.getParameterMap());
 		logger.debug("PluginName: " + request.getParameter(POST_COMMAND_PLUGIN_NAME));
 
@@ -98,10 +103,12 @@ public class LookupHandler extends TemplateHandlerWithDatabaseLink {
 	{
 		List<ToolUsage> toolUsages = this.databaseLink.getAllToolUsagesForPlugin(pluginName);
 		List<ToolCountTemplateModel> toolsAndCounts = countUpAllToolUsages(toolUsages);
-
+		List<String> pluginNames = this.databaseLink.getNamesOfAllPlugins();
+		
 		Map<Object, Object> retval = new HashMap<>();
 		retval.put("myToolsAndCounts", toolsAndCounts);
 		retval.put("plugin", pluginName);
+		retval.put("pluginNames", pluginNames);
 		addThisUserInfoToModel(retval); 	
 		return retval; 
 	}

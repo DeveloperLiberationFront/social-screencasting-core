@@ -145,6 +145,14 @@ function selectUser() {
     updatePrev();
 }
 
+function selectPlugin() {
+    plugin = $(this).val();
+    url = window.location.href.replace(
+            /[\?#].*|$/, "");
+    window.location.href = url + "?pluginName="+plugin;
+    console.log("selected:"+plugin);
+}
+
 function showUserTools(email) {
     var index, getUrl;
     $("#otherUsersPlaceHolder").text(namesByEmail[currentEmail] + "'s Tools");
@@ -462,6 +470,8 @@ $(document).ready(function () {
     elementPosition = $('#moreInfo').offset();
     //fix it there for scrolling
     $('#moreInfo').css('position', 'fixed').css('top', elementPosition.top).css('left', elementPosition.left);
+
+    $("#pluginSelector").change(selectPlugin);
 
     //handles the click on the view buttons to see if a video file exists
     $("table").on('mouseenter', '.clickMe', handleMouseEnter);

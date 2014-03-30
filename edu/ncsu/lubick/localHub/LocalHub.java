@@ -407,8 +407,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		{
 			hubToDebug.reportToolStream(ts);
 		}
-	
-	
 	}
 
 	@Override
@@ -428,5 +426,4 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	{
 		this.clipShareRequester.requestClipsFromUser(owner, pluginName, toolName);
 	}
-
 }
