@@ -23,8 +23,7 @@ import freemarker.template.Version;
 public abstract class TemplateHandlerWithDatabaseLink extends AbstractHandler {
 
 	private static final String TEMPLATES_DIR = "/templates";
-	protected static final String PLUGIN_VIEWER = "index.html";
-	protected static final String DISPLAY_TOOL_USAGE = "displayToolUsage.html";
+	protected static final String DISPLAY_TOOL_USAGE = "index.html";
 	protected static final String PARAM_PLUGIN_NAME = "pluginName";
 	protected static final String PARAM_TOOL_NAME = "toolName";
 	protected String httpRequestPattern;

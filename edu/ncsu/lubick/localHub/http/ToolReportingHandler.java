@@ -96,6 +96,4 @@ public class ToolReportingHandler extends AbstractHandler  {
 		}
 		return true;
 	}
-	
-
 }

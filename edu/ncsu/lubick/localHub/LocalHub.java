@@ -420,7 +420,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			hubToDebug.setTrayIconMenu(pm);
 		}
 	
-	
+
 	}
 
 	@Override
@@ -445,5 +445,4 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	{
 		this.clipShareRequester.requestClipsFromUser(owner, pluginName, toolName);
 	}
-
 }
