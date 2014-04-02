@@ -4,6 +4,8 @@ var pluginUsers = []; //list of user ids (emails) for users of currentPlugin
 var namesByEmail = {}; //map of email -> name
 var userData = {}; //cache user tool data
 
+var localPath;
+
 var userName, userEmail, userToken;
 var currentPlugin, currentTool, currentClips, currentImageDir, currentEmail;
 var authString;
@@ -464,6 +466,7 @@ $(document).ready(function () {
     userName = $("body").data("name");
     userEmail = $("body").data("email");
     userToken = $("body").data("token");
+	localPath = $("body").data("localPath");
     currentPlugin = $("body").data("plugin");
     authString = "?name=" + userName + "&email=" + userEmail + "&token=" + userToken;
 

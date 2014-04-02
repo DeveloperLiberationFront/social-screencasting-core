@@ -63,8 +63,8 @@ public class HandlerManager
 
 	private static void makeAndAddHandlersForBrowsing(HandlerCollection h, WebQueryInterface wqi)
 	{
-		h.addHandler(new LookupHandler("/", wqi));
-		h.addHandler(new LookupHandler("/index", wqi));
+		h.addHandler(new ToolComparisionHandler("/", wqi));
+		h.addHandler(new ToolComparisionHandler("/index", wqi));
 	}
 
 	private static void makeAndAddHandlersForMediaResources(HandlerCollection h, WebQueryInterface wqi)

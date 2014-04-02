@@ -59,6 +59,7 @@ function setUpPlaybackForDataAuthAndDir(data, auth, imageDir) {
     toolName = data.clip.tool;
     frames = data.clip.filenames;
     for (i = frames.length - 1; i > 0; i--) {
+	//does the name begin with "frame"
         if (frames[i].lastIndexOf("frame", 0) === 0)	//http://stackoverflow.com/a/4579228/1447621
         {
             break;

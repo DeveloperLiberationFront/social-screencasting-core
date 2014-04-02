@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.localHub.http;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,6 +17,7 @@ import org.eclipse.jetty.server.Request;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.ToolCountStruct;
 import freemarker.template.SimpleNumber;
 import freemarker.template.SimpleScalar;
@@ -29,14 +31,14 @@ import freemarker.template.TemplateModelException;
  * @author KevinLubick
  * 
  */
-public class LookupHandler extends TemplateHandlerWithDatabaseLink {
+public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 
 	private static final String POST_COMMAND_PLUGIN_NAME = "pluginName";
 	private static final String POST_COMMAND_GET_TOOL_USAGE_FOR_PLUGIN = "getToolUsageForPlugin";
 	
-	private static final Logger logger = Logger.getLogger(LookupHandler.class);
+	private static final Logger logger = Logger.getLogger(ToolComparisionHandler.class);
 
-	public LookupHandler(String matchPattern, WebQueryInterface databaseLink)
+	public ToolComparisionHandler(String matchPattern, WebQueryInterface databaseLink)
 	{
 		super(matchPattern, databaseLink);
 	}
@@ -109,6 +111,7 @@ public class LookupHandler extends TemplateHandlerWithDatabaseLink {
 		retval.put("myToolsAndCounts", toolsAndCounts);
 		retval.put("plugin", pluginName);
 		retval.put("pluginNames", pluginNames);
+		retval.put("localPath", new File(PostProductionHandler.MEDIA_OUTPUT_FOLDER).getAbsolutePath());
 		addThisUserInfoToModel(retval); 	
 		return retval; 
 	}

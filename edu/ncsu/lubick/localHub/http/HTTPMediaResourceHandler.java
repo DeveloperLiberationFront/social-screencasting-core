@@ -99,6 +99,9 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 				fileNamesArr.put(imageFile);
 			}
 		}
+		else {
+			logger.info("Clip "+clipName+" does not exist");
+		}
 
 
 		try{
@@ -108,6 +111,9 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 			clipObject.put("clip", fileNamesObject);
 
 			response.setContentType("application/json");
+			
+			logger.debug("Returning clip info "+clipName);
+			
 			clipObject.write(response.getWriter());
 		}
 		catch (JSONException e)
