@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.util.component.LifeCycle;
 
 import edu.ncsu.lubick.localHub.ToolStream;
 
@@ -24,12 +25,14 @@ public class ToolReportingHandler extends AbstractHandler  {
 	
 	private static Logger logger = Logger.getLogger(ToolReportingHandler.class.getName());
 	
-	ExecutorService threadPool = Executors.newFixedThreadPool(1);
+	private ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
 	public ToolReportingHandler(String location, WebToolReportingInterface toolReportingInterface)
 	{
 		this.httpRequestPattern = location;
 		this.toolReportingInterface = toolReportingInterface;
+		
+		prepareShutdownListener();
 	}
 
 	@Override
@@ -96,4 +99,37 @@ public class ToolReportingHandler extends AbstractHandler  {
 		}
 		return true;
 	}
+
+	private void prepareShutdownListener()
+	{
+		addLifeCycleListener(new Listener() {
+			
+			@Override
+			public void lifeCycleStopping(LifeCycle event)
+			{
+				threadPool.shutdown();
+			}
+			
+			@Override
+			public void lifeCycleStopped(LifeCycle event)
+			{//nothing
+			}
+			
+			@Override
+			public void lifeCycleStarting(LifeCycle event)
+			{//nothing
+			}
+			
+			@Override
+			public void lifeCycleStarted(LifeCycle event)
+			{//nothing
+			}
+			
+			@Override
+			public void lifeCycleFailure(LifeCycle event, Throwable cause)
+			{//nothing
+			}
+		});
+	}
+
 }

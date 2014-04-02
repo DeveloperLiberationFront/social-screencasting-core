@@ -194,6 +194,7 @@ public class RemoteToolReporter {
 	public void shutDown()
 	{
 		this.reportingTimer.cancel();
+		this.reportingTimer = null;
 	}
 	
 	

@@ -131,8 +131,8 @@ public class BufferedDatabaseManager
 		remoteThreadPool.shutdown();
 		try
 		{
-			localThreadPool.awaitTermination(30, TimeUnit.SECONDS);
-			remoteThreadPool.awaitTermination(30, TimeUnit.SECONDS);
+			localThreadPool.awaitTermination(10, TimeUnit.SECONDS);
+			remoteThreadPool.awaitTermination(10, TimeUnit.SECONDS);
 		}
 		catch (InterruptedException e)
 		{
