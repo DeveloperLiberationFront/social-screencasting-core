@@ -45,7 +45,7 @@ public class ToolReportingHandler extends AbstractHandler  {
 		logger.debug(String.format("HTML Request %s, with target %s", baseRequest.toString(), target));
 		String type = baseRequest.getMethod();
 		
-		if (type.equals("POST"))
+		if (type.equals("POST")) 
 		{
 			respondToPost(request);
 		}
