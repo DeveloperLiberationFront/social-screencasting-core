@@ -125,7 +125,7 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 
 	private void createAnimationImagesForToolStream(ToolUsage toolUsage) throws IOException
 	{
-		if (toolUsage == null || toolUsage.getToolKeyPresses().equals(ToolStream.MENU_KEY_PRESS))
+		if (toolUsage == null || ToolStream.MENU_KEY_PRESS.equals(toolUsage.getToolKeyPresses()))
 		{
 			return; // no animation for menus
 		}

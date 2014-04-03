@@ -52,7 +52,7 @@ public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 		}
 		logger.debug(String.format("HTML Request %s, with target %s", baseRequest.toString(), target));
 		String type = baseRequest.getMethod();
-		if (type.equals("POST"))
+		if ("POST".equals(type))
 		{
 			respondToPost(baseRequest, request, response);
 		}
@@ -174,11 +174,11 @@ public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 		@Override
 		public TemplateModel get(String arg0) throws TemplateModelException
 		{
-			if (arg0.equals("toolName"))
+			if ("toolName".equals(arg0))
 			{
 				return new SimpleScalar(toolName);
 			}
-			if (arg0.equals("toolCount"))
+			if ("toolCount".equals(arg0))
 			{
 				return new SimpleNumber(toolCount);
 			}

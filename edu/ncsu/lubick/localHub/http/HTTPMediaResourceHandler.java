@@ -66,11 +66,11 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 		logger.debug("POST parameters recieved " + request.getParameterMap());
 		logger.debug("PluginName: " + request.getParameter(PARAM_PLUGIN_NAME));
 
-		if (request.getParameter(PERFORM_ACTION).equals(QUERY_CLIP_EXISTANCE))
+		if (QUERY_CLIP_EXISTANCE.equals(request.getParameter(PERFORM_ACTION)))
 		{
 			respondToDoesMediaExist(baseRequest, request, response);
 		}
-		else if (request.getParameter(PERFORM_ACTION).equals(GET_IMAGES_FOR_CLIP)) 
+		else if (GET_IMAGES_FOR_CLIP.equals(request.getParameter(PERFORM_ACTION))) 
 		{
 			respondToGetClipImages(baseRequest, request, response);
 		}
