@@ -500,4 +500,6 @@ $(document).ready(function () {
 	$(".requestPermissions").on('click', requestSharingPermission);
 
     loadPeople();
+	
+	console.log("end of comparison");
 });
