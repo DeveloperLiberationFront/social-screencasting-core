@@ -83,7 +83,8 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
 		{
-			statement.setString(1, ToolStream.makeUniqueIdentifierForToolUsage(tu, getUserEmail()));
+			String uniqueId = ToolStream.makeUniqueIdentifierForToolUsage(tu, getUserEmail());
+			statement.setString(1, uniqueId);
 			statement.setString(2, associatedPlugin);
 			statement.setLong(3, tu.getTimeStamp().getTime());
 			statement.setString(4, tu.getToolName());
@@ -91,6 +92,11 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			statement.setString(6, tu.getToolClass());
 			statement.setInt(7, tu.getDuration());
 			statement.setInt(8, tu.getClipScore());
+			
+			getLogger().debug(String.format("INSERT INTO ToolUsages ( use_id, plugin_name, usage_timestamp, tool_name, tool_key_presses, class_of_tool, "+
+				"tool_use_duration, clip_score  ) VALUES (%s,%s,%d,%s,%s,%s,%d,%d)",
+				uniqueId,associatedPlugin, tu.getTimeStamp().getTime(), tu.getToolName(), tu.getToolKeyPresses(), tu.getToolClass(), tu.getDuration(), tu.getClipScore()));
+			
 			executeStatementWithNoResults(statement);
 		}
 		catch (SQLException e)

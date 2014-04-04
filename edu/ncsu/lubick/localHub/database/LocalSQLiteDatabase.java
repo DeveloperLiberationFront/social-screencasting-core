@@ -97,7 +97,7 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 		}
 		catch (SQLException e)
 		{
-			throw new DBAbstractionException("Problem executing statement",e);
+			throw new DBAbstractionException("Problem executing statement ",e);
 		}
 		
 	}
