@@ -148,7 +148,7 @@ public class RemoteToolReporter {
 	
 	private JSONObject makeAggregateForAllPlugins() throws NoToolDataException
 	{
-		List<String> plugins = databaseManager.getNamesOfAllNonHiddenPlugins();
+		List<String> plugins = databaseManager.getNamesOfAllNonHiddenPlugins(); 
 		if (plugins.isEmpty()) 
 		{
 			throw new NoToolDataException();
