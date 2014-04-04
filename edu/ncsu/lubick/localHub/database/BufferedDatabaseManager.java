@@ -3,6 +3,7 @@ package edu.ncsu.lubick.localHub.database;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -31,6 +32,7 @@ import edu.ncsu.lubick.util.ToolCountStruct;
 public class BufferedDatabaseManager
 {
 
+	private static final String HIDDEN_PLUGIN_PREFIX = "[";
 	private LocalDBAbstraction localDB = null;
 	private ExternalDBAbstraction externalDB = null;
 	
@@ -200,7 +202,7 @@ public class BufferedDatabaseManager
 	}
 
 
-	public List<String> getNamesOfAllPlugins()
+	public List<String> getNamesOfAllNonHiddenPlugins()
 	{
 		FutureTask<List<String> > future = new FutureTask<List<String>>(new Callable<List<String>>() {
 
@@ -215,13 +217,28 @@ public class BufferedDatabaseManager
 		
 		try
 		{
-			return future.get();
+			return filterOutHiddenPlugins(future.get());
 		}
 		catch (InterruptedException | ExecutionException e)
 		{
 			logger.error("Problem with query", e);
 			return Collections.emptyList();
 		}
+	}
+
+	private List<String> filterOutHiddenPlugins(List<String> plugins)
+	{
+		for (Iterator<String> iterator = plugins.iterator(); iterator.hasNext();)
+		{
+			String pluginName =  iterator.next();
+			if (pluginName.startsWith(HIDDEN_PLUGIN_PREFIX))
+			{
+				iterator.remove();
+			}
+			
+		}
+		
+		return plugins;
 	}
 
 	public List<ToolCountStruct> getAllToolAggregateForPlugin(String pluginName)

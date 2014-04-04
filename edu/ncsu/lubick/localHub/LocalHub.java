@@ -256,7 +256,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	@Override
 	public List<String> getNamesOfAllPlugins()
 	{
-		return databaseManager.getNamesOfAllPlugins();
+		return databaseManager.getNamesOfAllNonHiddenPlugins();
 	}
 
 	@Override
