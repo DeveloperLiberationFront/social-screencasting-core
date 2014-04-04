@@ -44,8 +44,8 @@ public class HandlerManager
 		Resource[] staticWebResources = setUpWebResources(h.getClass());
 		
 		//TODO is this causing the memory bloat?
-		Resource[] allWebResources = setUpLocalMediaAssets(staticWebResources);
-		//Resource[] allWebResources = staticWebResources;
+		//Resource[] allWebResources = setUpLocalMediaAssets(staticWebResources);
+		Resource[] allWebResources = staticWebResources;
 		
 		logger.info("Web Resources "+Arrays.toString(allWebResources));
 

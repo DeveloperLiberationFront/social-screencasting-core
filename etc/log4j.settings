@@ -1,5 +1,5 @@
 # Set root logger level and create the appender (output device) mainLogger.
-log4j.rootLogger=debug, mainLogger
+log4j.rootLogger=debug, stdout, filebased
 
 #custom logging levels can go here
 #Format them like log4j.logger.[package].[class name]
@@ -8,18 +8,19 @@ log4j.logger.org.apache = info
 #log4j.logger.edu.ncsu.lubick.unitTests.TestImageCompressionAndDecompression = trace
 #log4j.logger.edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput = trace
 
-# mainLogger is set to be a ConsoleAppender.
-log4j.appender.mainLogger=org.apache.log4j.ConsoleAppender
+# stdout is set to be a ConsoleAppender.
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
 
-# mainLogger is set to be a RollingFileAppender.
-#log4j.appender.mainLogger=org.apache.log4j.RollingFileAppender
-#log4j.appender.mainLogger.MaxBackupIndex = 10
-#log4j.appender.mainLogger.File=screencasting.log
-#log4j.appender.mainLogger.MaxFileSize=3MB
-
-
-# mainLogger uses PatternLayout.
-log4j.appender.mainLogger.layout=org.apache.log4j.PatternLayout
-log4j.appender.mainLogger.layout.ConversionPattern=%-4r [%t] %-5p %c{1} %x - %m%n
+# filebased is set to be a RollingFileAppender.
+log4j.appender.filebased=org.apache.log4j.RollingFileAppender
+log4j.appender.filebased.MaxBackupIndex = 10
+log4j.appender.filebased.File=screencasting.log
+log4j.appender.filebased.MaxFileSize=3MB
 
 
+# both uses PatternLayout.
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%-4r [%t] %-5p %c{1} %x - %m%n
+
+log4j.appender.filebased.layout=org.apache.log4j.PatternLayout
+log4j.appender.filebased.layout.ConversionPattern=%-4r [%t] %-5p %c{1} %x - %m%n

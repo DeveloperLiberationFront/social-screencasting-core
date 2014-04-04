@@ -9,7 +9,7 @@ import edu.ncsu.lubick.localHub.WebQueryInterface;
 public class HTTPServer {
 
 	// HTTP Port Number
-	public static final int SERVER_PORT = 4444;	//XXX go back to 4443 for release
+	public static final int SERVER_PORT = 4443;	//XXX go back to 4443 for release
 
 	// information about the HTTP server
 	public static final String VERSION_ID = "screencasting-1.0";
