@@ -286,7 +286,7 @@ function changeSharedMediaSource(arrayOfClips, clipIndex) {
 
 function changeLocalMediaSource(arrayOfClips, clipIndex) {
     var postUrl;
-    currentImageDir = "/" + arrayOfClips[clipIndex] + "/";
+    currentImageDir = "/" + arrayOfClips[clipIndex];
     postUrl = "/mediaServer";
     currentClips = arrayOfClips;
 
