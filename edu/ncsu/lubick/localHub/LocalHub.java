@@ -1,6 +1,5 @@
 package edu.ncsu.lubick.localHub;
 
-import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.io.File;
 import java.util.ArrayList;

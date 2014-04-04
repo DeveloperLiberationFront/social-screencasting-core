@@ -1,6 +1,5 @@
 package edu.ncsu.lubick.localHub.http;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +16,6 @@ import org.eclipse.jetty.server.Request;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
-import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.ToolCountStruct;
 import freemarker.template.SimpleNumber;
 import freemarker.template.SimpleScalar;
@@ -137,17 +135,6 @@ public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 		}
 		// sort, using the internal comparator
 		Collections.sort(retVal);
-		return retVal;
-	}
-
-	private Map<Object, Object> getPluginsFollowedDataModelFromDatabase()
-	{
-
-		List<String> pluginNames = this.databaseLink.getNamesOfAllPlugins();
-
-		Map<Object, Object> retVal = new HashMap<>();
-		retVal.put("pluginNames", pluginNames);
-
 		return retVal;
 	}
 
