@@ -111,7 +111,6 @@ public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 		retval.put("myToolsAndCounts", toolsAndCounts);
 		retval.put("plugin", pluginName);
 		retval.put("pluginNames", pluginNames);
-		retval.put("localPath", new File(PostProductionHandler.MEDIA_OUTPUT_FOLDER).getAbsolutePath());
 		addThisUserInfoToModel(retval); 	
 		return retval; 
 	}

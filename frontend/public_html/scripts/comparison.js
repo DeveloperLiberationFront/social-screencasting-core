@@ -4,15 +4,13 @@ var pluginUsers = []; //list of user ids (emails) for users of currentPlugin
 var namesByEmail = {}; //map of email -> name
 var userData = {}; //cache user tool data
 
-var localPath;
-
 var userName, userEmail, userToken;
 var currentPlugin, currentTool, currentClips, currentImageDir, currentEmail;
 var authString;
 
 var emailIndex; //index of current email; for rotation purposes
 
-var ascending; //sort order for tables
+var ascending; //sort order for tables 
 
 var requested = {};
 
@@ -39,17 +37,17 @@ function handleMouseLeave() {
 }
 
 function updateShareRequestButton() {
-	$("#requestText").text("You do not have permission to view this user's usages of the tool " + currentTool);
+    $("#requestText").text("You do not have permission to view this user's usages of the tool " + currentTool);
 
     if (requested[currentEmail + currentPlugin + currentTool] === true) {
         $(".requestPermissions").addClass("requested");
         $(".requestPermissions").prop("disabled", true);
-		$(".requestPermissions").text("Requested!");
+        $(".requestPermissions").text("Requested!");
     }
     else {
         $(".requestPermissions").removeClass("requested");
         $(".requestPermissions").prop("disabled", false);
-		$(".requestPermissions").text("Click to Request Permission");
+        $(".requestPermissions").text("Click to Request Permission");
     }
 }
 
@@ -92,12 +90,12 @@ function sortName(a, b) {
 
 function drawToolTable(tools, comparison) {
     var i, newItem;
-    comparison = typeof comparison !== 'undefined' ? comparison : sortCount
+    comparison = (typeof comparison !== 'undefined' ? comparison : sortCount);
 
     //insert them smallest to largest
     for (i = 0; i < tools.length; i++) {
         newItem = $("<tr class='clickMe addedItem'><td>" + tools[i].name + "<td>" + tools[i].count + "</tr>");
-		newItem.data("toolName", tools[i].name);
+        newItem.data("toolName", tools[i].name);
         newItem.appendTo($("#otherPersonsTable tbody"));
     }
 }
@@ -148,11 +146,12 @@ function selectUser() {
 }
 
 function selectPlugin() {
+    var plugin, url;
     plugin = $(this).val();
     url = window.location.href.replace(
             /[\?#].*|$/, "");
-    window.location.href = url + "?pluginName="+plugin;
-    console.log("selected:"+plugin);
+    window.location.href = url + "?pluginName=" + plugin;
+    console.log("selected:" + plugin);
 }
 
 function showUserTools(email) {
@@ -189,16 +188,16 @@ function showUserTools(email) {
 
 function loadPeople() {
     $.ajax({
-        url: "http://screencaster-hub.appspot.com/api/plugin/"+currentPlugin,
+        url: "http://screencaster-hub.appspot.com/api/plugin/" + currentPlugin,
         success: function (data) {
             emailIndex = -1;
 
             //remove this user from the array
-            pluginUsers = Object.keys(data.users).filter(function(e) {
+            pluginUsers = Object.keys(data.users).filter(function (e) {
                 return e != userEmail;
             });
 
-            pluginUsers.forEach(function(email) {
+            pluginUsers.forEach(function (email) {
                 namesByEmail[email] = data.users[email];
             });
 
@@ -209,15 +208,16 @@ function loadPeople() {
 }
 
 function listUsers() {
-    for (var i = 0; i < pluginUsers.length; i++) {
+    var email, i, name, newItem;
+    for (i = 0; i < pluginUsers.length; i++) {
         email = pluginUsers[i];
         name = namesByEmail[email];
 
         newItem = $("<tr class='clickMe addedUser'><td>" + name + "<td>" + email + "</tr>");
-		
-		newItem.data("index", i);
-		newItem.data("email", email);
-		
+
+        newItem.data("index", i);
+        newItem.data("email", email);
+
         newItem.appendTo($("#usersTable tbody"));
     }
 }
@@ -457,8 +457,8 @@ function sortTableByCount() {
     ascending = !ascending;
 }
 
-function sortUsersByEmail() {}
-function sortUsersByName() {}
+function sortUsersByEmail() { }
+function sortUsersByName() { }
 
 $(document).ready(function () {
     var elementPosition;
@@ -466,7 +466,6 @@ $(document).ready(function () {
     userName = $("body").data("name");
     userEmail = $("body").data("email");
     userToken = $("body").data("token");
-	localPath = $("body").data("localPath");
     currentPlugin = $("body").data("plugin");
     authString = "?name=" + userName + "&email=" + userEmail + "&token=" + userToken;
 
@@ -497,9 +496,9 @@ $(document).ready(function () {
     $("table").on('click', ".sortByTool", sortTableByToolName);
     $("table").on('click', ".sortByNum", sortTableByCount);
 
-	$(".requestPermissions").on('click', requestSharingPermission);
+    $(".requestPermissions").on('click', requestSharingPermission);
 
     loadPeople();
-	
-	console.log("end of comparison");
+
+    console.log("end of comparison");
 });
