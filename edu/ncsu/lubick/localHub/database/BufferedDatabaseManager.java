@@ -32,7 +32,7 @@ import edu.ncsu.lubick.util.ToolCountStruct;
 public class BufferedDatabaseManager
 {
 
-	private static final String HIDDEN_PLUGIN_PREFIX = "[";
+	
 	private LocalDBAbstraction localDB = null;
 	private ExternalDBAbstraction externalDB = null;
 	
@@ -231,7 +231,7 @@ public class BufferedDatabaseManager
 		for (Iterator<String> iterator = plugins.iterator(); iterator.hasNext();)
 		{
 			String pluginName =  iterator.next();
-			if (pluginName.startsWith(HIDDEN_PLUGIN_PREFIX))
+			if (pluginName.startsWith(LocalHub.HIDDEN_PLUGIN_PREFIX))
 			{
 				iterator.remove();
 			}

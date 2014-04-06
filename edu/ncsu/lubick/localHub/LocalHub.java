@@ -29,6 +29,8 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	public static final String LOGGING_FILE_PATH = "/etc/log4j.settings";
 	public static final int MAX_TOOL_USAGES = 5;
 	
+	public static final String HIDDEN_PLUGIN_PREFIX = "[";
+	
 	private static final LocalHub singletonHub;
 	private static Logger logger;
 
@@ -307,6 +309,12 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
 	private void potentiallyMakeClipsFromToolStream(ToolStream ts)
 	{
+		if (pluginIsHidden(ts.getAssociatedPlugin())) 
+		{
+			logger.debug("Not making screencasts for "+ts.getAssociatedPlugin()+" because it is hidden");
+			return;
+		}
+		
 		for(ToolUsage tu : ts.getAsList())
 		{
 			if (clipQualityManager.shouldMakeClipForUsage(tu))
@@ -333,6 +341,11 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 				logger.debug("Not making clip from "+tu+" because its score isn't high enough");
 			}
 		}
+	}
+
+	private boolean pluginIsHidden(String pluginName)
+	{
+		return pluginName.startsWith(HIDDEN_PLUGIN_PREFIX);
 	}
 
 	public static String getCurrentUserEmail()
