@@ -143,6 +143,7 @@ function selectUser() {
     showUserTools(currentEmail);
     updateNext();
     updatePrev();
+    
 }
 
 function selectPlugin() {
@@ -177,7 +178,8 @@ function showUserTools(email) {
                 });
                 userData[email] = theseTools;
                 drawToolTable(theseTools);
-
+				ascending = true;		//set ascending to true so that the next call to sort makes them A-Z
+				sortTableByToolName($("#otherPersonsTable"));
             },
             error: function () {
                 console.log("There was a problem displaying user " + email + "'s tools");
@@ -419,9 +421,9 @@ function checkExistanceOfLocalClips(element) {
     });
 }
 
-function sortTableByToolName() {
+function sortTableByToolName(givenTable) {
     var elements, thisTable;
-    thisTable = $(this).closest("table");
+    thisTable = givenTable === undefined ? $(this).closest("table") : givenTable;
 
     elements = thisTable.find("tr").filter(".clickMe");
 
