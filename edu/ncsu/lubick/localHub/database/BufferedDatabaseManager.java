@@ -3,9 +3,11 @@ package edu.ncsu.lubick.localHub.database;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -272,7 +274,10 @@ public class BufferedDatabaseManager
 		}
 		// convert the map back to a list
 		List<ToolCountStruct> retVal = new ArrayList<>();
-		for (String toolName : guiToolCountsMap.keySet())
+		HashSet<String> bulkSet = new HashSet<>(guiToolCountsMap.keySet());
+		bulkSet.addAll(keyboardToolCountsMap.keySet());
+		
+		for (String toolName : bulkSet)
 		{
 			retVal.add(new ToolCountStruct(toolName, guiToolCountsMap.get(toolName), keyboardToolCountsMap.get(toolName)));
 		}
