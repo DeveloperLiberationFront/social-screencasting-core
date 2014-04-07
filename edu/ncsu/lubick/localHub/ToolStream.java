@@ -39,21 +39,23 @@ public class ToolStream {
 		sb.append(name);
 		sb.append(toolUsage.getToolName());
 		sb.append(toolUsage.getTimeStamp().getTime());
-		
+
 		UUID u;
 		try
 		{
 			u = UUID.nameUUIDFromBytes(sb.toString().getBytes("UTF-8"));
-			//add a truncatedName for readability
-			String truncatedName = name.substring(0, name.length()>=8?8:name.length());
-			return truncatedName+u;
+			// add a truncatedName for readability
+			String firstLetter = MENU_KEY_PRESS.equals(toolUsage.keyPresses) ? "G" : "K";
+
+			String truncatedName = name.substring(0, name.length() >= 8 ? 8 : name.length());
+			return firstLetter + truncatedName + u;
 		}
 		catch (UnsupportedEncodingException e)
 		{
-			logger.fatal("Severly wrong encoding",e);
+			logger.fatal("Severly wrong encoding", e);
 		}
 		return null;
-		
+
 	}
 
 	public static ToolStream generateFromJSON(String fileContents)
@@ -62,14 +64,13 @@ public class ToolStream {
 		try
 		{
 			jArray = new JSONArray(fileContents);
-			logger.debug("Array created: "+jArray.toString(1));
+			logger.debug("Array created: " + jArray.toString(1));
 		}
 		catch (JSONException e)
 		{
 			logger.error("Problem reading in from JSON", e);
 			return null;
 		}
-		
 
 		ToolStream ts = new ToolStream();
 
@@ -131,13 +132,13 @@ public class ToolStream {
 	}
 
 	public static class ToolUsage {
-	
+
 		private String toolName, toolClass, keyPresses;
 		private Date timeStamp;
 		private int duration;
 		private String pluginName;
 		private int clipScore;
-	
+
 		private ToolUsage(String toolName, String toolClass, String keyPresses, Date timeStamp, int duration, int clipScore)
 		{
 			this.toolName = toolName.trim();
@@ -147,60 +148,57 @@ public class ToolStream {
 			this.duration = duration;
 			this.clipScore = clipScore;
 		}
-		
+
 		public ToolUsage(String toolName, String toolClass, String keyPresses, String pluginName, Date timeStamp, int duration, int score)
 		{
 			this(toolName, toolClass, keyPresses, timeStamp, duration, score);
 			setPluginName(pluginName);
 		}
-		
-	
+
 		public static ToolUsage buildFromJSONObject(JSONObject jobj)
 		{
-			//TODO change this (eventually) to read the clip_score from the json
-			
-			
+			// TODO change this (eventually) to read the clip_score from the json
+
 			String newToolName = jobj.optString(ToolStream.TOOL_NAME, "[No Name]");
 			String newToolClass = jobj.optString(ToolStream.TOOL_CLASS, "");
 			String newToolKeyPress = jobj.optString(ToolStream.TOOL_KEY_PRESSES, MENU_KEY_PRESS);
 			Date newToolTimeStamp = new Date(jobj.optLong(ToolStream.TOOL_TIMESTAMP, 0));
 			int newToolDuration = jobj.optInt(ToolStream.TOOL_DURATION, 0);
-			
-			
+
 			return new ToolUsage(newToolName, newToolClass, newToolKeyPress, newToolTimeStamp,
-					newToolDuration, /*just use duration for score */ newToolDuration);
+					newToolDuration, /* just use duration for score */newToolDuration);
 		}
-	
+
 		public String getToolName()
 		{
 			return toolName;
 		}
-	
+
 		public String getToolClass()
 		{
 			return toolClass;
 		}
-	
+
 		public String getToolKeyPresses()
 		{
 			return keyPresses;
 		}
-	
+
 		public Date getTimeStamp()
 		{
 			return timeStamp;
 		}
-	
+
 		public int getDuration()
 		{
 			return duration;
 		}
-	
+
 		public String getPluginName()
 		{
 			return this.pluginName;
 		}
-	
+
 		public final void setPluginName(String pluginName)
 		{
 			this.pluginName = pluginName;
@@ -241,10 +239,10 @@ public class ToolStream {
 			if (obj == null)
 				return false;
 			if (!(obj instanceof ToolUsage))
-				return false;			
+				return false;
 			return this.hashCode() == obj.hashCode();
-			
+
 		}
-	
+
 	}
 }
