@@ -5,7 +5,7 @@ var namesByEmail = {}; //map of email -> name
 var userData = {}; //cache user tool data
 
 var userName, userEmail, userToken;
-var currentPlugin, currentTool, currentClips, currentImageDir, currentEmail;
+var currentPlugin, currentTool, currentClips, currentImageDir, currentEmail, currentClipIndex;
 var authString;
 
 var emailIndex; //index of current email; for rotation purposes
@@ -122,7 +122,6 @@ function updatePrev() {
 }
 
 function nextUser() {
-    var getUrl;
     emailIndex = nextIndex(emailIndex);
     currentEmail = pluginUsers[emailIndex];
     showUserTools(currentEmail);
@@ -130,7 +129,6 @@ function nextUser() {
 }
 
 function prevUser() {
-    var getUrl;
     emailIndex = prevIndex(emailIndex);
     currentEmail = pluginUsers[emailIndex];
     showUserTools(currentEmail);
@@ -259,6 +257,7 @@ function changeSharedMediaSource(arrayOfClips, clipIndex) {
     getUrl = currentImageDir + authString;
 
     currentClips = arrayOfClips;
+    currentClipIndex = clipIndex;
 
     makeButtonsForMultipleClips(currentClips);
     modifyMultipleClipButtonsForExternal();
@@ -336,32 +335,40 @@ function showSharedClips(arrayOfClips) {
     $("#placeholder").hide();
     if (arrayOfClips.length === 0) {
         $("#clipLoading").hide();
-        $("#clipDoesNotExist").hide();
+		$("#clipDoesNotExist").hide();
         $("#requestShare").show();
     }
     else {
         $("#clipDoesNotExist").hide();
         $("#requestShare").hide();
         $("#clipLoading").show();
-        changeSharedMediaSource(arrayOfClips, 0);		//start with the first clip
-
+        changeSharedMediaSource(arrayOfClips, 0);		//start with the first clip	from SHARED
     }
-    updateShareRequestButton();
+	updateShareRequestButton();
 }
 
+/*function showSharedClips(arrayOfClips) {
+    if (arrayOfClips.length === 0) {
+        $("#clipDoesNotExist").hide();
+        $("#requestShare").show();
+    }
+    showClips(arrayOfClips);
+    updateShareRequestButton();
+}*/
+
 function showLocalClips(arrayOfClips) {
-    stopFramePlayback();
+	stopFramePlayback();
     $("#placeholder").hide();
     if (arrayOfClips.length === 0) {
-        $("#clipLoading").hide();
-        $("#requestShare").hide();
         $("#clipDoesNotExist").show();
+        $("#requestShare").hide();
+		$("#clipLoading").hide();
     }
     else {
         $("#requestShare").hide();
         $("#clipDoesNotExist").hide();
         $("#clipLoading").show();
-        changeLocalMediaSource(arrayOfClips, 0);		//start with the first clip
+        changeLocalMediaSource(arrayOfClips, 0);		//start with the first clip in LOCAL
 
     }
 }
@@ -462,6 +469,15 @@ function sortTableByCount() {
 function sortUsersByEmail() { }
 function sortUsersByName() { }
 
+function submit_rating() {
+    var url = "http://screencaster-hub.appspot.com/api/" +
+        currentEmail + "/" +
+        currentPlugin + "/" +
+        currentTool + "/" +
+        currentClips[currentClipIndex] + authString;
+    $.post(url, $(this).serialize());
+}
+
 $(document).ready(function () {
     var elementPosition;
     //global variables
@@ -499,6 +515,8 @@ $(document).ready(function () {
     $("table").on('click', ".sortByNum", sortTableByCount);
 
     $(".requestPermissions").on('click', requestSharingPermission);
+
+    $("form#rating").click(submit_rating);
 
     loadPeople();
 
