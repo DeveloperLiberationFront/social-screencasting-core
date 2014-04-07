@@ -82,9 +82,6 @@ $(document).ready(function () {
     console.log("beginning of instrumentation");
 
     $("#pluginSelector").change(selectPlugin);
-    $(document).on('click', '.myItem', function () {
-        queueToolUse(new ToolUsage("Select Local Tool", "[GUI]", currentPlugin + ":" + $(this).data("toolName")));
-    });
 
     $(document).on('click', '.addedUser', function () {
         queueToolUse(new ToolUsage("View tools of user", "[GUI]",
@@ -93,6 +90,22 @@ $(document).ready(function () {
     });
 
     monitorSorts();
+
+    $("#otherPersonsTable").on('click', '.addedItem', function () {
+        queueToolUse(new ToolUsage("Select External Tool", "[GUI]", currentPlugin + ":" + $(this).data("toolName")));
+    });
+
+    $(document).on('click', '.myItem', function () {
+        queueToolUse(new ToolUsage("Select Local Tool", "[GUI]", currentPlugin + ":" + $(this).data("toolName")));
+    });
+
+    $(document).on('click', '.playImage', function () {
+        queueToolUse(new ToolUsage("Play screencast", "[GUI]", ""));
+    });
+
+    $(document).on('click', '.viewOther', function () {
+        queueToolUse(new ToolUsage("Switch example to", "[GUI]", $(this).text()));
+    });
 
     detectedClickCommand("Loaded Interface");
     setInterval(reportToolUsages, 60000);
