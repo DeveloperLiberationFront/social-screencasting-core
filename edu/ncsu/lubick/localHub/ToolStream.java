@@ -45,10 +45,10 @@ public class ToolStream {
 		{
 			u = UUID.nameUUIDFromBytes(sb.toString().getBytes("UTF-8"));
 			// add a truncatedName for readability
-			String firstLetter = MENU_KEY_PRESS.equals(toolUsage.keyPresses) ? "G" : "K";
+			String lastLetter = MENU_KEY_PRESS.equals(toolUsage.keyPresses) ? "G" : "K";
 
 			String truncatedName = name.substring(0, name.length() >= 8 ? 8 : name.length());
-			return firstLetter + truncatedName + u;
+			return truncatedName + u + lastLetter;
 		}
 		catch (UnsupportedEncodingException e)
 		{
