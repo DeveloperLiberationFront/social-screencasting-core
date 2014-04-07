@@ -181,20 +181,30 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 
 
 	@Override
-	public List<ToolUsage> getBestNInstancesOfToolUsage(int n, String pluginName, String toolName)
+	public List<ToolUsage> getBestNInstancesOfToolUsage(int n, String pluginName, String toolName, boolean isKeyboardShortcutHuh)
 	{
-		List<ToolUsage> toolUsages = new ArrayList<>();
-
 		StringBuilder sqlQueryBuilder = new StringBuilder();
 		sqlQueryBuilder.append("SELECT * FROM ToolUsages ");
-		sqlQueryBuilder.append("WHERE plugin_name=? AND tool_name=? ORDER BY clip_score DESC");
-		sqlQueryBuilder.append(" LIMIT "+n);
+		sqlQueryBuilder.append("WHERE plugin_name=? AND tool_name=? AND ");
+		
+		if (isKeyboardShortcutHuh)
+		{
+			sqlQueryBuilder.append("tool_key_presses<>?");
+		}
+		else 
+		{
+			sqlQueryBuilder.append("tool_key_presses=?");
+		}
+		
+		sqlQueryBuilder.append(" ORDER BY clip_score DESC LIMIT ");
+		sqlQueryBuilder.append(n);
 
 		PreparedStatement statement = makePreparedStatement(sqlQueryBuilder.toString());
 		try
 		{
 			statement.setString(1, pluginName);
 			statement.setString(2, toolName);
+			statement.setString(3, ToolStream.MENU_KEY_PRESS);
 		}
 		catch (SQLException e)
 		{
@@ -202,6 +212,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		}
 
 
+		List<ToolUsage> toolUsages = new ArrayList<>();
 		try (ResultSet results = executeWithResults(statement);)
 		{
 			// perform the query
@@ -214,7 +225,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				int duration = results.getInt("tool_use_duration");
 				int clipScore = results.getInt("clip_score");
 
-				toolUsages.add(new ToolUsage(toolName, toolClass, keyPresses, pluginName, timestamp, duration, clipScore));
+				toolUsages .add(new ToolUsage(toolName, toolClass, keyPresses, pluginName, timestamp, duration, clipScore));
 			}
 
 		}
@@ -252,46 +263,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		return retVal;
 	}
 
-	@Override
-	public List<Integer> getTopScoresForToolUsage(int maxToolUsages, String pluginName, String toolName)
-	{
-		List<Integer> scores = new ArrayList<>();
 
-		StringBuilder sqlQueryBuilder = new StringBuilder();
-		sqlQueryBuilder.append("SELECT clip_score FROM ToolUsages ");
-		sqlQueryBuilder.append("WHERE plugin_name=? AND tool_name=? ORDER BY clip_score DESC");
-		sqlQueryBuilder.append(" LIMIT "+maxToolUsages);
-
-		PreparedStatement statement = makePreparedStatement(sqlQueryBuilder.toString());
-		try
-		{
-			statement.setString(1, pluginName);
-			statement.setString(2, toolName);
-		}
-		catch (SQLException e)
-		{
-			throw new DBAbstractionException("There was a problem of the params in getLastNInstancesOfToolUsage()", e);
-		}
-
-
-		try (ResultSet results = executeWithResults(statement);)
-		{
-			// perform the query
-			while (results.next())
-			{
-				int clipScore = results.getInt("clip_score");
-
-				scores.add(clipScore);
-			}
-
-		}
-		catch (SQLException ex)
-		{
-			throw new DBAbstractionException(ex);
-		}
-
-		return scores;
-	}
 
 	/*
 	 * "CREATE TABLE IF NOT EXISTS Clips ( " +

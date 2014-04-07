@@ -145,3 +145,9 @@ td, tr, th{
 #rating {
     float: right;
 }
+
+.noClips {
+	border:1px solid black;
+	padding:3px;
+	margin-left:10px;
+}

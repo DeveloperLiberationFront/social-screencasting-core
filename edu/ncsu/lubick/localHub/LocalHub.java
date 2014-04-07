@@ -355,9 +355,9 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	}
 
 	@Override
-	public List<File> getBestExamplesOfTool(String pluginName, String toolName)
+	public List<File> getBestExamplesOfTool(String pluginName, String toolName, boolean isKeyboardHuh)
 	{
-		List<ToolUsage> usages = this.databaseManager.getBestNInstancesOfToolUsage(5, pluginName, toolName);
+		List<ToolUsage> usages = this.databaseManager.getBestNInstancesOfToolUsage(5, pluginName, toolName, isKeyboardHuh);
 		
 		List<File> retVal = new ArrayList<>();
 		

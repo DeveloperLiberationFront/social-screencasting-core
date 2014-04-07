@@ -21,10 +21,11 @@ import edu.ncsu.lubick.localHub.WebQueryInterface;
 public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink implements Handler {
 
 	private static final String PARAM_CLIP_NAME = "clipName";
+	
 	private static final String PERFORM_ACTION = "thingToDo";
-
 	private static final String QUERY_CLIP_EXISTANCE = "queryClipExistance";
 	private static final String GET_IMAGES_FOR_CLIP = "getImages";
+	
 
 
 	private static Logger logger;
@@ -132,26 +133,35 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 		String pluginName = request.getParameter(PARAM_PLUGIN_NAME);
 		String toolName = request.getParameter(PARAM_TOOL_NAME);
 
-		List<File> browserPackages = databaseLink.getBestExamplesOfTool(pluginName, toolName);
+		List<File> keyClips = databaseLink.getBestExamplesOfTool(pluginName, toolName, true);
 
-		JSONArray jarr = new JSONArray();
-		for(File f: browserPackages)
+		List<File> guiClips = databaseLink.getBestExamplesOfTool(pluginName, toolName, false);
+		
+		JSONArray keyJarr = new JSONArray();
+		for(File f: keyClips)
 		{
-			jarr.put(f.getName());
+			keyJarr.put(f.getName());
+		}
+		
+		JSONArray guiJarr = new JSONArray();
+		for(File f: guiClips)
+		{
+			guiJarr.put(f.getName());
 		}
 		JSONObject clips = new JSONObject();
 
 		try
 		{
-			/*// Testing data
-			jarr.put("Testingfdcb42bc-b6c2-3884-ad3a-4179e19e771d");
-			jarr.put("Testing4115af06-d507-3e79-96ba-9d2c6689ad9b");
-			jarr.put("Testing68f1890b-421e-3e56-9f0e-5c08e97bca55");
-			jarr.put("Testing6fbf2c0d-3521-379c-8f87-48380fe5806d");
-			jarr.put("Testing2dd3c700-e17a-332d-b71c-fdcd6bae8fd0");
-			*/
+			// Testing data
+			keyJarr.put("Eclipsef100758a-fc1f-3cdb-a1c0-7287f184d10d");
+			keyJarr.put("Eclipsee667cfd3-0bd8-3af8-93d7-10d16ab2f854");
+			//guiJarr.put("Eclipsee434f382-7183-3cc5-8380-2137816a48d4");
+			//guiJarr.put("Eclipse47397aaf-c70f-3aa1-9df5-a87f5a583af3");
+			//guiJarr.put("Eclipse06ac5c3c-da64-3300-9a74-6fed83aa2722");
+
 			
-			clips.put("clips",jarr);
+			clips.put("keyclips",keyJarr);
+			clips.put("guiclips",guiJarr);
 
 			response.setContentType("application/json");
 			clips.write(response.getWriter());

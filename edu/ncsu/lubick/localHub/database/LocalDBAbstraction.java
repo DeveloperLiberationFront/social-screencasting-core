@@ -13,11 +13,11 @@ public abstract class LocalDBAbstraction
 
 	public abstract void close();
 
-	public abstract List<ToolUsage> getBestNInstancesOfToolUsage(int n, String pluginName, String toolName);
+	public abstract List<ToolUsage> getBestNInstancesOfToolUsage(int n, String pluginName, String toolName, boolean isKeyboardShortcutHuh);
 
 	public abstract List<String> getNamesOfAllPlugins();
 
-	public abstract List<Integer> getTopScoresForToolUsage(int maxToolUsages, String pluginName, String toolName);
+	//public abstract List<Integer> getTopScoresForToolUsage(String pluginName, String toolName, boolean isKeyboardShortcutHuh);
 
 	public abstract List<String> getExcesiveTools();
 

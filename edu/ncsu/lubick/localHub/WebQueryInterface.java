@@ -9,7 +9,7 @@ public interface WebQueryInterface {
 
 	List<String> getNamesOfAllPlugins();
 
-	List<File> getBestExamplesOfTool(String pluginName, String toolName);
+	List<File> getBestExamplesOfTool(String pluginName, String toolName, boolean isKeyboardHuh);
 
 	void shareClipWithUser(String clipId, String recipient);
 

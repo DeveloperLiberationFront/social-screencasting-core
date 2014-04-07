@@ -44,9 +44,11 @@ public class ToolStream {
 		try
 		{
 			u = UUID.nameUUIDFromBytes(sb.toString().getBytes("UTF-8"));
-			// add a truncatedName for readability
+			
 			String lastLetter = MENU_KEY_PRESS.equals(toolUsage.keyPresses) ? "G" : "K";
 
+			// add a truncatedName for readability (so we know, when browsing in the files,
+			//what plugin it belongs to)
 			String truncatedName = name.substring(0, name.length() >= 8 ? 8 : name.length());
 			return truncatedName + u + lastLetter;
 		}

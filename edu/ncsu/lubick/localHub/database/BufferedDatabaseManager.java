@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -179,14 +178,14 @@ public class BufferedDatabaseManager
 	}
 
 
-	public List<ToolUsage> getBestNInstancesOfToolUsage(final int n, final String pluginName, final String toolName)
+	public List<ToolUsage> getBestNInstancesOfToolUsage(final int n, final String pluginName, final String toolName, final boolean isKeyboardShortcut)
 	{
 		FutureTask<List<ToolUsage> > future = new FutureTask<List<ToolUsage>>(new Callable<List<ToolUsage>>() {
 
 			@Override
 			public List<ToolUsage> call() throws Exception
 			{
-				return localDB.getBestNInstancesOfToolUsage(n, pluginName, toolName);
+				return localDB.getBestNInstancesOfToolUsage(n, pluginName, toolName, isKeyboardShortcut);
 			}
 		});
 		
@@ -285,30 +284,6 @@ public class BufferedDatabaseManager
 		Collections.sort(retVal);
 		
 		return retVal;
-	}
-
-	public List<Integer> getTopScoresForToolUsage(final ToolUsage tu)
-	{
-		FutureTask<List<Integer> > future = new FutureTask<List<Integer>>(new Callable<List<Integer>>() {
-
-			@Override
-			public List<Integer> call() throws Exception
-			{
-				return localDB.getTopScoresForToolUsage(LocalHub.MAX_TOOL_USAGES, tu.getPluginName(), tu.getToolName());
-			}
-		});
-			
-		this.localThreadPool.execute(future);
-		
-		try
-		{
-			return future.get();
-		}
-		catch (InterruptedException | ExecutionException e)
-		{
-			logger.error("Problem with query", e);
-			return Collections.emptyList();
-		}
 	}
 
 	public List<String> getExcesiveTools()
