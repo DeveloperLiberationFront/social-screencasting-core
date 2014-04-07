@@ -539,7 +539,7 @@ $(document).ready(function () {
     var elementPosition;
     //global variables
     userName = $("body").data("name");
-    userEmail = $("body").data("email");
+    userEmail = $("body").data("email").replace(/\+/g, "%2b");
     userToken = $("body").data("token");
     currentPlugin = $("body").data("plugin");
     authString = "?name=" + userName + "&email=" + userEmail + "&token=" + userToken;
