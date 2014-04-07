@@ -249,13 +249,26 @@ public class BufferedDatabaseManager
 		// add the toolusages to the map
 		for (ToolUsage tu : toolUsages)
 		{
-			Integer previousCount = guiToolCountsMap.get(tu.getToolName());
-			if (previousCount == null)
+			
+			if (ToolStream.MENU_KEY_PRESS.equals(tu.getToolKeyPresses()))
 			{
-				previousCount = 0;
+				Integer guiPreviousCount = guiToolCountsMap.get(tu.getToolName());
+				if (guiPreviousCount == null)
+				{
+					guiPreviousCount = 0;
+				}
+				guiToolCountsMap.put(tu.getToolName(), guiPreviousCount + 1);
 			}
-			guiToolCountsMap.put(tu.getToolName(), previousCount + 1);
-			keyboardToolCountsMap.put(tu.getToolName(), previousCount + 1);
+			else 
+			{
+				Integer keyPreviousCount = keyboardToolCountsMap.get(tu.getToolName());
+				if (keyPreviousCount == null)
+				{
+					keyPreviousCount = 0;
+				}
+				keyboardToolCountsMap.put(tu.getToolName(), keyPreviousCount + 1);
+			}
+
 		}
 		// convert the map back to a list
 		List<ToolCountStruct> retVal = new ArrayList<>();

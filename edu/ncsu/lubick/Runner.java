@@ -11,6 +11,7 @@ import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.apache.log4j.Logger;
@@ -18,6 +19,7 @@ import org.apache.log4j.Logger;
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.LocalHubProcess;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
+import edu.ncsu.lubick.localHub.http.HTTPServer;
 
 public class Runner
 {
@@ -33,7 +35,12 @@ public class Runner
 		localHub = LocalHub.startServerForUse("HF/Screencasting/", DEFAULT_DB_LOC);
 		localHub.setTrayIconMenu(pm);
 		Thread.sleep(1000);
-		Desktop.getDesktop().browse(new URI("http://localhost:4443/"));
+		Desktop.getDesktop().browse(buildStartingURI());
+	}
+	
+	private static URI buildStartingURI() throws URISyntaxException
+	{
+		return new URI("http", null, "localhost", HTTPServer.SERVER_PORT, "/", null, null);
 	}
 
 

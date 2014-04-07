@@ -144,9 +144,9 @@ public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 
 		@Override
 		public String toString()
-		{ // for debugging
-			return "ToolCountTemplateModel [toolName=" + toolName + ", toolCount="
-					+ guiToolCount + "]";
+		{
+			return "ToolCountTemplateModel [toolName=" + toolName + ", guiToolCount=" + 
+					guiToolCount + ", keyboardCount=" + keyboardCount + "]";
 		}
 
 		@Override
@@ -156,9 +156,13 @@ public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 			{
 				return new SimpleScalar(toolName);
 			}
-			if ("toolCount".equals(arg0))
+			if ("guiToolCount".equals(arg0))
 			{
 				return new SimpleNumber(guiToolCount);
+			}
+			if ("keyToolCount".equals(arg0))
+			{
+				return new SimpleNumber(keyboardCount);
 			}
 			throw new TemplateModelException("Does not have a " + arg0);
 		}

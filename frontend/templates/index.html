@@ -32,7 +32,7 @@
       <#list myToolsAndCounts as thisToolCount>
       <tr class='clickMe myItem' data-tool-name="${thisToolCount.toolName}">
         <td>${thisToolCount.toolName}</td>
-	    <td>${thisToolCount.toolCount}</td>
+	    <td>${thisToolCount.guiToolCount}/${thisToolCount.keyToolCount}</td>
       </tr>
       </#list>
     </table>

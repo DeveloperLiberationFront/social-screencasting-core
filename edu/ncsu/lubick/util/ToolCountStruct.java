@@ -3,14 +3,14 @@ package edu.ncsu.lubick.util;
 public class ToolCountStruct implements Comparable<ToolCountStruct> {
 
 	public final String toolName;
-	public final Integer guiToolCount;	
+	public final Integer guiToolCount;
 	public final Integer keyboardCount;
-	
-	public ToolCountStruct(String toolName, int guiCount, int keyboardCount)
+
+	public ToolCountStruct(String toolName, Integer guiCount, Integer keyboardCount)
 	{
 		this.toolName = toolName;
-		this.guiToolCount = guiCount;
-		this.keyboardCount = keyboardCount;
+		this.guiToolCount = (guiCount == null ? 0 : guiCount.intValue());
+		this.keyboardCount = (keyboardCount == null ? 0 : keyboardCount.intValue());
 	}
 
 	@Override
@@ -18,24 +18,21 @@ public class ToolCountStruct implements Comparable<ToolCountStruct> {
 	{
 		int thisTotal = guiToolCount + keyboardCount;
 		int otherTotal = o.guiToolCount + o.keyboardCount;
-		
-		
+
 		if (thisTotal != otherTotal)
 		{
-			return otherTotal - thisTotal; // reversed (from a standard compare) so that Collections.sort 
-											//sorts in descending order
+			return otherTotal - thisTotal; // reversed (from a standard compare) so that Collections.sort
+											// sorts in descending order
 		}
-		//if tied, then sort by gui tool count
+		// if tied, then sort by gui tool count
 		if (this.guiToolCount.compareTo(o.guiToolCount) != 0)
 		{
 			return o.guiToolCount.compareTo(this.guiToolCount); // reversed so that Collections.sort sorts in
-															// descending order
+			// descending order
 		}
-		//if still tied, go alphabetically
+		// if still tied, go alphabetically
 		return o.toolName.compareTo(this.toolName);
 	}
-	
-	
 
 	@Override
 	public int hashCode()
