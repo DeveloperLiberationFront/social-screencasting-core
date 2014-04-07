@@ -3,13 +3,9 @@ package edu.ncsu.lubick.localHub;
 import java.io.File;
 import java.util.List;
 
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
 public interface WebQueryInterface {
-
-	@Deprecated
-	List<ToolUsage> getAllToolUsagesForPlugin(String pluginName);
 
 	List<String> getNamesOfAllPlugins();
 

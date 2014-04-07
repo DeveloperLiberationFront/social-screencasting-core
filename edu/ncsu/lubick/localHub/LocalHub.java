@@ -261,13 +261,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	{
 		return databaseManager.getNamesOfAllNonHiddenPlugins();
 	}
-
-	@Deprecated
-	@Override
-	public List<ToolUsage> getAllToolUsagesForPlugin(String pluginName)
-	{
-		return databaseManager.getAllToolUsageHistoriesForPlugin(pluginName);
-	}
 	
 	@Override
 	public List<ToolCountStruct> getAllToolAggregateForPlugin(String pluginName)
@@ -407,12 +400,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			return hubToDebug.isRunning();
 		}
 	
-	
-		@Override
-		public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName)
-		{
-			return hubToDebug.getAllToolUsagesForPlugin(currentPluginName);
-		}
 	
 		@Override
 		public void shutDown()

@@ -46,7 +46,7 @@ function registerGUIClick(selector, toolName) {
     });
 }
 
-function selectPlugin() {
+function selectPluginChanged() {
     queuedToolUsages.push(new ToolUsage("Changed plugin", "[GUI]", this.value));
     reportToolUsages();
 }
@@ -81,7 +81,7 @@ function monitorSorts() {
 $(document).ready(function () {
     console.log("beginning of instrumentation");
 
-    $("#pluginSelector").change(selectPlugin);
+    $(document).on('change','#pluginSelector', selectPluginChanged);
 
     $(document).on('click', '.addedUser', function () {
         queueToolUse(new ToolUsage("View tools of user", "[GUI]",

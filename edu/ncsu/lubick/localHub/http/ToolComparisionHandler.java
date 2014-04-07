@@ -123,31 +123,6 @@ public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 		return retVal;
 	}
 
-//	@Deprecated
-//	private List<ToolCountTemplateModel> countUpAllToolUsages(List<ToolUsage> toolUsages)
-//	{
-//		//TODO this is duplicated code.  Perhaps refactor
-//		Map<String, Integer> toolCountsMap = new HashMap<>();
-//		// add the toolusages to the map
-//		for (ToolUsage tu : toolUsages)
-//		{
-//			Integer previousCount = toolCountsMap.get(tu.getToolName());
-//			if (previousCount == null)
-//			{
-//				previousCount = 0;
-//			}
-//			toolCountsMap.put(tu.getToolName(), previousCount + 1);
-//		}
-//		// convert the map back to a list
-//		List<ToolCountTemplateModel> retVal = new ArrayList<>();
-//		for (String toolName : toolCountsMap.keySet())
-//		{
-//			retVal.add(new ToolCountTemplateModel(toolName, toolCountsMap.get(toolName)));
-//		}
-//		// sort, using the internal comparator
-//		Collections.sort(retVal);
-//		return retVal;
-//	}
 
 	/*
 	 * implements TemplatehashModel so that in the templates, its fields can be accessed via ${toolNameAndCount.toolCount}

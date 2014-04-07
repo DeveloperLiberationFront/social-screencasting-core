@@ -125,7 +125,7 @@ public class RemoteToolReporter {
 		pathBuilder.append(userManager.getUserEmail());
 		try
 		{
-			return new URI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), HTTPUtils.getUnEscapedUserAuthURL(userManager), null);
+			return HTTPUtils.buildURI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), userManager);
 		}
 		catch (URISyntaxException e)
 		{
@@ -178,9 +178,12 @@ public class RemoteToolReporter {
 		JSONObject retVal = new JSONObject();
 		for(ToolCountStruct tcs: counts)
 		{
+			JSONObject tempObject = new JSONObject();
 			try
 			{
-				retVal.put(tcs.toolName, tcs.guiToolCount);
+				tempObject.put("gui", tcs.guiToolCount);
+				tempObject.put("keyboard", tcs.keyboardCount);
+				retVal.put(tcs.toolName, tempObject);
 			}
 			catch (JSONException e)
 			{
@@ -215,12 +218,14 @@ public class RemoteToolReporter {
 
 		StringBuilder pathBuilder = new StringBuilder("/api/");
 		
-		UserManager um = new UnitTestUserManager("Test User", "test@mailinator.com", "123");
+		UserManager um = new UnitTestUserManager("Kevins Bad Test", "kjlubick%2btest@ncsu.edu", "221ed3d8-6a09-4967-91b6-482783ec5313");
 		
 		pathBuilder.append(um.getUserEmail());
-		URI u = new URI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), HTTPUtils.getUnEscapedUserAuthURL(um), null);
+		URI u = HTTPUtils.buildURI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), um);
 		
 		HttpPut httpPut = new HttpPut(u);
+		
+		logger.info(httpPut);
 
 		try
 		{

@@ -128,7 +128,7 @@ public class BrowserMediaPackageUploader {
 		pathBuilder.append("/");
 		pathBuilder.append(reportingName);
 
-		return new URI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), HTTPUtils.getUnEscapedUserAuthURL(userManager), null);
+		return HTTPUtils.buildURI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), userManager);
 	}
 
 
