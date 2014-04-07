@@ -333,9 +333,10 @@ function viewOtherExample() {
 function showSharedClips(arrayOfClips) {
     stopFramePlayback();
     $("#placeholder").hide();
+    $("#rating").show();
     if (arrayOfClips.length === 0) {
         $("#clipLoading").hide();
-		$("#clipDoesNotExist").hide();
+        $("#clipDoesNotExist").hide();
         $("#requestShare").show();
     }
     else {
@@ -344,7 +345,7 @@ function showSharedClips(arrayOfClips) {
         $("#clipLoading").show();
         changeSharedMediaSource(arrayOfClips, 0);		//start with the first clip	from SHARED
     }
-	updateShareRequestButton();
+    updateShareRequestButton();
 }
 
 /*function showSharedClips(arrayOfClips) {
@@ -357,12 +358,13 @@ function showSharedClips(arrayOfClips) {
 }*/
 
 function showLocalClips(arrayOfClips) {
-	stopFramePlayback();
+    stopFramePlayback();
     $("#placeholder").hide();
+    $("#rating").hide();
     if (arrayOfClips.length === 0) {
         $("#clipDoesNotExist").show();
         $("#requestShare").hide();
-		$("#clipLoading").hide();
+        $("#clipLoading").hide();
     }
     else {
         $("#requestShare").hide();
