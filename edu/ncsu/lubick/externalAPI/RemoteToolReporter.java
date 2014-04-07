@@ -125,7 +125,7 @@ public class RemoteToolReporter {
 		pathBuilder.append(userManager.getUserEmail());
 		try
 		{
-			return HTTPUtils.buildURI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), userManager);
+			return HTTPUtils.buildExternalHttpURI(pathBuilder.toString(), userManager);
 		}
 		catch (URISyntaxException e)
 		{
@@ -221,7 +221,7 @@ public class RemoteToolReporter {
 		UserManager um = new UnitTestUserManager("Kevins Bad Test", "kjlubick%2btest@ncsu.edu", "221ed3d8-6a09-4967-91b6-482783ec5313");
 		
 		pathBuilder.append(um.getUserEmail());
-		URI u = HTTPUtils.buildURI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), um);
+		URI u = HTTPUtils.buildExternalHttpURI(pathBuilder.toString(), um);
 		
 		HttpPut httpPut = new HttpPut(u);
 		

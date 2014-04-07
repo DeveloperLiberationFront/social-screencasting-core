@@ -92,7 +92,7 @@ public class ExternalClipRequester {
 	{
 		StringBuilder pathBuilder = new StringBuilder("/api/request-share");
 
-		return HTTPUtils.buildURI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), userManager);
+		return HTTPUtils.buildExternalHttpURI(pathBuilder.toString(), userManager);
 	}
 
 

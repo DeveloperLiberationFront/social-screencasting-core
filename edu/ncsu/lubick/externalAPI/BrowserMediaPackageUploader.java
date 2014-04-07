@@ -128,7 +128,7 @@ public class BrowserMediaPackageUploader {
 		pathBuilder.append("/");
 		pathBuilder.append(reportingName);
 
-		return HTTPUtils.buildURI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), userManager);
+		return HTTPUtils.buildExternalHttpURI(pathBuilder.toString(), userManager);
 	}
 
 

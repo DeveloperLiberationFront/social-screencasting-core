@@ -101,6 +101,6 @@ public class BrowserMediaPackageSharer {
 	{
 		StringBuilder pathBuilder = new StringBuilder("/api/share");
 
-		return HTTPUtils.buildURI("http", HTTPUtils.BASE_URL, pathBuilder.toString(), userManager);
+		return HTTPUtils.buildExternalHttpURI(pathBuilder.toString(), userManager);
 	}
 }
