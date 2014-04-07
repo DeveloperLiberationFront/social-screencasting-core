@@ -243,24 +243,25 @@ public class BufferedDatabaseManager
 
 	public List<ToolCountStruct> getAllToolAggregateForPlugin(String pluginName)
 	{
-		//Note: doesn't hit the database at all
 		List<ToolUsage> toolUsages = getAllToolUsageHistoriesForPlugin(pluginName);
-		Map<String, Integer> toolCountsMap = new HashMap<>();
+		Map<String, Integer> guiToolCountsMap = new HashMap<>();
+		Map<String, Integer> keyboardToolCountsMap = new HashMap<>();
 		// add the toolusages to the map
 		for (ToolUsage tu : toolUsages)
 		{
-			Integer previousCount = toolCountsMap.get(tu.getToolName());
+			Integer previousCount = guiToolCountsMap.get(tu.getToolName());
 			if (previousCount == null)
 			{
 				previousCount = 0;
 			}
-			toolCountsMap.put(tu.getToolName(), previousCount + 1);
+			guiToolCountsMap.put(tu.getToolName(), previousCount + 1);
+			keyboardToolCountsMap.put(tu.getToolName(), previousCount + 1);
 		}
 		// convert the map back to a list
 		List<ToolCountStruct> retVal = new ArrayList<>();
-		for (String toolName : toolCountsMap.keySet())
+		for (String toolName : guiToolCountsMap.keySet())
 		{
-			retVal.add(new ToolCountStruct(toolName, toolCountsMap.get(toolName)));
+			retVal.add(new ToolCountStruct(toolName, guiToolCountsMap.get(toolName), keyboardToolCountsMap.get(toolName)));
 		}
 		// sort, using the internal comparator
 		Collections.sort(retVal);

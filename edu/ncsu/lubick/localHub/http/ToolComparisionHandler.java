@@ -2,7 +2,6 @@ package edu.ncsu.lubick.localHub.http;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +13,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Request;
 
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
 import edu.ncsu.lubick.util.ToolCountStruct;
 import freemarker.template.SimpleNumber;
@@ -101,8 +99,8 @@ public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 
 	private Map<Object, Object> getToolUsagesAndCountsFromDatabase(String pluginName)
 	{
-		List<ToolUsage> toolUsages = this.databaseLink.getAllToolUsagesForPlugin(pluginName);
-		List<ToolCountTemplateModel> toolsAndCounts = countUpAllToolUsages(toolUsages);
+		List<ToolCountStruct> toolUsages = this.databaseLink.getAllToolAggregateForPlugin(pluginName);
+		List<ToolCountTemplateModel> toolsAndCounts = convertToTemplateModels(toolUsages);
 		List<String> pluginNames = this.databaseLink.getNamesOfAllPlugins();
 		
 		Map<Object, Object> retval = new HashMap<>();
@@ -113,30 +111,43 @@ public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 		return retval; 
 	}
 
-	private List<ToolCountTemplateModel> countUpAllToolUsages(List<ToolUsage> toolUsages)
+	private List<ToolCountTemplateModel> convertToTemplateModels(List<ToolCountStruct> toolcounts)
 	{
-		//TODO this is duplicated code.  Perhaps refactor
-		Map<String, Integer> toolCountsMap = new HashMap<>();
-		// add the toolusages to the map
-		for (ToolUsage tu : toolUsages)
-		{
-			Integer previousCount = toolCountsMap.get(tu.getToolName());
-			if (previousCount == null)
-			{
-				previousCount = 0;
-			}
-			toolCountsMap.put(tu.getToolName(), previousCount + 1);
-		}
-		// convert the map back to a list
 		List<ToolCountTemplateModel> retVal = new ArrayList<>();
-		for (String toolName : toolCountsMap.keySet())
+		
+		for(ToolCountStruct count:toolcounts) 
 		{
-			retVal.add(new ToolCountTemplateModel(toolName, toolCountsMap.get(toolName)));
+			retVal.add(new ToolCountTemplateModel(count));
 		}
-		// sort, using the internal comparator
-		Collections.sort(retVal);
+		
 		return retVal;
 	}
+
+//	@Deprecated
+//	private List<ToolCountTemplateModel> countUpAllToolUsages(List<ToolUsage> toolUsages)
+//	{
+//		//TODO this is duplicated code.  Perhaps refactor
+//		Map<String, Integer> toolCountsMap = new HashMap<>();
+//		// add the toolusages to the map
+//		for (ToolUsage tu : toolUsages)
+//		{
+//			Integer previousCount = toolCountsMap.get(tu.getToolName());
+//			if (previousCount == null)
+//			{
+//				previousCount = 0;
+//			}
+//			toolCountsMap.put(tu.getToolName(), previousCount + 1);
+//		}
+//		// convert the map back to a list
+//		List<ToolCountTemplateModel> retVal = new ArrayList<>();
+//		for (String toolName : toolCountsMap.keySet())
+//		{
+//			retVal.add(new ToolCountTemplateModel(toolName, toolCountsMap.get(toolName)));
+//		}
+//		// sort, using the internal comparator
+//		Collections.sort(retVal);
+//		return retVal;
+//	}
 
 	/*
 	 * implements TemplatehashModel so that in the templates, its fields can be accessed via ${toolNameAndCount.toolCount}
@@ -144,9 +155,15 @@ public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 	 */
 	private class ToolCountTemplateModel extends ToolCountStruct implements TemplateHashModel
 	{
-		public ToolCountTemplateModel(String toolName, int toolCount)
+		public ToolCountTemplateModel(String toolName, int guiToolCount, int keyboardCount)
 		{
-			super(toolName.replace("'","&#39").replace("\"", "&#34"), toolCount);
+			super(toolName.replace("'","&#39").replace("\"", "&#34"), guiToolCount, keyboardCount);
+		}
+
+
+		public ToolCountTemplateModel(ToolCountStruct count)
+		{
+			this(count.toolName,count.guiToolCount, count.keyboardCount);
 		}
 
 
@@ -154,7 +171,7 @@ public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 		public String toString()
 		{ // for debugging
 			return "ToolCountTemplateModel [toolName=" + toolName + ", toolCount="
-					+ toolCount + "]";
+					+ guiToolCount + "]";
 		}
 
 		@Override
@@ -166,7 +183,7 @@ public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 			}
 			if ("toolCount".equals(arg0))
 			{
-				return new SimpleNumber(toolCount);
+				return new SimpleNumber(guiToolCount);
 			}
 			throw new TemplateModelException("Does not have a " + arg0);
 		}

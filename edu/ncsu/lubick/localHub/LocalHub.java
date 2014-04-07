@@ -23,6 +23,7 @@ import edu.ncsu.lubick.localHub.http.WebToolReportingInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.FileUtilities;
+import edu.ncsu.lubick.util.ToolCountStruct;
 
 public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
@@ -261,12 +262,19 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		return databaseManager.getNamesOfAllNonHiddenPlugins();
 	}
 
+	@Deprecated
 	@Override
 	public List<ToolUsage> getAllToolUsagesForPlugin(String pluginName)
 	{
 		return databaseManager.getAllToolUsageHistoriesForPlugin(pluginName);
 	}
 	
+	@Override
+	public List<ToolCountStruct> getAllToolAggregateForPlugin(String pluginName)
+	{
+		return databaseManager.getAllToolAggregateForPlugin(pluginName);
+	}
+
 	@Override
 	public void reportToolStream(ToolStream ts)	//requests coming in from the web (usually async)
 	{

@@ -180,7 +180,7 @@ public class RemoteToolReporter {
 		{
 			try
 			{
-				retVal.put(tcs.toolName, tcs.toolCount);
+				retVal.put(tcs.toolName, tcs.guiToolCount);
 			}
 			catch (JSONException e)
 			{
