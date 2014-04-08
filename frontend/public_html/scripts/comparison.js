@@ -487,7 +487,7 @@ function checkExistanceOfLocalClips(element) {
 
 function sortTableByToolName(givenTable) {
     var elements, thisTable;
-    thisTable = givenTable === undefined ? $(this).closest("table") : givenTable;
+    thisTable = givenTable.hasOwnProperty('target') ? $(givenTable.target).closest("table") : givenTable
 
     elements = thisTable.find("tr").filter(".clickMe");
 
