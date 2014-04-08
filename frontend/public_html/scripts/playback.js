@@ -131,7 +131,7 @@ function getImageForFrameNumber(frameNumber) {
 function preloadImages() {
     var p, i;
     p = $("#panel");
-    for (i = 1; i < totalFrames; i++) {
+    for (i = 0; i < totalFrames; i++) {
         getImageForFrameNumber(i).appendTo(p);
     }
 

@@ -6,7 +6,7 @@
 }
 
 h1 {
-	margin-top:5%;
+	margin-top:5px;
 }
 
 #sidebar {
@@ -43,6 +43,7 @@ h1 {
 .noClips {
 	position:absolute;
 	bottom:0;
+	left:0;
 	color: red;
 }
 
