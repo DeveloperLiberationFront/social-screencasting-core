@@ -122,6 +122,26 @@ public class BufferedDatabaseManager
 
 	}
 
+	public void writeToolUsageToDatabase(final ToolUsage tu)
+	{
+		localThreadPool.execute(new Runnable() {
+
+			@Override
+			public void run()
+			{
+				localDB.storeToolUsage(tu, tu.getPluginName());
+			}
+		});
+		
+		remoteThreadPool.execute(new Runnable() {
+			@Override
+			public void run()
+			{
+				externalDB.storeToolUsage(tu, tu.getPluginName());
+			}
+		});
+	}
+
 	private void startThreadPools()
 	{
 		this.localThreadPool = Executors.newSingleThreadExecutor();

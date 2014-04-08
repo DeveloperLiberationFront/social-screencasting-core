@@ -28,6 +28,13 @@ public class NotificationManager {
 	
 	private MenuItem noNotifications = new MenuItem("No requests... for now");
 
+	private NotificationListener listener;
+
+	public NotificationManager(NotificationListener localHub)
+	{
+		this.listener = localHub;
+	}
+
 	public void handlePossibleNotification(JSONObject responseObject)
 	{
 		if (!responseObject.has("notifications"))
@@ -35,10 +42,15 @@ public class NotificationManager {
 			return;
 		}
 		
+		
+		
 		TrayIcon icon = Runner.getTrayIcon();
 		if (icon != null) {
 			try {
 				JSONArray messages = responseObject.getJSONArray("notifications");
+				
+				listener.notificationRecieved(messages.toString(2));
+				
 				JSONObject notification = messages.getJSONObject(0); 
 				String message = notification.getString("message");
 				final String pluginName = notification.getString("plugin");

@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+
+
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.ScreenRecordingModule;
@@ -25,7 +27,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.FileUtilities;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
-public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
+public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, NotificationListener {
 
 	public static final String LOGGING_FILE_PATH = "/etc/log4j.settings";
 	public static final int MAX_TOOL_USAGES = 5;
@@ -146,7 +148,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		
 		if (shouldReportToolsRemotely)
 		{
-			this.notificationManager = new NotificationManager();
+			this.notificationManager = new NotificationManager(this);
 			this.remoteToolReporter = new RemoteToolReporter(this.databaseManager, userManager, this.notificationManager);
 		}
 	}
@@ -284,6 +286,15 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			
 			cleanUpObsoleteClips();
 		}	
+	}
+	
+	/**
+	 * Meant for internal reporting
+	 * @param tu
+	 */
+	private void reportToolUsage(ToolUsage tu) {
+		logger.debug("Internal tool usage reported" + tu);
+		this.databaseManager.writeToolUsageToDatabase(tu);
 	}
 
 	private void cleanUpObsoleteClips()
@@ -451,5 +462,12 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	public void requestClipsFromUser(String owner, String pluginName, String toolName)
 	{
 		this.clipShareRequester.requestClipsFromUser(owner, pluginName, toolName);
+	}
+
+	@Override
+	public void notificationRecieved(String notifications)
+	{
+		ToolUsage tu = new ToolUsage("Notification received", notifications, "[GUI]", "[ScreencastingHub]", new Date(), 10, 10);
+		reportToolUsage(tu);
 	}
 }
