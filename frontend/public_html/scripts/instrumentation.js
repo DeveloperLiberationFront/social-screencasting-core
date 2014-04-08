@@ -77,6 +77,48 @@ function monitorSorts() {
     });
 }
 
+function monitor(selector, message, details, event, application) {
+    //default arguments
+    details = (details === undefined) ? '' : details;
+    event = (event === undefined) ? 'click' : event;
+    application = (application === undefined) ? '[GUI]' : application;
+
+    $(document).on(event, selector, function() {
+        var d = $.isFunction(details) ? details() : details;
+        console.log(message + ": " + d);
+        queueToolUse(new ToolUsage(message, application, d));
+    });
+}
+
+function monitorSharing() {
+    monitor('.requestPermissions', 'Request share', function(){ 
+        return currentClips[currentClipIndex];
+    });
+    monitor('.shareClip', 'Share clip with user', function(){
+        return getIthClip(currentView);
+    });
+    monitor('.shareAll', 'Share clip with everybody', function(){
+        return getIthClip(currentView);
+    });
+    monitor('.noClips', 'Reject share request',  function(){
+        return getIthClip(currentView);
+    });
+}
+
+function monitorNavigation() {
+    monitor('#prevUser', 'Previous user', function(){ 
+        //assuming already decremented by the time we get here
+        return pluginUsers[nextIndex(emailIndex)] +
+            " -> " + pluginUsers[emailIndex];
+    });
+    monitor('#nextUser', 'Next user', function(){ 
+        //assuming already decremented by the time we get here
+        return pluginUsers[prevIndex(emailIndex)] +
+            " -> " + pluginUsers[emailIndex];
+    });
+    monitor(null, 'Gained focus', '', 'focus');
+    monitor(null, 'Lost focus', '', 'blur');
+}
 
 $(document).ready(function () {
     console.log("beginning of instrumentation");
@@ -90,6 +132,8 @@ $(document).ready(function () {
     });
 
     monitorSorts();
+    monitorSharing();
+    monitorNavigation();
 
     $("#otherPersonsTable").on('click', '.addedItem', function () {
         queueToolUse(new ToolUsage("Select External Tool", "[GUI]", currentPlugin + ":" + $(this).data("toolName")));
