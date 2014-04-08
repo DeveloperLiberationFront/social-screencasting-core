@@ -199,6 +199,19 @@ function shareClip() {
     });
 }
 
+function shareAll() {
+    $(".viewOther").eq(currentView).addClass("shared");
+    $("#sidebar .shareClip").prop("disabled", true);
+    $("#sidebar .shareClip").addClass("disabled");
+    $("#sidebar .shareClip").text("Shared!");
+
+    $.ajax({
+        type: "post",
+        url: "/shareClip",
+        data: { clipId: getIthClip(currentView), recipient: "all" }
+    });
+}
+
 $(document).ready(function () {
 
     console.log(urlParams);
@@ -209,6 +222,7 @@ $(document).ready(function () {
     $("#viewOtherDiv").on('click', 'button', viewOtherExample);
     $("#sidebar").on('click', '.noClips', shareNoClips);
     $("#sidebar").on('click', '.shareClip', shareClip);
+	$("#sidebar").on('click', '.shareAll', shareAll);
 
     checkExistanceOfLocalClips(urlParams.pluginName, urlParams.toolName);
 
