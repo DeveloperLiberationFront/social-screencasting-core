@@ -4,4 +4,5 @@ public interface NotificationListener {
 
 	void notificationRecieved(String notifications);
 
+	void notificationClickedOn(String notification);
 }

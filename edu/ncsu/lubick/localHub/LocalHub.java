@@ -8,6 +8,7 @@ import java.util.List;
 
 
 
+
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.ScreenRecordingModule;
@@ -468,6 +469,13 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	public void notificationRecieved(String notifications)
 	{
 		ToolUsage tu = new ToolUsage("Notification received", notifications, "[GUI]", "[ScreencastingHub]", new Date(), 10, 10);
+		reportToolUsage(tu);
+	}
+
+	@Override
+	public void notificationClickedOn(String notification)
+	{
+		ToolUsage tu = new ToolUsage("Respond to notification", notification, "[GUI]", "[ScreencastingHub]", new Date(), 10, 10);
 		reportToolUsage(tu);
 	}
 }

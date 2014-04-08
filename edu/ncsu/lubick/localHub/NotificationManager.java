@@ -74,6 +74,7 @@ public class NotificationManager {
 							Desktop.getDesktop().browse(u);
 							
 							markNotificationAsHandled(newNotification);
+							listener.notificationClickedOn(pluginName+":"+toolName+":"+recipientEmail);
 						} catch (IOException | URISyntaxException e1) {
 							Logger.getRootLogger().error("Error loading notifications page", e1);
 						}
