@@ -5,7 +5,7 @@ var namesByEmail = {}; //map of email -> name
 var userData = {}; //cache user tool data
 
 var userName, userEmail, userToken;
-var currentPlugin, currentTool, currentClips, currentImageDir, currentEmail, currentClipIndex;
+var currentPlugin, currentTool, currentImageDir, currentEmail, currentClipIndex;
 var currentGuiClips = [];
 var currentKeyClips = [];
 
@@ -80,24 +80,31 @@ function modifyMultipleClipButtonsForExternal() {
     $("#viewOtherDiv").find("button").data("source", "external");
 }
 
-//JSON tuple {name="name", count=42}
-function sortCount(a, b) {
-    return a.count - b.count;		//sorts so that smaller count numbers come first because we insert smallest elements first
-}
+////JSON tuple {name="name", count=42}
+//function sortCount(a, b) {
+//    return a.count - b.count;		//sorts so that smaller count numbers come first because we insert smallest elements first
+//}
 
-//JSON tuple {name="name", count=42}
-function sortName(a, b) {
-    return b.name.localeCompare(a.name);
-}
+////JSON tuple {name="name", count=42}
+//function sortName(a, b) {
+//    return b.name.localeCompare(a.name);
+//}
 
 
-function drawToolTable(tools, comparison) {
+function drawToolTable(tools) {
     var i, newItem;
-    comparison = (typeof comparison !== 'undefined' ? comparison : sortCount);
 
     //insert them smallest to largest
     for (i = 0; i < tools.length; i++) {
-        newItem = $("<tr class='clickMe addedItem'><td>" + tools[i].name + "<td>" + tools[i].count + "</tr>");
+        newItem = "<tr class='clickMe addedItem'><td>" + tools[i].name;
+
+        if ("object" == typeof (tools[i].count)) {
+            newItem = newItem + "<td>" + tools[i].count.gui + "/" + tools[i].count.keyboard + "</tr>";
+        } else {
+            newItem = newItem + "<td>" + tools[i].count + "</tr>";
+        }
+
+        newItem = $(newItem);
         newItem.data("toolName", tools[i].name);
         newItem.appendTo($("#otherPersonsTable tbody"));
     }
@@ -179,8 +186,8 @@ function showUserTools(email) {
                 });
                 userData[email] = theseTools;
                 drawToolTable(theseTools);
-                ascending = true;		//set ascending to true so that the next call to sort makes them A-Z
-                sortTableByToolName($("#otherPersonsTable"));
+                ascending = false;		//set ascending to false so that the next call to sort makes them lo to hi
+                sortTableByCount($("#otherPersonsTable"));
             },
             error: function () {
                 console.log("There was a problem displaying user " + email + "'s tools");
@@ -225,32 +232,13 @@ function listUsers() {
     }
 }
 
-function makeButtonsForMultipleClips(arrayOfClips) {
-    var i, newButton, insertionPoint;
-    if (arrayOfClips.length > 1) {
-        //clear out old buttons
-        $("#viewOtherDiv").find("button").remove();
-        $("#viewOtherDiv").show();
-        insertionPoint = $("#viewOtherSpot");
-        for (i = 0; i < arrayOfClips.length; i++) {
-            newButton = $('<button class="viewOther"></button>');
-            newButton.text("Example " + (i + 1));
-            newButton.data("index", i);
-            insertionPoint.before(newButton);
-        }
-    }
-    else {
-        $("#viewOtherDiv").hide();
-    }
-}
-
-function makeButtonsForMultipleGuiAndKeyClips(currentGuiClips, currentKeyClips) {
-	var i, j, newButton, insertionPoint;
+function makeButtonsForMultipleGuiAndKeyClips() {
+    var i, j, newButton, insertionPoint;
 	
     if (currentKeyClips.length + currentGuiClips.length > 1) {
         //clear out old buttons
         $("#viewOtherDiv").find("button").remove();
-		$("#viewOtherDiv").find("div").remove();
+        $("#viewOtherDiv").find("div").remove();
         $("#viewOtherDiv").show();
 		
         insertionPoint = $("#viewOtherSpot");
@@ -260,34 +248,26 @@ function makeButtonsForMultipleGuiAndKeyClips(currentGuiClips, currentKeyClips) 
             newButton.data("index", i);
             insertionPoint.before(newButton);
         }
-		if (currentGuiClips.length === 0) {
-			insertionPoint.before("<div class='noClipsShared'>No clips demonstrating GUI use</div>");
-		}
+        if (currentGuiClips.length === 0) {
+            insertionPoint.before("<div class='noClipsShared'>No clips demonstrating GUI use</div>");
+        }
 		
-		insertionPoint.before("<div>More keyboard shortcut uses:</div>");
-		insertionPoint.before("<div></div>");
+        insertionPoint.before("<div>More keyboard shortcut uses:</div>");
+        insertionPoint.before("<div></div>");
 		
-		for (j = 0; j < currentKeyClips.length; j++) {
+        for (j = 0; j < currentKeyClips.length; j++) {
             newButton = $('<button class="viewOther"></button>');
             newButton.text("Example " + (j + 1));
             newButton.data("index", i + j);
             insertionPoint.before(newButton);
         }
-		if (currentKeyClips.length === 0) {
-			insertionPoint.before("<div class='noClipsShared'>No clips demonstrating keyboard shortcut use</div>");
-		}
+        if (currentKeyClips.length === 0) {
+            insertionPoint.before("<div class='noClipsShared'>No clips demonstrating keyboard shortcut use</div>");
+        }
 		
     }
     else {
         $("#viewOtherDiv").hide();
-    }
-}
-
-function highlightNthButton(n) {
-    if (currentClips.length > 1) {
-        var buttons = $("#viewOtherDiv").find("button");
-        buttons.removeClass("activated");
-        buttons.eq(n).addClass("activated");
     }
 }
 
@@ -299,18 +279,27 @@ function highlightNthButtonGuiAndKey(n) {
     }
 }
 
+//Wraps around from GUIclips to KeyClips
+function getIthClip(clipIndex) {
+    if (clipIndex < currentGuiClips.length) {
+        return currentGuiClips[clipIndex];
+    }
+    return currentKeyClips[clipIndex - currentGuiClips.length];
+}
 
-function changeSharedMediaSource(arrayOfClips, clipIndex) {
-    var getUrl;
-    currentImageDir = "http://screencaster-hub.appspot.com/api/" + currentEmail + "/" + currentPlugin + "/" + currentTool + "/" + arrayOfClips[clipIndex];
+function changeSharedMediaSource(clipIndex) {
+    var getUrl, clipName;
+
+    clipName = getIthClip(clipIndex);
+
+    currentImageDir = "http://screencaster-hub.appspot.com/api/" + currentEmail + "/" + currentPlugin + "/" + currentTool + "/" + clipName;
     getUrl = currentImageDir + authString;
 
-    currentClips = arrayOfClips;
     currentClipIndex = clipIndex;
 
-    makeButtonsForMultipleClips(currentClips);
+    makeButtonsForMultipleGuiAndKeyClips();
     modifyMultipleClipButtonsForExternal();
-    highlightNthButton(clipIndex);
+    highlightNthButtonGuiAndKey(clipIndex);
 
     //clear out all frames
     $(".frame").remove();
@@ -332,13 +321,7 @@ function changeSharedMediaSource(arrayOfClips, clipIndex) {
     //this will return the html to view the media
 }
 
-//Wraps around from GUIclips to KeyClips
-function getIthClip(clipIndex) {
-	if (clipIndex < currentGuiClips.length) {
-		return currentGuiClips[clipIndex];
-	}
-	return currentKeyClips[clipIndex - currentGuiClips.length];
-}
+
 
 
 function changeLocalMediaSource(clipIndex) {
@@ -349,7 +332,7 @@ function changeLocalMediaSource(clipIndex) {
     currentImageDir = "/" + clipName;
     postUrl = "/mediaServer";
 
-    makeButtonsForMultipleGuiAndKeyClips(currentGuiClips, currentKeyClips);
+    makeButtonsForMultipleGuiAndKeyClips();
     modifyMultipleClipButtonsForLocal();
     highlightNthButtonGuiAndKey(clipIndex);
 
@@ -380,7 +363,7 @@ function viewOtherExample() {
     var e = $(this);
 
     if (e.data("source") == "external") {
-        changeSharedMediaSource(currentClips, e.data("index"));
+        changeSharedMediaSource(e.data("index"));
     }
     else {
         changeLocalMediaSource(e.data("index"));
@@ -388,11 +371,15 @@ function viewOtherExample() {
 
 }
 
-function showSharedClips(arrayOfClips) {
+function showSharedClips(arrayOfGuiClips, arrayOfKeyClips) {
+    var totalClips;
     stopFramePlayback();
     $("#placeholder").hide();
     $("#rating").show();
-    if (arrayOfClips.length === 0) {
+    
+    totalClips = arrayOfGuiClips.length + arrayOfKeyClips.length;
+	
+    if (totalClips === 0) {
         $("#clipLoading").hide();
         $("#clipDoesNotExist").hide();
         $("#requestShare").show();
@@ -401,18 +388,20 @@ function showSharedClips(arrayOfClips) {
         $("#clipDoesNotExist").hide();
         $("#requestShare").hide();
         $("#clipLoading").show();
-        changeSharedMediaSource(arrayOfClips, 0);		//start with the first clip	from SHARED
+        currentGuiClips = arrayOfGuiClips;
+        currentKeyClips = arrayOfKeyClips;
+        changeSharedMediaSource(0);		//start with the first clip	from SHARED
     }
-    updateShareRequestButton();
+    updateShareRequestButton(); 
 }
 
 function showLocalClips(arrayOfGuiClips, arrayOfKeyClips) {
-	var totalClips;
+    var totalClips;
     stopFramePlayback();
     $("#placeholder").hide();
     $("#rating").hide();
 	
-	totalClips = arrayOfGuiClips.length + arrayOfKeyClips.length;
+    totalClips = arrayOfGuiClips.length + arrayOfKeyClips.length;
 	
     if (totalClips === 0) {
         $("#clipDoesNotExist").show();
@@ -423,8 +412,8 @@ function showLocalClips(arrayOfGuiClips, arrayOfKeyClips) {
         $("#requestShare").hide();
         $("#clipDoesNotExist").hide();
         $("#clipLoading").show();
-		currentGuiClips = arrayOfGuiClips;
-		currentKeyClips = arrayOfKeyClips;
+        currentGuiClips = arrayOfGuiClips;
+        currentKeyClips = arrayOfKeyClips;
         changeLocalMediaSource(0);		//start with the first clip in LOCAL
 
     }
@@ -448,7 +437,7 @@ function checkExistanceOfShare(element) {
             console.log(data);
             console.log(JSON.stringify(data));
 
-            showSharedClips(data.clips);
+            showSharedClips(data.guiclips, data.keyclips);
         },
         error: function () {
             console.log("There was a problem");
@@ -487,7 +476,7 @@ function checkExistanceOfLocalClips(element) {
 
 function sortTableByToolName(givenTable) {
     var elements, thisTable;
-    thisTable = givenTable.hasOwnProperty('target') ? $(givenTable.target).closest("table") : givenTable
+    thisTable = (givenTable.hasOwnProperty('target') ? $(givenTable.target).closest("table") : givenTable);
 
     elements = thisTable.find("tr").filter(".clickMe");
 
@@ -504,16 +493,29 @@ function sortTableByToolName(givenTable) {
     ascending = !ascending;
 }
 
-function sortTableByCount() {
+function sortTableByCount(givenTable) {
     var elements, thisTable;
-    thisTable = $(this).closest("table");
+    thisTable = (givenTable.hasOwnProperty('target') ? $(givenTable.target).closest("table") : givenTable);
 
     elements = thisTable.find("tr").filter(".clickMe");
 
     elements.sortElements(function (a, b) {
         var first, second;
-        first = +$(a.childNodes[1]).text().trim();
-        second = +$(b.childNodes[1]).text().trim();
+        first = $(a.childNodes[1]).text().trim();
+		if (first.indexOf("/") == -1) {
+			first = +first;
+		} else {
+			first = first.split("/");
+			first = +first[0] + +first[1];		//converts the 5/8 to (int)5 + (int)8
+		}
+        second = $(b.childNodes[1]).text().trim();
+		if (second.indexOf("/") == -1) {
+			second = +second;
+		} else {
+			second = second.split("/");
+			second = +second[0] + +second[1];		//converts the 5/8 to (int)5 + (int)8
+		}
+		
         if (ascending) {
             return first - second;
         } else {
@@ -531,7 +533,7 @@ function submit_rating() {
         currentEmail + "/" +
         currentPlugin + "/" +
         currentTool + "/" +
-        currentClips[currentClipIndex] + authString;
+        getIthClip(currentClipIndex) + authString;
     $.post(url, $(this).serialize());
 }
 
@@ -539,10 +541,10 @@ $(document).ready(function () {
     var elementPosition;
     //global variables
     userName = $("body").data("name");
-    userEmail = $("body").data("email").replace(/\+/g, "%2b");
+    userEmail = $("body").data("email");
     userToken = $("body").data("token");
     currentPlugin = $("body").data("plugin");
-    authString = "?name=" + userName + "&email=" + userEmail + "&token=" + userToken;
+    authString = "?name=" + userName + "&email=" + userEmail.replace(/\+/g, "%2b") + "&token=" + userToken;
 
     elementPosition = $('#moreInfo').offset();
     //fix it there for scrolling
