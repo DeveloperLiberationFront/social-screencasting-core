@@ -51,9 +51,22 @@ function selectPluginChanged() {
     reportToolUsages();
 }
 
+function monitor(selector, message, details, event, application) {
+    //default arguments
+    details = (details === undefined) ? '' : details;
+    event = (event === undefined) ? 'click' : event;
+    application = (application === undefined) ? '[GUI]' : application;
+
+    $(document).on(event, selector, function() {
+        var d = $.isFunction(details) ? details() : details;
+        console.log(message + ": " + d);
+        queueToolUse(new ToolUsage(message, application, d));
+    });
+}
+
 function monitorSorts() {
-    $(document).on('click', '.sortByTool', function () {
-        queueToolUse(new ToolUsage("Sort tools alphabetically", "[GUI]", "ascending: " + !ascending));
+    monitor('.sortByTool', "Sort tools alphabetically", function() {
+        return "ascending: " + !ascending;
         //report !ascending because by the time this callback happens, the sort has already happened and ascending
         //refers to what the next sort should be
     });
@@ -74,19 +87,6 @@ function monitorSorts() {
         queueToolUse(new ToolUsage("Sort emails by email address", "[GUI]", "ascending: " + !ascending));
         //report !ascending because by the time this callback happens, the sort has already happened and ascending
         //refers to what the next sort should be
-    });
-}
-
-function monitor(selector, message, details, event, application) {
-    //default arguments
-    details = (details === undefined) ? '' : details;
-    event = (event === undefined) ? 'click' : event;
-    application = (application === undefined) ? '[GUI]' : application;
-
-    $(document).on(event, selector, function() {
-        var d = $.isFunction(details) ? details() : details;
-        console.log(message + ": " + d);
-        queueToolUse(new ToolUsage(message, application, d));
     });
 }
 
