@@ -146,7 +146,7 @@ td, tr, th{
     float: right;
 }
 
-.noClips {
+.noClipsShared {
 	border:1px solid black;
 	padding:3px;
 	margin-left:10px;

@@ -3,12 +3,13 @@
 var urlParams;
 var madeButtons = false;
 
-var currentClips;
+var currentGuiClips = [];
+var currentKeyClips = [];
 
 var currentView = 0;
 
 function highlightNthButton(n) {
-    if (currentClips.length > 1) {
+    if (currentGuiClips.length + currentKeyClips.length > 1) {
         var buttons = $("#viewOtherDiv").find("button");
         buttons.removeClass("activated");
         buttons.eq(n).addClass("activated");
@@ -19,36 +20,62 @@ function modifyMultipleClipButtonsForLocal() {
     $("#viewOtherDiv").find("button").data("source", "local");
 }
 
-function makeButtonsOnceForMultipleClips(arrayOfClips) {
-    var i, newButton, insertionPoint;
-	if (!madeButtons)
-	{
-		if (arrayOfClips.length > 1) {
-			//clear out old buttons
-			$("#viewOtherDiv").find("button").remove();
-			$("#viewOtherDiv").show();
-			insertionPoint = $("#viewOtherSpot");
-			for (i = 0; i < arrayOfClips.length; i++) {
-				newButton = $('<button class="viewOther"></button>');
-				newButton.text("Example " + (i + 1));
-				newButton.data("index", i);
-				insertionPoint.before(newButton);
-			}
-		}
-		else {
-			$("#viewOtherDiv").hide();
-		}
-	}
-	madeButtons = true;
+function makeButtonsForMultipleGuiAndKeyClips() {
+    var i, j, newButton, insertionPoint;
+
+    if (currentKeyClips.length + currentGuiClips.length > 1) {
+        //clear out old buttons
+        $("#viewOtherDiv").find("button").remove();
+        $("#viewOtherDiv").find("div").remove();
+        $("#viewOtherDiv").show();
+
+        insertionPoint = $("#viewOtherSpot");
+        for (i = 0; i < currentGuiClips.length; i++) {
+            newButton = $('<button class="viewOther"></button>');
+            newButton.text("Example " + (i + 1));
+            newButton.data("index", i);
+            insertionPoint.before(newButton);
+        }
+        if (currentGuiClips.length === 0) {
+            insertionPoint.before("<div class='noClipsShared'>No clips demonstrating GUI use</div>");
+        }
+
+        insertionPoint.before("<div>More keyboard shortcut uses:</div>");
+        insertionPoint.before("<div></div>");
+
+        for (j = 0; j < currentKeyClips.length; j++) {
+            newButton = $('<button class="viewOther"></button>');
+            newButton.text("Example " + (j + 1));
+            newButton.data("index", i + j);
+            insertionPoint.before(newButton);
+        }
+        if (currentKeyClips.length === 0) {
+            insertionPoint.before("<div class='noClipsShared'>No clips demonstrating keyboard shortcut use</div>");
+        }
+
+    }
+    else {
+        $("#viewOtherDiv").hide();
+    }
 }
 
-function changeLocalMediaSource(arrayOfClips, clipIndex) {
-    var postUrl, currentImageDir;
-    currentImageDir = "/" + arrayOfClips[clipIndex] + "/";
-    postUrl = "/mediaServer";
-    currentClips = arrayOfClips;
+//Wraps around from GUIclips to KeyClips
+function getIthClip(clipIndex) {
+    if (clipIndex < currentGuiClips.length) {
+        return currentGuiClips[clipIndex];
+    }
+    return currentKeyClips[clipIndex - currentGuiClips.length];
+}
 
-	makeButtonsOnceForMultipleClips(currentClips);
+function changeLocalMediaSource(clipIndex) {
+    var postUrl, currentImageDir, clipName;
+
+    clipName = getIthClip(clipIndex);
+
+    currentImageDir = "/" + clipName;
+    postUrl = "/mediaServer";
+
+    makeButtonsForMultipleGuiAndKeyClips();
     modifyMultipleClipButtonsForLocal();
     highlightNthButton(clipIndex);
 
@@ -59,7 +86,7 @@ function changeLocalMediaSource(arrayOfClips, clipIndex) {
     $.ajax({
         type: "POST",
         url: postUrl,
-        data: { "clipName": arrayOfClips[clipIndex], "thingToDo": "getImages" },
+        data: { "clipName": clipName, "thingToDo": "getImages" },
         success: function (data) {
             data.clip.plugin = urlParams.pluginName;
             data.clip.tool = urlParams.toolName;
@@ -75,17 +102,21 @@ function changeLocalMediaSource(arrayOfClips, clipIndex) {
     });
 }
 
-function showLocalClips(arrayOfClips) {
+function showLocalClips(guiClips, keyClips) {
     stopFramePlayback();
     $("#placeholder").hide();
-    if (arrayOfClips.length === 0) {
+    if (guiClips.length + keyClips.length === 0) {
         $("#clipLoading").hide();
         $("#clipDoesNotExist").show();
     }
     else {
         $("#clipDoesNotExist").hide();
         $("#clipLoading").show();
-        changeLocalMediaSource(arrayOfClips, 0);		//start with the first clip
+
+        currentGuiClips = guiClips;
+        currentKeyClips = keyClips;
+
+        changeLocalMediaSource(0);		//start with the first clip
 
     }
 }
@@ -103,9 +134,9 @@ function checkExistanceOfLocalClips(pluginName, toolName) {
         success: function (data) {
             console.log(data);
             console.log(JSON.stringify(data));
-            //Expecting a {clips: [CLIPID, CLIPID...]}
-            showLocalClips(data.clips);
-			
+            //Expecting a {guiclips: [CLIPID, CLIPID...], keyclips: [CLIPID, CLIPID...]}
+            showLocalClips(data.guiclips, data.keyclips);
+
         },
         error: function () {
             console.log("There was a problem");
@@ -117,21 +148,19 @@ function checkExistanceOfLocalClips(pluginName, toolName) {
 function viewOtherExample() {
     var e = $(this);
 
-	currentView = e.data("index");
-    changeLocalMediaSource(currentClips, e.data("index"));
-	
-	if ($(".viewOther").eq(currentView).hasClass("shared"))
-	{
-		$("#sidebar .shareClip").prop("disabled",true);
-		$("#sidebar .shareClip").addClass("disabled");
-		$("#sidebar .shareClip").text("Shared!");
-	}
-	else
-	{
-		$("#sidebar .shareClip").prop("disabled",false);
-		$("#sidebar .shareClip").removeClass("disabled");
-		$("#sidebar .shareClip").text("Share This Clip");
-	}
+    currentView = e.data("index");
+    changeLocalMediaSource(e.data("index"));
+
+    if ($(".viewOther").eq(currentView).hasClass("shared")) {
+        $("#sidebar .shareClip").prop("disabled", true);
+        $("#sidebar .shareClip").addClass("disabled");
+        $("#sidebar .shareClip").text("Shared!");
+    }
+    else {
+        $("#sidebar .shareClip").prop("disabled", false);
+        $("#sidebar .shareClip").removeClass("disabled");
+        $("#sidebar .shareClip").text("Share This Clip");
+    }
 
 }
 
@@ -150,26 +179,24 @@ function viewOtherExample() {
     }
 })();
 
-function shareNoClips()
-{
-	$("#moreInfo").hide();
-	$("#sidebar").html("<h2>Thanks for your input</h2");
-	
-	//TODO report that no clips where shared?
+function shareNoClips() {
+    $("#moreInfo").hide();
+    $("#sidebar").html("<h2>Thanks for your input</h2");
+
+    //TODO report that no clips where shared?
 }
 
-function shareClip()
-{
-	$(".viewOther").eq(currentView).addClass("shared");
-	$("#sidebar .shareClip").prop("disabled",true);
-	$("#sidebar .shareClip").addClass("disabled");
-	$("#sidebar .shareClip").text("Shared!");
-	
-	$.ajax({
-		type:"post",
-		url:"/shareClip",
-		data:{clipId: currentClips[currentView], recipient: urlParams.shareWithEmail}
-		});
+function shareClip() {
+    $(".viewOther").eq(currentView).addClass("shared");
+    $("#sidebar .shareClip").prop("disabled", true);
+    $("#sidebar .shareClip").addClass("disabled");
+    $("#sidebar .shareClip").text("Shared!");
+
+    $.ajax({
+        type: "post",
+        url: "/shareClip",
+        data: { clipId: getIthClip(currentView), recipient: urlParams.shareWithEmail }
+    });
 }
 
 $(document).ready(function () {
@@ -179,10 +206,10 @@ $(document).ready(function () {
     var userHeader = $("#userHeader");
     userHeader.text(urlParams.shareWithName + " [" + urlParams.shareWithEmail + "]");
 
-	$("#viewOtherDiv").on('click', 'button', viewOtherExample);
-	$("#sidebar").on('click', '.noClips', shareNoClips);
-	$("#sidebar").on('click', '.shareClip', shareClip);
-	
+    $("#viewOtherDiv").on('click', 'button', viewOtherExample);
+    $("#sidebar").on('click', '.noClips', shareNoClips);
+    $("#sidebar").on('click', '.shareClip', shareClip);
+
     checkExistanceOfLocalClips(urlParams.pluginName, urlParams.toolName);
 
 });

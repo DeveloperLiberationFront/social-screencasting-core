@@ -261,7 +261,7 @@ function makeButtonsForMultipleGuiAndKeyClips(currentGuiClips, currentKeyClips) 
             insertionPoint.before(newButton);
         }
 		if (currentGuiClips.length === 0) {
-			insertionPoint.before("<div class='noClips'>No clips demonstrating GUI use</div>");
+			insertionPoint.before("<div class='noClipsShared'>No clips demonstrating GUI use</div>");
 		}
 		
 		insertionPoint.before("<div>More keyboard shortcut uses:</div>");
@@ -274,7 +274,7 @@ function makeButtonsForMultipleGuiAndKeyClips(currentGuiClips, currentKeyClips) 
             insertionPoint.before(newButton);
         }
 		if (currentKeyClips.length === 0) {
-			insertionPoint.before("<div class='noClips'>No clips demonstrating keyboard shortcut use</div>");
+			insertionPoint.before("<div class='noClipsShared'>No clips demonstrating keyboard shortcut use</div>");
 		}
 		
     }
