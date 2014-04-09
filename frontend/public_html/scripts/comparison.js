@@ -196,7 +196,8 @@ function showUserTools(email) {
     }
 }
 
-function loadPeople() {
+function loadPeopleAjax() {
+	$("#notTimeYet").hide();
     $.ajax({
         url: "http://screencaster-hub.appspot.com/api/plugin/" + currentPlugin,
         success: function (data) {
@@ -215,6 +216,21 @@ function loadPeople() {
             listUsers();
         }
     });
+}
+
+function loadPeople() {
+	$.ajax({
+        url: "http://screencaster-hub.appspot.com/api/status",
+        success: function (data) {
+            if (data.status == "enabled") {
+				loadPeopleAjax();
+			} else {
+				$("#notTimeYet").show();
+			}
+        }
+    });
+	
+	
 }
 
 function listUsers() {

@@ -146,6 +146,10 @@ td, tr, th{
     float: right;
 }
 
+#notTimeYet{
+	display:none;
+}
+
 .noClipsShared {
 	border:1px solid black;
 	padding:3px;
