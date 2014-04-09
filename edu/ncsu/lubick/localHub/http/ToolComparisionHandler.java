@@ -2,6 +2,7 @@ package edu.ncsu.lubick.localHub.http;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 
 	private static final String POST_COMMAND_PLUGIN_NAME = "pluginName";
 	private static final String POST_COMMAND_GET_TOOL_USAGE_FOR_PLUGIN = "getToolUsageForPlugin";
-	
+
 	private static final Logger logger = Logger.getLogger(ToolComparisionHandler.class);
 
 	public ToolComparisionHandler(String matchPattern, WebQueryInterface databaseLink)
@@ -65,16 +66,33 @@ public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_OK);
 		baseRequest.setHandled(true);
-		
+
 		List<String> pluginNames = this.databaseLink.getNamesOfAllPlugins();
-		
+
 		String pluginName = baseRequest.getParameter("pluginName");
+
+		Map<Object,Object> dataModel = getBaseDataModel();
 		if (pluginName == null) {
-			pluginName = pluginNames.get(0);
-		}
-		Map<Object,Object> dataModel = getToolUsagesAndCountsFromDatabase(pluginName);
-		
+			if (!pluginNames.isEmpty())
+			{
+				pluginName = pluginNames.get(0);
+				dataModel = getToolUsagesAndCountsFromDatabase(pluginName, dataModel); 	
+			}
+			else 
+			{
+				dataModel = getEmptyToolUsages(dataModel);
+			}
+		}	
+		dataModel = addThisUserInfoToModel(dataModel);
+
 		processTemplate(response, dataModel, DISPLAY_TOOL_USAGE);
+	}
+
+
+
+	private Map<Object, Object> getBaseDataModel()
+	{
+		return new HashMap<>();
 	}
 
 	private void respondToPost(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
@@ -91,35 +109,43 @@ public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 
 	private void respondToGetToolUsageForPlugin(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
-		Map<Object, Object> dataModel = getToolUsagesAndCountsFromDatabase(request.getParameter(POST_COMMAND_PLUGIN_NAME));
+		Map<Object, Object> dataModel = getBaseDataModel();
+		dataModel = getToolUsagesAndCountsFromDatabase(request.getParameter(POST_COMMAND_PLUGIN_NAME), dataModel);
 		processTemplate(response, dataModel, DISPLAY_TOOL_USAGE);
 
 		baseRequest.setHandled(true);
 	}
 
-	private Map<Object, Object> getToolUsagesAndCountsFromDatabase(String pluginName)
+	private Map<Object, Object> getToolUsagesAndCountsFromDatabase(String pluginName, Map<Object, Object> dataModel)
 	{
 		List<ToolCountStruct> toolUsages = this.databaseLink.getAllToolAggregateForPlugin(pluginName);
 		List<ToolCountTemplateModel> toolsAndCounts = convertToTemplateModels(toolUsages);
 		List<String> pluginNames = this.databaseLink.getNamesOfAllPlugins();
-		
-		Map<Object, Object> retval = new HashMap<>();
-		retval.put("myToolsAndCounts", toolsAndCounts);
-		retval.put("plugin", pluginName);
-		retval.put("pluginNames", pluginNames);
-		addThisUserInfoToModel(retval); 	
-		return retval; 
+
+		dataModel.put("myToolsAndCounts", toolsAndCounts);
+		dataModel.put("plugin", pluginName);
+		dataModel.put("pluginNames", pluginNames);
+		return dataModel; 
+	}
+
+	private Map<Object, Object> getEmptyToolUsages(Map<Object, Object> dataModel)
+	{
+		dataModel.put("plugin", "none");
+		dataModel.put("pluginNames", Collections.emptyList());
+		dataModel.put("myToolsAndCounts", Collections.emptyList());
+
+		return dataModel;
 	}
 
 	private List<ToolCountTemplateModel> convertToTemplateModels(List<ToolCountStruct> toolcounts)
 	{
 		List<ToolCountTemplateModel> retVal = new ArrayList<>();
-		
+
 		for(ToolCountStruct count:toolcounts) 
 		{
 			retVal.add(new ToolCountTemplateModel(count));
 		}
-		
+
 		return retVal;
 	}
 
