@@ -155,3 +155,8 @@ td, tr, th{
 	padding:3px;
 	margin-left:10px;
 }
+
+.noKeyboard {
+	border: 5px solid #4ad672;
+	background-color: #d5f5de;
+}

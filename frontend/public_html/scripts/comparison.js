@@ -18,14 +18,29 @@ var ascending; //sort order for tables
 var requested = {};
 
 function handleMouseEnter() {
-    $(this).addClass("rowHover");
-    var highlightedToolName = $(this).data("toolName");
+    //$(this).addClass("rowHover");
+    var highlightedToolName = $(this).data("toolName"), classToAdd, objs, i;
+	classToAdd = "none";
+	objs = [];
+		
     $(".clickMe").each(function () {
         if ($(this).data("toolName") &&
             $(this).data("toolName") == highlightedToolName) {
-            $(this).addClass("rowHover");
+			objs.push($(this));
+            if ($(this.childNodes[3]).text().trim().indexOf("/0") != -1) {
+                classToAdd = "noKeyboard";
+            } else if (classToAdd == "none" ){
+                classToAdd = "rowHover";
+            }            
         }
     });
+	
+	if (objs.length == 1) {
+		classToAdd = "rowHover";	// don't make things green if they've only used keyboard and they don't have a video
+	}
+	for(i = 0;i<objs.length;i++)  {
+		objs[i].addClass(classToAdd);
+	}
 }
 
 function handleMouseLeave() {
@@ -35,6 +50,7 @@ function handleMouseLeave() {
         if ($(this).data("toolName") &&
             $(this).data("toolName") == highlightedToolName) {
             $(this).removeClass("rowHover");
+			$(this).removeClass("noKeyboard");
         }
     });
 }
