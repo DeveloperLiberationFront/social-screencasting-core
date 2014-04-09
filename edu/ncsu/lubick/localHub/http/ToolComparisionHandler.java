@@ -82,7 +82,9 @@ public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 			{
 				dataModel = getEmptyToolUsages(dataModel);
 			}
-		}	
+		} else {
+			dataModel = getToolUsagesAndCountsFromDatabase(pluginName, dataModel); 	
+		}
 		dataModel = addThisUserInfoToModel(dataModel);
 
 		processTemplate(response, dataModel, DISPLAY_TOOL_USAGE);
