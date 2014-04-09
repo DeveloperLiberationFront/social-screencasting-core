@@ -142,7 +142,7 @@ public class TestClipCreationLimits {
 			if (fileName.startsWith(TestPostProductionHandler.TEST_PLUGIN_NAME))
 			{
 				logger.debug("found created clip: "+fileName);
-				assertTrue("Expecting to find "+fileName, expectedNames.contains(fileName));
+				assertTrue("Expecting to find "+fileName+" in "+expectedNames, expectedNames.contains(fileName));
 
 				numHits++;
 			}
@@ -154,7 +154,7 @@ public class TestClipCreationLimits {
 
 	private String getFolderNameForToolUsage(ToolUsage tu)
 	{
-		return FileUtilities.makeLocalFolderNameForBrowserMediaPackage(tu , "kjlubick@ncsu.edu")
+		return FileUtilities.makeLocalFolderNameForBrowserMediaPackage(tu , "kjlubick+test@ncsu.edu")
 				.substring("renderedVideos/".length());
 	}
 

@@ -153,8 +153,8 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 		try
 		{
 			// Testing data
-			keyJarr.put("Eclipsef100758a-fc1f-3cdb-a1c0-7287f184d10d");
-			keyJarr.put("Eclipsee667cfd3-0bd8-3af8-93d7-10d16ab2f854");
+			//keyJarr.put("Eclipsef100758a-fc1f-3cdb-a1c0-7287f184d10d");
+			//keyJarr.put("Eclipsee667cfd3-0bd8-3af8-93d7-10d16ab2f854");
 			//guiJarr.put("Eclipsee434f382-7183-3cc5-8380-2137816a48d4");
 			//guiJarr.put("Eclipse47397aaf-c70f-3aa1-9df5-a87f5a583af3");
 			//guiJarr.put("Eclipse06ac5c3c-da64-3300-9a74-6fed83aa2722");
