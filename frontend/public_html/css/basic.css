@@ -39,7 +39,7 @@ td, tr, th{
 }
 
 .rowHover{
-	border: 5px solid #e48600;
+	outline: 2px solid #e48600;
 	background-color: #ffedd3;
 }
 
@@ -63,7 +63,8 @@ td, tr, th{
 .requestGeneration{
 	font-size: 1.2em;
 }
-.clickMe{
+
+.clickMe {
 	font-size:16px;
 	padding: 5px;
 	cursor: pointer;
@@ -157,6 +158,14 @@ td, tr, th{
 }
 
 .noKeyboard {
-	border: 5px solid #4ad672;
+	outline: 3px solid #29b350;
 	background-color: #d5f5de;
+}
+
+.newTool { /* For marking tools in the comparison table that have not yet been used by the viewer */
+	background-color: #baeec8;
+}
+
+.noUseBorder {
+	outline: 3px solid #29b350;
 }

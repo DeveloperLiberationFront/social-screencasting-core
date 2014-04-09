@@ -21,8 +21,8 @@ function handleMouseEnter() {
     //$(this).addClass("rowHover");
     var highlightedToolName = $(this).data("toolName"), classToAdd, objs, i;
 	classToAdd = "none";
-	objs = [];
-		
+    objs = [];
+
     $(".clickMe").each(function () {
         if ($(this).data("toolName") &&
             $(this).data("toolName") == highlightedToolName) {
@@ -31,13 +31,14 @@ function handleMouseEnter() {
                 classToAdd = "noKeyboard";
             } else if (classToAdd == "none" ){
                 classToAdd = "rowHover";
-            }            
+            }
         }
     });
 	
-	if (objs.length == 1) {
-		classToAdd = "rowHover";	// don't make things green if they've only used keyboard and they don't have a video
+	if (objs.length == 1 && objs[0].hasClass('addedItem')) {
+		classToAdd = "noUseBorder";	// don't make things green if they've only used keyboard and they don't have a video
 	}
+
 	for(i = 0;i<objs.length;i++)  {
 		objs[i].addClass(classToAdd);
 	}
@@ -51,6 +52,7 @@ function handleMouseLeave() {
             $(this).data("toolName") == highlightedToolName) {
             $(this).removeClass("rowHover");
 			$(this).removeClass("noKeyboard");
+			$(this).removeClass("noUseBorder");
         }
     });
 }
@@ -120,7 +122,15 @@ function drawToolTable(tools) {
             newItem = newItem + "<td>" + tools[i].count + "</tr>";
         }
 
+        var hasMatch = false;
+        $(".myTools .clickMe").each(function () {
+            if ($(this).data("toolName") &&
+                $(this).data("toolName") == tools[i].name)
+                hasMatch = true;
+        });
+
         newItem = $(newItem);
+        if (!hasMatch) newItem.addClass("newTool");
         newItem.data("toolName", tools[i].name);
         newItem.appendTo($("#otherPersonsTable tbody"));
     }
