@@ -99,9 +99,15 @@ public class UserManager {
 	{
 		logger.info("Prompting user for name and email");
         String name = JOptionPane.showInputDialog(null, "What is your name?");
+        if (name == null) {
+        	throw new NullPointerException("User Name is null");
+        }
         setName(name);
 
         String email = JOptionPane.showInputDialog(null, "What is your email address?");
+        if (email == null) {
+        	throw new NullPointerException("email is null");
+        }
         setEmail(email);
         
         logger.debug("welcomed new user "+name+" "+email);
