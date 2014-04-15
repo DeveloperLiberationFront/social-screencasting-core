@@ -53,11 +53,15 @@ public class UserManager {
 
 	private final void parseOutFile(File initFile)
 	{
+		logger.info("Looking for ini file: " + initFile.getAbsolutePath());
 		if (!initFile.exists())
-		{
+		{	
+			logger.info("User ini file does not exist, prompting for user info.");
 			promptUserForInfo();
 			writeOutInitFile(initFile);
 			return;
+		} else {
+			logger.info("Loading ini file: " + initFile.getPath());
 		}
 		needsUserInfo = false;
 		String fileContents = FileUtilities.readAllFromFile(initFile);
