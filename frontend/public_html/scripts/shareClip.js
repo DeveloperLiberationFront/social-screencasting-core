@@ -218,6 +218,9 @@ $(document).ready(function () {
 
     var userHeader = $("#userHeader");
     userHeader.text(urlParams.shareWithName + " [" + urlParams.shareWithEmail + "]");
+	
+	var userB = $("#userButton");
+    userB.text(urlParams.shareWithName);
 
     $("#viewOtherDiv").on('click', 'button', viewOtherExample);
     $("#sidebar").on('click', '.noClips', shareNoClips);

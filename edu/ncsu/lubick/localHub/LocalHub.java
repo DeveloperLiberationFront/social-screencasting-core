@@ -2,9 +2,11 @@ package edu.ncsu.lubick.localHub;
 
 import java.awt.PopupMenu;
 import java.io.File;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 
 
 
@@ -156,7 +158,17 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 
 	private void setUpUserManager()
 	{
-		userManager = new UserManager(new File("."));		//this will block and prompt for use input if needed
+		File initDirectory = new File(System.getProperty("user.dir"));
+//		try
+//		{
+//			initDirectory = new File(getClass().getResource("").toURI());
+//		}
+//		catch (URISyntaxException e)
+//		{
+//			logger.error("Could not find launch directory",e);
+//			initDirectory = new File("");
+//		}
+		userManager = new UserManager(initDirectory);		//this will block and prompt for use input if needed
 	}
 
 	/**

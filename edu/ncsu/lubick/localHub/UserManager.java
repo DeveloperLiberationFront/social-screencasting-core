@@ -60,9 +60,11 @@ public class UserManager {
 			promptUserForInfo();
 			writeOutInitFile(initFile);
 			return;
-		} else {
-			logger.info("Loading ini file: " + initFile.getPath());
 		}
+
+		logger.info("Loading ini file: " + initFile.getPath());
+
+
 		needsUserInfo = false;
 		String fileContents = FileUtilities.readAllFromFile(initFile);
 		try
