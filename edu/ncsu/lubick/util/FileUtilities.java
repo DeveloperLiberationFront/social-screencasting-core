@@ -147,7 +147,7 @@ public class FileUtilities
 	/**
 	 * Makes a String representing the path name to where this file would exist on disk.
 	 * 
-	 * This includes the reference to the PostProductionHandler.MEDIA_OUTPUT_FOLDER "renderedVideos/"
+	 * This includes the reference to the PostProductionHandler.MEDIA_OUTPUT_FOLDER "renderedVideos"
 	 * @param tu
 	 * @param userEmail
 	 * @return

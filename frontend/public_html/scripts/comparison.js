@@ -343,8 +343,9 @@ function changeSharedMediaSource(clipIndex) {
     modifyMultipleClipButtonsForExternal();
     highlightNthButtonGuiAndKey(clipIndex);
 
-    //clear out all frames
+    //clear out all frames and animations
     $(".frame").remove();
+	$(".keyAnimation").remove();
 
     //reload frames //TODO: implement caching
     $.ajax(getUrl, {
@@ -378,8 +379,9 @@ function changeLocalMediaSource(clipIndex) {
     modifyMultipleClipButtonsForLocal();
     highlightNthButtonGuiAndKey(clipIndex);
 
-    //clear out all frames
+    //clear out all frames and animations
     $(".frame").remove();
+	$(".keyAnimation").remove();
 
     //reload frames //TODO: implement caching
     $.ajax({
