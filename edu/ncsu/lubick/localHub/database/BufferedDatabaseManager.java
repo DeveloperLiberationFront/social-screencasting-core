@@ -144,8 +144,10 @@ public class BufferedDatabaseManager
 
 	private void startThreadPools()
 	{
-		this.localThreadPool = Executors.newSingleThreadExecutor();
-		this.remoteThreadPool = Executors.newSingleThreadExecutor();
+		if (localThreadPool == null)
+			this.localThreadPool = Executors.newSingleThreadExecutor();
+		if (remoteThreadPool == null)
+			this.remoteThreadPool = Executors.newSingleThreadExecutor();
 	}
 
 	public void shutDown()
