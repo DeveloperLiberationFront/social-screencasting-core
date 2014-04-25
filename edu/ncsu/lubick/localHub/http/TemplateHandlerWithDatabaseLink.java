@@ -31,19 +31,12 @@ public abstract class TemplateHandlerWithDatabaseLink extends AbstractHandler {
 	protected static Configuration cfg; // Template Configuration
 	protected UserManager userManager = HTTPServer.getUserManager();
 
-	public TemplateHandlerWithDatabaseLink(String matchPattern, WebQueryInterface databaseLink)
+	public TemplateHandlerWithDatabaseLink(String matchPattern, WebQueryInterface databaseLink) throws IOException, URISyntaxException
 	{
 		this.httpRequestPattern = matchPattern;
 		this.databaseLink = databaseLink;
-		try
-		{
-			getLogger().trace("Setting up template configuration");
-			setupTemplateConfiguration();
-		}
-		catch (IOException | URISyntaxException e)
-		{
-			getLogger().fatal("There was a problem booting up the template configuration");
-		}
+		setupTemplateConfiguration();
+
 	}
 
 	private static void setupTemplateConfiguration() throws IOException, URISyntaxException

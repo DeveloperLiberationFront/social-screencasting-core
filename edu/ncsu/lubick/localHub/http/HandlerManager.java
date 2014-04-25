@@ -2,6 +2,7 @@ package edu.ncsu.lubick.localHub.http;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 
@@ -36,10 +37,15 @@ public class HandlerManager
 	{
 		HandlerCollection h = new HandlerList();
 
-		makeAndAddHandlersForBrowsing(h, wqi);
-		makeAndAddHandlersForMediaResources(h, wqi);
-		makeAndAddHandlersForWebReporting(h, wqi);
-		makeAndAddHandlersForClipSharing(h, wqi);
+		try {
+			makeAndAddHandlersForBrowsing(h, wqi);
+			makeAndAddHandlersForMediaResources(h, wqi);
+			makeAndAddHandlersForWebReporting(h, wqi);
+			makeAndAddHandlersForClipSharing(h, wqi);
+		}
+		catch (IOException | URISyntaxException e) {
+			logger.error("Problem setting up handlers",e);
+		}
 
 		Resource[] staticWebResources = setUpWebResources(h.getClass());
 		
@@ -55,19 +61,19 @@ public class HandlerManager
 		return h;
 	}
 
-	private static void makeAndAddHandlersForClipSharing(HandlerCollection h, WebQueryInterface wqi)
+	private static void makeAndAddHandlersForClipSharing(HandlerCollection h, WebQueryInterface wqi) throws IOException, URISyntaxException
 	{
 		h.addHandler(new HTTPClipSharer("/shareClip", wqi));	
 		h.addHandler(new HTTPShareRequester("/shareRequest", wqi));
 	}
 
-	private static void makeAndAddHandlersForBrowsing(HandlerCollection h, WebQueryInterface wqi)
+	private static void makeAndAddHandlersForBrowsing(HandlerCollection h, WebQueryInterface wqi) throws IOException, URISyntaxException
 	{
 		h.addHandler(new ToolComparisionHandler("/", wqi));
 		h.addHandler(new ToolComparisionHandler("/index", wqi));
 	}
 
-	private static void makeAndAddHandlersForMediaResources(HandlerCollection h, WebQueryInterface wqi)
+	private static void makeAndAddHandlersForMediaResources(HandlerCollection h, WebQueryInterface wqi) throws IOException, URISyntaxException
 	{
 		h.addHandler(new HTTPMediaResourceHandler("/mediaServer", wqi));
 	}

@@ -1,6 +1,7 @@
 package edu.ncsu.lubick.localHub.http;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,7 +36,7 @@ public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 
 	private static final Logger logger = Logger.getLogger(ToolComparisionHandler.class);
 
-	public ToolComparisionHandler(String matchPattern, WebQueryInterface databaseLink)
+	public ToolComparisionHandler(String matchPattern, WebQueryInterface databaseLink) throws IOException, URISyntaxException
 	{
 		super(matchPattern, databaseLink);
 	}

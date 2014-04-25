@@ -1,6 +1,7 @@
 package edu.ncsu.lubick.localHub.http;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +22,7 @@ public class HTTPClipSharer extends TemplateHandlerWithDatabaseLink {
 	private static final String TEMPLATE_NAME = "shareClip.html";
 	private static final Logger logger = Logger.getLogger(HTTPClipSharer.class);
 
-	public HTTPClipSharer(String matchPattern, WebQueryInterface wqi)
+	public HTTPClipSharer(String matchPattern, WebQueryInterface wqi) throws IOException, URISyntaxException
 	{
 		super(matchPattern, wqi);
 

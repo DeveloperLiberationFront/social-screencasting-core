@@ -1,6 +1,7 @@
 package edu.ncsu.lubick.localHub.http;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -18,7 +19,7 @@ public class HTTPShareRequester extends TemplateHandlerWithDatabaseLink implemen
 	private static final Logger logger = Logger.getLogger(HTTPShareRequester.class);
 	
 	
-	public HTTPShareRequester(String matchPattern, WebQueryInterface databaseLink)
+	public HTTPShareRequester(String matchPattern, WebQueryInterface databaseLink) throws IOException, URISyntaxException
 	{
 		super(matchPattern, databaseLink);
 	}

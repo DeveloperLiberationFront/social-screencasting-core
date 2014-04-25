@@ -2,6 +2,7 @@ package edu.ncsu.lubick.localHub.http;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 		logger = Logger.getLogger(HTTPMediaResourceHandler.class.getName());
 	}
 
-	public HTTPMediaResourceHandler(String matchPattern, WebQueryInterface databaseLink)
+	public HTTPMediaResourceHandler(String matchPattern, WebQueryInterface databaseLink) throws IOException, URISyntaxException
 	{
 		super(matchPattern, databaseLink);
 	}
