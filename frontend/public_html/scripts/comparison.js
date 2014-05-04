@@ -331,7 +331,7 @@ function getIthClip(clipIndex) {
 
 function changeSharedMediaSource(clipIndex) {
     var getUrl, clipName;
-
+	stopFramePlayback();
     clipName = getIthClip(clipIndex);
 
     currentImageDir = "http://screencaster-hub.appspot.com/api/" + currentEmail + "/" + currentPlugin + "/" + currentTool + "/" + clipName;
@@ -369,7 +369,7 @@ function changeSharedMediaSource(clipIndex) {
 
 function changeLocalMediaSource(clipIndex) {
     var postUrl, clipName;
-	
+	stopFramePlayback();
     clipName = getIthClip(clipIndex);
 	
     currentImageDir = "/" + clipName;
