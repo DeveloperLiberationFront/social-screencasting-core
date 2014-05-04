@@ -96,7 +96,7 @@ public class ExternalClipRequester {
 	}
 
 
-	@SuppressWarnings("unused")
+	
 	private static void main(String[] args) throws Exception
 	{
 		TestingUtils.makeSureLoggingIsSetUp();

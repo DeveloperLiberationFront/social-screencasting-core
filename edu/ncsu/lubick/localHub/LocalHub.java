@@ -475,6 +475,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	@Override
 	public void notificationReceived(String notifications)
 	{
+		//Log notification for study
 		ToolUsage tu = new ToolUsage("Notification received", notifications, "[GUI]", "[ScreencastingHub]", new Date(), 10, 10);
 		reportToolUsage(tu);
 	}
@@ -482,6 +483,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	@Override
 	public void notificationClickedOn(String notification)
 	{
+		//Log notification for study
 		ToolUsage tu = new ToolUsage("Respond to notification", notification, "[GUI]", "[ScreencastingHub]", new Date(), 10, 10);
 		reportToolUsage(tu);
 	}

@@ -34,12 +34,12 @@ public class BrowserMediaPackageSharer {
 	private static void main(String[] args) throws Exception
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
-		UserManager userManager = new UnitTestUserManager("Kevin Lubick", "kjlubick@ncsu.edu", "0216427e-b0e0-4102-8274-9ce3bc7a74a0");
-		
+		//UserManager userManager = new UnitTestUserManager("Kevin Lubick", "kjlubick@ncsu.edu", "0216427e-b0e0-4102-8274-9ce3bc7a74a0");
+		UserManager userManager = new UnitTestUserManager("Test User", "test@mailinator.com", "123");
 		
 		BrowserMediaPackageSharer sharer = new BrowserMediaPackageSharer(userManager);
 		
-		sharer.shareClipWithUser("Eclipse857d7529-773c-3459-abbc-6f16f7b98418", "schrist@ncsu.edu");
+		sharer.shareClipWithUser("Eclipsedc3a37d4-4469-391f-bd62-0324ac2b7091K", "kjlubick@ncsu.edu");
 		
 	}
 	
