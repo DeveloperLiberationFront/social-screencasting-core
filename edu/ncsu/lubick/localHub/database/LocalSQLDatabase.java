@@ -417,7 +417,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	@Override
 	public boolean isClipUploaded(String clipId)
 	{
-		String sqlQuery = "SELECT uploaded_date FROM Clips where folder_name = ?";
+		String sqlQuery = "SELECT uploaded_date FROM Clips where folder_name LIKE '%\"+clipId+\"%'";
 		
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
 		{
@@ -444,7 +444,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	{
 		long uploadedDate = b?new Date().getTime():0;
 		
-		String sqlQuery = "UPDATE Clips SET uploaded_date = ? where folder_name = ?";
+		String sqlQuery = "UPDATE Clips SET uploaded_date = ? where folder_name LIKE '%"+clipId+"%'";
 		
 		
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
