@@ -2,14 +2,9 @@ package edu.ncsu.lubick.localHub;
 
 import java.awt.PopupMenu;
 import java.io.File;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-
-
-
 
 import org.apache.log4j.Logger;
 

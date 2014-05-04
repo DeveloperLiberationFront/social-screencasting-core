@@ -79,10 +79,10 @@ public abstract class TemplateHandlerWithDatabaseLink extends AbstractHandler {
 
 	protected boolean strictCheckIfWeHandleThisRequest(String target)
 	{
-		getLogger().debug("Does "+target+" equal "+httpRequestPattern);
+		getLogger().trace("Does "+target+" equal "+httpRequestPattern);
 		if (!httpRequestPattern.equals(target))
 		{
-			getLogger().debug("passing on target " + target);
+			getLogger().trace("passing on target " + target);
 			return false;
 		}
 		return true;

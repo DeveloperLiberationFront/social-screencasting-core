@@ -94,7 +94,7 @@ public class ToolReportingHandler extends AbstractHandler  {
 	{
 		if (!target.equals(httpRequestPattern))
 		{
-			logger.debug("LookupHandler passing on target " + target);
+			logger.trace("LookupHandler passing on target " + target);
 			return false;
 		}
 		return true;
