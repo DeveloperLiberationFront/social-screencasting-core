@@ -116,11 +116,18 @@ function drawToolTable(tools) {
     for (i = 0; i < tools.length; i++) {
         newItem = "<tr class='clickMe addedItem'><td>" + tools[i].name;
 
-        if ("object" == typeof (tools[i].count)) {
-            newItem = newItem + "<td>" + tools[i].count.gui + "/" + tools[i].count.keyboard + "</tr>";
+        if ("object" == typeof (tools[i].details)) {
+            newItem = newItem + "<td>" + tools[i].details.gui + "/" + tools[i].details.keyboard + "</td>";
+            if (tools[i].details.hasOwnProperty("clips")
+                && tools[i].details.clips > 0) {
+                newItem = newItem + "<td><img src='images/video_icon_tiny.png'/></td>";
+            } else {
+                newItem = newItem + "<td></td>";
+            }
         } else {
-            newItem = newItem + "<td>" + tools[i].count + "</tr>";
+            newItem = newItem + "<td>" + tools[i].details + "</td><td></td>";
         }
+        newItem = newItem + "</tr>";
 
         var hasMatch = false;
         $(".myTools .clickMe").each(function () {
@@ -208,7 +215,7 @@ function showUserTools(email) {
                 keys = Object.keys(data[currentPlugin]);
                 //turn map data[currentPlugin] to theseTools array
                 theseTools = keys.map(function (key) {
-                    return { name: key, count: data[currentPlugin][key] };
+                    return { name: key, details: data[currentPlugin][key] };
                 });
                 userData[email] = theseTools;
                 drawToolTable(theseTools);
@@ -537,6 +544,26 @@ function sortTableByToolName(givenTable) {
     ascending = !ascending;
 }
 
+function sortTableByVideo(givenTable) {
+    var elements, thisTable;
+    thisTable = (givenTable.hasOwnProperty('target') ? $(givenTable.target).closest("table") : givenTable);
+
+    elements = thisTable.find("tr").filter(".clickMe");
+
+    elements.sortElements(function (a, b) {
+        var first, second;
+        console.log(a);
+        first = a.childNodes[2]
+        second = b.childNodes[2]
+        if (ascending) {
+            return second.childNodes.length - first.childNodes.length
+        } else {
+            return first.childNodes.length - second.childNodes.length
+        }
+    });
+    ascending = !ascending;
+}
+
 function sortTableByCount(givenTable) {
     var elements, thisTable;
     thisTable = (givenTable.hasOwnProperty('target') ? $(givenTable.target).closest("table") : givenTable);
@@ -616,6 +643,7 @@ $(document).ready(function () {
 
     $("table").on('click', ".sortByTool", sortTableByToolName);
     $("table").on('click', ".sortByNum", sortTableByCount);
+    $("table").on('click', ".sortByVideo", sortTableByVideo);
 
     $(".requestPermissions").on('click', requestSharingPermission);
 
