@@ -183,9 +183,8 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	@Override
 	public List<ToolUsage> getBestNInstancesOfToolUsage(int n, String pluginName, String toolName, boolean isKeyboardShortcutHuh)
 	{
-		StringBuilder sqlQueryBuilder = new StringBuilder();
-		sqlQueryBuilder.append("SELECT * FROM ToolUsages ");
-		sqlQueryBuilder.append("WHERE plugin_name=? AND tool_name=? AND ");
+		StringBuilder sqlQueryBuilder = new StringBuilder("SELECT * FROM ToolUsages "+
+					"WHERE plugin_name=? AND tool_name=? AND ");
 		
 		if (isKeyboardShortcutHuh)
 		{
@@ -225,7 +224,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				int duration = results.getInt("tool_use_duration");
 				int clipScore = results.getInt("clip_score");
 
-				toolUsages .add(new ToolUsage(toolName, toolClass, keyPresses, pluginName, timestamp, duration, clipScore));
+				toolUsages.add(new ToolUsage(toolName, toolClass, keyPresses, pluginName, timestamp, duration, clipScore));
 			}
 
 		}
@@ -334,7 +333,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				"SELECT plugin_name,tool_name, COUNT(*) AS num_clips FROM Clips Group by plugin_name, tool_name)" + 
 				"WHERE num_clips > ?";
 
-		List<PluginNameStruct> pluginToolCombosToThin = new ArrayList<>();
+		List<PluginNameStruct> potentialPluginToolCombosToThin = new ArrayList<>();
 
 		try (PreparedStatement statement = makePreparedStatement(firstQuery);)
 		{
@@ -344,7 +343,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			{
 				while (results.next())
 				{
-					pluginToolCombosToThin.add(new PluginNameStruct(results.getString(1),results.getString(2)));
+					potentialPluginToolCombosToThin.add(new PluginNameStruct(results.getString(1),results.getString(2)));
 				}
 			}
 		}
@@ -354,16 +353,20 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		}
 
 		List<String> extrasToDelete = new ArrayList<>();
-		for (PluginNameStruct pluginToolCombo : pluginToolCombosToThin)
+		for (PluginNameStruct pluginToolCombo : potentialPluginToolCombosToThin)
 		{
 			findExcessiveClipsFrom(pluginToolCombo.pluginName, pluginToolCombo.toolName, extrasToDelete);
 		}
 
 		return extrasToDelete;
 	}
+	private boolean isGUIClipPath(String clipPath)
+	{
+		return clipPath.endsWith("G");
+	}
 	private void findExcessiveClipsFrom(String pluginName, String toolName, List<String> listToAppendTo)
 	{
-		String sqlQuery = "SELECT folder_name FROM Clips where plugin_name = ? AND tool_name = ? order by clip_score asc";
+		String sqlQuery = "SELECT folder_name FROM Clips where plugin_name = ? AND tool_name = ? order by clip_score desc";
 		
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
 		{
@@ -371,14 +374,10 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			statement.setString(2, toolName);
 
 			try (ResultSet results = executeWithResults(statement);)
-			{
-				List<String> tempList = new ArrayList<>();
-				while(results.next())
-				{
-					tempList.add(results.getString(1));
-				}
-				int numToDelete = tempList.size() - LocalHub.MAX_TOOL_USAGES;
-				listToAppendTo.addAll(tempList.subList(0, numToDelete));
+			{				
+				List<String> listOfClipPaths = makeClipPaths(results);
+				
+				findExcessiveClipTypes(listToAppendTo, listOfClipPaths);
 			}
 		}
 		catch (SQLException e)
@@ -387,7 +386,34 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		}
 
 	}
-	
+	private void findExcessiveClipTypes(List<String> listToAppendTo, List<String> listOfClipPaths)
+	{
+		int numKeyboardShortcuts = 0;
+		int numGUI = 0;
+		for(String clipPath:listOfClipPaths) {
+			if (isGUIClipPath(clipPath)) {
+				numGUI++;
+				if (numGUI > LocalHub.MAX_TOOL_USAGES){
+					listToAppendTo.add(clipPath);
+				}
+			}
+			else {
+				numKeyboardShortcuts++;
+				if (numKeyboardShortcuts > LocalHub.MAX_TOOL_USAGES) {
+					listToAppendTo.add(clipPath);
+				}
+			}
+		}
+	}
+	private List<String> makeClipPaths(ResultSet results) throws SQLException
+	{
+		List<String> listOfClipPaths = new ArrayList<>();
+		while(results.next())
+		{
+			listOfClipPaths.add(results.getString(1));
+		}
+		return listOfClipPaths;
+	}
 	@Override
 	public boolean isClipUploaded(String clipId)
 	{

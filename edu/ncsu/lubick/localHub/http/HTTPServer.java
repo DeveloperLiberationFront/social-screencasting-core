@@ -12,7 +12,7 @@ public class HTTPServer {
 	public static final int SERVER_PORT = 4443;	
 
 	// information about the HTTP server
-	public static final String VERSION_ID = "screencasting-2.4";
+	public static final String VERSION_ID = "screencasting-2.4.6-RC";
 
 	private static Logger logger = Logger.getLogger(HTTPServer.class.getName());
 	
