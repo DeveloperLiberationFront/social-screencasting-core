@@ -20,28 +20,28 @@ var requested = {};
 function handleMouseEnter() {
     //$(this).addClass("rowHover");
     var highlightedToolName = $(this).data("toolName"), classToAdd, objs, i;
-	classToAdd = "none";
+    classToAdd = "none";
     objs = [];
 
     $(".clickMe").each(function () {
         if ($(this).data("toolName") &&
             $(this).data("toolName") == highlightedToolName) {
-			objs.push($(this));
+            objs.push($(this));
             if ($(this.childNodes[3]).text().trim().indexOf("/0") != -1) {
                 classToAdd = "noKeyboard";
-            } else if (classToAdd == "none" ){
+            } else if (classToAdd == "none") {
                 classToAdd = "rowHover";
             }
         }
     });
-	
-	if (objs.length == 1 && objs[0].hasClass('addedItem')) {
-		classToAdd = "noUseBorder";	// don't make things green if they've only used keyboard and they don't have a video
-	}
 
-	for(i = 0;i<objs.length;i++)  {
-		objs[i].addClass(classToAdd);
-	}
+    if (objs.length == 1 && objs[0].hasClass('addedItem')) {
+        classToAdd = "noUseBorder";	// don't make things green if they've only used keyboard and they don't have a video
+    }
+
+    for (i = 0; i < objs.length; i++) {
+        objs[i].addClass(classToAdd);
+    }
 }
 
 function handleMouseLeave() {
@@ -51,8 +51,8 @@ function handleMouseLeave() {
         if ($(this).data("toolName") &&
             $(this).data("toolName") == highlightedToolName) {
             $(this).removeClass("rowHover");
-			$(this).removeClass("noKeyboard");
-			$(this).removeClass("noUseBorder");
+            $(this).removeClass("noKeyboard");
+            $(this).removeClass("noUseBorder");
         }
     });
 }
@@ -110,7 +110,7 @@ function modifyMultipleClipButtonsForExternal() {
 
 
 function drawToolTable(tools) {
-    var i, newItem;
+    var i, newItem, hasMatch;
 
     //insert them smallest to largest
     for (i = 0; i < tools.length; i++) {
@@ -122,15 +122,17 @@ function drawToolTable(tools) {
             newItem = newItem + "<td>" + tools[i].count + "</tr>";
         }
 
-        var hasMatch = false;
+        hasMatch = false;
         $(".myTools .clickMe").each(function () {
-            if ($(this).data("toolName") &&
-                $(this).data("toolName") == tools[i].name)
+            if ($(this).data("toolName") && $(this).data("toolName") == tools[i].name) {
                 hasMatch = true;
+            }
         });
 
         newItem = $(newItem);
-        if (!hasMatch) newItem.addClass("newTool");
+        if (!hasMatch) {
+            newItem.addClass("newTool");
+        }
         newItem.data("toolName", tools[i].name);
         newItem.appendTo($("#otherPersonsTable tbody"));
     }
@@ -223,7 +225,7 @@ function showUserTools(email) {
 }
 
 function loadPeopleAjax() {
-	$("#notTimeYet").hide();
+    $("#notTimeYet").hide();
     $.ajax({
         url: "http://screencaster-hub.appspot.com/api/plugin/" + currentPlugin,
         success: function (data) {
@@ -245,18 +247,18 @@ function loadPeopleAjax() {
 }
 
 function loadPeople() {
-	$.ajax({
+    $.ajax({
         url: "http://screencaster-hub.appspot.com/api/status",
         success: function (data) {
             if (data.status == "enabled") {
-				loadPeopleAjax();
-			} else {
-				$("#notTimeYet").show();
-			}
+                loadPeopleAjax();
+            } else {
+                $("#notTimeYet").show();
+            }
         }
     });
-	
-	
+
+
 }
 
 function listUsers() {
@@ -276,13 +278,13 @@ function listUsers() {
 
 function makeButtonsForMultipleGuiAndKeyClips() {
     var i, j, newButton, insertionPoint;
-	
+
     if (currentKeyClips.length + currentGuiClips.length > 1) {
         //clear out old buttons
         $("#viewOtherDiv").find("button").remove();
         $("#viewOtherDiv").find("div").remove();
         $("#viewOtherDiv").show();
-		
+
         insertionPoint = $("#viewOtherSpot");
         for (i = 0; i < currentGuiClips.length; i++) {
             newButton = $('<button class="viewOther"></button>');
@@ -293,10 +295,10 @@ function makeButtonsForMultipleGuiAndKeyClips() {
         if (currentGuiClips.length === 0) {
             insertionPoint.before("<div class='noClipsShared'>No clips demonstrating GUI use</div>");
         }
-		
+
         insertionPoint.before("<div>More keyboard shortcut uses:</div>");
         insertionPoint.before("<div></div>");
-		
+
         for (j = 0; j < currentKeyClips.length; j++) {
             newButton = $('<button class="viewOther"></button>');
             newButton.text("Example " + (j + 1));
@@ -306,7 +308,7 @@ function makeButtonsForMultipleGuiAndKeyClips() {
         if (currentKeyClips.length === 0) {
             insertionPoint.before("<div class='noClipsShared'>No clips demonstrating keyboard shortcut use</div>");
         }
-		
+
     }
     else {
         $("#viewOtherDiv").hide();
@@ -331,7 +333,7 @@ function getIthClip(clipIndex) {
 
 function changeSharedMediaSource(clipIndex) {
     var getUrl, clipName;
-	stopFramePlayback();
+    stopFramePlayback();
     clipName = getIthClip(clipIndex);
 
     currentImageDir = "http://screencaster-hub.appspot.com/api/" + currentEmail + "/" + currentPlugin + "/" + currentTool + "/" + clipName;
@@ -345,7 +347,7 @@ function changeSharedMediaSource(clipIndex) {
 
     //clear out all frames and animations
     $(".frame").remove();
-	$(".keyAnimation").remove();
+    $(".keyAnimation").remove();
 
     //reload frames //TODO: implement caching
     $.ajax(getUrl, {
@@ -369,9 +371,9 @@ function changeSharedMediaSource(clipIndex) {
 
 function changeLocalMediaSource(clipIndex) {
     var postUrl, clipName;
-	stopFramePlayback();
+    stopFramePlayback();
     clipName = getIthClip(clipIndex);
-	
+
     currentImageDir = "/" + clipName;
     postUrl = "/mediaServer";
 
@@ -381,7 +383,7 @@ function changeLocalMediaSource(clipIndex) {
 
     //clear out all frames and animations
     $(".frame").remove();
-	$(".keyAnimation").remove();
+    $(".keyAnimation").remove();
 
     //reload frames //TODO: implement caching
     $.ajax({
@@ -420,9 +422,9 @@ function showSharedClips(arrayOfGuiClips, arrayOfKeyClips) {
     stopFramePlayback();
     $("#placeholder").hide();
     $("#rating").show();
-    
+
     totalClips = arrayOfGuiClips.length + arrayOfKeyClips.length;
-	
+
     if (totalClips === 0) {
         $("#clipLoading").hide();
         $("#clipDoesNotExist").hide();
@@ -436,7 +438,7 @@ function showSharedClips(arrayOfGuiClips, arrayOfKeyClips) {
         currentKeyClips = arrayOfKeyClips;
         changeSharedMediaSource(0);		//start with the first clip	from SHARED
     }
-    updateShareRequestButton(); 
+    updateShareRequestButton();
 }
 
 function showLocalClips(arrayOfGuiClips, arrayOfKeyClips) {
@@ -444,9 +446,9 @@ function showLocalClips(arrayOfGuiClips, arrayOfKeyClips) {
     stopFramePlayback();
     $("#placeholder").hide();
     $("#rating").hide();
-	
+
     totalClips = arrayOfGuiClips.length + arrayOfKeyClips.length;
-	
+
     if (totalClips === 0) {
         $("#clipDoesNotExist").show();
         $("#requestShare").hide();
@@ -504,7 +506,7 @@ function checkExistanceOfLocalClips(element) {
     $.ajax({
         type: "POST",
         url: postUrl,
-        data: { "pluginName": currentPlugin, "toolName": currentTool, "thingToDo": "queryClipExistance"},
+        data: { "pluginName": currentPlugin, "toolName": currentTool, "thingToDo": "queryClipExistance" },
         success: function (data) {
             console.log(data);
             console.log(JSON.stringify(data));
@@ -515,7 +517,7 @@ function checkExistanceOfLocalClips(element) {
             console.log("There was a problem");
         }
     });
-	
+
 }
 
 function sortTableByToolName(givenTable) {
@@ -546,20 +548,20 @@ function sortTableByCount(givenTable) {
     elements.sortElements(function (a, b) {
         var first, second;
         first = $(a.childNodes[1]).text().trim();
-		if (first.indexOf("/") == -1) {
-			first = +first;
-		} else {
-			first = first.split("/");
-			first = +first[0] + +first[1];		//converts the 5/8 to (int)5 + (int)8
-		}
+        if (first.indexOf("/") == -1) {
+            first = +first;
+        } else {
+            first = first.split("/");
+            first = parseInt(first[0], 10) + parseInt(first[1], 10);		//converts the 5/8 to (int)5 + (int)8
+        }
         second = $(b.childNodes[1]).text().trim();
-		if (second.indexOf("/") == -1) {
-			second = +second;
-		} else {
-			second = second.split("/");
-			second = +second[0] + +second[1];		//converts the 5/8 to (int)5 + (int)8
-		}
-		
+        if (second.indexOf("/") == -1) {
+            second = +second;
+        } else {
+            second = second.split("/");
+            second = parseInt(second[0], 10) + parseInt(second[1], 10);		//converts the 5/8 to (int)5 + (int)8
+        }
+
         if (ascending) {
             return first - second;
         } else {
