@@ -65,8 +65,8 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 
 	private void respondToPost(Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
-		logger.debug("POST parameters recieved " + request.getParameterMap());
-		logger.debug("PluginName: " + request.getParameter(PARAM_PLUGIN_NAME));
+		logger.debug("POST parameters received " + request.getParameterMap());
+		//logger.debug("PluginName: " + request.getParameter(PARAM_PLUGIN_NAME));
 
 		if (QUERY_CLIP_EXISTANCE.equals(request.getParameter(PERFORM_ACTION)))
 		{

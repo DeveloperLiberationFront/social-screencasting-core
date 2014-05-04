@@ -1,18 +1,22 @@
 package edu.ncsu.lubick.localHub.database;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.UserManager;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 
 public class LocalSQLiteDatabase extends LocalSQLDatabase
 {
-	
+
 	private static final Logger logger = Logger.getLogger(LocalSQLiteDatabase.class);
 	private static final String DB_EXTENSION_NAME = ".sqlite";
 	private Connection connection;
@@ -29,13 +33,72 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 			open(databaseLocation);
 		}
 		else
-		// incorrect file name
+			// incorrect file name
 		{
 			throw new DBAbstractionException("The database file name must end with " + DB_EXTENSION_NAME + " : " + databaseLocation);
 		}
+
+		//XXX remove from future releases
+		try
+		{
+			patchDatabase();
+		}
+		catch (SQLException e)
+		{
+			logger.fatal("error patching",e);
+		}
 	}
 
-	private void open(String path)
+	private final void patchDatabase() throws SQLException
+	{
+		//check to see if patch already done
+
+		String alreadyPatchedString = "Select count(*) from ToolUsages where clip_score = -1";
+		try (ResultSet results = executeWithResults(makePreparedStatement(alreadyPatchedString));)
+		{
+			if (results.next()) {
+				if (results.getInt(1) > 0) {
+					logger.info("Already patched database");
+					return;
+				}
+			}
+		}
+		logger.info("Patching database - finding deleted folders");
+
+		String sqlQueryString = "SELECT use_id FROM ToolUsages ";
+		List<String> keysToEraseList = new ArrayList<>();
+		try(PreparedStatement existantStatement = makePreparedStatement(sqlQueryString);) {
+			File mediaOutput = new File(PostProductionHandler.MEDIA_OUTPUT_FOLDER);
+			
+			try (ResultSet results = executeWithResults(existantStatement);)
+			{
+				while(results.next()) {
+					String clipId = results.getString(1);
+					File f = new File(mediaOutput, clipId);
+					if (!f.exists()) {
+						keysToEraseList.add(clipId);
+					}
+				}
+			}
+		}
+		logger.info("Patching database - updating database");
+
+		String resetQueryString = "UPDATE ToolUsages SET clip_score = -1 where use_id = ?";
+		try (PreparedStatement resetScoreStatement = makePreparedStatement(resetQueryString);) {
+			for(String useId : keysToEraseList) {
+
+				resetScoreStatement.setString(1, useId);
+				resetScoreStatement.addBatch();
+			}
+			logger.info("Patching database - executing batch");
+
+			resetScoreStatement.executeBatch();
+		}
+
+		logger.info("Finished patch");
+	}
+
+	private final void open(String path)
 	{
 		try
 		{
@@ -99,7 +162,7 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 		{
 			throw new DBAbstractionException("Problem executing statement ",e);
 		}
-		
+
 	}
 
 	@Override
@@ -117,7 +180,7 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 			throw new DBAbstractionException("Problem with query", e);
 		}
 		return retVal;
-		
+
 	}
 
 	@Override

@@ -49,7 +49,7 @@ public class NotificationManager {
 			try {
 				JSONArray messages = responseObject.getJSONArray("notifications");
 				
-				listener.notificationRecieved(messages.toString(2));
+				listener.notificationReceived(messages.toString(2));
 				
 				JSONObject notification = messages.getJSONObject(0); 
 				String message = notification.getString("message");

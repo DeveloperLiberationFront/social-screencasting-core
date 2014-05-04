@@ -184,7 +184,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	public List<ToolUsage> getBestNInstancesOfToolUsage(int n, String pluginName, String toolName, boolean isKeyboardShortcutHuh)
 	{
 		StringBuilder sqlQueryBuilder = new StringBuilder("SELECT * FROM ToolUsages "+
-					"WHERE plugin_name=? AND tool_name=? AND ");
+					"WHERE plugin_name=? AND tool_name=? AND clip_score > 0 AND ");
 		
 		if (isKeyboardShortcutHuh)
 		{
@@ -299,7 +299,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	@Override
 	public void deleteClipForToolUsage(String clipID)
 	{
-		String sqlQuery = 		"DELETE FROM Clips where folder_name = ?";
+		String sqlQuery = "DELETE FROM Clips where folder_name = ?";
 
 
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)

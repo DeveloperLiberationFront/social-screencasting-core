@@ -473,7 +473,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	}
 
 	@Override
-	public void notificationRecieved(String notifications)
+	public void notificationReceived(String notifications)
 	{
 		ToolUsage tu = new ToolUsage("Notification received", notifications, "[GUI]", "[ScreencastingHub]", new Date(), 10, 10);
 		reportToolUsage(tu);
