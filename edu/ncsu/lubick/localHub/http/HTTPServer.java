@@ -1,5 +1,7 @@
 package edu.ncsu.lubick.localHub.http;
 
+import java.net.InetSocketAddress;
+
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Server;
 
@@ -36,7 +38,7 @@ public class HTTPServer {
 		{
 			userManager = um;
 		}
-		httpServer.underlyingServer = new Server(SERVER_PORT);
+		httpServer.underlyingServer = new Server(new InetSocketAddress("localhost", SERVER_PORT));
 		httpServer.underlyingServer.setHandler(HandlerManager.makeHandler(wqi));
 
 		try
