@@ -26,11 +26,14 @@ h1 {
 	border-spacing:0;
 	text-align:center;
 	font-size:16px;
-	max-width:20%;
 }
 
-.resultsTable th{
+.resultsTable th {
 	font-size:18px;
+}
+
+.resultsTable tbody {
+	padding-right: 15px;
 }
 
 
@@ -118,6 +121,11 @@ td, tr, th{
 
 .sort {
 	cursor:pointer;
+	background-image: url("/images/tableArrows.svg");
+	background-size: 15px;
+	background-position: center right;
+	background-repeat: no-repeat;
+	padding-right: 15px;
 }
 
 .requestPermissions {
