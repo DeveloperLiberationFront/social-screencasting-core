@@ -20,17 +20,20 @@ h1 {
 .resultsTable{
 	display:block;
 	float:left;
-	margin-left:3%;
+	margin:25px;
 	background-color:white;
 	border:3px solid orange;
 	border-spacing:0;
 	text-align:center;
 	font-size:16px;
-	max-width:20%;
 }
 
-.resultsTable th{
+.resultsTable th {
 	font-size:18px;
+}
+
+.resultsTable tbody {
+	padding-right: 20px;
 }
 
 
@@ -88,12 +91,12 @@ td, tr, th{
 }
 
 #moreInfo{
+	display: inline-block;
 	border: 1px solid black;
 	padding: 10px 20px;
-	float:right;
-	margin-right: 5%;
 	background-color:#ffdfb1;
-	width:40%;
+	width: 720px;
+	margin: 25px;
 }
 
 #requestShare {
@@ -102,6 +105,8 @@ td, tr, th{
 
 #clipPlayer {
 	display:none;
+	width: 720px;
+	height: 500px;
 }
 
 #clipDoesNotExist {
@@ -118,6 +123,22 @@ td, tr, th{
 
 .sort {
 	cursor:pointer;
+	background-size: 15px;
+	background-position: center right;
+	background-repeat: no-repeat;
+	padding-right: 20px;
+}
+
+.noSort {
+	background-image: url("/images/table/noSort.svg");
+}
+
+.ascendSort {
+	background-image: url("/images/table/ascendSort.svg");
+}
+
+.descendSort {
+	background-image: url("/images/table/descendSort.svg");
 }
 
 .requestPermissions {
@@ -168,4 +189,8 @@ td, tr, th{
 
 .noUseBorder {
 	outline: 3px solid #29b350;
+}
+
+#prevTable {
+	float: left;
 }

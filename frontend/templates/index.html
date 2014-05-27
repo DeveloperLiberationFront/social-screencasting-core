@@ -27,8 +27,8 @@
         <th colspan="2" class="header">My Tools</th>
       </tr>
       <tr class="header">
-        <th class="sort sortByTool">Tool Name</th>
-		<th class="sort sortByNum">GUI uses/Keyboard uses</th>
+        <th class="sort sortByTool noSort">Tool Name</th>
+		    <th class="sort sortByNum noSort">GUI uses/Keyboard uses</th>
       </tr>
 
       <#list myToolsAndCounts as thisToolCount>
@@ -45,19 +45,21 @@
           <th colspan="2" id="otherUsers">Other users of ${plugin}</th>
         </tr>
         <tr class='header'>
-          <th class="sort sortByName">User Name</th>
-		  <th class="sort sortByEmail">Email</th>
+          <th class="sort sortByName noSort">User Name</th>
+		  <th class="sort sortByEmail noSort">Email</th>
         </tr>
 		<tr class='header' id="notTimeYet"><th colspan="2">Sharing Disabled until 4/16/14.</th></tr>
       </thead>
       <tbody>
       </tbody>
     </table>
-
-    <table border="1" id='otherPersonsTable' class="resultsTable tablesorter" style='display:none'>
+    
+    <table border="1" id='otherPersonsTable' class="resultsTable tablesorter" style="display: none">
       <thead>
         <tr class="changeName">
           <th colspan="3" id="otherPeoplesTools">
+            <button id="prevTable">&laquo;</button>
+
             <button id='prevUser'>&laquo;</button>
             <span id="otherUsersPlaceHolder" data-email="">Loading Team-mates</span>
 			
@@ -65,9 +67,9 @@
           </th>
         </tr>
         <tr class="header">
-          <th class="sort sortByTool">Tool Name</th>
-		  <th class="sort sortByNum">GUI uses/Keyboard uses</th>
-		  <th class="sort sortByVideo">Video Available</th>
+          <th class="sort sortByTool noSort">Tool Name</th>
+		  <th class="sort sortByNum noSort">GUI uses/Keyboard uses</th>
+		  <th class="sort sortByVideo noSort">Video Available</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -146,6 +148,7 @@
     <script src="jquery/jquery.form.js"></script>
 	<script src="jquery/jquery-ui.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
+	<script src="jquery/jquery.fullscreen.js"></script>
 	<script src="scripts/sortElements.js"></script>
     <script src="scripts/playback.js"></script>
     <script src="scripts/setUpPlayback.js"></script>

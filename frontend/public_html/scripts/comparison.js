@@ -110,6 +110,7 @@ function modifyMultipleClipButtonsForExternal() {
 
 
 function drawToolTable(tools) {
+    $("#otherPersonsTable tbody").empty();
     var i, newItem, hasMatch;
 
     //insert them smallest to largest
@@ -209,6 +210,9 @@ function showUserTools(email) {
 
     if (email in userData) {
         drawToolTable(userData[email]);
+        // Sort
+        ascending = false;
+        $("#otherPersonsTable").find(".sortByNum")[0].click();
     } else {
         $.ajax({
             url: getUrl,
@@ -219,16 +223,24 @@ function showUserTools(email) {
                 theseTools = keys.map(function (key) {
                     return { name: key, details: data[currentPlugin][key] };
                 });
+
                 userData[email] = theseTools;
-                drawToolTable(theseTools);
+                drawToolTable(userData[email]);
+
+                // Sort
                 ascending = false;		//set ascending to false so that the next call to sort makes them lo to hi
-                sortTableByCount($("#otherPersonsTable"));
+                $("#otherPersonsTable").find(".sortByNum")[0].click();
             },
             error: function () {
                 console.log("There was a problem displaying user " + email + "'s tools");
             }
         });
     }
+}
+
+function hideToolsShowOtherUsers() {
+    $("#usersTable").show();
+    $("#otherPersonsTable").hide();
 }
 
 function loadPeopleAjax() {
@@ -530,7 +542,9 @@ function checkExistanceOfLocalClips(element) {
 function sortTableByToolName(givenTable) {
     var elements, thisTable;
     thisTable = (givenTable.hasOwnProperty('target') ? $(givenTable.target).closest("table") : givenTable);
-
+    
+    changeSortArrows(thisTable);
+    
     elements = thisTable.find("tr").filter(".clickMe");
 
     elements.sortElements(function (a, b) {
@@ -549,6 +563,8 @@ function sortTableByToolName(givenTable) {
 function sortTableByVideo(givenTable) {
     var elements, thisTable;
     thisTable = (givenTable.hasOwnProperty('target') ? $(givenTable.target).closest("table") : givenTable);
+
+    changeSortArrows(thisTable);
 
     elements = thisTable.find("tr").filter(".clickMe");
 
@@ -570,6 +586,8 @@ function sortTableByCount(givenTable) {
     var elements, thisTable;
     thisTable = (givenTable.hasOwnProperty('target') ? $(givenTable.target).closest("table") : givenTable);
 
+    changeSortArrows(thisTable);
+
     elements = thisTable.find("tr").filter(".clickMe");
 
     elements.sortElements(function (a, b) {
@@ -579,14 +597,14 @@ function sortTableByCount(givenTable) {
             first = +first;
         } else {
             first = first.split("/");
-            first = parseInt(first[0], 10) + parseInt(first[1], 10);		//converts the 5/8 to (int)5 + (int)8
+            first = parseInt(first[0], 10) + parseInt(first[1], 10);        //converts the 5/8 to (int)5 + (int)8
         }
         second = $(b.childNodes[1]).text().trim();
         if (second.indexOf("/") == -1) {
             second = +second;
         } else {
             second = second.split("/");
-            second = parseInt(second[0], 10) + parseInt(second[1], 10);		//converts the 5/8 to (int)5 + (int)8
+            second = parseInt(second[0], 10) + parseInt(second[1], 10);     //converts the 5/8 to (int)5 + (int)8
         }
 
         if (ascending) {
@@ -598,8 +616,29 @@ function sortTableByCount(givenTable) {
     ascending = !ascending;
 }
 
-function sortUsersByEmail() { }
-function sortUsersByName() { }
+function sortUsersByEmail() {}
+function sortUsersByName() {}
+
+var gThisTable = null;
+
+function changeSortArrows(thisTable) {
+    var ascendSorts = $(thisTable).find("th").filter(".ascendSort")
+    var descendSorts = $(thisTable).find("th").filter(".descendSort")
+    ascendSorts.addClass("noSort");
+    descendSorts.addClass("noSort");
+    descendSorts.removeClass("descendSort");
+    ascendSorts.removeClass("ascendSort");
+
+    gThisTable = thisTable;
+
+    if(ascending) {
+        thisTable.context.classList.add("ascendSort");
+    } else {
+        thisTable.context.classList.add("descendSort");
+    }
+
+    thisTable.context.classList.remove("noSort");
+}
 
 function submit_rating() {
     var url = "http://screencaster-hub.appspot.com/api/" +
@@ -620,8 +659,6 @@ $(document).ready(function () {
     authString = "?name=" + userName + "&email=" + userEmail.replace(/\+/g, "%2b") + "&token=" + userToken;
 
     elementPosition = $('#moreInfo').offset();
-    //fix it there for scrolling
-    $('#moreInfo').css('position', 'fixed').css('top', elementPosition.top).css('left', elementPosition.left);
 
     $("#pluginSelector").change(selectPlugin);
 
@@ -631,6 +668,7 @@ $(document).ready(function () {
 
     $("#viewOtherDiv").on('click', 'button', viewOtherExample);
 
+    $("#prevTable").on('click', hideToolsShowOtherUsers);
     $("#nextUser").on('click', nextUser);
     $("#prevUser").on('click', prevUser);
 
