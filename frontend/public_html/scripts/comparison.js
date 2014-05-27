@@ -118,7 +118,7 @@ function drawToolTable(tools) {
         newItem = "<tr class='clickMe addedItem'><td>" + tools[i].name;
 
         if ("object" == typeof (tools[i].details)) {
-            newItem = newItem + "<td>" + tools[i].details.gui + "/" + tools[i].details.keyboard + "</td>";
+            newItem = newItem + "<td>" + tools[i].details.gui + "</td><td>" + tools[i].details.keyboard + "</td>";
             if (tools[i].details.hasOwnProperty("clips")
                 && tools[i].details.clips > 0) {
                 newItem = newItem + "<td><img src='images/video_icon_tiny.png'/></td>";
@@ -286,7 +286,7 @@ function listUsers() {
         email = pluginUsers[i];
         name = namesByEmail[email];
 
-        newItem = $("<tr class='clickMe addedUser'><td>" + name + "<td>" + email + "</tr>");
+        newItem = $("<tr class='clickMe addedUser'><td title='"+email+"'>" + name + "</td></tr>");
 
         newItem.data("index", i);
         newItem.data("email", email);
@@ -571,8 +571,8 @@ function sortTableByVideo(givenTable) {
     elements.sortElements(function (a, b) {
         var first, second;
         console.log(a);
-        first = a.childNodes[2]
-        second = b.childNodes[2]
+        first = a.childNodes[3]
+        second = b.childNodes[3]
         if (ascending) {
             return second.childNodes.length - first.childNodes.length
         } else {
