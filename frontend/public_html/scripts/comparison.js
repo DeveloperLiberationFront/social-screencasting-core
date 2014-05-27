@@ -110,6 +110,7 @@ function modifyMultipleClipButtonsForExternal() {
 
 
 function drawToolTable(tools) {
+    $("#otherPersonsTable tbody").empty();
     var i, newItem, hasMatch;
 
     //insert them smallest to largest
@@ -222,8 +223,10 @@ function showUserTools(email) {
                 theseTools = keys.map(function (key) {
                     return { name: key, details: data[currentPlugin][key] };
                 });
+
                 userData[email] = theseTools;
-                drawToolTable(theseTools);
+                drawToolTable(userData[email]);
+
                 // Sort
                 ascending = false;		//set ascending to false so that the next call to sort makes them lo to hi
                 $("#otherPersonsTable").find(".sortByNum")[0].click();
