@@ -656,8 +656,6 @@ $(document).ready(function () {
     authString = "?name=" + userName + "&email=" + userEmail.replace(/\+/g, "%2b") + "&token=" + userToken;
 
     elementPosition = $('#moreInfo').offset();
-    //fix it there for scrolling
-    $('#moreInfo').css('position', 'fixed').css('top', elementPosition.top).css('left', elementPosition.left);
 
     $("#pluginSelector").change(selectPlugin);
 
