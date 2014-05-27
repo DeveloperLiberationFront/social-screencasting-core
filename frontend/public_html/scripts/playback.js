@@ -220,10 +220,15 @@ function renderPlayback(auth) {
 	{
 		$("#overlay").on("click", function() {
             launchFullScreen($("#panel")[0])
-        });
-        $("#panel")[0].onwebkitfullscreenchange = handleFullScreenChange;
 
-		$("#moreInfo").on("click",".playPause", playOrPause);
+        });
+
+        $("#panel").on("fullscreenchange", handleFullScreenChange);
+        $("#panel").on("webkitfullscreenchange", handleFullScreenChange);
+        $("#panel").on("mozfullscreenchange", handleFullScreenChange);
+        $("#panel").on("MSFullscreenChange", handleFullScreenChange);
+		
+        $("#moreInfo").on("click",".playPause", playOrPause);
 		$("#moreInfo").on("click",".settings", rotateAnimationSettings);
 		hasInitializedButtons = true;
 	}

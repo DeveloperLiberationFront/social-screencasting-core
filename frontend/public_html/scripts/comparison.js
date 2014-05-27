@@ -222,7 +222,8 @@ function showUserTools(email) {
                 userData[email] = theseTools;
                 drawToolTable(theseTools);
                 ascending = false;		//set ascending to false so that the next call to sort makes them lo to hi
-                sortTableByCount($("#otherPersonsTable"));
+                // Sort the table by tool uses.
+                $("#otherPersonsTable").find(".sortByNum")[0].click();
             },
             error: function () {
                 console.log("There was a problem displaying user " + email + "'s tools");
@@ -607,6 +608,8 @@ function sortTableByCount(givenTable) {
 function sortUsersByEmail() {}
 function sortUsersByName() {}
 
+var gThisTable = null;
+
 function changeSortArrows(thisTable) {
     var ascendSorts = $(thisTable).find("th").filter(".ascendSort")
     var descendSorts = $(thisTable).find("th").filter(".descendSort")
@@ -614,6 +617,8 @@ function changeSortArrows(thisTable) {
     descendSorts.addClass("noSort");
     descendSorts.removeClass("descendSort");
     ascendSorts.removeClass("ascendSort");
+
+    gThisTable = thisTable;
 
     if(ascending) {
         thisTable.context.classList.add("ascendSort");
