@@ -121,11 +121,22 @@ td, tr, th{
 
 .sort {
 	cursor:pointer;
-	background-image: url("/images/tableArrows.svg");
 	background-size: 15px;
 	background-position: center right;
 	background-repeat: no-repeat;
 	padding-right: 20px;
+}
+
+.noSort {
+	background-image: url("/images/table/noSort.svg");
+}
+
+.ascendSort {
+	background-image: url("/images/table/ascendSort.svg");
+}
+
+.descendSort {
+	background-image: url("/images/table/descendSort.svg");
 }
 
 .requestPermissions {

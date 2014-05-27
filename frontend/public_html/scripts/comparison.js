@@ -530,7 +530,9 @@ function checkExistanceOfLocalClips(element) {
 function sortTableByToolName(givenTable) {
     var elements, thisTable;
     thisTable = (givenTable.hasOwnProperty('target') ? $(givenTable.target).closest("table") : givenTable);
-
+    
+    changeSortArrows(thisTable);
+    
     elements = thisTable.find("tr").filter(".clickMe");
 
     elements.sortElements(function (a, b) {
@@ -549,6 +551,8 @@ function sortTableByToolName(givenTable) {
 function sortTableByVideo(givenTable) {
     var elements, thisTable;
     thisTable = (givenTable.hasOwnProperty('target') ? $(givenTable.target).closest("table") : givenTable);
+
+    changeSortArrows(thisTable);
 
     elements = thisTable.find("tr").filter(".clickMe");
 
@@ -570,6 +574,8 @@ function sortTableByCount(givenTable) {
     var elements, thisTable;
     thisTable = (givenTable.hasOwnProperty('target') ? $(givenTable.target).closest("table") : givenTable);
 
+    changeSortArrows(thisTable);
+
     elements = thisTable.find("tr").filter(".clickMe");
 
     elements.sortElements(function (a, b) {
@@ -579,14 +585,14 @@ function sortTableByCount(givenTable) {
             first = +first;
         } else {
             first = first.split("/");
-            first = parseInt(first[0], 10) + parseInt(first[1], 10);		//converts the 5/8 to (int)5 + (int)8
+            first = parseInt(first[0], 10) + parseInt(first[1], 10);        //converts the 5/8 to (int)5 + (int)8
         }
         second = $(b.childNodes[1]).text().trim();
         if (second.indexOf("/") == -1) {
             second = +second;
         } else {
             second = second.split("/");
-            second = parseInt(second[0], 10) + parseInt(second[1], 10);		//converts the 5/8 to (int)5 + (int)8
+            second = parseInt(second[0], 10) + parseInt(second[1], 10);     //converts the 5/8 to (int)5 + (int)8
         }
 
         if (ascending) {
@@ -598,8 +604,25 @@ function sortTableByCount(givenTable) {
     ascending = !ascending;
 }
 
-function sortUsersByEmail() { }
-function sortUsersByName() { }
+function sortUsersByEmail() {}
+function sortUsersByName() {}
+
+function changeSortArrows(thisTable) {
+    var ascendSorts = $(thisTable).find("th").filter(".ascendSort")
+    var descendSorts = $(thisTable).find("th").filter(".descendSort")
+    ascendSorts.addClass("noSort");
+    descendSorts.addClass("noSort");
+    descendSorts.removeClass("descendSort");
+    ascendSorts.removeClass("ascendSort");
+
+    if(ascending) {
+        thisTable.context.classList.add("ascendSort");
+    } else {
+        thisTable.context.classList.add("descendSort");
+    }
+
+    thisTable.context.classList.remove("noSort");
+}
 
 function submit_rating() {
     var url = "http://screencaster-hub.appspot.com/api/" +
