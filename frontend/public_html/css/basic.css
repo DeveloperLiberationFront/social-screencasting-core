@@ -33,7 +33,7 @@ h1 {
 }
 
 .resultsTable tbody {
-	padding-right: 15px;
+	padding-right: 20px;
 }
 
 
@@ -125,7 +125,7 @@ td, tr, th{
 	background-size: 15px;
 	background-position: center right;
 	background-repeat: no-repeat;
-	padding-right: 15px;
+	padding-right: 20px;
 }
 
 .requestPermissions {
