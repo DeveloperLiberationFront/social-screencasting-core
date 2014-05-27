@@ -209,6 +209,9 @@ function showUserTools(email) {
 
     if (email in userData) {
         drawToolTable(userData[email]);
+        // Sort
+        ascending = false;
+        $("#otherPersonsTable").find(".sortByNum")[0].click();
     } else {
         $.ajax({
             url: getUrl,
@@ -221,8 +224,8 @@ function showUserTools(email) {
                 });
                 userData[email] = theseTools;
                 drawToolTable(theseTools);
+                // Sort
                 ascending = false;		//set ascending to false so that the next call to sort makes them lo to hi
-                // Sort the table by tool uses.
                 $("#otherPersonsTable").find(".sortByNum")[0].click();
             },
             error: function () {
@@ -230,6 +233,11 @@ function showUserTools(email) {
             }
         });
     }
+}
+
+function hideToolsShowOtherUsers() {
+    $("#usersTable").show();
+    $("#otherPersonsTable").hide();
 }
 
 function loadPeopleAjax() {
@@ -659,6 +667,7 @@ $(document).ready(function () {
 
     $("#viewOtherDiv").on('click', 'button', viewOtherExample);
 
+    $("#prevTable").on('click', hideToolsShowOtherUsers);
     $("#nextUser").on('click', nextUser);
     $("#prevUser").on('click', prevUser);
 

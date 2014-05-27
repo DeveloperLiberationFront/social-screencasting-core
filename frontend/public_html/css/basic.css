@@ -188,3 +188,7 @@ td, tr, th{
 .noUseBorder {
 	outline: 3px solid #29b350;
 }
+
+#prevTable {
+	float: left;
+}
