@@ -21,15 +21,10 @@ function launchFullScreen(element) {  //From davidwalsh.name/fullscreen
     }
 }
 
-function handleFullScreenChange() {
-    isFullScreen = !isFullScreen;
-
-    if(isFullScreen) {
-        setFloatingPlaybackControlsVisible(true);
-    } else {
-        setFloatingPlaybackControlsVisible(false);
-    }
-}
+$(window).bind("fullscreen-toggle", function(e, state) {
+    isFullScreen = state;
+    setFloatingPlaybackControlsVisible(state);
+});
 
 function setFloatingPlaybackControlsVisible(shouldBeVisible) {
     if (shouldBeVisible) {
@@ -192,7 +187,6 @@ function rotateAnimationSettings() {
     handleAnimationOptionsForCurrentFrame();
 }
 
-
 function renderPlayback(auth) {
     if (auth) {
         authToken = auth;
@@ -222,11 +216,6 @@ function renderPlayback(auth) {
             launchFullScreen($("#panel")[0])
 
         });
-
-        $("#panel").on("fullscreenchange", handleFullScreenChange);
-        $("#panel").on("webkitfullscreenchange", handleFullScreenChange);
-        $("#panel").on("mozfullscreenchange", handleFullScreenChange);
-        $("#panel").on("MSFullscreenChange", handleFullScreenChange);
 		
         $("#moreInfo").on("click",".playPause", playOrPause);
 		$("#moreInfo").on("click",".settings", rotateAnimationSettings);
