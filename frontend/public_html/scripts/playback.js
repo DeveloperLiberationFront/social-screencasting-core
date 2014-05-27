@@ -19,10 +19,17 @@ function launchFullScreen(element) {  //From davidwalsh.name/fullscreen
     } else if (element.webkitRequestFullScreen) {
         element.webkitRequestFullScreen();
     }
-    isFullScreen = true;
 }
 
+function handleFullScreenChange() {
+    isFullScreen = !isFullScreen;
 
+    if(isFullScreen) {
+        setFloatingPlaybackControlsVisible(true);
+    } else {
+        setFloatingPlaybackControlsVisible(false);
+    }
+}
 
 function setFloatingPlaybackControlsVisible(shouldBeVisible) {
     if (shouldBeVisible) {
@@ -161,13 +168,6 @@ function setUpDraggableThings() {
     //$(".animationHolder").draggable();  Not as simple as I hoped.  Abandoning for now
 }
 
-function goFullScreen() {
-    launchFullScreen($("#panel")[0]);
-
-    setFloatingPlaybackControlsVisible(true);
-
-}
-
 function setAnimationOverlaysTo(animationSelection) {
     var fullScreenAnimationChoices, previewAnimationChoices;
     previewAnimationChoices = $("#controlPanel").find(".animationSelection");
@@ -218,7 +218,10 @@ function renderPlayback(auth) {
 
 	if (!hasInitializedButtons)
 	{
-		$("#overlay").on("click", goFullScreen);
+		$("#overlay").on("click", function() {
+            launchFullScreen($("#panel")[0])
+        });
+        $("#panel")[0].onwebkitfullscreenchange = handleFullScreenChange;
 
 		$("#moreInfo").on("click",".playPause", playOrPause);
 		$("#moreInfo").on("click",".settings", rotateAnimationSettings);
