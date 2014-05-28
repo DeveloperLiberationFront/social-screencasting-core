@@ -212,3 +212,21 @@ button {
 [class*="col-"] {
 	margin-bottom: 15px;
 }
+
+/* Table Sort stuff */
+th.sortable.header {
+	background-image: url("/images/table/noSort.svg");
+	cursor: pointer;
+	background-size: 15px;
+	background-position: center right;
+	background-repeat: no-repeat;
+	padding-right: 20px;
+}
+
+th.sortable.headerSortUp {
+	background-image: url("/images/table/ascendSort.svg");
+}
+
+th.sortable.headerSortDown {
+	background-image: url("/images/table/descendSort.svg");
+}
