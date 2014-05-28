@@ -199,6 +199,12 @@ button {
 	border: none;
 }
 
+.ui-slider .ui-slider-handle,
+.ui-slider,
+.startLabel {
+	cursor: pointer;
+}
+
 /* Bootstrap stuff */
 .container {
 	text-align: center;
