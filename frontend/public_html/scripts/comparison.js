@@ -202,8 +202,8 @@ function selectPlugin() {
 function showUserTools(email) {
     var index, getUrl;
     $("#otherUsersPlaceHolder").text(namesByEmail[currentEmail] + "'s Tools");
-    $("#usersTable").hide();
-    $("#otherPersonsTable").show();
+    $("#usersTable").parent().hide();
+    $("#otherPersonsTable").parent().show();
 
     $(".addedItem").remove();
     getUrl = "http://screencaster-hub.appspot.com/api/" + currentEmail + "/" + currentPlugin + authString;
@@ -239,8 +239,8 @@ function showUserTools(email) {
 }
 
 function hideToolsShowOtherUsers() {
-    $("#usersTable").show();
-    $("#otherPersonsTable").hide();
+    $("#usersTable").parent().show();
+    $("#otherPersonsTable").parent().hide();
 }
 
 function loadPeopleAjax() {
@@ -619,17 +619,14 @@ function sortTableByCount(givenTable) {
 function sortUsersByEmail() {}
 function sortUsersByName() {}
 
-var gThisTable = null;
-
 function changeSortArrows(thisTable) {
     var ascendSorts = $(thisTable).find("th").filter(".ascendSort")
     var descendSorts = $(thisTable).find("th").filter(".descendSort")
+
     ascendSorts.addClass("noSort");
     descendSorts.addClass("noSort");
     descendSorts.removeClass("descendSort");
     ascendSorts.removeClass("ascendSort");
-
-    gThisTable = thisTable;
 
     if(ascending) {
         thisTable.context.classList.add("ascendSort");

@@ -20,9 +20,6 @@ h1 {
 }
 
 .resultsTable{
-	display:block;
-	float:left;
-	margin:25px;
 	background-color:white;
 	border:3px solid orange;
 	border-spacing:0;
@@ -34,11 +31,6 @@ h1 {
 	font-size:18px;
 	text-align: center;
 }
-
-.resultsTable tbody {
-	padding-right: 20px;
-}
-
 
 td, tr, th{
 	padding:4px;
@@ -94,12 +86,8 @@ td, tr, th{
 }
 
 #moreInfo{
-	display: inline-block;
 	border: 1px solid black;
-	padding: 10px 20px;
 	background-color:#ffdfb1;
-	width: 760px;
-	margin: 25px;
 }
 
 #requestShare {
@@ -108,8 +96,6 @@ td, tr, th{
 
 #clipPlayer {
 	display:none;
-	width: 720px;
-	height: 500px;
 }
 
 #clipDoesNotExist {
@@ -198,7 +184,17 @@ td, tr, th{
 	float: left;
 }
 
+
+/* Bootstrap stuff */
 .container {
 	text-align: center;
 	width: 100%;
+}
+
+.row {
+	margin: 0 15px;
+}
+
+.col-md-4 {
+	margin-bottom: 15px;
 }

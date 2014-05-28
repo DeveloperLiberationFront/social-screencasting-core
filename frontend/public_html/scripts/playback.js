@@ -76,11 +76,12 @@ function startFramePlayback() {
         isPlaying = true;
 
         frameAnimationTimer = window.setInterval(function () {
-            $(".frame").eq(currentFrame).hide();
+            var oldFrame = $(".frame").eq(currentFrame);
             currentFrame = (currentFrame + 1) % totalFrames;
             updateSlider(currentFrame);
             handleAnimationOptionsForCurrentFrame();
             $(".frame").eq(currentFrame).show();
+            oldFrame.hide();
         }, 200);
     }
 }
