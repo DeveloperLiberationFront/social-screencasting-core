@@ -184,6 +184,10 @@ td, tr, th{
 	float: left;
 }
 
+button {
+	background: none;
+	border: none;
+}
 
 /* Bootstrap stuff */
 .container {
@@ -195,11 +199,6 @@ td, tr, th{
 	margin: 0 15px;
 }
 
-.col-md-4 {
+[class*="col-"] {
 	margin-bottom: 15px;
-}
-
-button {
-	background: none;
-	border: none;
 }
