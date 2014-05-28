@@ -198,3 +198,8 @@ td, tr, th{
 .col-md-4 {
 	margin-bottom: 15px;
 }
+
+button {
+	background: none;
+	border: none;
+}
