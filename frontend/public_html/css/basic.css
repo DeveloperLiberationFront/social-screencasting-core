@@ -98,6 +98,16 @@ td, tr, th{
 	display:none;
 }
 
+#ratingDiv {
+	background: #ffdfb1;
+	width: 100%;
+	height: 20px;
+}
+
+#viewOtherDiv {
+	margin-top: -20px;
+}
+
 #clipDoesNotExist {
 	display: none;
 }
