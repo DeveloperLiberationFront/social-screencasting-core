@@ -13,8 +13,6 @@ var authString;
 
 var emailIndex; //index of current email; for rotation purposes
 
-var ascending; //sort order for tables 
-
 var requested = {};
 
 function handleMouseEnter() {
@@ -118,7 +116,7 @@ function drawToolTable(tools) {
         newItem = "<tr class='clickMe addedItem'><td>" + tools[i].name;
 
         if ("object" == typeof (tools[i].details)) {
-            newItem = newItem + "<td>" + tools[i].details.gui + "/" + tools[i].details.keyboard + "</td>";
+            newItem = newItem + "<td>" + tools[i].details.gui + "</td><td>" + tools[i].details.keyboard + "</td>";
             if (tools[i].details.hasOwnProperty("clips")
                 && tools[i].details.clips > 0) {
                 newItem = newItem + "<td><img src='images/video_icon_tiny.png'/></td>";
@@ -143,6 +141,7 @@ function drawToolTable(tools) {
         }
         newItem.data("toolName", tools[i].name);
         newItem.appendTo($("#otherPersonsTable tbody"));
+       $("table").trigger("update");
     }
 }
 
@@ -202,17 +201,17 @@ function selectPlugin() {
 function showUserTools(email) {
     var index, getUrl;
     $("#otherUsersPlaceHolder").text(namesByEmail[currentEmail] + "'s Tools");
-    $("#usersTable").hide();
-    $("#otherPersonsTable").show();
+    $("#usersTable").parent().hide();
+    $("#otherPersonsTable").parent().show();
 
     $(".addedItem").remove();
     getUrl = "http://screencaster-hub.appspot.com/api/" + currentEmail + "/" + currentPlugin + authString;
 
     if (email in userData) {
         drawToolTable(userData[email]);
-        // Sort
-        ascending = false;
-        $("#otherPersonsTable").find(".sortByNum")[0].click();
+
+        // Click on the "Tool Name" field to sort it.
+        $("#otherPersonsTable").children()[0].children[1].children[0].click();
     } else {
         $.ajax({
             url: getUrl,
@@ -227,9 +226,8 @@ function showUserTools(email) {
                 userData[email] = theseTools;
                 drawToolTable(userData[email]);
 
-                // Sort
-                ascending = false;		//set ascending to false so that the next call to sort makes them lo to hi
-                $("#otherPersonsTable").find(".sortByNum")[0].click();
+                // Click on the "Tool Name" field to sort it.
+                $("#otherPersonsTable").children()[0].children[1].children[0].click();
             },
             error: function () {
                 console.log("There was a problem displaying user " + email + "'s tools");
@@ -239,8 +237,8 @@ function showUserTools(email) {
 }
 
 function hideToolsShowOtherUsers() {
-    $("#usersTable").show();
-    $("#otherPersonsTable").hide();
+    $("#usersTable").parent().show();
+    $("#otherPersonsTable").parent().hide();
 }
 
 function loadPeopleAjax() {
@@ -286,12 +284,13 @@ function listUsers() {
         email = pluginUsers[i];
         name = namesByEmail[email];
 
-        newItem = $("<tr class='clickMe addedUser'><td>" + name + "<td>" + email + "</tr>");
+        newItem = $("<tr class='clickMe addedUser'><td title='"+email+"'>" + name + "</td></tr>");
 
         newItem.data("index", i);
         newItem.data("email", email);
 
         newItem.appendTo($("#usersTable tbody"));
+        $("table").trigger("update");
     }
 }
 
@@ -539,107 +538,6 @@ function checkExistanceOfLocalClips(element) {
 
 }
 
-function sortTableByToolName(givenTable) {
-    var elements, thisTable;
-    thisTable = (givenTable.hasOwnProperty('target') ? $(givenTable.target).closest("table") : givenTable);
-    
-    changeSortArrows(thisTable);
-    
-    elements = thisTable.find("tr").filter(".clickMe");
-
-    elements.sortElements(function (a, b) {
-        var first, second;
-        first = $(a.childNodes[0]).text().trim();
-        second = $(b.childNodes[0]).text().trim();
-        if (ascending) {
-            return first.localeCompare(second);
-        } else {
-            return second.localeCompare(first);
-        }
-    });
-    ascending = !ascending;
-}
-
-function sortTableByVideo(givenTable) {
-    var elements, thisTable;
-    thisTable = (givenTable.hasOwnProperty('target') ? $(givenTable.target).closest("table") : givenTable);
-
-    changeSortArrows(thisTable);
-
-    elements = thisTable.find("tr").filter(".clickMe");
-
-    elements.sortElements(function (a, b) {
-        var first, second;
-        console.log(a);
-        first = a.childNodes[2]
-        second = b.childNodes[2]
-        if (ascending) {
-            return second.childNodes.length - first.childNodes.length
-        } else {
-            return first.childNodes.length - second.childNodes.length
-        }
-    });
-    ascending = !ascending;
-}
-
-function sortTableByCount(givenTable) {
-    var elements, thisTable;
-    thisTable = (givenTable.hasOwnProperty('target') ? $(givenTable.target).closest("table") : givenTable);
-
-    changeSortArrows(thisTable);
-
-    elements = thisTable.find("tr").filter(".clickMe");
-
-    elements.sortElements(function (a, b) {
-        var first, second;
-        first = $(a.childNodes[1]).text().trim();
-        if (first.indexOf("/") == -1) {
-            first = +first;
-        } else {
-            first = first.split("/");
-            first = parseInt(first[0], 10) + parseInt(first[1], 10);        //converts the 5/8 to (int)5 + (int)8
-        }
-        second = $(b.childNodes[1]).text().trim();
-        if (second.indexOf("/") == -1) {
-            second = +second;
-        } else {
-            second = second.split("/");
-            second = parseInt(second[0], 10) + parseInt(second[1], 10);     //converts the 5/8 to (int)5 + (int)8
-        }
-
-        if (ascending) {
-            return first - second;
-        } else {
-            return second - first;
-        }
-    });
-    ascending = !ascending;
-}
-
-function sortUsersByEmail() {}
-function sortUsersByName() {}
-
-var gThisTable = null;
-
-function changeSortArrows(thisTable) {
-    var ascendSorts = $(thisTable).find("th").filter(".ascendSort")
-    var descendSorts = $(thisTable).find("th").filter(".descendSort")
-    ascendSorts.addClass("noSort");
-    descendSorts.addClass("noSort");
-    descendSorts.removeClass("descendSort");
-    ascendSorts.removeClass("ascendSort");
-
-    gThisTable = thisTable;
-
-    if(ascending) {
-        thisTable.context.classList.add("ascendSort");
-    } else {
-        thisTable.context.classList.add("descendSort");
-    }
-
-    thisTable.context.classList.remove("noSort");
-}
-
 function submit_rating() {
     var url = "http://screencaster-hub.appspot.com/api/" +
         currentEmail + "/" +
@@ -647,6 +545,30 @@ function submit_rating() {
         currentTool + "/" +
         getIthClip(currentClipIndex) + authString;
     $.post(url, $(this).serialize());
+}
+
+function setupTableSorting() {
+    $("table").not("#otherPersonsTable").tablesorter();
+
+    $.tablesorter.addParser({
+        id: "video",
+        is: function(s) {
+            return false;
+        },
+        format: function(s, table, cell) {
+            //console.log(cell);
+            return $(cell).children().length;
+        },
+        type: "numeric"
+    })
+
+    $("#otherPersonsTable").tablesorter({
+        headers: {
+            3: {
+                sorter: "video"
+            }
+        }
+    });
 }
 
 $(document).ready(function () {
@@ -674,21 +596,16 @@ $(document).ready(function () {
 
     //users table
     $("table").on('click', ".addedUser", selectUser);
-    $("table").on('click', ".sortByName", sortUsersByName);
-    $("table").on('click', ".sortByEmail", sortUsersByEmail);
 
     //items table
     $("table").on('click', ".addedItem", checkExistanceOfShare);
     $("table").on('click', ".myItem", checkExistanceOfLocalClips);
 
-    $("table").on('click', ".sortByTool", sortTableByToolName);
-    $("table").on('click', ".sortByNum", sortTableByCount);
-    $("table").on('click', ".sortByVideo", sortTableByVideo);
-
     $(".requestPermissions").on('click', requestSharingPermission);
 
     $("form#rating").click(submit_rating);
 
+    setupTableSorting();
     loadPeople();
 
     console.log("end of comparison");

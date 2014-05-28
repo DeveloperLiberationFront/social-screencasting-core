@@ -15,12 +15,11 @@ h1 {
 	display:none;
 }
 
-
+.main {
+    padding-top: 100px;
+}
 
 .resultsTable{
-	display:block;
-	float:left;
-	margin:25px;
 	background-color:white;
 	border:3px solid orange;
 	border-spacing:0;
@@ -30,12 +29,8 @@ h1 {
 
 .resultsTable th {
 	font-size:18px;
+	text-align: center;
 }
-
-.resultsTable tbody {
-	padding-right: 20px;
-}
-
 
 td, tr, th{
 	padding:4px;
@@ -91,12 +86,8 @@ td, tr, th{
 }
 
 #moreInfo{
-	display: inline-block;
 	border: 1px solid black;
-	padding: 10px 20px;
 	background-color:#ffdfb1;
-	width: 720px;
-	margin: 25px;
 }
 
 #requestShare {
@@ -105,8 +96,16 @@ td, tr, th{
 
 #clipPlayer {
 	display:none;
-	width: 720px;
-	height: 500px;
+}
+
+#ratingDiv {
+	background: #ffdfb1;
+	width: 100%;
+	height: 20px;
+}
+
+#viewOtherDiv {
+	margin-top: -20px;
 }
 
 #clipDoesNotExist {
@@ -193,4 +192,47 @@ td, tr, th{
 
 #prevTable {
 	float: left;
+}
+
+button {
+	background: none;
+	border: none;
+}
+
+.ui-slider .ui-slider-handle,
+.ui-slider,
+.startLabel {
+	cursor: pointer;
+}
+
+/* Bootstrap stuff */
+.container {
+	text-align: center;
+	width: 100%;
+}
+
+.row {
+	margin: 0 15px;
+}
+
+[class*="col-"] {
+	margin-bottom: 15px;
+}
+
+/* Table Sort stuff */
+th.sortable.header {
+	background-image: url("/images/table/noSort.svg");
+	cursor: pointer;
+	background-size: 15px;
+	background-position: center right;
+	background-repeat: no-repeat;
+	padding-right: 20px;
+}
+
+th.sortable.headerSortUp {
+	background-image: url("/images/table/ascendSort.svg");
+}
+
+th.sortable.headerSortDown {
+	background-image: url("/images/table/descendSort.svg");
 }
