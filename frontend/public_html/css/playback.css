@@ -29,11 +29,19 @@
 	display:none;
 }
 
-#staticSliderHolder, #dockedSliderHolder, #editSlider {
-	margin-left:7px;
-	display:inline-block;
-	width:84%;
-	cursor:default;
+#staticSliderHolder, #dockedSliderHolder {
+	margin: 7px;
+	display: inline-block;
+	width: calc(100% - 150px);
+	cursor: default;
+}
+
+#editSlider, #staticSlider {
+	width: 100%;
+}
+
+#staticSlider {
+	margin-bottom: 14px;
 }
 
 #save {
