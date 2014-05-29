@@ -548,7 +548,7 @@ function submit_rating() {
 }
 
 function setupTableSorting() {
-    $("table").not("#otherPersonsTable").tablesorter();
+    $("table").not("#otherPersonsTable, #keyTable").tablesorter();
 
     $.tablesorter.addParser({
         id: "video",
@@ -556,7 +556,6 @@ function setupTableSorting() {
             return false;
         },
         format: function(s, table, cell) {
-            //console.log(cell);
             return $(cell).children().length;
         },
         type: "numeric"
@@ -568,6 +567,18 @@ function setupTableSorting() {
                 sorter: "video"
             }
         }
+    });
+}
+
+function setupKey() {
+    var keyDiv = $("#keyTableDiv").dialog({
+        autoOpen: false
+    });
+
+    $("#keyButton").on("click", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        keyDiv.dialog("open");
     });
 }
 
@@ -606,6 +617,7 @@ $(document).ready(function () {
     $("form#rating").click(submit_rating);
 
     setupTableSorting();
+    setupKey();
     loadPeople();
 
     console.log("end of comparison");

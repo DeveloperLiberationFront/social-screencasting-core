@@ -20,16 +20,20 @@ h1 {
 }
 
 .resultsTable{
-	background-color:white;
-	border:3px solid orange;
-	border-spacing:0;
-	text-align:center;
-	font-size:16px;
+	background: #fafafa;
+	border: 3px solid #666;
+	border-spacing: 0;
+	text-align: left;
+	font-size: 16px;
 }
 
 .resultsTable th {
 	font-size:18px;
 	text-align: center;
+}
+
+#usersTable td:hover {
+	color: #999;
 }
 
 td, tr, th{
@@ -66,6 +70,11 @@ td, tr, th{
 	font-size:16px;
 	padding: 5px;
 	cursor: pointer;
+}
+
+#keyButton img {
+	width: 25px;
+	height: 25px;
 }
 
 .showAll, .showUnique{
@@ -178,7 +187,7 @@ td, tr, th{
 }
 
 .noKeyboard {
-	outline: 3px solid #29b350;
+	border: 3px solid #29b350;
 	background-color: #d5f5de;
 }
 
@@ -187,7 +196,7 @@ td, tr, th{
 }
 
 .noUseBorder {
-	outline: 3px solid #29b350;
+	border: 3px solid #29b350;
 }
 
 #prevTable {
@@ -203,6 +212,12 @@ button {
 .ui-slider,
 .startLabel {
 	cursor: pointer;
+}
+
+.ui-dialog .ui-dialog-titlebar-close {
+	background-image: url("/images/x.svg");
+	background-position: center;
+	background-size: 35px;
 }
 
 /* Bootstrap stuff */
@@ -235,4 +250,8 @@ th.sortable.headerSortUp {
 
 th.sortable.headerSortDown {
 	background-image: url("/images/table/descendSort.svg");
+}
+
+# {
+	background-color: blue;
 }
