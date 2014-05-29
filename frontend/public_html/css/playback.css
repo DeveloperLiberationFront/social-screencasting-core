@@ -7,6 +7,7 @@
 
 #panel:-webkit-full-screen {	/*work around for webkit*/
 	width:100%;
+	background-color:#F0F0F0;
 }
 
 #mediaTitle{
@@ -28,11 +29,15 @@
 	display:none;
 }
 
-#staticSliderHolder, #dockedSliderHolder {
+#staticSliderHolder, #dockedSliderHolder, #editSlider {
 	margin-left:7px;
 	display:inline-block;
 	width:84%;
 	cursor:default;
+}
+
+#save {
+	
 }
 
 .playPause{

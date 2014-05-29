@@ -3,6 +3,8 @@ var currentFrame;
 var frameAnimationTimer;
 var isFullScreen;
 var totalFrames;
+var startFrames = 0;
+var endFrames;
 var animationEnabled;
 var currentAnimationChoice;
 var totalAnimationChoices;
@@ -77,7 +79,17 @@ function startFramePlayback() {
 
         frameAnimationTimer = window.setInterval(function () {
             var oldFrame = $(".frame").eq(currentFrame);
-            currentFrame = (currentFrame + 1) % totalFrames;
+            currentFrame = currentFrame + 1;
+			if (currentFrame >= endFrames) {
+				//FadeToBlack();
+				//stopFramePlayback
+				$(".frame").eq(currentFrame-1).fadeOut(1000, function() {
+					currentFrame = startFrames;
+					console.log(currentFrame);
+					console.log(startFrames);
+					oldFrame.hide();
+				});
+			}
             updateSlider(currentFrame);
             handleAnimationOptionsForCurrentFrame();
             $(".frame").eq(currentFrame).show();
@@ -151,12 +163,48 @@ function setUpSliders() {
     $(".slider").slider({
         value: 0,
         min: 0,
-        max: totalFrames - 1,	//minus 1 because we start at 0
+        max: endFrames - 1,	//minus 1 because we start at 0
         step: 1,
         animate: "fast",
         easing: "linear",
         slide: sliderMoved	//when the user moves this, call sliderMoved()
     });
+	
+	$("#editSlider").slider({
+		range: true,
+        values: [0, totalFrames - 1],
+        min: 0,
+        max: totalFrames - 1,	//minus 1 because we start at 0
+        step: 1,
+        animate: "fast",
+        easing: "linear",
+        slide: setMinMaxFrame	//when the user moves this, call sliderMoved()
+    });
+	
+}
+
+function setMinMaxFrame(event, ui) {
+   startFrames = ui.values[0];
+   endFrames = ui.values[1];
+   
+   
+}
+
+function saveVideoLength () {
+	//currentlydoesnothing
+	/* var postURL, emailToRequest;
+
+    postURL = "/shareRequest";
+
+    $.ajax({
+        type: "POST",
+        url: postURL,
+        data: { "pluginName": currentPlugin, "toolName": currentTool, "ownerEmail": currentEmail }
+
+    });
+
+    requested[currentEmail + currentPlugin + currentTool] = true;*/
+
 }
 
 function setUpDraggableThings() {
@@ -220,15 +268,17 @@ function renderPlayback(auth) {
 		
         $("#moreInfo").on("click",".playPause", playOrPause);
 		$("#moreInfo").on("click",".settings", rotateAnimationSettings);
+		$("moreInfo").on("click",".save", saveVideoLength);
 		hasInitializedButtons = true;
 	}
-    totalFrames = +$("#panel").data("totalFrames");
+    totalFrames = $("#panel").data("totalFrames");
+	endFrames = totalFrames;
     if ($("#panel").data("type") == "keystroke") {
         animationEnabled = true;
     }
 
 	//put a little green tick where the tool starts
-    $(".startLabel").css('left', rampUp * 100 / totalFrames + '%');
+    $(".startLabel").css('left', rampUp * 100 / endFrames + '%');
     handleAnimationOptionsForCurrentFrame();
     setUpSliders();
     setUpDraggableThings();
