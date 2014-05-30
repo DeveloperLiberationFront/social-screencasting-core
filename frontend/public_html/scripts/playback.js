@@ -80,18 +80,27 @@ function startFramePlayback() {
         frameAnimationTimer = window.setInterval(function () {
             var oldFrame = $(".frame").eq(currentFrame);
             currentFrame = currentFrame + 1;
+
 			if (currentFrame >= endFrames) {
-                oldFrame.hide();
-				$(".frame").eq(currentFrame-1).fadeOut(1000, function() {
-					currentFrame = startFrames;
+                stopFramePlayback();
+
+                $(".frame").eq(currentFrame-1).fadeOut(500, function() {
+                    oldFrame.hide();
+                    currentFrame = startFrames;
+                    $(".frame").eq(currentFrame).show();
+                    startFramePlayback();
 				});
-			} else if(currentFrame < startFrames) {
-                currentFrame = startFrames;
+			} else {
+                    if (currentFrame < startFrames) {
+                        currentFrame = startFrames;
+                    }
+
+                oldFrame.hide();
+                updateSlider(currentFrame);
+                handleAnimationOptionsForCurrentFrame();
+                $(".frame").eq(currentFrame).show();
             }
-            updateSlider(currentFrame);
-            handleAnimationOptionsForCurrentFrame();
-            $(".frame").eq(currentFrame).show();
-            oldFrame.hide();
+
         }, 200);
     }
 }
@@ -166,6 +175,7 @@ function setUpSliders() {
         value: 0,
         min: 0,
         max: totalFrames - 1,	//minus 1 because we start at 0
+        animate: "fast",
         step: 1,
         easing: "linear",
         slide: sliderMoved,
@@ -176,6 +186,7 @@ function setUpSliders() {
 		range: true,
         values: [0, totalFrames - 1],
         min: 0,
+        animate: "fast",
         max: totalFrames - 1,	//minus 1 because we start at 0
         step: 1,
         easing: "linear",
@@ -187,8 +198,7 @@ function setUpSliders() {
 function setMinMaxFrame(event, ui) {
    startFrames = ui.values[0];
    endFrames = ui.values[1];
-
-   console.log()
+   stopFramePlayback();
    
    if (startFrames > currentFrame) {
     $("#staticSlider, #dockedSlider").slider("value", startFrames);
