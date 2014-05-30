@@ -38,7 +38,7 @@ function setFloatingPlaybackControlsVisible(shouldBeVisible) {
 }
 
 function updateSlider(index) {
-    $(".slider").slider("value", index);
+    $("#staticSlider, #dockedSlider").slider("value", index);
 }
 
 function handleAnimationOptionsForCurrentFrame() {
@@ -81,16 +81,13 @@ function startFramePlayback() {
             var oldFrame = $(".frame").eq(currentFrame);
             currentFrame = currentFrame + 1;
 			if (currentFrame >= endFrames) {
-				//FadeToBlack();
-				stopFramePlayback
-				oldFrame.hide();
+                oldFrame.hide();
 				$(".frame").eq(currentFrame-1).fadeOut(1000, function() {
 					currentFrame = startFrames;
-					console.log(currentFrame);
-					console.log(startFrames);
-					//oldFrame.hide();
 				});
-			}
+			} else if(currentFrame < startFrames) {
+                currentFrame = startFrames;
+            }
             updateSlider(currentFrame);
             handleAnimationOptionsForCurrentFrame();
             $(".frame").eq(currentFrame).show();
@@ -118,12 +115,16 @@ function playOrPause() {
 
 function sliderMoved(event, ui) {
     event.preventDefault();
-    stopFramePlayback();
-    $(".frame").eq(currentFrame).hide();
-    currentFrame = ui.value % totalFrames;
-    handleAnimationOptionsForCurrentFrame();
-    $(".frame").eq(currentFrame).show();
-    updateSlider(currentFrame);
+
+    if(ui.value != currentFrame) {
+        stopFramePlayback();
+        $(".frame").eq(currentFrame).hide();
+        currentFrame = ui.value % totalFrames;
+        handleAnimationOptionsForCurrentFrame();
+        $(".frame").eq(currentFrame).show();
+    
+        updateSlider(currentFrame);
+    }
 }
 
 function getImageForFrameNumber(frameNumber) {
@@ -161,14 +162,14 @@ $(document).keyup(function (e) {
 });
 
 function setUpSliders() {
-    $(".slider").slider({
+    $("#staticSlider, #dockedSlider").slider({
         value: 0,
         min: 0,
-        max: endFrames - 1,	//minus 1 because we start at 0
+        max: totalFrames - 1,	//minus 1 because we start at 0
         step: 1,
-        animate: "fast",
         easing: "linear",
-        slide: sliderMoved	//when the user moves this, call sliderMoved()
+        slide: sliderMoved,
+        change: sliderMoved	//when the user moves this, call sliderMoved()
     });
 	
 	$("#editSlider").slider({
@@ -177,7 +178,6 @@ function setUpSliders() {
         min: 0,
         max: totalFrames - 1,	//minus 1 because we start at 0
         step: 1,
-        animate: "fast",
         easing: "linear",
         slide: setMinMaxFrame	//when the user moves this, call sliderMoved()
     });
@@ -187,8 +187,16 @@ function setUpSliders() {
 function setMinMaxFrame(event, ui) {
    startFrames = ui.values[0];
    endFrames = ui.values[1];
+
+   console.log()
    
-   
+   if (startFrames > currentFrame) {
+    $("#staticSlider, #dockedSlider").slider("value", startFrames);
+   }
+
+   if (endFrames < currentFrame) {
+    $("#staticSlider, #dockedSlider").slider("value", endFrames);
+   }
 }
 
 function saveVideoLength () {
