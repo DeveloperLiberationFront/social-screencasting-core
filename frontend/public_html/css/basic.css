@@ -252,6 +252,11 @@ th.sortable.headerSortDown {
 	background-image: url("/images/table/descendSort.svg");
 }
 
-# {
-	background-color: blue;
+html, body, .container-fluid.main, .row, [class*="col-"] {
+	height: 100%;
+}
+
+[class*="col-"] {
+	height: calc(100% - 15px);
+	overflow-y: auto;
 }
