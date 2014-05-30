@@ -110,6 +110,8 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 			JSONObject fileNamesObject = new JSONObject();
 			fileNamesObject.put("filenames", fileNamesArr);
 			fileNamesObject.put("name", clipName);
+			fileNamesObject.put("start", 0);
+			fileNamesObject.put("end", fileNamesArr.length()-1);
 			clipObject.put("clip", fileNamesObject);
 
 			response.setContentType("application/json");

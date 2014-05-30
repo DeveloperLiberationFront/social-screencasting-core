@@ -82,12 +82,13 @@ function startFramePlayback() {
             currentFrame = currentFrame + 1;
 			if (currentFrame >= endFrames) {
 				//FadeToBlack();
-				//stopFramePlayback
+				stopFramePlayback
+				oldFrame.hide();
 				$(".frame").eq(currentFrame-1).fadeOut(1000, function() {
 					currentFrame = startFrames;
 					console.log(currentFrame);
 					console.log(startFrames);
-					oldFrame.hide();
+					//oldFrame.hide();
 				});
 			}
             updateSlider(currentFrame);
@@ -246,6 +247,7 @@ function renderPlayback(auth) {
 	}
     isPlaying = false;
     currentFrame = 0;
+	startFrames = 0;
     isFullScreen = false;
     animationEnabled = false;
     currentAnimationChoice = 0;

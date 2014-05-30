@@ -60,7 +60,9 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				"plugin_name TEXT, " +
 				"tool_name TEXT, " +
 				"clip_score INTEGER," +
-				"uploaded_date INTEGER" +
+				"uploaded_date INTEGER," +
+				"start_frame INTEGER," +
+				"end_frame INTEGER" +
 				") ";
 
 		// execute the query
@@ -78,7 +80,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				"tool_key_presses, "+
 				"class_of_tool, "+
 				"tool_use_duration,"+
-				"clip_score  ) VALUES (?,?,?,?,?,?,?,?)";
+				"clip_score ) VALUES (?,?,?,?,?,?,?,?)";
 
 
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
@@ -128,6 +130,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 					String keyPresses = results.getString("tool_key_presses");
 					int duration = results.getInt("tool_use_duration");
 					int clipScore = results.getInt("clip_score");
+					
 
 					return new ToolUsage(toolName, toolClass, keyPresses, pluginName, timestamp, duration, clipScore);
 				}
@@ -166,6 +169,8 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 					String keyPresses = results.getString("tool_key_presses");
 					int duration = results.getInt("tool_use_duration");
 					int clipScore = results.getInt("clip_score");
+					//int startFrame = results.getInt("start_frame");
+					//int endFrame = results.getInt("end_frame");
 
 					toolUsages.add(new ToolUsage(toolName, toolClass, keyPresses, currentPluginName, timestamp, duration, clipScore));
 				}
@@ -223,6 +228,8 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				String keyPresses = results.getString("tool_key_presses");
 				int duration = results.getInt("tool_use_duration");
 				int clipScore = results.getInt("clip_score");
+				//int startFrame = results.getInt("start_frame");
+				//int endFrame = results.getInt("end_frame");
 
 				toolUsages.add(new ToolUsage(toolName, toolClass, keyPresses, pluginName, timestamp, duration, clipScore));
 			}
@@ -279,7 +286,9 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				"folder_name, "+
 				"plugin_name, "+
 				"tool_name, "+
-				"clip_score  ) VALUES (?,?,?,?)";
+				"clip_score, "+
+				"start_frame, "+
+				"end_frame ) VALUES (?,?,?,?,?,?)";
 
 
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
@@ -288,6 +297,8 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			statement.setString(2, tu.getPluginName());
 			statement.setString(3, tu.getToolName());
 			statement.setInt(4, tu.getClipScore());
+			statement.setInt(5, tu.getStartFrame());
+			statement.setInt(6, tu.getEndFrame());
 			executeStatementWithNoResults(statement);
 		}
 		catch (SQLException e)

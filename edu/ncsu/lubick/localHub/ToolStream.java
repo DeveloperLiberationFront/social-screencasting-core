@@ -19,6 +19,9 @@ public class ToolStream {
 	public static final String TOOL_TIMESTAMP = "Tool_Timestamp";
 	public static final String TOOL_DURATION = "Tool_Duration";
 	public static final String MENU_KEY_PRESS = "[GUI]";
+	public static final String TOOL_START = "Tool_Start";
+	public static final String TOOL_END = "Tool_End";
+	
 
 	private List<ToolUsage> listOfToolUsages;
 	private Date timeStamp;
@@ -140,6 +143,8 @@ public class ToolStream {
 		private int duration;
 		private String pluginName;
 		private int clipScore;
+		private int startFrame;
+		private int endFrame;
 
 		private ToolUsage(String toolName, String toolClass, String keyPresses, Date timeStamp, int duration, int clipScore)
 		{
@@ -194,6 +199,16 @@ public class ToolStream {
 		public int getDuration()
 		{
 			return duration;
+		}
+		
+		public int getStartFrame()
+		{
+			return startFrame;
+		}
+		
+		public int getEndFrame()
+		{
+			return endFrame;
 		}
 
 		public String getPluginName()
