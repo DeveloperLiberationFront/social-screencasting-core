@@ -84,11 +84,14 @@ function startFramePlayback() {
 			if (currentFrame >= endFrames) {
                 stopFramePlayback();
 
-                $(".frame").eq(currentFrame-1).fadeOut(500, function() {
-                    oldFrame.hide();
-                    currentFrame = startFrames;
-                    $(".frame").eq(currentFrame).show();
-                    startFramePlayback();
+                $(".frame").eq(currentFrame-1).animate({opacity: 0}, 500, function() {
+                    setTimeout(function() {
+                        currentFrame = startFrames;
+                        oldFrame.hide();
+                        oldFrame.css({opacity: 100});
+                        $(".frame").eq(currentFrame).show();
+                        startFramePlayback();
+                    }, 500);
 				});
 			} else {
                     if (currentFrame < startFrames) {
