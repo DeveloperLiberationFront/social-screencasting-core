@@ -284,7 +284,6 @@ function renderPlayback(auth) {
 		authToken = "";
 	}
     isPlaying = false;
-    currentFrame = startFrames;
     isFullScreen = false;
     animationEnabled = false;
     currentAnimationChoice = 0;
@@ -312,9 +311,14 @@ function renderPlayback(auth) {
 	}
     
     totalFrames = $("#panel").data("totalFrames");
-    if(endFrames <= 0) {
+    if (endFrames === undefined || endFrames <= 0) {
         endFrames = totalFrames - 1;
     }
+    if (startFrames === undefined) {
+        startFrames = 0;
+    }
+    
+    currentFrame = startFrames;
 
     if ($("#panel").data("type") == "keystroke") {
         animationEnabled = true;

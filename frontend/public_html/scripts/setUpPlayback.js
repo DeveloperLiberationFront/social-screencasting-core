@@ -60,6 +60,8 @@ function setUpPlaybackForDataAuthAndDir(data, auth, imageDir) {
     frames = data.clip.filenames;
     startFrames = data.clip.start;
     endFrames = data.clip.end;
+
+    console.log("data: " + data);
     
     for (i = frames.length - 1; i > 0; i--) {
 	//does the name begin with "frame"
