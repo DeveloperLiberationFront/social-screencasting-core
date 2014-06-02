@@ -148,9 +148,13 @@ public class ToolStream {
 
 		private ToolUsage(String toolName, String toolClass, String keyPresses, Date timeStamp, int duration, int clipScore)
 		{
-			this.toolName = toolName.trim();
-			this.toolClass = toolClass.trim();
-			this.keyPresses = keyPresses.trim();
+			if(toolName != null)
+				this.toolName = toolName.trim();
+			if(toolClass != null)
+				this.toolClass = toolClass.trim();
+			if(keyPresses != null)
+				this.keyPresses = keyPresses.trim();
+			
 			this.timeStamp = timeStamp;
 			this.duration = duration;
 			this.clipScore = clipScore;
@@ -206,9 +210,17 @@ public class ToolStream {
 			return startFrame;
 		}
 		
+		public void setStartFrame(int startFrame) {
+			this.startFrame = startFrame;
+		}
+		
 		public int getEndFrame()
 		{
 			return endFrame;
+		}
+		
+		public void setEndFrame(int endFrame) {
+			this.endFrame = endFrame;
 		}
 
 		public String getPluginName()

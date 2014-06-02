@@ -189,7 +189,7 @@ $(document).keyup(function (e) {
 
 function setUpSliders() {
     $("#staticSlider, #dockedSlider").slider({
-        value: 0,
+        value: startFrames,
         min: 0,
         max: totalFrames - 1,	//minus 1 because we start at 0
         animate: "fast",

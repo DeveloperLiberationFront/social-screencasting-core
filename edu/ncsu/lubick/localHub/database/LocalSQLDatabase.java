@@ -109,13 +109,13 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	}
 
 	@Override
-	public ToolUsage getToolUsageById(String clipId)
+	public ToolUsage getToolUsageById(String folder)
 	{
 		String sqlQuery = "SELECT * FROM ToolUsages WHERE use_id = ?";
 		
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
 		{
-			statement.setString(1, clipId);
+			statement.setString(1, folder);
 
 			try (ResultSet results = executeWithResults(statement);)
 			{
@@ -144,6 +144,42 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 
 		return null;
 		
+	}
+	
+	@Override
+	public ToolUsage getClipByFolder(String clipId)
+	{
+		String sqlQuery = "Select * FROM Clips WHERE folder_name = ?";
+		
+		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
+		{
+			statement.setString(1, clipId);
+			
+			try (ResultSet results = executeWithResults(statement);)
+			{
+				if(results.next())
+				{
+					String toolName = results.getString("tool_name");
+					String pluginName = results.getString("plugin_name");
+					//String folder_name = results.getString("folder_name");
+					int startFrame = results.getInt("start_frame");
+					int endFrame = results.getInt("end_frame");
+					int score = results.getInt("clip_score");
+					
+					ToolUsage tu = new ToolUsage(toolName, null, null, pluginName, null, 0, score);
+					tu.setStartFrame(startFrame);
+					tu.setEndFrame(endFrame);
+					
+					return tu;
+				}
+			}
+		}
+		catch(SQLException ex)
+		{
+			throw new DBAbstractionException(ex);
+		}
+		
+		return null;
 	}
 
 	@Override

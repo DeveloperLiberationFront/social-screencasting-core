@@ -487,4 +487,9 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 		ToolUsage tu = new ToolUsage("Respond to notification", notification, "[GUI]", "[ScreencastingHub]", new Date(), 10, 10);
 		reportToolUsage(tu);
 	}
+
+	@Override
+	public ToolUsage getToolUsageByFolder(String folder) {
+		return databaseManager.getToolUsageByFolder(folder);
+	}
 }
