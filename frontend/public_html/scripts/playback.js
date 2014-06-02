@@ -82,7 +82,8 @@ function startFramePlayback() {
             currentFrame = currentFrame + 1;
 
 			if (currentFrame >= endFrames) {
-                stopFramePlayback();
+                $(".playPause").prop("disabled", true);
+                stopFramePlayback(false);
 
                 $(".frame").eq(currentFrame-1).animate({opacity: 0}, 500, function() {
                     setTimeout(function() {
@@ -91,6 +92,7 @@ function startFramePlayback() {
                         oldFrame.css({opacity: 100});
                         $(".frame").eq(currentFrame).show();
                         startFramePlayback();
+                        $(".playPause").prop("disabled", false);
                     }, 500);
 				});
 			} else {
@@ -108,9 +110,11 @@ function startFramePlayback() {
     }
 }
 
-function stopFramePlayback() {
+function stopFramePlayback(updatePausePlayButton) {
     if (isPlaying) {
-        $(".playbackCommand").removeClass("play").addClass("pause");
+        if(updatePausePlayButton) {
+            $(".playbackCommand").removeClass("play").addClass("pause");
+        }
         isPlaying = false;
         clearInterval(frameAnimationTimer);
     }
@@ -118,10 +122,10 @@ function stopFramePlayback() {
 
 function playOrPause() {
     if (isPlaying) {
-        stopFramePlayback();
+        stopFramePlayback(true);
     }
     else {
-        startFramePlayback();
+        startFramePlayback(true);
     }
 }
 
@@ -129,7 +133,7 @@ function sliderMoved(event, ui) {
     event.preventDefault();
 
     if(ui.value != currentFrame) {
-        stopFramePlayback();
+        stopFramePlayback(true);
         $(".frame").eq(currentFrame).hide();
         currentFrame = ui.value % totalFrames;
         handleAnimationOptionsForCurrentFrame();
@@ -201,7 +205,7 @@ function setUpSliders() {
 function setMinMaxFrame(event, ui) {
    startFrames = ui.values[0];
    endFrames = ui.values[1];
-   stopFramePlayback();
+   stopFramePlayback(true);
    
    if (startFrames > currentFrame) {
     $("#staticSlider, #dockedSlider").slider("value", startFrames);

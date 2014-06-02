@@ -196,7 +196,7 @@ td, tr, th{
 }
 
 .noUseBorder {
-	border: 3px solid #29b350;
+	outline: 3px solid #29b350;
 }
 
 #prevTable {
