@@ -95,11 +95,21 @@ function startFramePlayback() {
                         $(".playPause").prop("disabled", false);
                     }, 500);
 				});
-			} else {
-                    if (currentFrame < startFrames) {
-                        currentFrame = startFrames;
-                    }
+			} else if (currentFrame <= startFrames + 1) {
+                $(".playPause").prop("disabled", true);
+                currentFrame = startFrames;
+                $(".frame").eq(currentFrame).css({opacity: 0});
+                stopFramePlayback(false);
+                $(".frame").eq(currentFrame).animate({opacity: 1.0}, 500, function() {
+                    startFramePlayback();
+                    $(".frame").eq(currentFrame).hide();
+                    $(".frame").eq(currentFrame).css({opacity: 0});
+                    currentFrame++;
+                    $(".frame").eq(currentFrame).show();
+                    $(".playPause").prop("disabled", false);
+                });
 
+            } else {
                 oldFrame.hide();
                 updateSlider(currentFrame);
                 handleAnimationOptionsForCurrentFrame();
@@ -206,6 +216,9 @@ function setMinMaxFrame(event, ui) {
    startFrames = ui.values[0];
    endFrames = ui.values[1];
    stopFramePlayback(true);
+
+   $(".frame").css({opacity: 1.0});
+   $(".frame").eq(startFrames).css({opacity: 0.0});
    
    if (startFrames > currentFrame) {
     $("#staticSlider, #dockedSlider").slider("value", startFrames);
@@ -310,6 +323,7 @@ function renderPlayback(auth) {
     setUpSliders();
     setUpDraggableThings();
     preloadImages();
-	$(".frame").first().show();
+    $(".frame").eq(startFrames).css({opacity: 0});
+	$(".frame").eq(startFrames).show();
 
 }
