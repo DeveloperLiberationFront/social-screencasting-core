@@ -85,7 +85,7 @@ function startFramePlayback() {
                 $(".playPause").prop("disabled", true);
                 stopFramePlayback(false);
 
-                $(".frame").eq(currentFrame-1).animate({opacity: 0}, 500, function() {
+                oldFrame.animate({opacity: 0}, 500, function() {
                     setTimeout(function() {
                         currentFrame = startFrames;
                         oldFrame.hide();
@@ -201,7 +201,7 @@ function setUpSliders() {
 	
 	$("#editSlider").slider({
 		range: true,
-        values: [0, totalFrames - 1],
+        values: [startFrames, endFrames],
         min: 0,
         animate: "fast",
         max: totalFrames - 1,	//minus 1 because we start at 0
@@ -284,8 +284,7 @@ function renderPlayback(auth) {
 		authToken = "";
 	}
     isPlaying = false;
-    currentFrame = 0;
-	startFrames = 0;
+    currentFrame = startFrames;
     isFullScreen = false;
     animationEnabled = false;
     currentAnimationChoice = 0;
@@ -311,8 +310,12 @@ function renderPlayback(auth) {
 		$("moreInfo").on("click",".save", saveVideoLength);
 		hasInitializedButtons = true;
 	}
+    
     totalFrames = $("#panel").data("totalFrames");
-	endFrames = totalFrames;
+    if(endFrames <= 0) {
+        endFrames = totalFrames - 1;
+    }
+
     if ($("#panel").data("type") == "keystroke") {
         animationEnabled = true;
     }
