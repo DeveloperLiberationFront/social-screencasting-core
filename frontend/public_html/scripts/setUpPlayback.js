@@ -60,7 +60,7 @@ function setUpPlaybackForDataAuthAndDir(data, auth, imageDir) {
     frames = data.clip.filenames;
     startFrames = data.clip.start;
     endFrames = data.clip.end;
-	folderName = data.clip.folder;
+	folderName = data.clip.name;
 
     console.log("data: " + data);
     

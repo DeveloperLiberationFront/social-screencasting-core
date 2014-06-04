@@ -3,7 +3,7 @@ var currentFrame;
 var frameAnimationTimer;
 var isFullScreen;
 var totalFrames;
-var startFrames = 0;
+var startFrames;
 var endFrames;
 var animationEnabled;
 var currentAnimationChoice;
@@ -235,7 +235,10 @@ function saveVideoLength () {
     $.ajax({
         type: "POST",
         url: "/updateClip",
-        data: { "folder_name": folderName, "start_frame": startFrames, "end_frame": endFrames }
+        data: { "folder_name": folderName, "start_frame": startFrames, "end_frame": endFrames },
+		success: function() {
+			console.log("it worked?");
+		}
 
     });
 
@@ -301,7 +304,7 @@ function renderPlayback(auth) {
 		
         $("#moreInfo").on("click",".playPause", playOrPause);
 		$("#moreInfo").on("click",".settings", rotateAnimationSettings);
-		$("moreInfo").on("click",".save", saveVideoLength);
+		$("#saveClip").on("click", saveVideoLength);
 		hasInitializedButtons = true;
 	}
     
