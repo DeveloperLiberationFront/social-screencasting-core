@@ -416,4 +416,14 @@ public class BufferedDatabaseManager
 		});
 	}
 
+	public void setStartEndFrame(final String folder, final int startFrame, final int endFrame) {
+		localThreadPool.execute(new Runnable() {
+			@Override
+			public void run()
+			{
+				localDB.setStartEndFrame(folder, startFrame, endFrame);
+			}
+		});
+	}
+
 }

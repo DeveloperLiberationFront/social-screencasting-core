@@ -12,6 +12,7 @@ var rampUp = 22;	//22 frames of ramp up
 var durationOfAnimation = 10;  //10 frames of showing animation
 var authToken = "";
 var hasInitializedButtons = false;
+var folderName;
 
 function launchFullScreen(element) {  //From davidwalsh.name/fullscreen
     if (element.requestFullScreen) {
@@ -230,19 +231,13 @@ function setMinMaxFrame(event, ui) {
 }
 
 function saveVideoLength () {
-	//currentlydoesnothing
-	/* var postURL, emailToRequest;
-
-    postURL = "/shareRequest";
-
+	//saves the start and end frames in database...eventually
     $.ajax({
         type: "POST",
-        url: postURL,
-        data: { "pluginName": currentPlugin, "toolName": currentTool, "ownerEmail": currentEmail }
+        url: "/updateClip",
+        data: { "folder_name": folderName, "start_frame": startFrames, "end_frame": endFrames }
 
     });
-
-    requested[currentEmail + currentPlugin + currentTool] = true;*/
 
 }
 

@@ -505,5 +505,23 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			throw new DBAbstractionException("There was a problem marking clip as uploaded or not", e);
 		}
 	}
+	
+	@Override
+	public void setStartEndFrame(String folder, int startFrame, int endFrame) {
+		String sqlQuery = "UPDATE Clips SET start_frame = ?, end_frame = ? WHERE folder_name = ?";
+		
+		try (PreparedStatement statement = makePreparedStatement(sqlQuery))
+		{
+			statement.setInt(1, startFrame);
+			statement.setInt(2, endFrame);
+			statement.setString(3, folder);
+			executeStatementWithNoResults(statement);
+		}
+		catch (SQLException e)
+		{
+			throw new DBAbstractionException("There was a problem changing the start or end frames", e);
+		}
+	}
+
 
 }

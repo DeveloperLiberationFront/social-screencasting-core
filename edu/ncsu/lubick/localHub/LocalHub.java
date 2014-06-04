@@ -492,4 +492,9 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	public ToolUsage getToolUsageByFolder(String folder) {
 		return databaseManager.getToolUsageByFolder(folder);
 	}
+
+	@Override
+	public void setStartEndFrame(String folder, int startFrame, int endFrame) {
+		databaseManager.setStartEndFrame(folder, startFrame, endFrame);
+	}
 }

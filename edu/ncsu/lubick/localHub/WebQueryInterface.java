@@ -20,4 +20,6 @@ public interface WebQueryInterface {
 	
 	ToolUsage getToolUsageByFolder(String folder);
 
+	void setStartEndFrame(String folder, int startFrame, int endFrame);
+
 }

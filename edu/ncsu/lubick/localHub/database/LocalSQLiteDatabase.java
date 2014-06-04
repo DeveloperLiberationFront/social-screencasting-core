@@ -195,5 +195,4 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 		return userManager.getUserEmail();
 	}
 
-
 }
