@@ -1,10 +1,6 @@
 package edu.ncsu.lubick.localHub.videoPostProduction.outputs;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.WritableRenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,7 +31,6 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 	private static Logger logger = Logger.getLogger(FramesToBrowserAnimatedPackage.class.getName());
 	private ShortcutsToKeyCodesConverter keyCodeReader = new ShortcutsToKeyCodesConverter();
 	private List<KeypressAnimationMaker> animationSources = new ArrayList<>();
-	private Dimension size;
 	private File browserPackageRootDir;
 	private File[] sortedFrameFiles;
 	private UserManager userManager;
@@ -66,10 +61,7 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 		this.browserPackageRootDir = super.makeDirectoryIfClear(browserPackageRootDirName);
 		try
 		{
-			BufferedImage lastFrame = this.copyImagesToFolderAndReturnLast(startIndex, endIndex);
-			int framesCopiedSoFar = endIndex-startIndex+1;
-			framesCopiedSoFar = duplicateLastFrame5Times(lastFrame, framesCopiedSoFar);
-			add5FramesOfBlack(framesCopiedSoFar);
+			copyImagesToFolder(startIndex, endIndex);
 
 			this.lazyLoadAnimationSources();
 			this.createAnimationImagesForToolStream(toolUsage);
@@ -80,79 +72,6 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 			throw new MediaEncodingException(e);
 		}
 	}
-
-
-	private void add5FramesOfBlack(int frameCounter) throws IOException
-	{
-		//int rgb, red, green, blue, alpha;
-		BufferedImage image = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g = image.createGraphics();
-
-		g.setBackground(Color.black);
-		
-		/* for (int n = 1; n <= 5; n++) {
-	          //  double alpha = 1.0 * n / 5;
-	            for (int i = 0; i < image.getWidth(); i++) {
-	                for (int j = 0; j < image.getHeight(); j++) {
-	                    rgb = image.getRGB(i, j);
-	                    alpha = (rgb >> 24) & 0x000000ff;
-	                    red = (rgb >> 16) & 0x000000ff;
-	                    green = (rgb >> 8) & 0x000000ff;
-	                    blue = rgb & 0x000000ff;
-	                    
-	                    red = (int) (red * (5-n)/5.0);
-	                    green = (int) (green * (5-n)/5.0);
-	                    blue = (int) (blue * (5-n)/5.0);
-	                    
-	                    rgb = (alpha << 24);
-	                    rgb += (red << 16);
-	                    rgb += (green << 8);
-	                    rgb += blue;
-	                    
-	                    image.setRGB(i, j, rgb);
-	                }
-	            }
-	            g.drawImage(image, null, 0, 0);
-	        }*/
-	    
-		
-		
-		
-		for(int i = frameCounter;i<frameCounter+5;i++)
-		{
-			String newFileName = "frame" + FileUtilities.padIntTo4Digits(i) + "." + PostProductionHandler.INTERMEDIATE_FILE_FORMAT;
-			File newFile = new File(browserPackageRootDir, newFileName);
-			ImageIO.write(image, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, newFile);
-		}
-		
-	}
-
-	private int duplicateLastFrame5Times(WritableRenderedImage lastFrame, int numFramesSoFar) throws IOException
-	{
-		this.size = new Dimension(lastFrame.getWidth(), lastFrame.getHeight()); 
-		for(int i = numFramesSoFar;i<numFramesSoFar+5;i++)
-		{
-			String newFileName = "frame" + FileUtilities.padIntTo4Digits(i) + "." + PostProductionHandler.INTERMEDIATE_FILE_FORMAT;
-			File newFile = new File(browserPackageRootDir, newFileName);
-			ImageIO.write(lastFrame, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, newFile);
-		}
-		
-		return numFramesSoFar + 5;
-		
-	}
-	
-
-
-	
-
-	 /*   private void Color combine(Color c1, double alpha) {
-	        int r = (int) ((1 - alpha) * c1.getRed());
-	        int g = (int) ((1 - alpha) * c1.getGreen());
-	        int b = (int) ((1 - alpha) * c1.getBlue());
-	        return new Color(r, g, b);
-	    }*/
-
-
 
 	private void lazyLoadAnimationSources() throws IOException
 	{
@@ -188,7 +107,7 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 
 	}
 
-	private BufferedImage copyImagesToFolderAndReturnLast(int startIndex, int endIndex) throws IOException
+	private void copyImagesToFolder(int startIndex, int endIndex) throws IOException
 	{
 	
 		if (sortedFrameFiles == null  || sortedFrameFiles.length == 0)
@@ -208,7 +127,6 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 			frameIndex++;
 		}
 
-		return ImageIO.read(sortedFrameFiles[sortedFrameFiles.length-1]);
 	}
 
 	@Override
