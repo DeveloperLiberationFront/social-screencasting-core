@@ -366,6 +366,8 @@ function changeSharedMediaSource(clipIndex) {
     //clear out all frames and animations
     $(".frame").remove();
     $(".keyAnimation").remove();
+    
+    $("#editSlider").hide();
 
     //reload frames //TODO: implement caching
     $.ajax(getUrl, {
@@ -402,6 +404,8 @@ function changeLocalMediaSource(clipIndex) {
     //clear out all frames and animations
     $(".frame").remove();
     $(".keyAnimation").remove();
+
+    $("#editSlider").show();
 
     //reload frames //TODO: implement caching
     $.ajax({
