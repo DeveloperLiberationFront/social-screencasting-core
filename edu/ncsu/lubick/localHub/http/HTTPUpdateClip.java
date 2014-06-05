@@ -56,12 +56,6 @@ public class HTTPUpdateClip extends TemplateHandlerWithDatabaseLink implements H
 		int endFrame = Integer.parseInt(request.getParameter("end_frame"));
 		String folder = "renderedVideos" + File.separator + request.getParameter("folder_name");
 		
-		logger.debug("SFDJKKDNSMM<NDFNMSDMFMNFNMDSMNFMNDSMNFMDSMNFMNMNDSMNFMNSDMNFMNMNDSF");
-		logger.debug(startFrame);
-		logger.debug(endFrame);
-		logger.debug(folder);
-				
-		
 		databaseLink.setStartEndFrame(folder, startFrame, endFrame);
 		baseRequest.setHandled(true);
 	}

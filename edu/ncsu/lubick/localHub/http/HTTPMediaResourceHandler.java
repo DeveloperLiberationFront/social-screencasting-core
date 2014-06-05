@@ -89,7 +89,6 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 
 		File clipDir = new File("renderedVideos/",clipName);
 		ToolUsage clip = databaseLink.getToolUsageByFolder("renderedVideos" + File.separator + clipName);
-		logger.debug("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA renderedVideos" + File.separator + clipName);
 
 		JSONObject clipObject = new JSONObject();
 		JSONArray fileNamesArr = new JSONArray();
