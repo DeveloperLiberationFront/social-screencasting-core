@@ -61,8 +61,6 @@ function setUpPlaybackForDataAuthAndDir(data, auth, imageDir) {
     startFrames = data.clip.start;
     endFrames = data.clip.end;
 	folderName = data.clip.name;
-
-    console.log("data: " + data);
     
     for (i = frames.length - 1; i > 0; i--) {
 	//does the name begin with "frame"
@@ -84,7 +82,7 @@ function setUpPlaybackForDataAuthAndDir(data, auth, imageDir) {
 
     setUpAnimations(imageAssets);
 
-    renderPlayback(authToken);
+    renderPlayback(authToken, frames);
     $("#clipLoading").hide();
     $("#clipPlayer").show();
 }

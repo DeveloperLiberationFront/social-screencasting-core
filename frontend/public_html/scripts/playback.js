@@ -154,31 +154,18 @@ function sliderMoved(event, ui) {
     }
 }
 
-function getImageForFrameNumber(frameNumber) {
-    var retVal = '<img class="frame" src="';
-    retVal += $("#panel").data("playbackDirectory");
-    retVal += '/frame';
-    if (frameNumber < 1000) {
-        retVal += "0";
-    }
-    if (frameNumber < 100) {
-        retVal += "0";
-    }
-    if (frameNumber < 10) {
-        retVal += "0";
-    }
-    retVal += frameNumber;
-    retVal += '.jpg' + authToken + '"></img>';
-    return $(retVal);
+
+function getImageForFrame(frame) {
+    return $('<img class="frame" src=' + $("#panel").data("playbackDirectory") + "/" + frame + authToken + '>');
 }
 
-function preloadImages() {
-    var p, i;
+function preloadImages(frames) {
+    var p;
     p = $("#panel");
-    for (i = 0; i < totalFrames; i++) {
-        getImageForFrameNumber(i).appendTo(p);
-    }
 
+    $(frames).each(function() {
+        getImageForFrame(this).appendTo(p);
+    })
 }
 
 $(document).keyup(function (e) {
@@ -273,7 +260,7 @@ function rotateAnimationSettings() {
     handleAnimationOptionsForCurrentFrame();
 }
 
-function renderPlayback(auth) {
+function renderPlayback(auth, frames) {
     if (auth) {
         authToken = auth;
     }
@@ -327,7 +314,7 @@ function renderPlayback(auth) {
     handleAnimationOptionsForCurrentFrame();
     setUpSliders();
     setUpDraggableThings();
-    preloadImages();
+    preloadImages(frames);
     $(".frame").eq(startFrames).css({opacity: 0});
 	$(".frame").eq(startFrames).show();
 
