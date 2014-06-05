@@ -62,7 +62,8 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				"clip_score INTEGER," +
 				"uploaded_date INTEGER," +
 				"start_frame INTEGER," +
-				"end_frame INTEGER" +
+				"end_frame INTEGER," +
+				"time_stamp LONG" +
 				") ";
 
 		// execute the query
@@ -165,8 +166,9 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 					int startFrame = results.getInt("start_frame");
 					int endFrame = results.getInt("end_frame");
 					int score = results.getInt("clip_score");
+					Date timeStamp = new Date(results.getLong("time_stamp"));
 					
-					ToolUsage tu = new ToolUsage(toolName, null, null, pluginName, null, 0, score);
+					ToolUsage tu = new ToolUsage(toolName, null, null, pluginName, timeStamp, 0, score);
 					tu.setStartFrame(startFrame);
 					tu.setEndFrame(endFrame);
 					
@@ -324,7 +326,8 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				"tool_name, "+
 				"clip_score, "+
 				"start_frame, "+
-				"end_frame ) VALUES (?,?,?,?,?,?)";
+				"end_frame," +
+				"time_stamp) VALUES (?,?,?,?,?,?,?)";
 
 
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
@@ -335,6 +338,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			statement.setInt(4, tu.getClipScore());
 			statement.setInt(5, tu.getStartFrame());
 			statement.setInt(6, tu.getEndFrame());
+			statement.setLong(7, tu.getTimeStamp().getTime());
 			executeStatementWithNoResults(statement);
 		}
 		catch (SQLException e)
@@ -464,7 +468,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	@Override
 	public boolean isClipUploaded(String clipId)
 	{
-		String sqlQuery = "SELECT uploaded_date FROM Clips where folder_name LIKE '%\"+clipId+\"%'";
+		String sqlQuery = "SELECT uploaded_date FROM Clips where folder_name LIKE ?";
 		
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
 		{
@@ -491,7 +495,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	{
 		long uploadedDate = b?new Date().getTime():0;
 		
-		String sqlQuery = "UPDATE Clips SET uploaded_date = ? where folder_name LIKE '%"+clipId+"%'";
+		String sqlQuery = "UPDATE Clips SET uploaded_date = ? where folder_name LIKE ?";
 		
 		
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)

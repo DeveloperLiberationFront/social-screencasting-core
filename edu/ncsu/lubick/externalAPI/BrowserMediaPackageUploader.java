@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.util.Date;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -55,23 +56,53 @@ public class BrowserMediaPackageUploader {
 
 		logger.info("Searching for browser package in directory "+packageDirectory);
 
-		if (packageDirectory.exists()&&packageDirectory.isDirectory())
+		if (packageDirectory.exists() && packageDirectory.isDirectory())
 		{
-			int counter = 1, totalFiles = packageDirectory.listFiles().length;
-			for(File file: packageDirectory.listFiles())
+			File[] allFiles = packageDirectory.listFiles();
+			int totalFiles = allFiles.length;
+			int startFrame = toolUsage.getStartFrame();
+			int endFrame = toolUsage.getEndFrame() != 0 ? toolUsage.getEndFrame() : totalFiles;
+
+			logger.info("Total Frames: " + totalFiles);
+			logger.info("Start Frame: " + startFrame);
+			logger.info("End Frame: " + endFrame);			
+			
+			for(File file : allFiles)
 			{
+				String fileName = file.getName();
+				int fileNum = 0;
 				try
 				{
-					logger.info(String.format("reporting file %d/%d",counter,totalFiles));
-					this.reportFile(file,file.getName());
-					counter++;
+					fileNum = Integer.parseInt(fileName.substring(fileName.indexOf("e") + 1, fileName.indexOf(".")));
+					
+					try
+					{
+						if(fileNum >= startFrame && fileNum <= endFrame)
+						{
+							logger.info("Uploading: " + fileName + " (" + fileNum + ")");
+							reportFile(file);
+						}
+						else
+						{
+							logger.info("Unuploading: " + fileName + " (" + fileNum + ")");
+							unreportFile(file);
+						}
+					}
+					catch(NumberFormatException e)
+					{
+						logger.info("Uploading: " + fileName + " (not a frame)");
+						reportFile(file);
+					}
 				}
-				catch (IOException e)
+				catch(IOException e)
 				{
-					logger.fatal("Could not upload browser package.  Problem with file "+counter +"("+file+")",e);
+					logger.fatal("Could not report/unreport file " + fileName + " (" + fileNum + ")", e);
 					return false;
 				}
 			}
+			
+			logger.info("Done uploading stuff");
+			
 			return true;
 		}
 		logger.error("Browser package not found, not uploading");
@@ -85,12 +116,12 @@ public class BrowserMediaPackageUploader {
 	}
 
 
-	private void reportFile(File file, String reportingName) throws IOException
+	private void reportFile(File file) throws IOException
 	{
 		URI putUri;
 		try
 		{
-			putUri = this.preparePutURI(reportingName);
+			putUri = this.preparePutURI(file.getName());
 		}
 		catch (URISyntaxException e)
 		{
@@ -98,7 +129,8 @@ public class BrowserMediaPackageUploader {
 		}
 
 		HttpPut httpPut = new HttpPut(putUri);
-		try {
+		try 
+		{
 			MultipartEntityBuilder mpeBuilder = MultipartEntityBuilder.create();
 
 			mpeBuilder.addBinaryBody("image", file);
@@ -108,10 +140,28 @@ public class BrowserMediaPackageUploader {
 			httpPut.setEntity(content);
 			client.execute(httpPut);
 		}
-		finally {
-		httpPut.reset();
+		finally 
+		{
+			httpPut.reset();
 		}
 
+	}
+	
+	private void unreportFile(File file) throws IOException
+	{
+		URI deleteUri;
+		try
+		{
+			deleteUri = preparePutURI(file.getName());
+		}
+		catch (URISyntaxException e)
+		{
+			throw new IOException("Problem making the uri to send", e);
+		}
+		
+		HttpDelete request = new HttpDelete(deleteUri);
+		logger.debug(request.getURI());
+		client.execute(request);
 	}
 
 
