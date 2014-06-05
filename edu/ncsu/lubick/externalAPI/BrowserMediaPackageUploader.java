@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Date;
 
 import org.apache.http.HttpEntity;
@@ -67,31 +68,35 @@ public class BrowserMediaPackageUploader {
 			logger.info("Start Frame: " + startFrame);
 			logger.info("End Frame: " + endFrame);			
 			
+			logger.info("All Files: " + Arrays.toString(allFiles));
+			
 			for(File file : allFiles)
 			{
 				String fileName = file.getName();
 				int fileNum = 0;
+				logger.info("File: " + fileName);
+				
 				try
 				{
-					fileNum = Integer.parseInt(fileName.substring(fileName.indexOf("e") + 1, fileName.indexOf(".")));
-					
 					try
 					{
-						if(fileNum >= startFrame && fileNum <= endFrame)
-						{
-							logger.info("Uploading: " + fileName + " (" + fileNum + ")");
-							reportFile(file);
-						}
-						else
-						{
-							logger.info("Unuploading: " + fileName + " (" + fileNum + ")");
-							unreportFile(file);
-						}
+						fileNum = Integer.parseInt(fileName.substring(fileName.indexOf("e") + 1, fileName.indexOf(".")));
 					}
 					catch(NumberFormatException e)
 					{
 						logger.info("Uploading: " + fileName + " (not a frame)");
 						reportFile(file);
+					}
+				
+					if(fileNum >= startFrame && fileNum <= endFrame)
+					{
+						logger.info("Uploading: " + fileName + " (" + fileNum + ")");
+						reportFile(file);
+					}
+					else
+					{
+						logger.info("Unuploading: " + fileName + " (" + fileNum + ")");
+						unreportFile(file);
 					}
 				}
 				catch(IOException e)
@@ -158,10 +163,17 @@ public class BrowserMediaPackageUploader {
 		{
 			throw new IOException("Problem making the uri to send", e);
 		}
-		
+
 		HttpDelete request = new HttpDelete(deleteUri);
-		logger.debug(request.getURI());
-		client.execute(request);
+		try
+		{
+			logger.debug(request.getURI());
+			client.execute(request);
+		}
+		finally
+		{
+			request.reset();
+		}
 	}
 
 

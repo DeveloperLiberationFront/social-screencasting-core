@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.localHub.database;
 
+import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -494,6 +495,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	public void setClipUploaded(String clipId, boolean b)
 	{
 		long uploadedDate = b?new Date().getTime():0;
+		getLogger().info("ClipId: " + clipId);
 		
 		String sqlQuery = "UPDATE Clips SET uploaded_date = ? where folder_name LIKE ?";
 		
@@ -501,7 +503,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
 		{
 			statement.setLong(1, uploadedDate);
-			statement.setString(2, clipId);
+			statement.setString(2, "renderedVideos" + File.separator + clipId);
 			executeStatementWithNoResults(statement);
 		}
 		catch (SQLException e)

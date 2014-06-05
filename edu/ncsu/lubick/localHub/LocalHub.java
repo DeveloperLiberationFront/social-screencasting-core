@@ -499,9 +499,9 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	{
 		databaseManager.setStartEndFrame(folder, startFrame, endFrame);
 		
-		//if(databaseManager.isClipUploaded(folder))
-		//{
+		if(databaseManager.isClipUploaded(folder))
+		{
 			clipUploader.uploadToolUsage(getToolUsageByFolder(folder));
-		//}
+		}
 	}
 }
