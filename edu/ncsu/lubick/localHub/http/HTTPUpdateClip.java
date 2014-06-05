@@ -1,6 +1,5 @@
 package edu.ncsu.lubick.localHub.http;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
@@ -13,6 +12,7 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 
 import edu.ncsu.lubick.localHub.WebQueryInterface;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 
 public class HTTPUpdateClip extends TemplateHandlerWithDatabaseLink implements Handler {
 
@@ -54,9 +54,9 @@ public class HTTPUpdateClip extends TemplateHandlerWithDatabaseLink implements H
 	{		
 		int startFrame = Integer.parseInt(request.getParameter("start_frame"));
 		int endFrame = Integer.parseInt(request.getParameter("end_frame"));
-		String folder = "renderedVideos" + File.separator + request.getParameter("folder_name");
+		String folder = PostProductionHandler.MEDIA_OUTPUT_FOLDER + request.getParameter("folder_name");
 		
-		databaseLink.setStartEndFrame(folder, startFrame, endFrame);
+		databaseLink.setStartEndFrame(folder, startFrame, endFrame, true);
 		baseRequest.setHandled(true);
 	}
 

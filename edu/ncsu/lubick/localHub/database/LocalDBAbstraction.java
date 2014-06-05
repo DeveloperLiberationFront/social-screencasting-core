@@ -33,5 +33,5 @@ public abstract class LocalDBAbstraction
 
 	public abstract void setClipUploaded(String clipId, boolean b);
 
-	public abstract void setStartEndFrame(String folder, int startFrame, int endFrame);
+	public abstract Boolean setStartEndFrame(String folder, int startFrame, int endFrame);
 }

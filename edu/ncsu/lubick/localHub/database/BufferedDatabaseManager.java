@@ -416,14 +416,27 @@ public class BufferedDatabaseManager
 		});
 	}
 
-	public void setStartEndFrame(final String folder, final int startFrame, final int endFrame) {
-		localThreadPool.execute(new Runnable() {
+	public Boolean setStartEndFrame(final String folder, final int startFrame, final int endFrame) 
+	{
+		FutureTask<Boolean> future = new FutureTask<Boolean>(new Callable<Boolean>() {
+		
 			@Override
-			public void run()
+			public Boolean call()
 			{
-				localDB.setStartEndFrame(folder, startFrame, endFrame);
+				return localDB.setStartEndFrame(folder, startFrame, endFrame);
 			}
 		});
+		this.localThreadPool.execute(future);
+		
+		try
+		{
+			return future.get();
+		}
+		catch(InterruptedException | ExecutionException e)
+		{
+			logger.error("Problem with query", e);
+			return null;
+		}
 	}
 
 }

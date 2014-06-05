@@ -12,7 +12,7 @@ public interface WebQueryInterface {
 
 	List<File> getBestExamplesOfTool(String pluginName, String toolName, boolean isKeyboardHuh);
 
-	void shareClipWithUser(String clipId, String recipient);
+	void shareClipWithUser(String clipId, String recipient, int startFrame, int endFrame);
 
 	void requestClipsFromUser(String owner, String pluginName, String toolName);
 
@@ -20,6 +20,6 @@ public interface WebQueryInterface {
 	
 	ToolUsage getToolUsageByFolder(String folder);
 
-	void setStartEndFrame(String folder, int startFrame, int endFrame);
+	void setStartEndFrame(String folder, int startFrame, int endFrame, boolean upload);
 
 }

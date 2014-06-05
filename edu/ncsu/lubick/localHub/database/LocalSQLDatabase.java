@@ -1,6 +1,5 @@
 package edu.ncsu.lubick.localHub.database;
 
-import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,6 +12,7 @@ import org.apache.log4j.Logger;
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 
 public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	
@@ -495,7 +495,6 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	public void setClipUploaded(String clipId, boolean b)
 	{
 		long uploadedDate = b?new Date().getTime():0;
-		getLogger().info("ClipId: " + clipId);
 		
 		String sqlQuery = "UPDATE Clips SET uploaded_date = ? where folder_name LIKE ?";
 		
@@ -503,7 +502,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
 		{
 			statement.setLong(1, uploadedDate);
-			statement.setString(2, "renderedVideos" + File.separator + clipId);
+			statement.setString(2, PostProductionHandler.MEDIA_OUTPUT_FOLDER + clipId);
 			executeStatementWithNoResults(statement);
 		}
 		catch (SQLException e)
@@ -513,7 +512,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	}
 	
 	@Override
-	public void setStartEndFrame(String folder, int startFrame, int endFrame) {
+	public Boolean setStartEndFrame(String folder, int startFrame, int endFrame) {
 		String sqlQuery = "UPDATE Clips SET start_frame = ?, end_frame = ? WHERE folder_name = ?";
 		
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery))
@@ -522,6 +521,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			statement.setInt(2, endFrame);
 			statement.setString(3, folder);
 			executeStatementWithNoResults(statement);
+			return true;
 		}
 		catch (SQLException e)
 		{

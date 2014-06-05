@@ -195,7 +195,7 @@ function shareClip() {
     $.ajax({
         type: "post",
         url: "/shareClip",
-        data: { clipId: getIthClip(currentView), recipient: urlParams.shareWithEmail }
+        data: { clipId: getIthClip(currentView), recipient: urlParams.shareWithEmail, "start_frame": startFrames, "end_frame": endFrames }
     });
 }
 
@@ -208,7 +208,7 @@ function shareAll() {
     $.ajax({
         type: "post",
         url: "/shareClip",
-        data: { clipId: getIthClip(currentView), recipient: "all" }
+        data: { clipId: getIthClip(currentView), recipient: "all", "start_frame": startFrames, "end_frame": endFrames }
     });
 }
 

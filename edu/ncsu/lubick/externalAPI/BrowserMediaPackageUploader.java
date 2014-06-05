@@ -81,27 +81,29 @@ public class BrowserMediaPackageUploader {
 					try
 					{
 						fileNum = Integer.parseInt(fileName.substring(fileName.indexOf("e") + 1, fileName.indexOf(".")));
+					
+						if(fileNum >= startFrame && fileNum <= endFrame)
+						{
+							logger.info("Uploading: " + file.getAbsolutePath());
+							reportFile(file);
+						}
+						else
+						{
+							logger.info("Unuploading: " + file.getAbsolutePath());
+							unreportFile(file);
+						}
 					}
 					catch(NumberFormatException e)
 					{
-						logger.info("Uploading: " + fileName + " (not a frame)");
+						logger.info("Uploading: " + file.getAbsolutePath());
 						reportFile(file);
 					}
 				
-					if(fileNum >= startFrame && fileNum <= endFrame)
-					{
-						logger.info("Uploading: " + fileName + " (" + fileNum + ")");
-						reportFile(file);
-					}
-					else
-					{
-						logger.info("Unuploading: " + fileName + " (" + fileNum + ")");
-						unreportFile(file);
-					}
+					
 				}
 				catch(IOException e)
 				{
-					logger.fatal("Could not report/unreport file " + fileName + " (" + fileNum + ")", e);
+					logger.fatal("Could not report/unreport file " + file.getAbsolutePath(), e);
 					return false;
 				}
 			}
