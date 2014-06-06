@@ -354,7 +354,7 @@ function changeSharedMediaSource(clipIndex) {
     stopFramePlayback();
     clipName = getIthClip(clipIndex);
 
-    currentImageDir = "http://screencaster-hub.appspot.com/api/" + currentEmail + "/" + currentPlugin + "/" + currentTool + "/" + clipName;
+    currentImageDir = "http://screencaster-hub.appspot.com/api/" + currentEmail + "/" + currentPlugin + "/" + escape(currentTool) + "/" + clipName;
     getUrl = currentImageDir + authString;
 
     currentClipIndex = clipIndex;
