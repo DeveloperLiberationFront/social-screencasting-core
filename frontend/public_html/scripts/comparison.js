@@ -370,11 +370,11 @@ function changeSharedMediaSource(clipIndex) {
     $("#editDiv").hide();
 
     //reload frames //TODO: implement caching
-    $.ajax(getUrl, {
+    $.ajax({
+        type: "GET",
         url: getUrl,
         success: function (data) {
             setUpPlaybackForDataAuthAndDir(data, authString, currentImageDir);
-
         },
         error: function (error, e, f) {
             console.log("error");
