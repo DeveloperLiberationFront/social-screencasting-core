@@ -28,7 +28,10 @@ public abstract class LocalDBAbstraction
 	public abstract boolean isClipUploaded(String clipId);
 
 	public abstract ToolUsage getToolUsageById(String clipId);
+	
+	public abstract ToolUsage getClipByFolder(String folder);
 
 	public abstract void setClipUploaded(String clipId, boolean b);
 
+	public abstract Boolean setStartEndFrame(String folder, int startFrame, int endFrame);
 }

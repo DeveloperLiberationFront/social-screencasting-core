@@ -4,14 +4,21 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
@@ -54,28 +61,124 @@ public class BrowserMediaPackageUploader {
 		File packageDirectory = new File(expectedLocationOnDisk);
 
 		logger.info("Searching for browser package in directory "+packageDirectory);
-
-		if (packageDirectory.exists()&&packageDirectory.isDirectory())
+		
+		if (packageDirectory.exists() && packageDirectory.isDirectory())
 		{
-			int counter = 1, totalFiles = packageDirectory.listFiles().length;
-			for(File file: packageDirectory.listFiles())
-			{
-				try
-				{
-					logger.info(String.format("reporting file %d/%d",counter,totalFiles));
-					this.reportFile(file,file.getName());
-					counter++;
-				}
-				catch (IOException e)
-				{
-					logger.fatal("Could not upload browser package.  Problem with file "+counter +"("+file+")",e);
-					return false;
-				}
-			}
-			return true;
+			File[] allFiles = packageDirectory.listFiles();
+			int totalFiles = allFiles.length;
+			int startFrame = toolUsage.getStartFrame();
+			int endFrame = toolUsage.getEndFrame() != 0 ? toolUsage.getEndFrame() : totalFiles;
+			List<String> existingFiles = getExistingFiles(toolUsage);
+			
+			return uploadFiles(allFiles, existingFiles, startFrame, endFrame);
 		}
 		logger.error("Browser package not found, not uploading");
 		return false;
+	}
+	
+	private boolean uploadFiles(File[] files, List<String> existingFiles, int startFrame, int endFrame)
+	{
+		for(File file : files)
+		{
+			String fileName = file.getName();
+			int fileNum = -1;
+			
+			try
+			{
+				try
+				{
+					fileNum = fileNameToInt(fileName);
+					boolean doesFileExist = existingFiles.contains(fileName);
+				
+					if (!doesFileExist && (fileNum >= startFrame && fileNum <= endFrame || fileNum == -1))
+					{
+						logger.info("Uploading: " + fileName);
+						reportFile(file);
+					}
+					else if (doesFileExist && (fileNum != -1 && (fileNum < startFrame || fileNum > endFrame)))
+					{
+						logger.info("Unuploading: " + fileName);
+						unreportFile(file);
+					}
+				}
+				catch(NumberFormatException e)
+				{
+					logger.info("Uploading: " + file.getAbsolutePath());
+					reportFile(file);
+				}
+			}
+			catch(IOException e)
+			{
+				logger.fatal("Could not report/unreport file " + file.getAbsolutePath(), e);
+				return false;
+			}
+		}
+		
+		logger.info("Done uploading/unuploading files");
+		return true;
+	}
+
+	private int fileNameToInt(String fileName)
+	{
+		try
+		{
+			return Integer.parseInt(fileName.substring(fileName.indexOf("e") + 1, fileName.indexOf(".")));
+		}
+		catch(NumberFormatException e)
+		{
+			return -1;
+		}
+	}
+
+	private List<String> getExistingFiles(ToolUsage toolUsage) {
+		List<String> existingFiles = null;
+		
+		URI getUri = null;
+		try
+		{
+			StringBuilder sb = new StringBuilder("/api/");
+			sb.append(userManager.getUserEmail());
+			sb.append("/");
+			sb.append(toolUsage.getPluginName());
+			sb.append("/");
+			sb.append(toolUsage.getToolName());
+			sb.append("/");
+			sb.append(ToolStream.makeUniqueIdentifierForToolUsage(toolUsage, userManager.getUserEmail()));
+			getUri = HTTPUtils.buildExternalHttpURI(sb.toString(), userManager);
+			logger.info(getUri);
+			
+		} catch (URISyntaxException e)
+		{
+			e.printStackTrace();
+		}
+
+		HttpGet httpGet = new HttpGet(getUri);
+		try
+		{
+			CloseableHttpResponse response = client.execute(httpGet);
+			
+			String responseBody = HTTPUtils.getResponseBody(response);
+			JSONObject clip = new JSONObject(responseBody);
+			JSONArray filenames = clip.getJSONObject("clip").getJSONArray("filenames");
+			
+			existingFiles = new ArrayList<>(filenames.length());
+			
+			for(int i=0; i<filenames.length(); i++)
+			{
+				existingFiles.add(filenames.getString(i));
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			httpGet.reset();
+		}
+		
+		
+		return existingFiles;
 	}
 
 
@@ -85,12 +188,12 @@ public class BrowserMediaPackageUploader {
 	}
 
 
-	private void reportFile(File file, String reportingName) throws IOException
+	private void reportFile(File file) throws IOException
 	{
 		URI putUri;
 		try
 		{
-			putUri = this.preparePutURI(reportingName);
+			putUri = this.preparePutURI(file.getName());
 		}
 		catch (URISyntaxException e)
 		{
@@ -98,7 +201,8 @@ public class BrowserMediaPackageUploader {
 		}
 
 		HttpPut httpPut = new HttpPut(putUri);
-		try {
+		try 
+		{
 			MultipartEntityBuilder mpeBuilder = MultipartEntityBuilder.create();
 
 			mpeBuilder.addBinaryBody("image", file);
@@ -108,10 +212,35 @@ public class BrowserMediaPackageUploader {
 			httpPut.setEntity(content);
 			client.execute(httpPut);
 		}
-		finally {
-		httpPut.reset();
+		finally 
+		{
+			httpPut.reset();
 		}
 
+	}
+	
+	private void unreportFile(File file) throws IOException
+	{
+		URI deleteUri;
+		try
+		{
+			deleteUri = preparePutURI(file.getName());
+		}
+		catch (URISyntaxException e)
+		{
+			throw new IOException("Problem making the uri to send", e);
+		}
+
+		HttpDelete request = new HttpDelete(deleteUri);
+		try
+		{
+			logger.debug(request.getURI());
+			client.execute(request);
+		}
+		finally
+		{
+			request.reset();
+		}
 	}
 
 

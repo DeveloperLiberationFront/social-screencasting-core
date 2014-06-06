@@ -58,6 +58,10 @@ function setUpPlaybackForDataAuthAndDir(data, auth, imageDir) {
     pluginName = data.clip.plugin;
     toolName = data.clip.tool;
     frames = data.clip.filenames;
+    startFrames = data.clip.start;
+    endFrames = data.clip.end;
+	folderName = data.clip.name;
+    
     for (i = frames.length - 1; i > 0; i--) {
 	//does the name begin with "frame"
         if (frames[i].lastIndexOf("frame", 0) === 0)	//http://stackoverflow.com/a/4579228/1447621
@@ -78,7 +82,7 @@ function setUpPlaybackForDataAuthAndDir(data, auth, imageDir) {
 
     setUpAnimations(imageAssets);
 
-    renderPlayback(authToken);
+    renderPlayback(authToken, frames);
     $("#clipLoading").hide();
     $("#clipPlayer").show();
 }

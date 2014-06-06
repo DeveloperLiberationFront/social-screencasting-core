@@ -450,14 +450,18 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	}
 
 	@Override
-	public void shareClipWithUser(String clipId, String recipient)
+	public void shareClipWithUser(String clipId, String recipient, int startFrame, int endFrame)
 	{
 		if (!this.databaseManager.isClipUploaded(clipId))
 		{
 			ToolUsage toolUsage = databaseManager.getToolUsageById(clipId);
+			toolUsage.setStartFrame(startFrame);
+			toolUsage.setEndFrame(endFrame);
 			this.clipUploader.uploadToolUsage(toolUsage);
 			this.databaseManager.setClipUploaded(clipId, true);
 		}
+		
+		setStartEndFrame(PostProductionHandler.MEDIA_OUTPUT_FOLDER + clipId, startFrame, endFrame, false);
 		this.clipSharingManager.shareClipWithUser(clipId, recipient);
 	}
 
@@ -486,5 +490,22 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 		//Log notification for study
 		ToolUsage tu = new ToolUsage("Respond to notification", notification, "[GUI]", "[ScreencastingHub]", new Date(), 10, 10);
 		reportToolUsage(tu);
+	}
+
+	@Override
+	public ToolUsage getToolUsageByFolder(String folder)
+	{
+		return databaseManager.getToolUsageByFolder(folder);
+	}
+
+	@Override
+	public void setStartEndFrame(String folder, int startFrame, int endFrame, boolean upload)
+	{
+		databaseManager.setStartEndFrame(folder, startFrame, endFrame);
+		
+		if(databaseManager.isClipUploaded(folder) && upload)
+		{
+			clipUploader.uploadToolUsage(getToolUsageByFolder(folder));
+		}
 	}
 }

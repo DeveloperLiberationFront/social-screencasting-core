@@ -196,7 +196,7 @@ td, tr, th{
 }
 
 .noUseBorder {
-	border: 3px solid #29b350;
+	outline: 3px solid #29b350;
 }
 
 #prevTable {
@@ -252,11 +252,13 @@ th.sortable.headerSortDown {
 	background-image: url("/images/table/descendSort.svg");
 }
 
-html, body, .container-fluid.main, .row, [class*="col-"] {
+html, body, .container-fluid.main, .row {
 	height: 100%;
 }
 
-[class*="col-"] {
+#otherPersonsCol,
+#myToolsCol, 
+#usersCol {
 	height: calc(100% - 15px);
 	overflow-y: auto;
 }

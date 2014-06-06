@@ -57,13 +57,15 @@ public class HTTPClipSharer extends TemplateHandlerWithDatabaseLink {
 		baseRequest.setHandled(true);
 		String clipId = request.getParameter(PARAM_CLIP_ID);
 		String recipient = request.getParameter(PARAM_RECIPIENT);
+		int startFrame = Integer.parseInt(request.getParameter("start_frame"));
+		int endFrame = Integer.parseInt(request.getParameter("end_frame"));
 		if (clipId == null || recipient == null)
 		{
 			logger.info("clipId = "+clipId +", recipient = "+recipient+", so cancelling");
 			
 			return;
 		}
-		this.databaseLink.shareClipWithUser(clipId, recipient);
+		this.databaseLink.shareClipWithUser(clipId, recipient, startFrame, endFrame);
 	}
 
 

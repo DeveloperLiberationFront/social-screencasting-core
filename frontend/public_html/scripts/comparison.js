@@ -354,7 +354,7 @@ function changeSharedMediaSource(clipIndex) {
     stopFramePlayback();
     clipName = getIthClip(clipIndex);
 
-    currentImageDir = "http://screencaster-hub.appspot.com/api/" + currentEmail + "/" + currentPlugin + "/" + currentTool + "/" + clipName;
+    currentImageDir = "http://screencaster-hub.appspot.com/api/" + currentEmail + "/" + currentPlugin + "/" + escape(currentTool) + "/" + clipName;
     getUrl = currentImageDir + authString;
 
     currentClipIndex = clipIndex;
@@ -366,13 +366,15 @@ function changeSharedMediaSource(clipIndex) {
     //clear out all frames and animations
     $(".frame").remove();
     $(".keyAnimation").remove();
+    
+    $("#editDiv").hide();
 
     //reload frames //TODO: implement caching
-    $.ajax(getUrl, {
+    $.ajax({
+        type: "GET",
         url: getUrl,
         success: function (data) {
             setUpPlaybackForDataAuthAndDir(data, authString, currentImageDir);
-
         },
         error: function (error, e, f) {
             console.log("error");
@@ -402,6 +404,8 @@ function changeLocalMediaSource(clipIndex) {
     //clear out all frames and animations
     $(".frame").remove();
     $(".keyAnimation").remove();
+
+    $("#editDiv").show();
 
     //reload frames //TODO: implement caching
     $.ajax({
