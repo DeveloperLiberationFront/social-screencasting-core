@@ -154,7 +154,7 @@ public class RemoteMySQLDatabase implements ExternalDBAbstraction {
 	{
 		String sql ="INSERT INTO tool_info_by_user (user_id, plugin_name, " 
 				+"tool_name, usage_timestamp, tool_keypress, class_of_tool, "
-				+"tool_use_duration, start_frame, end_frame ) VALUES (?,?,?,?,?,?,?)";
+				+"tool_use_duration ) VALUES (?,?,?,?,?,?,?)";
 
 
 		try (PreparedStatement statement = makePreparedStatement(sql);)
@@ -166,8 +166,6 @@ public class RemoteMySQLDatabase implements ExternalDBAbstraction {
 			statement.setString(5, tu.getToolKeyPresses());
 			statement.setString(6, tu.getToolClass());
 			statement.setInt(7, tu.getDuration());
-			statement.setInt(8, tu.getStartFrame());
-			statement.setInt(9, tu.getEndFrame());
 			executeStatementWithNoResults(statement);
 		}
 		catch (SQLException e)

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.Date;
 
 import org.apache.http.HttpEntity;
@@ -66,15 +65,12 @@ public class BrowserMediaPackageUploader {
 
 			logger.info("Total Frames: " + totalFiles);
 			logger.info("Start Frame: " + startFrame);
-			logger.info("End Frame: " + endFrame);			
-			
-			logger.info("All Files: " + Arrays.toString(allFiles));
+			logger.info("End Frame: " + endFrame);
 			
 			for(File file : allFiles)
 			{
 				String fileName = file.getName();
 				int fileNum = 0;
-				logger.info("File: " + fileName);
 				
 				try
 				{
@@ -108,7 +104,7 @@ public class BrowserMediaPackageUploader {
 				}
 			}
 			
-			logger.info("Done uploading stuff");
+			logger.info("Done uploading/unuploading files");
 			
 			return true;
 		}
