@@ -3,6 +3,8 @@ var currentFrame;
 var frameAnimationTimer;
 var isFullScreen;
 var totalFrames;
+var startFrames;
+var endFrames;
 var animationEnabled;
 var currentAnimationChoice;
 var totalAnimationChoices;
@@ -10,6 +12,7 @@ var rampUp = 22;	//22 frames of ramp up
 var durationOfAnimation = 10;  //10 frames of showing animation
 var authToken = "";
 var hasInitializedButtons = false;
+var folderName;
 
 function launchFullScreen(element) {  //From davidwalsh.name/fullscreen
     if (element.requestFullScreen) {
@@ -36,7 +39,7 @@ function setFloatingPlaybackControlsVisible(shouldBeVisible) {
 }
 
 function updateSlider(index) {
-    $(".slider").slider("value", index);
+    $("#staticSlider, #dockedSlider").slider("value", index);
 }
 
 function handleAnimationOptionsForCurrentFrame() {
@@ -77,18 +80,52 @@ function startFramePlayback() {
 
         frameAnimationTimer = window.setInterval(function () {
             var oldFrame = $(".frame").eq(currentFrame);
-            currentFrame = (currentFrame + 1) % totalFrames;
-            updateSlider(currentFrame);
-            handleAnimationOptionsForCurrentFrame();
-            $(".frame").eq(currentFrame).show();
-            oldFrame.hide();
+            currentFrame = currentFrame + 1;
+
+			if (currentFrame >= endFrames) {
+                $(".playPause").prop("disabled", true);
+                stopFramePlayback(false);
+
+                oldFrame.animate({opacity: 0}, 500, function() {
+                    setTimeout(function() {
+                        currentFrame = startFrames;
+                        oldFrame.hide();
+                        oldFrame.css({opacity: 100});
+                        $(".frame").eq(currentFrame).show();
+                        startFramePlayback();
+                        $(".playPause").prop("disabled", false);
+                    }, 500);
+				});
+			} else if (currentFrame <= startFrames + 1) {
+                $(".playPause").prop("disabled", true);
+                currentFrame = startFrames;
+                $(".frame").eq(currentFrame).css({opacity: 0});
+                stopFramePlayback(false);
+                $(".frame").eq(currentFrame).animate({opacity: 1.0}, 500, function() {
+                    startFramePlayback();
+                    $(".frame").eq(currentFrame).hide();
+                    $(".frame").eq(currentFrame).css({opacity: 0});
+                    currentFrame++;
+                    $(".frame").eq(currentFrame).show();
+                    $(".playPause").prop("disabled", false);
+                });
+
+            } else {
+                oldFrame.hide();
+                updateSlider(currentFrame);
+                handleAnimationOptionsForCurrentFrame();
+                $(".frame").eq(currentFrame).show();
+            }
+
         }, 200);
     }
 }
 
-function stopFramePlayback() {
+function stopFramePlayback(updatePausePlayButton) {
     if (isPlaying) {
-        $(".playbackCommand").removeClass("play").addClass("pause");
+        if(updatePausePlayButton) {
+            $(".playbackCommand").removeClass("play").addClass("pause");
+        }
         isPlaying = false;
         clearInterval(frameAnimationTimer);
     }
@@ -96,48 +133,39 @@ function stopFramePlayback() {
 
 function playOrPause() {
     if (isPlaying) {
-        stopFramePlayback();
+        stopFramePlayback(true);
     }
     else {
-        startFramePlayback();
+        startFramePlayback(true);
     }
 }
 
 function sliderMoved(event, ui) {
     event.preventDefault();
-    stopFramePlayback();
-    $(".frame").eq(currentFrame).hide();
-    currentFrame = ui.value % totalFrames;
-    handleAnimationOptionsForCurrentFrame();
-    $(".frame").eq(currentFrame).show();
-    updateSlider(currentFrame);
+
+    if(ui.value != currentFrame) {
+        stopFramePlayback(true);
+        $(".frame").eq(currentFrame).hide();
+        currentFrame = ui.value % totalFrames;
+        handleAnimationOptionsForCurrentFrame();
+        $(".frame").eq(currentFrame).show();
+    
+        updateSlider(currentFrame);
+    }
 }
 
-function getImageForFrameNumber(frameNumber) {
-    var retVal = '<img class="frame" src="';
-    retVal += $("#panel").data("playbackDirectory");
-    retVal += '/frame';
-    if (frameNumber < 1000) {
-        retVal += "0";
-    }
-    if (frameNumber < 100) {
-        retVal += "0";
-    }
-    if (frameNumber < 10) {
-        retVal += "0";
-    }
-    retVal += frameNumber;
-    retVal += '.jpg' + authToken + '"></img>';
-    return $(retVal);
+
+function getImageForFrame(frame) {
+    return $('<img class="frame" src=' + $("#panel").data("playbackDirectory") + "/" + frame + authToken + '>');
 }
 
-function preloadImages() {
-    var p, i;
+function preloadImages(frames) {
+    var p;
     p = $("#panel");
-    for (i = 0; i < totalFrames; i++) {
-        getImageForFrameNumber(i).appendTo(p);
-    }
 
+    $(frames).each(function() {
+        getImageForFrame(this).appendTo(p);
+    })
 }
 
 $(document).keyup(function (e) {
@@ -148,15 +176,59 @@ $(document).keyup(function (e) {
 });
 
 function setUpSliders() {
-    $(".slider").slider({
-        value: 0,
+    $("#staticSlider, #dockedSlider").slider({
+        value: startFrames,
         min: 0,
         max: totalFrames - 1,	//minus 1 because we start at 0
-        step: 1,
         animate: "fast",
+        step: 1,
         easing: "linear",
-        slide: sliderMoved	//when the user moves this, call sliderMoved()
+        slide: sliderMoved,
+        change: sliderMoved	//when the user moves this, call sliderMoved()
     });
+	
+	$("#editSlider").slider({
+		range: true,
+        values: [startFrames, endFrames],
+        min: 0,
+        animate: "fast",
+        max: totalFrames - 1,	//minus 1 because we start at 0
+        step: 1,
+        easing: "linear",
+        slide: setMinMaxFrame	//when the user moves this, call sliderMoved()
+    });
+	
+}
+
+function setMinMaxFrame(event, ui) {
+   startFrames = ui.values[0];
+   endFrames = ui.values[1];
+   stopFramePlayback(true);
+
+   $(".frame").css({opacity: 1.0});
+   $(".frame").eq(startFrames).css({opacity: 0.0});
+   
+   if (startFrames > currentFrame) {
+    $("#staticSlider, #dockedSlider").slider("value", startFrames);
+   }
+
+   if (endFrames < currentFrame) {
+    $("#staticSlider, #dockedSlider").slider("value", endFrames);
+   }
+}
+
+function saveVideoLength () {
+	//saves the start and end frames in database...eventually
+    $.ajax({
+        type: "POST",
+        url: "/updateClip",
+        data: { "folder_name": folderName, "start_frame": startFrames, "end_frame": endFrames },
+		success: function() {
+			console.log("it worked?");
+		}
+
+    });
+
 }
 
 function setUpDraggableThings() {
@@ -188,7 +260,7 @@ function rotateAnimationSettings() {
     handleAnimationOptionsForCurrentFrame();
 }
 
-function renderPlayback(auth) {
+function renderPlayback(auth, frames) {
     if (auth) {
         authToken = auth;
     }
@@ -197,7 +269,6 @@ function renderPlayback(auth) {
 		authToken = "";
 	}
     isPlaying = false;
-    currentFrame = 0;
     isFullScreen = false;
     animationEnabled = false;
     currentAnimationChoice = 0;
@@ -220,19 +291,31 @@ function renderPlayback(auth) {
 		
         $("#moreInfo").on("click",".playPause", playOrPause);
 		$("#moreInfo").on("click",".settings", rotateAnimationSettings);
+		$("#saveClip").on("click", saveVideoLength);
 		hasInitializedButtons = true;
 	}
-    totalFrames = +$("#panel").data("totalFrames");
+    
+    totalFrames = $("#panel").data("totalFrames");
+    if (endFrames === undefined || endFrames <= 0) {
+        endFrames = totalFrames - 1;
+    }
+    if (startFrames === undefined) {
+        startFrames = 0;
+    }
+    
+    currentFrame = startFrames;
+
     if ($("#panel").data("type") == "keystroke") {
         animationEnabled = true;
     }
 
 	//put a little green tick where the tool starts
-    $(".startLabel").css('left', rampUp * 100 / totalFrames + '%');
+    $(".startLabel").css('left', rampUp * 100 / endFrames + '%');
     handleAnimationOptionsForCurrentFrame();
     setUpSliders();
     setUpDraggableThings();
-    preloadImages();
-	$(".frame").first().show();
+    preloadImages(frames);
+    $(".frame").eq(startFrames).css({opacity: 0});
+	$(".frame").eq(startFrames).show();
 
 }

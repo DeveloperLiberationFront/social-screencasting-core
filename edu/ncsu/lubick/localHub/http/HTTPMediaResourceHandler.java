@@ -17,6 +17,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
 
 public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink implements Handler {
@@ -86,7 +88,8 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 	{
 		String clipName = request.getParameter(PARAM_CLIP_NAME);
 
-		File clipDir = new File("renderedVideos/",clipName);
+		File clipDir = new File(PostProductionHandler.MEDIA_OUTPUT_FOLDER,clipName);
+		ToolUsage clip = databaseLink.getToolUsageByFolder(PostProductionHandler.MEDIA_OUTPUT_FOLDER + clipName);
 
 		JSONObject clipObject = new JSONObject();
 		JSONArray fileNamesArr = new JSONArray();
@@ -110,6 +113,8 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 			JSONObject fileNamesObject = new JSONObject();
 			fileNamesObject.put("filenames", fileNamesArr);
 			fileNamesObject.put("name", clipName);
+			fileNamesObject.put("start", clip.getStartFrame());
+			fileNamesObject.put("end", clip.getEndFrame());
 			clipObject.put("clip", fileNamesObject);
 
 			response.setContentType("application/json");

@@ -3,6 +3,7 @@ package edu.ncsu.lubick.localHub;
 import java.io.File;
 import java.util.List;
 
+import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
 public interface WebQueryInterface {
@@ -11,10 +12,14 @@ public interface WebQueryInterface {
 
 	List<File> getBestExamplesOfTool(String pluginName, String toolName, boolean isKeyboardHuh);
 
-	void shareClipWithUser(String clipId, String recipient);
+	void shareClipWithUser(String clipId, String recipient, int startFrame, int endFrame);
 
 	void requestClipsFromUser(String owner, String pluginName, String toolName);
 
 	List<ToolCountStruct> getAllToolAggregateForPlugin(String pluginName);
+	
+	ToolUsage getToolUsageByFolder(String folder);
+
+	void setStartEndFrame(String folder, int startFrame, int endFrame, boolean upload);
 
 }

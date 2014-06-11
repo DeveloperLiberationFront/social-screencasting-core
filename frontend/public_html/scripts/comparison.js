@@ -354,7 +354,7 @@ function changeSharedMediaSource(clipIndex) {
     stopFramePlayback();
     clipName = getIthClip(clipIndex);
 
-    currentImageDir = "http://screencaster-hub.appspot.com/api/" + currentEmail + "/" + currentPlugin + "/" + currentTool + "/" + clipName;
+    currentImageDir = "http://screencaster-hub.appspot.com/api/" + currentEmail + "/" + currentPlugin + "/" + escape(currentTool) + "/" + clipName;
     getUrl = currentImageDir + authString;
 
     currentClipIndex = clipIndex;
@@ -366,13 +366,15 @@ function changeSharedMediaSource(clipIndex) {
     //clear out all frames and animations
     $(".frame").remove();
     $(".keyAnimation").remove();
+    
+    $("#editDiv").hide();
 
     //reload frames //TODO: implement caching
-    $.ajax(getUrl, {
+    $.ajax({
+        type: "GET",
         url: getUrl,
         success: function (data) {
             setUpPlaybackForDataAuthAndDir(data, authString, currentImageDir);
-
         },
         error: function (error, e, f) {
             console.log("error");
@@ -402,6 +404,8 @@ function changeLocalMediaSource(clipIndex) {
     //clear out all frames and animations
     $(".frame").remove();
     $(".keyAnimation").remove();
+
+    $("#editDiv").show();
 
     //reload frames //TODO: implement caching
     $.ajax({
@@ -548,7 +552,7 @@ function submit_rating() {
 }
 
 function setupTableSorting() {
-    $("table").not("#otherPersonsTable").tablesorter();
+    $("table").not("#otherPersonsTable, #keyTable").tablesorter();
 
     $.tablesorter.addParser({
         id: "video",
@@ -556,7 +560,6 @@ function setupTableSorting() {
             return false;
         },
         format: function(s, table, cell) {
-            //console.log(cell);
             return $(cell).children().length;
         },
         type: "numeric"
@@ -568,6 +571,18 @@ function setupTableSorting() {
                 sorter: "video"
             }
         }
+    });
+}
+
+function setupKey() {
+    var keyDiv = $("#keyTableDiv").dialog({
+        autoOpen: false
+    });
+
+    $("#keyButton").on("click", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        keyDiv.dialog("open");
     });
 }
 
@@ -606,6 +621,7 @@ $(document).ready(function () {
     $("form#rating").click(submit_rating);
 
     setupTableSorting();
+    setupKey();
     loadPeople();
 
     console.log("end of comparison");

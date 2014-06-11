@@ -1,5 +1,5 @@
 # Set root logger level and create the appender (output device) mainLogger.
-log4j.rootLogger=debug, stdout, filebased
+log4j.rootLogger=info, stdout, filebased
 
 #custom logging levels can go here
 #Format them like log4j.logger.[package].[class name]

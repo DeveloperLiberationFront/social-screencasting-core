@@ -1,6 +1,9 @@
 package edu.ncsu.lubick.unitTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -17,12 +20,13 @@ import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.FileUtilities;
 
 public class TestClipCreationLimits {
 
 	private static final String TEST_SCREENCASTING_DIR = "test_screencasting/";
-	private static final File renderedVideos = new File("renderedVideos/");
+	private static final File renderedVideos = new File(PostProductionHandler.MEDIA_OUTPUT_FOLDER);
 	private static final int MAX_TOOL_USAGES = LocalHub.MAX_TOOL_USAGES;
 
 	private static final Logger logger = Logger.getLogger(TestClipCreationLimits.class);

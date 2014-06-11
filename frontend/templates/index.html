@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="#">Socaster</a>
+        <a class="navbar-brand" href="/">Socaster</a>
       </div>
       <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav">
@@ -63,7 +63,7 @@
       <div class="row">
 
         <!-- More info -->
-        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 col-md-push-6">
+        <div id="moreInfoCol" class="col-lg-6 col-md-6 col-sm-12 col-xs-12 col-md-push-6">
           <div id="moreInfo">
             <div id="placeholder">Select a tool for more info.</div>
             <div id="clipDoesNotExist">No clips exist locally for this tool.  This is unexpected...</div>
@@ -75,7 +75,9 @@
               <div id="panelAndOverlay">
                 <div id="overlay">
                   <span>Click for Full Screen</span>
+				  
                 </div>
+                <div id="underlay"></div>
                 <div id="panel" data-total-frames="" data-type="" data-playback-directory="" data-auth="">
 
                   <div id="moduleControlPanel" class="ui-widget-content">
@@ -111,6 +113,10 @@
                   <div id="staticSlider" class="slider">
                     <label class="startLabel" title="The tool gets used here">&nbsp;</label>
                   </div>
+                  <div id="editDiv">
+				            <div id="editSlider" class="slider"></div>
+				            <button id="saveClip">Save</button>
+                  </div>
                 </div>
               </div>
               <div id="ratingDiv">
@@ -132,11 +138,12 @@
         </div>
 
         <!-- My tools table -->
-        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 col-md-pull-6">
+        <div id="myToolsCol" class="col-lg-3 col-md-3 col-sm-6 col-xs-12 col-md-pull-6">
           <table id="myToolsTable" border="1" class="resultsTable myTools span4">
             <thead>
               <tr>
-                <th colspan="3">My Tools</th>
+                <th colspan="2">My Tools</th>
+                <th><button id="keyButton"><img src="/images/key.svg"/></button></th>
               </tr>
               <tr>
                 <th class="header sortable">Tool Name</th>
@@ -157,7 +164,7 @@
         </div>
 
         <!-- Users table -->
-        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 col-md-pull-6">
+        <div id="usersCol" class="col-lg-3 col-md-3 col-sm-6 col-xs-12 col-md-pull-6">
           <table border="1" id="usersTable" class="resultsTable">
             <thead>
               <tr class="header">
@@ -171,7 +178,7 @@
         </div>
 
         <!-- Other persons table -->
-        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 col-md-pull-6" style='display:none'>
+        <div id="otherPersonsCol" class="col-lg-3 col-md-3 col-sm-6 col-xs-12 col-md-pull-6" style='display:none'>
           <table id="otherPersonsTable" border="1" id='otherPersonsTable' class="resultsTable">
             <thead>
               <tr class="changeName">
@@ -196,18 +203,39 @@
       </div>
     </div>
 
+    <div id="keyTableDiv" title="Key">
+      <table id="keyTable">
+        <tbody>
+          <tr style="background: #ffedd3; border: 2px solid #e48600;">
+            <th>orange</th>
+            <td>Used Tools</td>
+          </tr>
+
+          <tr style="background: #baeec8; border: 2px solid #29b350;">
+            <td>green</td>
+            <td>Unused Tools</td>
+          </tr>
+
+          <tr style="background: white; border: 1px solid gray">
+            <td>white</td>
+            <td>Known Tools</td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
 
     <div class="modal">
     </div>
 
-  <script src="jquery/jquery.min.js"></script>
+  <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
   <script src="jquery/jquery.rating.pack.js"></script>
   <script src="jquery/jquery.MetaData.js"></script>
   <script src="jquery/jquery.form.js"></script>
 	<script src="jquery/jquery-ui.min.js"></script>
-	<script src="js/bootstrap.min.js"></script>
-	<script src="jquery/jquery.fullscreen.js"></script>
+  <script src="jquery/jquery.fullscreen.js"></script>
   <script src="jquery/jquery.tablesorter.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
   <script src="scripts/playback.js"></script>
   <script src="scripts/setUpPlayback.js"></script>
   <script src="scripts/comparison.js"></script>
