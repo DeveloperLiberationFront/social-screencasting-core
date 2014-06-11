@@ -416,7 +416,7 @@ public class BufferedDatabaseManager
 		});
 	}
 
-	public Boolean setStartEndFrame(final String folder, final int startFrame, final int endFrame) 
+	public boolean setStartEndFrame(final String folder, final int startFrame, final int endFrame) 
 	{
 		FutureTask<Boolean> future = new FutureTask<Boolean>(new Callable<Boolean>() {
 		
@@ -435,7 +435,7 @@ public class BufferedDatabaseManager
 		catch(InterruptedException | ExecutionException e)
 		{
 			logger.error("Problem with query", e);
-			return null;
+			return false;
 		}
 	}
 
