@@ -17,6 +17,7 @@ function reportToolUsages() {
     oldUsages.concat(queuedToolUsages);	//copy old ones
     queuedToolUsages = [];
 
+    /*
     $.ajax("http://localhost:4443/reportTool", {
         type: "POST",
         data: { pluginName: "[ScreencastingHub]", toolUsages: thing },
@@ -29,6 +30,7 @@ function reportToolUsages() {
             queuedToolUsages.concat(oldUsages);
         }
     });
+    */
 
 }
 
