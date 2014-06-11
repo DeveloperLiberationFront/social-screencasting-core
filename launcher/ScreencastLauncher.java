@@ -45,25 +45,26 @@ public class ScreencastLauncher
 
 	private static void searchForUpdate(String currentLatest) throws URISyntaxException
 	{
-		waitOneMinute();		//this normally gets run at boot.  We don't want to delay a user's start up process too much
+		//waitOneMinute();		//this normally gets run at boot.  We don't want to delay a user's start up process too much
 		
 		HttpGet get = new HttpGet(makeVersionURI());
 		JSONObject responseObject = getVersionJSON(get);
-		String serverVersion = responseObject.optString("version", "Screencasting-0.0.0-RELEASE.jar");
+		String serverVersion = responseObject.optString("version", "0.0.0");
 		if (serverVersion.compareToIgnoreCase(currentLatest) <= 0) {
 			System.out.println("We are up to date "+serverVersion+" <= "+currentLatest);
 			return;
 		}
-		
+		System.out.println("Fetching new version");
 		downloadLatestVersion(get, serverVersion);
 	}
 
 	private static void downloadLatestVersion(HttpGet get, String serverVersion) throws URISyntaxException
 	{
-		get.setURI(makeDownloadURI(serverVersion));
+		String newFileName = "Screencasting-"+serverVersion+"-RELEASE.jar";
+		get.setURI(makeDownloadURI(newFileName));
 		try(CloseableHttpResponse response = client.execute(get);)
 		{
-			writeResponseToFile(response, new File("./"+serverVersion));
+			writeResponseToFile(response, new File("./"+newFileName));
 		}
 		catch (IOException e)
 		{
@@ -92,6 +93,7 @@ public class ScreencastLauncher
 		else {
 			System.err.println("Couldn't make file "+file);
 		}
+		System.out.println("New file created: "+file);
 	}
 
 	private static JSONObject getVersionJSON(HttpGet get)
@@ -126,12 +128,12 @@ public class ScreencastLauncher
 
 	private static URI makeVersionURI() throws URISyntaxException
 	{
-		return new URI("http", "screencaster-hub.appspot.com", "api/update", null);
+		return new URI("http", "screencaster-hub.appspot.com", "/api/update", null);
 	}
 
 	private static URI makeDownloadURI(String serverVersion) throws URISyntaxException
 	{
-		return new URI("http", "screencaster-hub.appspot.com", "api/file/"+serverVersion, null);
+		return new URI("http", "screencaster-hub.appspot.com", "/files/"+serverVersion, null);
 	}
 
 	private static String findAndExecuteLatestVersion() throws IOException, NoExecutablesFoundException
@@ -145,7 +147,7 @@ public class ScreencastLauncher
 				ProcessBuilder pBuilder = new ProcessBuilder("java","-jar",fileName);
 				pBuilder.directory(f);
 				pBuilder.start();
-				return fileName;
+				return fileName.substring("Screencasting-".length(), fileName.lastIndexOf("-"));
 			}
 		}
 		throw new NoExecutablesFoundException("Could not find any jars to execute in "+f+" : "+Arrays.toString(fileNames));
