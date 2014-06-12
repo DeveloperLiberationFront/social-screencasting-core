@@ -102,6 +102,7 @@
 	bottom: 20px;
 	left:20px;
 	cursor:move;
+	z-index:10;
 }
 
 #controlPanel{
