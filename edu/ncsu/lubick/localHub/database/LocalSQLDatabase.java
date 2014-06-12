@@ -65,7 +65,10 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				"uploaded_date INTEGER," +
 				"start_frame INTEGER," +
 				"end_frame INTEGER," +
-				"time_stamp LONG" +
+				"time_stamp LONG," +
+				"start_data TEXT," +
+				"end_data TEXT," +
+				"rating_data TEXT" +
 				") ";
 
 		// execute the query
@@ -180,10 +183,17 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 					int endFrame = results.getInt("end_frame");
 					int score = results.getInt("clip_score");
 					Date timeStamp = new Date(results.getLong("time_stamp"));
+					String startData = results.getString("start_data");
+					String endData = results.getString("end_data");
+					String ratingData = results.getString("rating_data");
+					
 					
 					ToolUsage tu = new ToolUsage(toolName, null, null, pluginName, timeStamp, 0, score);
 					tu.setStartFrame(startFrame);
 					tu.setEndFrame(endFrame);
+					
+					tu.setStartData(startData);
+					tu.setEndData(endData);
 					
 					return tu;
 				}
@@ -340,7 +350,11 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				"clip_score, "+
 				"start_frame, "+
 				"end_frame," +
-				"time_stamp) VALUES (?,?,?,?,?,?,?)";
+				"time_stamp," +
+				"start_data," +
+				"end_data," +
+				"rating_data" +
+				") VALUES (?,?,?,?,?,?,?,?,?,?)";
 
 
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
@@ -352,6 +366,22 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			statement.setInt(5, tu.getStartFrame());
 			statement.setInt(6, tu.getEndFrame());
 			statement.setLong(7, tu.getTimeStamp().getTime());
+			
+			String startData = tu.getStartData();
+			if(startData == null)
+				startData = "";
+			String endData = tu.getEndData();
+			if(endData == null)
+				endData = "";
+			
+			String ratingData = tu.getRatingData();
+			if(ratingData == null)
+				ratingData = "";
+			
+			statement.setString(8, startData);
+			statement.setString(9, endData);
+			statement.setString(10, ratingData);
+			
 			executeStatementWithNoResults(statement);
 		}
 		catch (SQLException e)

@@ -21,6 +21,7 @@ public class ToolStream {
 	public static final String MENU_KEY_PRESS = "[GUI]";
 	public static final String TOOL_START = "Tool_Start";
 	public static final String TOOL_END = "Tool_End";
+	public static final String TOOL_SCORE = "Tool_Score";
 	
 
 	private List<ToolUsage> listOfToolUsages;
@@ -145,6 +146,9 @@ public class ToolStream {
 		private int clipScore;
 		private int startFrame;
 		private int endFrame;
+		private String startData;
+		private String endData;
+		private String ratingData;
 
 		private ToolUsage(String toolName, String toolClass, String keyPresses, Date timeStamp, int duration, int clipScore)
 		{
@@ -175,9 +179,48 @@ public class ToolStream {
 			String newToolKeyPress = jobj.optString(ToolStream.TOOL_KEY_PRESSES, MENU_KEY_PRESS);
 			Date newToolTimeStamp = new Date(jobj.optLong(ToolStream.TOOL_TIMESTAMP, 0));
 			int newToolDuration = jobj.optInt(ToolStream.TOOL_DURATION, 0);
+			double rating = jobj.optDouble(ToolStream.TOOL_SCORE, 0);
 
-			return new ToolUsage(newToolName, newToolClass, newToolKeyPress, newToolTimeStamp,
-					newToolDuration, /* just use duration for score */newToolDuration);
+			ToolUsage tu = new ToolUsage(newToolName, newToolClass, newToolKeyPress, newToolTimeStamp, newToolDuration, (int) rating);
+
+			try {
+				String newToolStartData = jobj.optJSONObject("Tool_Start_Data").toString(2);
+				String newToolEndData = jobj.optJSONObject("Tool_End_Data").toString(2);
+				String ratingData = jobj.optJSONObject("rating_data").toString(2);
+				tu.setStartData(newToolStartData);
+				tu.setEndData(newToolEndData);
+				tu.setRatingData(ratingData);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			
+			return tu;
+		}
+
+		public String getRatingData() {
+			return ratingData;
+		}
+
+		private void setRatingData(String ratingData) {
+			this.ratingData = ratingData;
+		}
+
+		public String getStartData()
+		{
+			return startData;
+		}
+		
+		public void setStartData(String newToolStartData) {
+			startData = newToolStartData;
+		}
+		
+		public String getEndData()
+		{
+			return endData;
+		}
+
+		public void setEndData(String newToolEndData) {
+			endData = newToolEndData;
 		}
 
 		public String getToolName()

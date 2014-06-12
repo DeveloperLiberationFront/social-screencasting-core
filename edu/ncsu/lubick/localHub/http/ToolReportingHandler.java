@@ -69,7 +69,7 @@ public class ToolReportingHandler extends AbstractHandler  {
 			logger.info("Bad parameters... not reporting");
 			return;
 		}
-		
+		logger.info(jsonArrayOfToolUsage);
 		ToolStream ts = ToolStream.generateFromJSON(jsonArrayOfToolUsage);
 		ts.setAssociatedPlugin(pluginName);
 		
