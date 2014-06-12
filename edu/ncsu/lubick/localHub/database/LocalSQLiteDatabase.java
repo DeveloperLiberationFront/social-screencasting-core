@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.client.webdav.MkcolExchange;
 
 import edu.ncsu.lubick.localHub.UserManager;
 
@@ -44,6 +43,9 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 		logger.debug("Database version: " + dbVersion);
 		
 		updateTo1_5(dbVersion, 1.5f);
+		updateTo1_6(dbVersion, 1.6f);
+		
+		storeDbVersion(dbVersion, 1.6f);
 	}
 	
 	/**
@@ -66,6 +68,33 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 			}
 			
 			executeStatementWithNoResults(statement);			
+		}
+	}
+	
+	private void updateTo1_6(float currentVersion, float newVersion)
+	{
+		if(currentVersion < newVersion)
+		{
+			if(!doesColumnExist("Clips", "start_frame"))
+			{
+				String addStartFrameToClip = "ALTER TABLE Clips ADD COLUMN start_frame INTEGER DEFAULT 0";
+				PreparedStatement addStartFrameToClipStatement = makePreparedStatement(addStartFrameToClip);
+				executeStatementWithNoResults(addStartFrameToClipStatement);
+			}
+			
+			if(!doesColumnExist("Clips", "end_frame"))
+			{
+				String addEndFrameToClip   = "ALTER TABLE Clips ADD COLUMN end_frame INTEGER DEFAULT 0";
+				PreparedStatement addEndFrameToClipStatement = makePreparedStatement(addEndFrameToClip);
+				executeStatementWithNoResults(addEndFrameToClipStatement);
+			}
+			
+			if(!doesColumnExist("Clips", "rating_data"))
+			{
+				String addRatingDataToClip = "ALTER TABLE CLIPS ADD COLUMN rating_data TEXT DEFAULT ''";
+				PreparedStatement addRatingDataToClipStatement = makePreparedStatement(addRatingDataToClip);
+				executeStatementWithNoResults(addRatingDataToClipStatement);
+			}
 		}
 	}
 	
@@ -97,6 +126,20 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 		}
 		
 		return 0.f;
+	}
+	
+	private boolean doesColumnExist(String table, String column)
+	{
+		String sqlQuery = "SELECT " + column + " FROM " + table;
+		try
+		{
+			makePreparedStatement(sqlQuery);
+		}
+		catch(DBAbstractionException e)
+		{
+			return false;
+		}
+		return true;
 	}
 
 	private final void open(String path)
