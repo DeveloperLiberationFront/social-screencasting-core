@@ -90,6 +90,12 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 
 		File clipDir = new File(PostProductionHandler.MEDIA_OUTPUT_FOLDER,clipName);
 		ToolUsage clip = databaseLink.getToolUsageByFolder(PostProductionHandler.MEDIA_OUTPUT_FOLDER + clipName);
+		
+		if (clip == null) {
+			response.sendError(500, "Corrupted database");
+			baseRequest.setHandled(true);
+			return;
+		}
 
 		JSONObject clipObject = new JSONObject();
 		JSONArray fileNamesArr = new JSONArray();

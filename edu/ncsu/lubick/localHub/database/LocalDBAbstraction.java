@@ -17,8 +17,6 @@ public abstract class LocalDBAbstraction
 
 	public abstract List<String> getNamesOfAllPlugins();
 
-	//public abstract List<Integer> getTopScoresForToolUsage(String pluginName, String toolName, boolean isKeyboardShortcutHuh);
-
 	public abstract List<String> getExcesiveTools();
 
 	public abstract void deleteClipForToolUsage(String clipID);
