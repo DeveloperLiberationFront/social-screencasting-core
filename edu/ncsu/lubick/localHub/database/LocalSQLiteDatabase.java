@@ -1,18 +1,15 @@
 package edu.ncsu.lubick.localHub.database;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.client.webdav.MkcolExchange;
 
 import edu.ncsu.lubick.localHub.UserManager;
-import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 
 public class LocalSQLiteDatabase extends LocalSQLDatabase
 {
@@ -38,64 +35,68 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 			throw new DBAbstractionException("The database file name must end with " + DB_EXTENSION_NAME + " : " + databaseLocation);
 		}
 
-		//XXX remove from future releases
-		try
+		updateDatabaseToNewest();
+	}
+	
+	private void updateDatabaseToNewest()
+	{
+		float dbVersion = getDbVersion();
+		logger.debug("Database version: " + dbVersion);
+		
+		updateTo1_5(dbVersion, 1.5f);
+	}
+	
+	/**
+	 * 1.5 added the database version to the tables.
+	 */
+	private void updateTo1_5(float currentVersion, float newVersion)
+	{
+		if(currentVersion < newVersion)
 		{
-			patchDatabase();
-		}
-		catch (SQLException e)
-		{
-			logger.fatal("error patching",e);
+			String sqlQuery = "INSERT INTO Database_Info (" +
+							  "db_version)  VALUES (?)";
+			PreparedStatement statement = makePreparedStatement(sqlQuery);
+			
+			try
+			{
+				statement.setFloat(1, newVersion);
+			} catch (SQLException e)
+			{
+				e.printStackTrace();
+			}
+			
+			executeStatementWithNoResults(statement);			
 		}
 	}
-
-	private final void patchDatabase() throws SQLException
-	{
-		//check to see if patch already done
-
-		String alreadyPatchedString = "Select count(*) from ToolUsages where clip_score = -1";
-		try (ResultSet results = executeWithResults(makePreparedStatement(alreadyPatchedString));)
+	
+	private void storeDbVersion(float currentVersion, float newVersion)
+	{	
+		if(currentVersion < newVersion)
 		{
-			if (results.next()) {
-				if (results.getInt(1) > 0) {
-					logger.info("Already patched database");
-					return;
-				}
-			}
-		}
-		logger.info("Patching database - finding deleted folders");
-
-		String sqlQueryString = "SELECT use_id FROM ToolUsages ";
-		List<String> keysToEraseList = new ArrayList<>();
-		try(PreparedStatement existantStatement = makePreparedStatement(sqlQueryString);) {
-			File mediaOutput = new File(PostProductionHandler.MEDIA_OUTPUT_FOLDER);
+			logger.info("Updating database to version " + newVersion);
 			
-			try (ResultSet results = executeWithResults(existantStatement);)
+			String sqlQuery = "UPDATE Database_Info SET db_version = " + newVersion + " WHERE rowid = 1";
+			PreparedStatement statement = makePreparedStatement(sqlQuery);
+			executeStatementWithNoResults(statement);
+		}
+	}
+	
+	private float getDbVersion()
+	{
+		String sqlQuery = "SELECT db_version FROM Database_Info";
+		PreparedStatement statement = makePreparedStatement(sqlQuery);
+		ResultSet results = executeWithResults(statement);
+		
+		try {
+			if(results.next())
 			{
-				while(results.next()) {
-					String clipId = results.getString(1);
-					File f = new File(mediaOutput, clipId);
-					if (!f.exists()) {
-						keysToEraseList.add(clipId);
-					}
-				}
+				return results.getFloat("db_version");
 			}
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-		logger.info("Patching database - updating database");
-
-		String resetQueryString = "UPDATE ToolUsages SET clip_score = -1 where use_id = ?";
-		try (PreparedStatement resetScoreStatement = makePreparedStatement(resetQueryString);) {
-			for(String useId : keysToEraseList) {
-
-				resetScoreStatement.setString(1, useId);
-				resetScoreStatement.addBatch();
-			}
-			logger.info("Patching database - executing batch");
-
-			resetScoreStatement.executeBatch();
-		}
-
-		logger.info("Finished patch");
+		
+		return 0.f;
 	}
 
 	private final void open(String path)

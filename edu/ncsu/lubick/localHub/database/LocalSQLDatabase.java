@@ -27,6 +27,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	{
 		createToolUsageTable();
 		createClipTable();
+		createDatabaseInfoTable();
 	}
 
 
@@ -74,6 +75,17 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		PreparedStatement statement = makePreparedStatement(sqlTableQuery);
 		executeStatementWithNoResults(statement);
 	}
+	
+	private void createDatabaseInfoTable()
+	{	
+		String sqlTableQuery = "CREATE TABLE IF NOT EXISTS Database_Info ( " +
+								"db_version REAL" +
+								") ";
+		
+		PreparedStatement statement = makePreparedStatement(sqlTableQuery);
+		executeStatementWithNoResults(statement);
+	}
+	
 	@Override
 	public void storeToolUsage(ToolUsage tu, String associatedPlugin)
 	{
