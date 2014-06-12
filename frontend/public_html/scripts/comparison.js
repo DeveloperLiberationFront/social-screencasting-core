@@ -1,4 +1,4 @@
-/*global stopFramePlayback, setUpPlaybackForDataAuthAndDir */       //depends on playback.js and setUpPlayback.js
+/*global stopFramePlayback, setUpPlaybackForDataAuthAndDir, escape */       //depends on playback.js and setUpPlayback.js
 
 var pluginUsers = []; //list of user ids (emails) for users of currentPlugin
 var namesByEmail = {}; //map of email -> name
@@ -593,7 +593,7 @@ $(document).ready(function () {
     userEmail = $("body").data("email");
     userToken = $("body").data("token");
     currentPlugin = $("body").data("plugin");
-    authString = "?name=" + userName + "&email=" + userEmail.replace(/\+/g, "%2b") + "&token=" + userToken;
+    authString = "?name=" + escape(userName) + "&email=" + escape(userEmail) + "&token=" + escape(userToken);
 
     elementPosition = $('#moreInfo').offset();
 

@@ -165,7 +165,7 @@ function preloadImages(frames) {
 
     $(frames).each(function() {
         getImageForFrame(this).appendTo(p);
-    })
+    });
 }
 
 $(document).keyup(function (e) {
@@ -285,7 +285,7 @@ function renderPlayback(auth, frames) {
 	if (!hasInitializedButtons)
 	{
 		$("#overlay").on("click", function() {
-            launchFullScreen($("#panel")[0])
+            launchFullScreen($("#panel")[0]);
 
         });
 		
