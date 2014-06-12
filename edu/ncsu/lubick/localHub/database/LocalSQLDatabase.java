@@ -79,7 +79,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	private void createDatabaseInfoTable()
 	{	
 		String sqlTableQuery = "CREATE TABLE IF NOT EXISTS Database_Info ( " +
-								"db_version REAL" +
+								"db_version INTEGER" +
 								") ";
 		
 		PreparedStatement statement = makePreparedStatement(sqlTableQuery);

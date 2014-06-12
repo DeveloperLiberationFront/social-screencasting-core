@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.client.webdav.MkcolExchange;
 
 import edu.ncsu.lubick.localHub.UserManager;
 
@@ -38,18 +37,22 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 		updateDatabaseToNewest();
 	}
 	
-	private void updateDatabaseToNewest()
+	private final void updateDatabaseToNewest()
 	{
-		float dbVersion = getDbVersion();
+		int dbVersion = getDbVersion();
 		logger.debug("Database version: " + dbVersion);
 		
-		updateTo1_5(dbVersion, 1.5f);
+		updateTo1_5(dbVersion, 15);
+		updateTo1_6(dbVersion, 16);
+		
+		
+		storeDbVersion(dbVersion, 16);
 	}
 	
 	/**
 	 * 1.5 added the database version to the tables.
 	 */
-	private void updateTo1_5(float currentVersion, float newVersion)
+	private void updateTo1_5(int currentVersion, int newVersion)
 	{
 		if(currentVersion < newVersion)
 		{
@@ -59,7 +62,7 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 			
 			try
 			{
-				statement.setFloat(1, newVersion);
+				statement.setInt(1, newVersion);
 			} catch (SQLException e)
 			{
 				e.printStackTrace();
@@ -69,19 +72,54 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 		}
 	}
 	
-	private void storeDbVersion(float currentVersion, float newVersion)
+	private void updateTo1_6(int currentVersion, int newVersion)
+	{
+		if(currentVersion < newVersion)
+		{
+			if(!doesColumnExist("Clips", "start_frame"))
+			{
+				String addStartFrameToClip = "ALTER TABLE Clips ADD COLUMN start_frame INTEGER DEFAULT 0";
+				PreparedStatement addStartFrameToClipStatement = makePreparedStatement(addStartFrameToClip);
+				executeStatementWithNoResults(addStartFrameToClipStatement);
+			}
+			
+			if(!doesColumnExist("Clips", "end_frame"))
+			{
+				String addEndFrameToClip   = "ALTER TABLE Clips ADD COLUMN end_frame INTEGER DEFAULT 0";
+				PreparedStatement addEndFrameToClipStatement = makePreparedStatement(addEndFrameToClip);
+				executeStatementWithNoResults(addEndFrameToClipStatement);
+			}
+			
+			if(!doesColumnExist("Clips", "rating_data"))
+			{
+				String addRatingDataToClip = "ALTER TABLE CLIPS ADD COLUMN rating_data TEXT DEFAULT ''";
+				PreparedStatement addRatingDataToClipStatement = makePreparedStatement(addRatingDataToClip);
+				executeStatementWithNoResults(addRatingDataToClipStatement);
+			}
+		}
+	}
+	
+	private void storeDbVersion(int currentVersion, int newVersion)
 	{	
 		if(currentVersion < newVersion)
 		{
 			logger.info("Updating database to version " + newVersion);
 			
-			String sqlQuery = "UPDATE Database_Info SET db_version = " + newVersion + " WHERE rowid = 1";
-			PreparedStatement statement = makePreparedStatement(sqlQuery);
+			PreparedStatement statement = makePreparedStatement("UPDATE Database_Info SET db_version = ? WHERE rowid = 1");
+			
+			try
+			{
+				statement.setInt(1, newVersion);
+			}
+			catch (SQLException e)
+			{
+				logger.error("Problem setting up dbVersionQuery",e);
+			}
 			executeStatementWithNoResults(statement);
 		}
 	}
 	
-	private float getDbVersion()
+	private int getDbVersion()
 	{
 		String sqlQuery = "SELECT db_version FROM Database_Info";
 		PreparedStatement statement = makePreparedStatement(sqlQuery);
@@ -90,13 +128,27 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 		try {
 			if(results.next())
 			{
-				return results.getFloat("db_version");
+				return results.getInt("db_version");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
-		return 0.f;
+		return 0;
+	}
+	
+	private boolean doesColumnExist(String table, String column)
+	{
+		String sqlQuery = "SELECT " + column + " FROM " + table;
+		try
+		{
+			makePreparedStatement(sqlQuery);
+		}
+		catch(DBAbstractionException e)
+		{
+			return false;
+		}
+		return true;
 	}
 
 	private final void open(String path)
