@@ -256,9 +256,17 @@ html, body, .container-fluid.main, .row {
 	height: 100%;
 }
 
+#nextUser, #prevUser, #otherUsersPlaceHolder {
+	float:right;
+}
+
+#otherPersonsTable {
+	width:100%;
+}
+
 #otherPersonsCol,
 #myToolsCol, 
 #usersCol {
 	height: calc(100% - 15px);
-	overflow-y: auto;
+	overflow-y: scroll;  
 }
