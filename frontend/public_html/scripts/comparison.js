@@ -117,8 +117,8 @@ function drawToolTable(tools) {
 
         if ("object" == typeof (tools[i].details)) {
             newItem = newItem + "<td>" + tools[i].details.gui + "</td><td>" + tools[i].details.keyboard + "</td>";
-            if (tools[i].details.hasOwnProperty("clips")
-                && tools[i].details.clips > 0) {
+            if (tools[i].details.hasOwnProperty("clips") &&
+                tools[i].details.clips > 0) {
                 newItem = newItem + "<td><img src='images/video_icon_tiny.png'/></td>";
             } else {
                 newItem = newItem + "<td></td>";

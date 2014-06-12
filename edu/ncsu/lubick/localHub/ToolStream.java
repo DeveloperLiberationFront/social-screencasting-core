@@ -184,9 +184,14 @@ public class ToolStream {
 			ToolUsage tu = new ToolUsage(newToolName, newToolClass, newToolKeyPress, newToolTimeStamp, newToolDuration, (int) rating);
 
 			try {
-				String newToolStartData = jobj.optJSONObject("Tool_Start_Data").toString(2);
-				String newToolEndData = jobj.optJSONObject("Tool_End_Data").toString(2);
-				String ratingData = jobj.optJSONObject("rating_data").toString(2);
+				JSONObject toolStartData = jobj.optJSONObject("Tool_Start_Data");
+				String newToolStartData = toolStartData == null ? "{}": toolStartData.toString(2);
+				
+				JSONObject toolEndData = jobj.optJSONObject("Tool_End_Data");
+				String newToolEndData = toolEndData == null ? "{}": toolEndData.toString(2);
+				
+				JSONObject ratingDataJobj = jobj.optJSONObject("rating_data");
+				String ratingData = ratingDataJobj == null ? "{}": ratingDataJobj.toString(2);
 				tu.setStartData(newToolStartData);
 				tu.setEndData(newToolEndData);
 				tu.setRatingData(ratingData);
