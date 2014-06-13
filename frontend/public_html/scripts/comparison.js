@@ -244,7 +244,7 @@ function hideToolsShowOtherUsers() {
 function loadPeopleAjax() {
     $("#notTimeYet").hide();
     $.ajax({
-        url: "http://screencaster-hub.appspot.com/api/plugin/" + currentPlugin + authString,
+        url: "http://screencaster-hub.appspot.com/api/details/" + currentPlugin,
         success: function (data) {
             emailIndex = -1;
 
