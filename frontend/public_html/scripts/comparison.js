@@ -71,9 +71,7 @@ function updateShareRequestButton() {
 }
 
 function requestSharingPermission() {
-    var postURL, emailToRequest;
-
-    postURL = "/shareRequest";
+    var postURL = "/shareRequest";
 
     $.ajax({
         type: "POST",
@@ -199,13 +197,15 @@ function selectPlugin() {
 }
 
 function showUserTools(email) {
-    var index, getUrl;
+    var getUrl = "http://screencaster-hub.appspot.com/api/" + currentEmail + "/" + currentPlugin + authString;
+
     $("#otherUsersPlaceHolder").text(namesByEmail[currentEmail] + "'s Tools");
     $("#usersTable").parent().hide();
     $("#otherPersonsTable").parent().show();
-
+    
+    
     $(".addedItem").remove();
-    getUrl = "http://screencaster-hub.appspot.com/api/" + currentEmail + "/" + currentPlugin + authString;
+    
 
     if (email in userData) {
         drawToolTable(userData[email]);
@@ -563,7 +563,7 @@ function setupTableSorting() {
             return $(cell).children().length;
         },
         type: "numeric"
-    })
+    });
 
     $("#otherPersonsTable").tablesorter({
         headers: {

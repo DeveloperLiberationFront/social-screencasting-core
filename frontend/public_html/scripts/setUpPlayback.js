@@ -1,5 +1,5 @@
-/*global renderPlayback */  // needs playback.js
-
+/*global renderPlayback  */  // needs playback.js
+/*exported setUpPlaybackForDataAuthAndDir*/
 /*
 	The meat and potatoes of this script is function setUpPlaybackForDataAuthAndDir(data, auth, imageDir),
 	which will prepare the video html piece (#clipPlayer) to have the correct animation selections and
