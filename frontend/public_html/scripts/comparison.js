@@ -94,17 +94,6 @@ function modifyMultipleClipButtonsForExternal() {
     $("#viewOtherDiv").find("button").data("source", "external");
 }
 
-////JSON tuple {name="name", count=42}
-//function sortCount(a, b) {
-//    return a.count - b.count;		//sorts so that smaller count numbers come first because we insert smallest elements first
-//}
-
-////JSON tuple {name="name", count=42}
-//function sortName(a, b) {
-//    return b.name.localeCompare(a.name);
-//}
-
-
 function drawToolTable(tools) {
     $("#otherPersonsTable tbody").empty();
     var i, newItem, hasMatch;
@@ -211,7 +200,7 @@ function showUserTools(email) {
         drawToolTable(userData[email]);
 
         // Click on the "Tool Name" field to sort it.
-        $("#otherPersonsTable").children()[0].children[1].children[0].click();
+        $("#otherPersonsTable").find(".sortable").get(0).click();
     } else {
         $.ajax({
             url: getUrl,
@@ -227,7 +216,7 @@ function showUserTools(email) {
                 drawToolTable(userData[email]);
 
                 // Click on the "Tool Name" field to sort it.
-                $("#otherPersonsTable").children()[0].children[1].children[0].click();
+                $("#otherPersonsTable").find(".sortable").get(0).click();
             },
             error: function () {
                 console.log("There was a problem displaying user " + email + "'s tools");
