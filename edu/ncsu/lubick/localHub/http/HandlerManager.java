@@ -40,6 +40,7 @@ public class HandlerManager
 		try {
 			makeAndAddHandlersForBrowsing(h, wqi);
 			makeAndAddHandlersForMediaResources(h, wqi);
+			makeAndAddHandlersForStatus(h, wqi);
 			makeAndAddHandlersForWebReporting(h, wqi);
 			makeAndAddHandlersForClipSharing(h, wqi);
 		}
@@ -77,6 +78,11 @@ public class HandlerManager
 	{
 		h.addHandler(new HTTPMediaResourceHandler("/mediaServer", wqi));
 		h.addHandler(new HTTPUpdateClip("/updateClip", wqi));
+	}
+	
+	private static void makeAndAddHandlersForStatus(HandlerCollection h, WebQueryInterface wqi) throws IOException, URISyntaxException
+	{
+		h.addHandler(new HTTPStatusTemplateHandler("/status", wqi));
 	}
 
 	private static void makeAndAddHandlersForWebReporting(HandlerCollection h, WebQueryInterface wqi)
