@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import edu.ncsu.lubick.localHub.ClipOptions;
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.UserManager;
@@ -52,7 +53,7 @@ public class BrowserMediaPackageUploader {
 	}
 
 
-	public boolean uploadToolUsage(ToolUsage toolUsage)
+	public boolean uploadToolUsage(ToolUsage toolUsage, ClipOptions clipOptions)
 	{
 		String expectedLocationOnDisk = FileUtilities.makeLocalFolderNameForBrowserMediaPackage(toolUsage, userManager.getUserEmail());
 
@@ -279,7 +280,7 @@ public class BrowserMediaPackageUploader {
 
 		ToolUsage testToolUsage = testToolUsage1;
 
-		uploader.uploadToolUsage(testToolUsage);
+		uploader.uploadToolUsage(testToolUsage, new ClipOptions());
 
 
 	}

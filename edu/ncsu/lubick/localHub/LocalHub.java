@@ -460,7 +460,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 			ToolUsage toolUsage = databaseManager.getToolUsageById(clipId);
 			toolUsage.setStartFrame(clipOptions.startFrame);
 			toolUsage.setEndFrame(clipOptions.endFrame);
-			this.clipUploader.uploadToolUsage(toolUsage);
+			this.clipUploader.uploadToolUsage(toolUsage, clipOptions);
 			this.databaseManager.setClipUploaded(clipId, true);
 		}
 		
@@ -509,7 +509,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 		
 		if(databaseManager.isClipUploaded(folder) && upload)
 		{
-			clipUploader.uploadToolUsage(getToolUsageByFolder(folder));
+			clipUploader.uploadToolUsage(getToolUsageByFolder(folder), options);
 		}
 	}
 }
