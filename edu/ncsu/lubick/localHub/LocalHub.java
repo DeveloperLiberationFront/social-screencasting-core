@@ -449,19 +449,23 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 
 	}
 
+	/* (non-Javadoc)
+	 * @see edu.ncsu.lubick.localHub.WebQueryInterface#shareClipWithUser(java.lang.String, java.lang.String, edu.ncsu.lubick.localHub.ClipOptions)
+	 */
 	@Override
-	public void shareClipWithUser(String clipId, String recipient, int startFrame, int endFrame)
+	public void shareClipWithUser(String clipId, String recipient, ClipOptions clipOptions)
 	{
 		if (!this.databaseManager.isClipUploaded(clipId))
 		{
 			ToolUsage toolUsage = databaseManager.getToolUsageById(clipId);
-			toolUsage.setStartFrame(startFrame);
-			toolUsage.setEndFrame(endFrame);
+			toolUsage.setStartFrame(clipOptions.startFrame);
+			toolUsage.setEndFrame(clipOptions.endFrame);
 			this.clipUploader.uploadToolUsage(toolUsage);
 			this.databaseManager.setClipUploaded(clipId, true);
 		}
 		
-		setStartEndFrame(PostProductionHandler.MEDIA_OUTPUT_FOLDER + clipId, startFrame, endFrame, false);
+		updateClipOptions(PostProductionHandler.MEDIA_OUTPUT_FOLDER + clipId, clipOptions, false);
+		
 		this.clipSharingManager.shareClipWithUser(clipId, recipient);
 	}
 
@@ -499,9 +503,9 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	}
 
 	@Override
-	public void setStartEndFrame(String folder, int startFrame, int endFrame, boolean upload)
+	public void updateClipOptions(String folder, ClipOptions options, boolean upload)
 	{
-		databaseManager.setStartEndFrame(folder, startFrame, endFrame);
+		databaseManager.setStartEndFrame(folder, options.startFrame, options.endFrame);
 		
 		if(databaseManager.isClipUploaded(folder) && upload)
 		{

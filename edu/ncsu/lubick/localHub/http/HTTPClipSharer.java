@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Request;
 
+import edu.ncsu.lubick.localHub.ClipOptions;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
 
 public class HTTPClipSharer extends TemplateHandlerWithDatabaseLink {
@@ -57,15 +58,18 @@ public class HTTPClipSharer extends TemplateHandlerWithDatabaseLink {
 		baseRequest.setHandled(true);
 		String clipId = request.getParameter(PARAM_CLIP_ID);
 		String recipient = request.getParameter(PARAM_RECIPIENT);
-		int startFrame = Integer.parseInt(request.getParameter("start_frame"));
-		int endFrame = Integer.parseInt(request.getParameter("end_frame"));
+		
+		String paramStartFrame = request.getParameter("start_frame");
+		int startFrame = Integer.parseInt(paramStartFrame == null? "0" : paramStartFrame);
+		String paramEndFrame = request.getParameter("end_frame");
+		int endFrame = Integer.parseInt(paramEndFrame == null? "0" : paramEndFrame);
+		
 		if (clipId == null || recipient == null)
 		{
 			logger.info("clipId = "+clipId +", recipient = "+recipient+", so cancelling");
-			
 			return;
 		}
-		this.databaseLink.shareClipWithUser(clipId, recipient, startFrame, endFrame);
+		this.databaseLink.shareClipWithUser(clipId, recipient, new ClipOptions(startFrame, endFrame));
 	}
 
 
