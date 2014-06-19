@@ -67,8 +67,8 @@ public class BrowserMediaPackageUploader {
 		{
 			File[] allFiles = packageDirectory.listFiles();
 			int totalFiles = allFiles.length;
-			int startFrame = toolUsage.getStartFrame();
-			int endFrame = toolUsage.getEndFrame() != 0 ? toolUsage.getEndFrame() : totalFiles;
+			int startFrame = clipOptions.startFrame;
+			int endFrame = clipOptions.endFrame > 0 ? clipOptions.endFrame : totalFiles;
 			List<String> existingFiles = getExistingFiles(toolUsage);
 			
 			return uploadFiles(allFiles, existingFiles, startFrame, endFrame);

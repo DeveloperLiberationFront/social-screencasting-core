@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
+import edu.ncsu.lubick.localHub.ClipOptions;
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
@@ -78,7 +79,7 @@ public class BufferedDatabaseManager
 			public void run()
 			{
 				
-				localDB.createClipForToolUsage(clipID, toolUsage);
+				localDB.createClipForToolUsage(clipID, toolUsage, new ClipOptions());
 			}
 		});
 	}
