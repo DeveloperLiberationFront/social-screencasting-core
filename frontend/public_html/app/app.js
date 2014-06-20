@@ -1,16 +1,16 @@
-define(['angular', 'app/controllers'], function (angular) {
+define(['angular', 'controllers'], function (ng) {
   'use strict';
 
   /* App Module */
   
-  var socasterApp = angular.module('socasterApp', [
+  return ng.module('socasterApp', [
     'ngRoute',
   
     'socasterControllers',
   //  'socasterServices'
-  ]);
+  ])
   
-  // socasterApp.config(['$routeProvider',
+  // .config(['$routeProvider',
   //   function($routeProvider) {
   //     $routeProvider.
   //       when('/', {
@@ -19,5 +19,4 @@ define(['angular', 'app/controllers'], function (angular) {
   //       })
   //   }
   // ]);
-  return socasterApp;
 });

@@ -1,17 +1,19 @@
-requirejs.config({
-    baseUrl: 'lib',
-    paths: {
-        app: '../app',
-        jquery: 'bower/jquery/dist/jquery.min',
-        bootstrap: 'bower/bootstrap/dist/js/bootstrap.min.js',
-        'jquery-ui': 'bower/jquery-ui/ui/minified/jquery-ui.min',
-        text: 'bower/requirejs-text/text',
-        angular: 'bower/angular/angular.min',
-        'angular-route': 'bower/angular-route/angular-route.min',
-        'angular-bootstrap': 'bower/angular-bootstrap/ui-bootstrap.min',
+//Not really sure the right way to do this, unfortunately...
 
-        'tablesorter': 'bower/jquery.tablesorter/js/jquery.tablesorter.min',
-        'jquery.metadata': 'bower/jquery.metadata/jquery.metadata'
+requirejs.config({
+    baseUrl: 'app',
+    paths: {
+        lib: '../lib',
+        jquery: '../lib/bower/jquery/dist/jquery.min',
+        bootstrap: '../lib/bower/bootstrap/dist/js',
+        'jquery-ui': '../lib/bower/jquery-ui/ui/minified/jquery-ui.min',
+        text: '../lib/bower/requirejs-text/text',
+        'angular': '../lib/bower/angular/angular.min',
+        'angular-route': '../lib/bower/angular-route/angular-route.min',
+        'angular-bootstrap': '../lib/bower/angular-bootstrap/ui-bootstrap.min',
+
+        'tablesorter': '../lib/bower/jquery.tablesorter/js',
+        'jquery.metadata': '../lib/bower/jquery.metadata/jquery.metadata'
     },
     shim: {
 	    'angular' : {'exports' : 'angular'},
@@ -22,35 +24,29 @@ requirejs.config({
         'tablesorter': ['jquery']
     },
 	priority: [
-        "angular"
+        "angular", "jquery"
     ]
 });
 
 requirejs([
     'angular',
-    'app/app',
+    'app',
+    'controllers',
 
     'jquery',
     'angular-route',
 
-    //app
-    'app/controllers',
-
     //legacy
     'jquery-ui',
-    'jquery.metadata',
-    'app/comparison',
-    'app/instrumentation',
-    'app/playback',
-    'app/setUpPlayback',
-    'jquery.fullscreen',
-    'jquery.form',
-    'jquery.rating.pack',
+    //'jquery.metadata',
+    // 'comparison',
+    // 'instrumentation',
+    // 'playback',
+    // 'setUpPlayback',
+    'lib/jquery.fullscreen',
+    'lib/jquery.form',
+    'lib/jquery.rating.pack',
 ], function(angular, app) {
   'use strict';
-  var $html = angular.element(document.getElementsByTagName('html')[0]);
-  
-  angular.element().ready(function() {
-    angular.bootstrap(document, [app['name']]);
-  });
+  angular.bootstrap(document, [app['name']]);
 });
