@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import edu.ncsu.lubick.localHub.ClipOptions;
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
@@ -178,9 +179,6 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				{
 					String toolName = results.getString("tool_name");
 					String pluginName = results.getString("plugin_name");
-					//String folder_name = results.getString("folder_name");
-					int startFrame = results.getInt("start_frame");
-					int endFrame = results.getInt("end_frame");
 					int score = results.getInt("clip_score");
 					Date timeStamp = new Date(results.getLong("time_stamp"));
 					String startData = results.getString("start_data");
@@ -189,12 +187,8 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 					
 					
 					ToolUsage tu = new ToolUsage(toolName, null, null, pluginName, timeStamp, 0, score);
-					tu.setStartFrame(startFrame);
-					tu.setEndFrame(endFrame);
-					
 					tu.setStartData(startData);
 					tu.setEndData(endData);
-					
 					return tu;
 				}
 			}
@@ -341,7 +335,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				") ";
 	 */
 	@Override
-	public void createClipForToolUsage(String clipID, ToolUsage tu)
+	public void createClipForToolUsage(String clipID, ToolUsage tu, ClipOptions clipOptions)
 	{
 		String sqlQuery = 		"INSERT INTO Clips ( "+
 				"folder_name, "+
@@ -363,8 +357,8 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			statement.setString(2, tu.getPluginName());
 			statement.setString(3, tu.getToolName());
 			statement.setInt(4, tu.getClipScore());
-			statement.setInt(5, tu.getStartFrame());
-			statement.setInt(6, tu.getEndFrame());
+			statement.setInt(5, clipOptions.startFrame);
+			statement.setInt(6, clipOptions.endFrame);
 			statement.setLong(7, tu.getTimeStamp().getTime());
 			
 			String startData = tu.getStartData();

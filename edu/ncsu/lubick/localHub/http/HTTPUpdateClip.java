@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 
+import edu.ncsu.lubick.localHub.ClipOptions;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 
@@ -52,11 +53,16 @@ public class HTTPUpdateClip extends TemplateHandlerWithDatabaseLink implements H
 
 	private void respondToPost(Request baseRequest, HttpServletRequest request, HttpServletResponse response)
 	{		
-		int startFrame = Integer.parseInt(request.getParameter("start_frame"));
-		int endFrame = Integer.parseInt(request.getParameter("end_frame"));
+		String paramStartFrame = request.getParameter("start_frame");
+		int startFrame = Integer.parseInt(paramStartFrame == null? "0" : paramStartFrame);
+		String paramEndFrame = request.getParameter("end_frame");
+		int endFrame = Integer.parseInt(paramEndFrame == null? "0" : paramEndFrame);
+		
 		String folder = PostProductionHandler.MEDIA_OUTPUT_FOLDER + request.getParameter("folder_name");
 		
-		databaseLink.setStartEndFrame(folder, startFrame, endFrame, true);
+		databaseLink.updateClipOptions(folder, new ClipOptions(startFrame, endFrame), true);
+		
+		response.setStatus(HttpServletResponse.SC_ACCEPTED);
 		baseRequest.setHandled(true);
 	}
 
