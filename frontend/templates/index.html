@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-	<link rel="stylesheet" href="jquery/jquery-ui.min.css">
+	<link rel="stylesheet" href="lib/bower/jquery-ui/themes/base/minified/jquery-ui.min.css">
     <link rel="stylesheet" href="css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/bootstrap-theme.min.css" />
     <link rel="stylesheet" href="css/basic.css" />
@@ -21,7 +21,7 @@
       <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 </head>
-<body data-name="${userName}" data-email="${userEmail}" data-token="${userToken}" data-plugin="${plugin}">
+<body ng-controller='NavCtrl'>
 
   <!-- Navbar -->
   <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -37,15 +37,14 @@
       </div>
       <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav">
-          <p class="navbar-text">${userName}</p>
-          <li>
-            <div class="btn-group navbar-btn">
-              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">${plugin} <span class="caret"></span>
+          <p class="navbar-text">{{userName}}</p>
+          <li ng-controller='DropdownCtrl'>
+            <div class="btn-group navbar-btn" dropdown is-open="status.isopen">
+              <button type="button" class="btn btn-default dropdown-toggle">
+                {{application}} <span class="caret"></span>
               </button>
               <ul class="dropdown-menu" role="menu">
-            <#list pluginNames as name>
-                <li><a href="/?pluginName=${name}">${name}</a></li>
-            </#list>
+                <li ng-repeat='app in applications'><a ng-click='setApp(app)'>{{app}}</a></li>
               </ul>
             </div>
           </li>
@@ -229,17 +228,6 @@
     <div class="modal">
     </div>
 
-  <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
-  <script src="jquery/jquery.rating.pack.js"></script>
-  <script src="jquery/jquery.MetaData.js"></script>
-  <script src="jquery/jquery.form.js"></script>
-	<script src="jquery/jquery-ui.min.js"></script>
-  <script src="jquery/jquery.fullscreen.js"></script>
-  <script src="jquery/jquery.tablesorter.min.js"></script>
-	<script src="js/bootstrap.min.js"></script>
-  <script src="scripts/playback.js"></script>
-  <script src="scripts/setUpPlayback.js"></script>
-  <script src="scripts/comparison.js"></script>
-	<script src="scripts/instrumentation.js"></script>
+  <script data-main="main" src="lib/bower/requirejs/require.js"></script>
 </body>
 </html>

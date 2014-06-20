@@ -1,0 +1,27 @@
+{
+  "name": "social-screencasting",
+  "version": "0.0.0",
+  "description": "A social interface for viewing peer-created example videos of various software tools",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "*",
+    "angular-route": "*",
+    "bootstrap": "3.1.1",
+    "jquery": "2.1.1",
+    "jquery.tablesorter": "*",
+    "jquery-ui": "*",
+    "jquery.metadata": "*",
+    "requirejs": "*",
+    "requirejs-text": "~2.0.12",
+    "angular-bootstrap": "~0.11.0",
+    "underscore": "~1.6.0"
+  }
+}

@@ -1,5 +1,7 @@
 /*global stopFramePlayback, setUpPlaybackForDataAuthAndDir, escape */       //depends on playback.js and setUpPlayback.js
 
+require(["jquery", "tablesorter"], function($) {
+
 var pluginUsers = []; //list of user ids (emails) for users of currentPlugin
 var namesByEmail = {}; //map of email -> name
 var userData = {}; //cache user tool data
@@ -614,4 +616,6 @@ $(document).ready(function () {
     loadPeople();
 
     console.log("end of comparison");
+});
+
 });
