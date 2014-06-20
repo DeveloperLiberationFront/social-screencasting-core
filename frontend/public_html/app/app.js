@@ -1,13 +1,12 @@
-define(['angular', 'controllers'], function (ng) {
+define(['angular', 'controllers', 'services'], function (ng) {
   'use strict';
 
   /* App Module */
   
   return ng.module('socasterApp', [
     'ngRoute',
-  
     'socasterControllers',
-  //  'socasterServices'
+    'socasterServices'
   ])
   
   // .config(['$routeProvider',

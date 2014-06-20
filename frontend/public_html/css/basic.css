@@ -15,39 +15,8 @@ h1 {
 	display:none;
 }
 
-.main {
+.main-container {
     padding-top: 100px;
-}
-
-.resultsTable{
-	background: #fafafa;
-	border: 3px solid #666;
-	border-spacing: 0;
-	text-align: left;
-	font-size: 16px;
-}
-
-.resultsTable th {
-	font-size:18px;
-	text-align: center;
-}
-
-#usersTable td:hover {
-	color: #999;
-}
-
-td, tr, th{
-	padding:4px;
-}
-
-.rowHover{
-	outline: 2px solid #e48600;
-	background-color: #ffedd3;
-}
-
-.moreInfoTitle{	
-	/*deprecated*/
-	text-align:center;
 }
 
 .pluginListing {
@@ -199,10 +168,6 @@ td, tr, th{
 	outline: 3px solid #29b350;
 }
 
-#prevTable {
-	float: left;
-}
-
 button {
 	background: none;
 	border: none;
@@ -226,47 +191,13 @@ button {
 	width: 100%;
 }
 
-.row {
-	margin: 0 15px;
-}
 
-[class*="col-"] {
-	margin-bottom: 15px;
-}
-
-/* Table Sort stuff */
-th.sortable.header {
-	background-image: url("/images/table/noSort.svg");
-	cursor: pointer;
-	background-size: 15px;
-	background-position: center right;
-	background-repeat: no-repeat;
-	padding-right: 20px;
-}
-
-th.sortable.headerSortUp {
-	background-image: url("/images/table/ascendSort.svg");
-}
-
-th.sortable.headerSortDown {
-	background-image: url("/images/table/descendSort.svg");
-}
-
-html, body, .container-fluid.main, .row {
+html, body, .container-fluid.main, {
 	height: 100%;
 }
 
-#nextUser, #prevUser, #otherUsersPlaceHolder {
-	float:right;
-}
-
-#otherPersonsTable {
-	width:100%;
-}
-
-#otherPersonsCol,
-#myToolsCol, 
-#usersCol {
-	height: calc(100% - 15px);
-	overflow-y: scroll;  
+.gridStyle {
+    border: 1px solid rgb(212,212,212);
+    width: 400px; 
+    height: 500px
 }

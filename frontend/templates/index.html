@@ -12,6 +12,8 @@
 	<link rel="stylesheet" href="lib/bower/jquery-ui/themes/base/minified/jquery-ui.min.css">
     <link rel="stylesheet" href="css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/bootstrap-theme.min.css" />
+	<link rel="stylesheet" href="lib/bower/ng-grid/ng-grid.min.css">
+
     <link rel="stylesheet" href="css/basic.css" />
     <link rel="stylesheet" href="css/jquery.rating.css" />
     <link rel="stylesheet" href="css/loading.css" />
@@ -24,7 +26,6 @@
     <![endif]-->
 </head>
 <body ng-controller='NavCtrl'>
-
   <!-- Navbar -->
   <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
     <div class="container">
@@ -61,9 +62,14 @@
   </div>
 
     <!-- Main container -->
-    <div class="container-fluid main">
-      <div class="row">
+    <div class="container-fluid main-container">
 
+      <div ng-controller='ToolTableCtrl'>
+        <div class="gridStyle" ng-grid="gridOptions"></div>
+        <div>{{selection}}</div>
+      </div>
+
+      <div class="row">
         <!-- More info -->
         <div id="moreInfoCol" class="col-lg-6 col-md-6 col-sm-12 col-xs-12 col-md-push-6">
           <div id="moreInfo">
@@ -116,8 +122,8 @@
                     <label class="startLabel" title="The tool gets used here">&nbsp;</label>
                   </div>
                   <div id="editDiv">
-				            <div id="editSlider" class="slider"></div>
-				            <button id="saveClip">Save</button>
+				    <div id="editSlider" class="slider"></div>
+				    <button id="saveClip">Save</button>
                   </div>
                 </div>
               </div>
@@ -140,30 +146,6 @@
         </div>
 
         <!-- My tools table -->
-        <div id="myToolsCol" class="col-lg-3 col-md-3 col-sm-6 col-xs-12 col-md-pull-6">
-          <table id="myToolsTable" border="1" class="resultsTable myTools span4">
-            <thead>
-              <tr>
-                <th colspan="2">My Tools</th>
-                <th><button id="keyButton"><img src="/images/key.svg"/></button></th>
-              </tr>
-              <tr>
-                <th class="header sortable">Tool Name</th>
-                <th class="header sortable"><img src="images/mouse-icon.png"/></th>
-                <th class="header sortable"><img src="images/keyboard-icon.png"/></th>
-              </tr>
-            </thead>
-            <tbody>
-                <#list myToolsAndCounts as thisToolCount>
-                  <tr class='clickMe myItem' data-tool-name="${thisToolCount.toolName}">
-                    <td>${thisToolCount.toolName}</td>
-                  <td>${thisToolCount.guiToolCount}</td>
-                    <td>${thisToolCount.keyToolCount}</td>
-                  </tr>
-                </#list>
-              </tbody>
-          </table>
-        </div>
 
         <!-- Users table -->
         <div id="usersCol" class="col-lg-3 col-md-3 col-sm-6 col-xs-12 col-md-pull-6">

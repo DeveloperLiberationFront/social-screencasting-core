@@ -23,7 +23,8 @@
     "requirejs-text": "~2.0.12",
     "angular-bootstrap": "~0.11.0",
     "underscore": "~1.6.0",
-    "ng-grid": "~2.0.11"
+    "ng-grid": "~2.0.11",
+    "angular-resource": "~1.2.18"
   },
   "resolutions": {
     "jquery": "2.1.1"

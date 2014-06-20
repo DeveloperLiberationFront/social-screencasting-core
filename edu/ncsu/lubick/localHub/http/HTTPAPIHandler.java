@@ -78,18 +78,18 @@ public class HTTPAPIHandler extends AbstractHandler {
 	private void returnUserInfo(HttpServletResponse response) throws IOException
 	{
 		try {
-			JSONObject jobj = new JSONObject();
 			JSONObject data = new JSONObject();
 			JSONObject user = makeUserAuthObj();
+			JSONObject applications = new JSONObject();
 			data.put("user", user);
+			data.put("applications", applications);
 
 			for(String plugin : this.databaseLink.getNamesOfAllPlugins()) {
 				JSONObject pluginObj = makePluginObj(plugin);
-				data.put(plugin, pluginObj);
+				applications.put(plugin, pluginObj);
 			}
 
-			jobj.put("data", data);
-			jobj.write(response.getWriter());
+			data.write(response.getWriter());
 		}
 		catch (JSONException e) {
 			throw new IOException("Problem making JSON", e);

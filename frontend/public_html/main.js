@@ -11,6 +11,8 @@ requirejs.config({
         'angular': '../lib/bower/angular/angular.min',
         'angular-route': '../lib/bower/angular-route/angular-route.min',
         'angular-bootstrap': '../lib/bower/angular-bootstrap/ui-bootstrap.min',
+        'angular-resource': '../lib/bower/angular-resource/angular-resource',
+        'ng-grid': '../lib/bower/ng-grid/ng-grid-2.0.11.min',
 
         'tablesorter': '../lib/bower/jquery.tablesorter/js',
         'jquery.metadata': '../lib/bower/jquery.metadata/jquery.metadata'
@@ -19,6 +21,7 @@ requirejs.config({
 	    'angular' : {'exports' : 'angular'},
         'angular-route': ['angular'],
         'angular-bootstrap': ['angular'],
+        'ng-grid': ['angular'],
         'bootstrap': ['jquery'],
         'jquery-ui': ['jquery'],
         'tablesorter': ['jquery']
@@ -35,6 +38,7 @@ requirejs([
 
     'jquery',
     'angular-route',
+    'ng-grid',
 
     //legacy
     'jquery-ui',
