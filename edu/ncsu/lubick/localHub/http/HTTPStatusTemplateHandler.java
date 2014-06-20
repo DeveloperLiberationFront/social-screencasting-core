@@ -33,7 +33,7 @@ public class HTTPStatusTemplateHandler extends TemplateHandlerWithDatabaseLink
 			return;
 		}
 		
-		if(baseRequest.getMethod().equals("GET"))
+		if ("GET".equals(baseRequest.getMethod()))
 		{
 			handleGet(baseRequest, response);
 		}
@@ -48,6 +48,7 @@ public class HTTPStatusTemplateHandler extends TemplateHandlerWithDatabaseLink
 		} catch (IOException e) {
 			getLogger().error("Problem processing template", e);
 		}
+		baseRequest.setHandled(true);
 	}
 
 	@Override

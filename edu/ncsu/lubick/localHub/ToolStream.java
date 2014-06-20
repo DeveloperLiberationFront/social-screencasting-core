@@ -144,8 +144,6 @@ public class ToolStream {
 		private int duration;
 		private String pluginName;
 		private int clipScore;
-		private int startFrame;
-		private int endFrame;
 		private String startData;
 		private String endData;
 		private String ratingData;
@@ -251,24 +249,6 @@ public class ToolStream {
 		public int getDuration()
 		{
 			return duration;
-		}
-		
-		public int getStartFrame()
-		{
-			return startFrame;
-		}
-		
-		public void setStartFrame(int startFrame) {
-			this.startFrame = startFrame;
-		}
-		
-		public int getEndFrame()
-		{
-			return endFrame;
-		}
-		
-		public void setEndFrame(int endFrame) {
-			this.endFrame = endFrame;
 		}
 
 		public String getPluginName()
