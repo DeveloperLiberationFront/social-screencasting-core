@@ -43,6 +43,7 @@ public class HandlerManager
 			makeAndAddHandlersForStatus(h, wqi);
 			makeAndAddHandlersForWebReporting(h, wqi);
 			makeAndAddHandlersForClipSharing(h, wqi);
+			makeAndAddHandlersForAPI(h, wqi);
 		}
 		catch (IOException | URISyntaxException e) {
 			logger.error("Problem setting up handlers",e);
@@ -53,13 +54,17 @@ public class HandlerManager
 
 		Resource[] allWebResources = setUpLocalMediaAssets(staticWebResources);
 
-		
 		logger.info("Web Resources "+Arrays.toString(allWebResources));
 
 		makeAndHandlerForFiles(h, allWebResources);
 
 		logger.debug("logger for HTTP Handlers set up with "+h.getChildHandlers().length+" handlers");
 		return h;
+	}
+
+	private static void makeAndAddHandlersForAPI(HandlerCollection h, WebQueryInterface wqi)
+	{
+		h.addHandler(new HTTPAPIHandler(wqi));
 	}
 
 	private static void makeAndAddHandlersForClipSharing(HandlerCollection h, WebQueryInterface wqi) throws IOException, URISyntaxException
