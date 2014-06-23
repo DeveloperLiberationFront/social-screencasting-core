@@ -5,7 +5,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.log4j.Logger;
 
@@ -62,7 +67,10 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	private BrowserMediaPackageSharer clipSharingManager;
 	private BrowserMediaPackageUploader clipUploader;
 	private ExternalClipRequester clipShareRequester;
-	private BitSet activeApps = new BitSet();
+	
+	private Map<String, Boolean> pluginsRecordingStatusMap = new HashMap<>();
+	private Timer pausingTimer = new Timer(true);	//Daemon timer
+	private TimerTask pausingTimerTask = null;
 
 	public static LocalHubDebugAccess startTESTINGServerAndReturnDebugAccess(String screencastMonitorLocation)
 	{
@@ -398,6 +406,14 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 		
 	}
 
+	private class PausingTimerTask extends TimerTask {
+		@Override
+		public void run()
+		{
+			screenRecordingModule.pauseRecording();
+		}
+	}
+
 	/**
 	 * A class that allows unit tests to have indirect, controlled access to the inner workings of the LocalHub. This can only be created with a static method
 	 * in LocalHub
@@ -510,6 +526,30 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 		if(databaseManager.isClipUploaded(folder) && upload)
 		{
 			clipUploader.uploadToolUsage(getToolUsageByFolder(folder), options);
+		}
+	}
+
+	@Override
+	public void updateActivity(String pluginName, boolean isActive)
+	{
+		if (isActive) {
+			if (pausingTimerTask != null) {
+				pausingTimerTask.cancel();
+			}
+			this.screenRecordingModule.unpauseRecording();
+			this.pluginsRecordingStatusMap.put(pluginName, Boolean.TRUE);
+		} else {
+			pluginsRecordingStatusMap.put(pluginName, Boolean.FALSE);
+			
+			boolean areAnyActive = false;
+			for(Entry<String, Boolean> status: pluginsRecordingStatusMap.entrySet()) {
+				areAnyActive = areAnyActive || status.getValue();
+			}
+			
+			if (!areAnyActive && pausingTimerTask == null) {	//don't schedule the task twice
+				pausingTimerTask = new PausingTimerTask();
+				pausingTimer.schedule(pausingTimerTask , 60_000);
+			}
 		}
 	}
 }

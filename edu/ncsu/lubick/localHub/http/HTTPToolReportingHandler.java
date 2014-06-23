@@ -20,16 +20,17 @@ public class HTTPToolReportingHandler extends AbstractHandler  {
 	private static final String POST_PROPERTY_PLUGIN_NAME = "pluginName";
 	private static final String POST_PROPERTY_JSON_ARRAY_TOOL_USAGES = "toolUsages";
 	
-	private String httpRequestPattern;
+	private static final String ENDPOINT_REPORT_TOOL = "reportTool";
+	private static final String ENDPOINT_UPDATE_ACTIVITY = "updateActivity";
+	
 	private WebToolReportingInterface toolReportingInterface;
 	
 	private static Logger logger = Logger.getLogger(HTTPToolReportingHandler.class.getName());
 	
 	private ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
-	public HTTPToolReportingHandler(String location, WebToolReportingInterface toolReportingInterface)
+	public HTTPToolReportingHandler(WebToolReportingInterface toolReportingInterface)
 	{
-		this.httpRequestPattern = location;
 		this.toolReportingInterface = toolReportingInterface;
 		
 		prepareShutdownListener();
@@ -47,18 +48,35 @@ public class HTTPToolReportingHandler extends AbstractHandler  {
 		
 		if ("POST".equals(type)) 
 		{
-			respondToPost(request);
+			if (ENDPOINT_REPORT_TOOL.equals(target)) {
+				respondToReportingPost(request);
+			} else if (ENDPOINT_UPDATE_ACTIVITY.equals(target))
+			{
+				respondToUpdateActivity(request);
+			}
+			else {
+				logger.fatal("What?  I thought we handled " +target);
+			}
 		}
 		else
 		{
 			logger.info("I don't know how to handle a GET like this");
 		}
-		logger.info("Finished handling tools");
+		logger.info("Finished handling reporting");
 		response.setStatus(HttpServletResponse.SC_ACCEPTED);
 		baseRequest.setHandled(true);
 	}
 
-	private void respondToPost(HttpServletRequest request)
+	private void respondToUpdateActivity(HttpServletRequest request)
+	{
+		logger.debug("POST parameters received " + request.getParameterMap());
+		String pluginName = request.getParameter(POST_PROPERTY_PLUGIN_NAME);
+		boolean isActive = Boolean.parseBoolean(request.getParameter(POST_PROPERTY_PLUGIN_NAME));
+		
+		this.toolReportingInterface.updateActivity(pluginName, isActive);
+	}
+
+	private void respondToReportingPost(HttpServletRequest request)
 	{
 		logger.debug("POST parameters received " + request.getParameterMap());
 		String pluginName = request.getParameter(POST_PROPERTY_PLUGIN_NAME);
@@ -92,12 +110,12 @@ public class HTTPToolReportingHandler extends AbstractHandler  {
 
 	private boolean checkIfWeHandleThisRequest(String target)
 	{
-		if (!target.equals(httpRequestPattern))
+		if (ENDPOINT_REPORT_TOOL.equals(target) || ENDPOINT_UPDATE_ACTIVITY.equals(target))
 		{
-			logger.trace("LookupHandler passing on target " + target);
-			return false;
+			return true;
 		}
-		return true;
+		logger.trace("LookupHandler passing on target " + target);
+		return false;
 	}
 
 	private void prepareShutdownListener()
