@@ -15,7 +15,7 @@ import org.eclipse.jetty.util.component.LifeCycle;
 
 import edu.ncsu.lubick.localHub.ToolStream;
 
-public class ToolReportingHandler extends AbstractHandler  {
+public class HTTPToolReportingHandler extends AbstractHandler  {
 
 	private static final String POST_PROPERTY_PLUGIN_NAME = "pluginName";
 	private static final String POST_PROPERTY_JSON_ARRAY_TOOL_USAGES = "toolUsages";
@@ -23,11 +23,11 @@ public class ToolReportingHandler extends AbstractHandler  {
 	private String httpRequestPattern;
 	private WebToolReportingInterface toolReportingInterface;
 	
-	private static Logger logger = Logger.getLogger(ToolReportingHandler.class.getName());
+	private static Logger logger = Logger.getLogger(HTTPToolReportingHandler.class.getName());
 	
 	private ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
-	public ToolReportingHandler(String location, WebToolReportingInterface toolReportingInterface)
+	public HTTPToolReportingHandler(String location, WebToolReportingInterface toolReportingInterface)
 	{
 		this.httpRequestPattern = location;
 		this.toolReportingInterface = toolReportingInterface;
