@@ -3,6 +3,7 @@ package edu.ncsu.lubick.localHub;
 import java.awt.PopupMenu;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Date;
 import java.util.List;
 
@@ -61,6 +62,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	private BrowserMediaPackageSharer clipSharingManager;
 	private BrowserMediaPackageUploader clipUploader;
 	private ExternalClipRequester clipShareRequester;
+	private BitSet activeApps = new BitSet();
 
 	public static LocalHubDebugAccess startTESTINGServerAndReturnDebugAccess(String screencastMonitorLocation)
 	{
