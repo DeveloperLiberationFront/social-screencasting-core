@@ -58,9 +58,9 @@ public class HTTPUpdateClip extends TemplateHandlerWithDatabaseLink implements H
 		String paramEndFrame = request.getParameter("end_frame");
 		int endFrame = Integer.parseInt(paramEndFrame == null? "0" : paramEndFrame);
 		
-		String folder = PostProductionHandler.MEDIA_OUTPUT_FOLDER + request.getParameter("folder_name");
+		String clipId = request.getParameter("clip_id");
 		
-		databaseLink.updateClipOptions(folder, new ClipOptions(startFrame, endFrame), true);
+		databaseLink.updateClipOptions(clipId, new ClipOptions(startFrame, endFrame), true);
 		
 		response.setStatus(HttpServletResponse.SC_ACCEPTED);
 		baseRequest.setHandled(true);

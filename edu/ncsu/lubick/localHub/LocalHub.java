@@ -3,7 +3,6 @@ package edu.ncsu.lubick.localHub;
 import java.awt.PopupMenu;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -512,21 +511,17 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 		reportToolUsage(tu);
 	}
 
-	@Override
-	public ToolUsage getToolUsageByFolder(String folder)
-	{
-		return databaseManager.getToolUsageByFolder(folder);
-	}
 
 	@Override
-	public void updateClipOptions(String folder, ClipOptions options, boolean upload)
+	public void updateClipOptions(String clipId, ClipOptions options, boolean upload)
 	{
-		databaseManager.setStartEndFrame(folder, options.startFrame, options.endFrame);
+		//TODO fix or remove
+		//databaseManager.setStartEndFrame(folder, options.startFrame, options.endFrame);
 		
-		if(databaseManager.isClipUploaded(folder) && upload)
-		{
-			clipUploader.uploadToolUsage(getToolUsageByFolder(folder), options);
-		}
+//		if(databaseManager.isClipUploaded(folder) && upload)
+//		{
+//			clipUploader.uploadToolUsage(getToolUsageByFolder(folder), options);
+//		}
 	}
 
 	@Override

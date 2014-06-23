@@ -163,43 +163,6 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		return null;
 		
 	}
-	
-	@Override
-	public ToolUsage getClipByFolder(String clipId)
-	{
-		String sqlQuery = "Select * FROM Clips WHERE folder_name = ?";
-		
-		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
-		{
-			statement.setString(1, clipId);
-			
-			try (ResultSet results = executeWithResults(statement);)
-			{
-				if(results.next())
-				{
-					String toolName = results.getString("tool_name");
-					String pluginName = results.getString("plugin_name");
-					int score = results.getInt("clip_score");
-					Date timeStamp = new Date(results.getLong("time_stamp"));
-					String startData = results.getString("start_data");
-					String endData = results.getString("end_data");
-					String ratingData = results.getString("rating_data");
-					
-					
-					ToolUsage tu = new ToolUsage(toolName, null, null, pluginName, timeStamp, 0, score);
-					tu.setStartData(startData);
-					tu.setEndData(endData);
-					return tu;
-				}
-			}
-		}
-		catch(SQLException ex)
-		{
-			throw new DBAbstractionException(ex);
-		}
-		
-		return null;
-	}
 
 	@Override
 	public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName)
@@ -505,7 +468,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	@Override
 	public boolean isClipUploaded(String clipId)
 	{
-		String sqlQuery = "SELECT uploaded_date FROM Clips where folder_name LIKE ?";
+		String sqlQuery = "SELECT uploaded_date FROM Clips where folder_name LIKE %?";
 		
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
 		{
@@ -532,7 +495,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	{
 		long uploadedDate = b?new Date().getTime():0;
 		
-		String sqlQuery = "UPDATE Clips SET uploaded_date = ? where folder_name LIKE ?";
+		String sqlQuery = "UPDATE Clips SET uploaded_date = ? where folder_name LIKE %?";
 		
 		
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)

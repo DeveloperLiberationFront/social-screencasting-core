@@ -89,13 +89,6 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 		String clipName = request.getParameter(PARAM_CLIP_NAME);
 
 		File clipDir = new File(PostProductionHandler.MEDIA_OUTPUT_FOLDER,clipName);
-		ToolUsage clip = databaseLink.getToolUsageByFolder(PostProductionHandler.MEDIA_OUTPUT_FOLDER + clipName);
-		
-		if (clip == null) {
-			response.sendError(500, "Corrupted database");
-			baseRequest.setHandled(true);
-			return;
-		}
 
 		JSONObject clipObject = new JSONObject();
 		JSONArray fileNamesArr = new JSONArray();
@@ -119,8 +112,6 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 			JSONObject fileNamesObject = new JSONObject();
 			fileNamesObject.put("filenames", fileNamesArr);
 			fileNamesObject.put("name", clipName);
-			fileNamesObject.put("start_data", clip.getStartData());
-			fileNamesObject.put("end_data", clip.getEndData());
 			clipObject.put("clip", fileNamesObject);
 
 			response.setContentType("application/json");
@@ -165,11 +156,11 @@ public class HTTPMediaResourceHandler extends TemplateHandlerWithDatabaseLink im
 		try
 		{
 			// Testing data
-			//keyJarr.put("Eclipsef100758a-fc1f-3cdb-a1c0-7287f184d10d");
-			//keyJarr.put("Eclipsee667cfd3-0bd8-3af8-93d7-10d16ab2f854");
-			//guiJarr.put("Eclipsee434f382-7183-3cc5-8380-2137816a48d4");
-			//guiJarr.put("Eclipse47397aaf-c70f-3aa1-9df5-a87f5a583af3");
-			//guiJarr.put("Eclipse06ac5c3c-da64-3300-9a74-6fed83aa2722");
+			keyJarr.put("Eclipsefc7fb775-e185-31af-83cb-1d315a809952K");
+			keyJarr.put("Eclipsef24fe0e7-d0c1-36c7-a4d0-565e131f35ecK");
+			guiJarr.put("Eclipse13d5a993-e46f-3b7f-862a-bfefa5831901G");
+			guiJarr.put("Eclipse1a46c017-a154-323b-824f-caa732caa84aG");
+			guiJarr.put("Eclipse29bf2b83-2e3d-3855-9286-ee7f69db64c1G");
 
 			
 			clips.put("keyclips",keyJarr);
