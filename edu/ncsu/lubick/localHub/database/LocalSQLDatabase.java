@@ -557,7 +557,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			statement.setInt(2, endFrame);
 			statement.setString(3, folder);
 			executeStatementWithNoResults(statement);
-			return true;
+			return Boolean.TRUE;		//prevents boxing
 		}
 		catch (SQLException e)
 		{
