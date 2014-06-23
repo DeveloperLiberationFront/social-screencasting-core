@@ -142,9 +142,9 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 			logger.debug("Server started up");
 		}
 
+		this.screenRecordingModule = new ScreenRecordingModule(this.screencastMonitorDirectory);
 		if (shouldUseScreenRecording)
 		{
-			this.screenRecordingModule = new ScreenRecordingModule(this.screencastMonitorDirectory);
 			screenRecordingModule.startRecording();
 			ScreencastManager.startManaging(this.screencastMonitorDirectory);
 		}

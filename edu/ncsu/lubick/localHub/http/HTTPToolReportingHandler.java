@@ -19,9 +19,11 @@ public class HTTPToolReportingHandler extends AbstractHandler  {
 
 	private static final String POST_PROPERTY_PLUGIN_NAME = "pluginName";
 	private static final String POST_PROPERTY_JSON_ARRAY_TOOL_USAGES = "toolUsages";
+	private static final String POST_PROPERTY_ACTIVITY = "activity";
 	
-	private static final String ENDPOINT_REPORT_TOOL = "reportTool";
-	private static final String ENDPOINT_UPDATE_ACTIVITY = "updateActivity";
+	private static final String ENDPOINT_REPORT_TOOL = "/reportTool";
+	private static final String ENDPOINT_UPDATE_ACTIVITY = "/updateActivity";
+	
 	
 	private WebToolReportingInterface toolReportingInterface;
 	
@@ -71,7 +73,7 @@ public class HTTPToolReportingHandler extends AbstractHandler  {
 	{
 		logger.debug("POST parameters received " + request.getParameterMap());
 		String pluginName = request.getParameter(POST_PROPERTY_PLUGIN_NAME);
-		boolean isActive = Boolean.parseBoolean(request.getParameter(POST_PROPERTY_PLUGIN_NAME));
+		boolean isActive = Boolean.parseBoolean(request.getParameter(POST_PROPERTY_ACTIVITY));
 		
 		this.toolReportingInterface.updateActivity(pluginName, isActive);
 	}
