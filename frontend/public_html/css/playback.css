@@ -1,5 +1,12 @@
-#panel {
+#player {
     width: 50%;
+    height: 800px;
+    background-color: blue;
+}
+
+#player img {
+    max-width: 100%;
+    max-height: 100%;
 }
 
 #playBtn img {
@@ -28,4 +35,11 @@
 
 #rating span {
     outline: 0;
+}
+
+#controlPanel.fullscreen {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 40%;
 }

@@ -121,6 +121,7 @@ define(['angular',
             frameCount: 100,
             playing: false
         };
+        $scope.isFullscreen = false;
         $scope.imgDir = 'images/';
         $scope.toolName = 'test';
         $scope.showRating = false;

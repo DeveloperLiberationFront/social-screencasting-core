@@ -1,15 +1,16 @@
-<div id="player">
+<div id="player" fullscreen='isFullscreen'>
   <div id="mediaTitle">{{toolName}}</div>
-  <div id="panel">
+  <div id="panel" ng-click='isFullscreen=!isFullscreen'>
     <img ng-src="{{ imgDir + player.frames[player.pos] }}"/>
   </div>
 
-  <div id="controlPanel">
+  <div id="controlPanel" ng-class="{fullscreen: isFullscreen}">
     <button id='playBtn' ng-click="player.playing = !player.playing">
       <img ng-src="{{ playBtnImages[player.playing] }}"/>
     </button>
-    <div ng-controller='PlaybackSliderCtrl'>
-      <slider floor='0' ceiling='{{player.frameCount -1}}' step='1' ng-model='player.pos'></slider>
+    <div ng-controller='PlaybackSliderCtrl' ng-mousedown="player.playing = false">
+      <slider floor='0' ceiling='{{player.frameCount -1}}' step='1' ng-model='player.pos'>
+      </slider>
     </div>
   </div>
   <div ng-controller='RatingCtrl' id='rating' ng-show='showRating'>
