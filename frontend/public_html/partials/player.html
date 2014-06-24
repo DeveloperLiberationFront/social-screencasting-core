@@ -1,7 +1,9 @@
+<div id="mediaTitle">{{toolName}}</div>
 <div id="player" fullscreen='isFullscreen'>
-  <div id="mediaTitle">{{toolName}}</div>
   <div id="panel" ng-click='isFullscreen=!isFullscreen'>
-    <img ng-src="{{ imgDir + player.frames[player.pos] }}"/>
+    <div id='overlay' ng-hide='isFullscreen'>Click to toggle fullscreen</div>
+    <img id='keyboardOverlay' ng-hide='keyboardMode == 4' ng-src="{{ imgDir + keyboardImages[keyboardOverlay][keyboardMode % 3] }}"/>
+    <img class='img-responsive' ng-src="{{ imgDir + player.frames[player.pos] }}"/>
   </div>
 
   <div id="controlPanel" ng-class="{fullscreen: isFullscreen}">

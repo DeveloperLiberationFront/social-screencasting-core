@@ -21,10 +21,6 @@ h1 {
 	width: 100%;
 }
 
-html, body, .container-fluid, {
-	height: 100%;
-}
-
 .container-fluid {
     padding-top: 100px;
 }
