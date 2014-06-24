@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>Co-worker Tool Comparison</title>
 
     <meta charset="utf-8">
@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/bootstrap-theme.min.css" />
 	<link rel="stylesheet" href="lib/bower/ng-grid/ng-grid.min.css">
+	<link rel="stylesheet" href="lib/bower/angular-slider/angular-slider.css">
 
     <link rel="stylesheet" href="css/basic.css" />
     <link rel="stylesheet" href="css/jquery.rating.css" />
@@ -21,196 +22,48 @@
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-</head>
-<body ng-controller='NavCtrl'>
-  <!-- Navbar -->
-  <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-    <div class="container">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="/">Socaster</a>
+  </head>
+  <body ng-controller='NavCtrl'>
+    <!-- Navbar -->
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Socaster</a>
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <p class="navbar-text"><span ng-bind='user.name'></span></p>
+            <li ng-controller='DropdownCtrl'>
+              <div class="btn-group navbar-btn" dropdown is-open="status.isopen">
+                <button type="button" class="btn btn-default dropdown-toggle">
+                  <span  ng-bind="application.name">Application</span>
+                  <span class='caret'></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                  <li ng-repeat='app in applications'><a ng-click='setApp(app)'>{{app.name}}</a></li>
+                </ul>
+              </div>
+            </li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#about">About</a></li>
+            <li><a href="#settings"><span class="glyphicon glyphicon-cog"></span></a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
       </div>
-      <div class="collapse navbar-collapse">
-        <ul class="nav navbar-nav">
-          <p class="navbar-text"><span ng-bind='userName'></span></p>
-          <li ng-controller='DropdownCtrl'>
-            <div class="btn-group navbar-btn" dropdown is-open="status.isopen">
-              <button type="button" class="btn btn-default dropdown-toggle">
-                <span  ng-bind="application">Application</span>
-                <span class='caret'></span>
-              </button>
-              <ul class="dropdown-menu" role="menu">
-                <li ng-repeat='app in applications'><a ng-click='setApp(app)'>{{app}}</a></li>
-              </ul>
-            </div>
-          </li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-          <li><a href="#about">About</a></li>
-          <li><a href="#settings"><span class="glyphicon glyphicon-cog"></span></a></li>
-        </ul>
-      </div><!--/.nav-collapse -->
     </div>
-  </div>
 
     <!-- Main container -->
-    <div class="container-fluid main-container">
-
-      <div ng-controller='ToolTableCtrl'>
-        <div class="gridStyle" ng-grid="gridOptions"></div>
-        <div>{{selection}}</div>
-      </div>
-
-      <div class="row">
-        <!-- More info -->
-        <div id="moreInfoCol" class="col-lg-6 col-md-6 col-sm-12 col-xs-12 col-md-push-6">
-          <div id="moreInfo">
-            <div id="placeholder">Select a tool for more info.</div>
-            <div id="clipDoesNotExist">No clips exist locally for this tool.  This is unexpected...</div>
-            <div id="requestShare"><div id="requestText">You do not have permission to view this users usages of the tool.</div><br/><button class="requestPermissions">Click to Request Permission</button></div>
-
-            <div id="clipLoading">Loading clips</div>
-            <div id="clipPlayer">
-              <div id="mediaTitle"></div>
-              <div id="panelAndOverlay">
-                <div id="overlay">
-                  <span>Click for Full Screen</span>
-				  
-                </div>
-                <div id="underlay"></div>
-                <div id="panel" data-total-frames="" data-type="" data-playback-directory="" data-auth="">
-
-                  <div id="moduleControlPanel" class="ui-widget-content">
-                    <button class="playPause">
-                      <img class="playbackCommand playImage pause" src="/images/playback/play.svg" />
-                      <img class="playbackCommand pauseImage pause" src="/images/playback/pause.svg" />
-                    </button>
-                    <div class="settings">
-                      <div id="animationSelectionSpot1" class="staging"></div>
-                      <img class="animationSelection" src="/images/none.png" />
-                    </div>
-                    <div id="dockedSliderHolder">
-                      <div id="dockedSlider" class="slider">
-                        <label class="startLabel" title="The tool gets used here">&nbsp;</label>
-                      </div>
-                    </div>
-                  </div>
-                  <div id="keyAnimationSpot" class="staging"></div>
-                  <div id="frameSpot" class="staging"></div>
-                </div>
-              </div>
-
-              <div id="controlPanel">
-                <button class="playPause">
-                  <img class="playbackCommand playImage pause" src="/images/playback/play.svg" />
-                  <img class="playbackCommand pauseImage pause" src="/images/playback/pause.svg" />
-                </button>
-                <div class="settings">
-                  <div id="animationSelectionSpot2" class="staging"></div>
-                  <img class="animationSelection" src="/images/none.png" />
-                </div>
-                <div id="staticSliderHolder">
-                  <div id="staticSlider" class="slider">
-                    <label class="startLabel" title="The tool gets used here">&nbsp;</label>
-                  </div>
-                  <div id="editDiv">
-				    <div id="editSlider" class="slider"></div>
-				    <button id="saveClip">Save</button>
-                  </div>
-                </div>
-              </div>
-              <div id="ratingDiv">
-                <form id ="rating">
-                  <input name="rating" type="radio" value="1" class="star"/>
-                  <input name="rating" type="radio" value="2" class="star"/>
-                  <input name="rating" type="radio" value="3" class="star"/>
-                  <input name="rating" type="radio" value="4" class="star"/>
-                  <input name="rating" type="radio" value="5" class="star"/>
-                </form>
-              </div>
-              <div id="viewOtherDiv">
-                <br/>More GUI uses:
-                <br/>
-    		    <span id="viewOtherSpot" class="staging"></span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- My tools table -->
-
-        <!-- Users table -->
-        <div id="usersCol" class="col-lg-3 col-md-3 col-sm-6 col-xs-12 col-md-pull-6">
-          <table border="1" id="usersTable" class="resultsTable">
-            <thead>
-              <tr class="header">
-                <th id="otherUsers" class="sortable">Other users</th>
-              </tr>
-              <!--<tr class='header' id="notTimeYet"><th colspan="2">Sharing Disabled until 4/16/14.</th></tr>-->
-            </thead>
-            <tbody>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Other persons table -->
-        <div id="otherPersonsCol" class="col-lg-3 col-md-3 col-sm-6 col-xs-12 col-md-pull-6" style='display:none'>
-          <table id="otherPersonsTable" border="1" id='otherPersonsTable' class="resultsTable">
-            <thead>
-              <tr class="changeName">
-                <th colspan="4" id="otherPeoplesTools">
-                  <button id='prevTable'>&laquo;</button>
-                  
-                  <button id='nextUser'>&raquo;</button>
-                  <span id="otherUsersPlaceHolder" data-email="">Loading Team-mates</span>
-                  <button id='prevUser'>&laquo;</button>
-                  
-                </th>
-              </tr>
-              <tr class="header">
-                <th class="sortable">Tool Name</th>
-                <th class="sortable"><img src="images/mouse-icon.png"/></th>
-                <th class="sortable"><img src="images/keyboard-icon.png"/></th>
-                <th class="sortable"><span class="glyphicon glyphicon-facetime-video"></span></th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
+    <div class="container-fluid" ng-view>
     </div>
-
-    <div id="keyTableDiv" title="Key">
-      <table id="keyTable">
-        <tbody>
-          <tr style="background: #ffedd3; border: 2px solid #e48600;">
-            <th>orange</th>
-            <td>Used Tools</td>
-          </tr>
-
-          <tr style="background: #baeec8; border: 2px solid #29b350;">
-            <td>green</td>
-            <td>Unused Tools</td>
-          </tr>
-
-          <tr style="background: white; border: 1px solid gray">
-            <td>white</td>
-            <td>Known Tools</td>
-          </tr>
-
-        </tbody>
-      </table>
-    </div>
-
-    <div class="modal">
-    </div>
-</body>
+  </body>
 </html>

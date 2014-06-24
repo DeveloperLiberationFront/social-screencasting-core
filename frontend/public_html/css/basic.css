@@ -11,178 +11,8 @@ h1 {
    font-size:2.2em;
 }
 
-.hidden{
-	display:none;
-}
-
-.main-container {
-    padding-top: 100px;
-}
-
-.pluginListing {
-	text-align:center;
-}
-
-.pluginListing input, .requestGeneration {
-    padding: 10px 20px;
-    color: #ffa729;
-    background-color: white;
-    font-size: 2.0em;
-	margin:1px;
-}
-
-.requestGeneration{
-	font-size: 1.2em;
-}
-
-.clickMe {
-	font-size:16px;
-	padding: 5px;
-	cursor: pointer;
-}
-
-#keyButton img {
-	width: 25px;
-	height: 25px;
-}
-
-.showAll, .showUnique{
-	display:block;
-	color: #ffa729;
-    background-color: white;
-	font-size: 17px;
-	margin:3px auto;
-}
-
-.showAll{
-	display:none;
-}
-
-.pluginListing input:hover, .requestGeneration:hover {
-    border: 3px solid #ffa729;
-	margin:0;
-}
-
-#moreInfo{
-	border: 1px solid black;
-	background-color:#ffdfb1;
-}
-
-#requestShare {
-	display:none;
-}
-
-#clipPlayer {
-	display:none;
-}
-
-#ratingDiv {
-	background: #ffdfb1;
-	width: 100%;
-	height: 20px;
-}
-
-#viewOtherDiv {
-	margin-top: -20px;
-}
-
-#clipDoesNotExist {
-	display: none;
-}
-
-#clipLoading {
-	display:none;
-}
-
-#viewOtherSpot {
-	display:none
-}
-
-.sort {
-	cursor:pointer;
-	background-size: 15px;
-	background-position: center right;
-	background-repeat: no-repeat;
-	padding-right: 20px;
-}
-
-.noSort {
-	background-image: url("/images/table/noSort.svg");
-}
-
-.ascendSort {
-	background-image: url("/images/table/ascendSort.svg");
-}
-
-.descendSort {
-	background-image: url("/images/table/descendSort.svg");
-}
-
-.requestPermissions {
-    color: green;
-    background-color: white;
-	margin:5px;
-	font-size:16px;
-	padding: 5px;
-}
-
-.requested {
-	background-color: #FFE;
-}
-
-.requestPermissions:hover{
-	border: 3px solid green;
-}
-
-.requestPermissions.requested {
-	border:3px solid black;
-}
-.requestPermissions.requested:hover{
-	border:3px solid black;
-}
-
-#rating {
-    float: right;
-}
-
-#notTimeYet{
-	display:none;
-}
-
-.noClipsShared {
-	border:1px solid black;
-	padding:3px;
-	margin-left:10px;
-}
-
-.noKeyboard {
-	border: 3px solid #29b350;
-	background-color: #d5f5de;
-}
-
 .newTool { /* For marking tools in the comparison table that have not yet been used by the viewer */
 	background-color: #baeec8;
-}
-
-.noUseBorder {
-	outline: 3px solid #29b350;
-}
-
-button {
-	background: none;
-	border: none;
-}
-
-.ui-slider .ui-slider-handle,
-.ui-slider,
-.startLabel {
-	cursor: pointer;
-}
-
-.ui-dialog .ui-dialog-titlebar-close {
-	background-image: url("/images/x.svg");
-	background-position: center;
-	background-size: 35px;
 }
 
 /* Bootstrap stuff */
@@ -191,13 +21,18 @@ button {
 	width: 100%;
 }
 
-
-html, body, .container-fluid.main, {
+html, body, .container-fluid, {
 	height: 100%;
 }
 
+.container-fluid {
+    padding-top: 100px;
+}
+
+/* tool tables */
 .gridStyle {
     border: 1px solid rgb(212,212,212);
-    width: 400px; 
-    height: 500px
+    width: 400px;
+    min-height: 400px;
+    max-height: 800px;
 }

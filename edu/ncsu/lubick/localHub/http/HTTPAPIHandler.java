@@ -78,37 +78,35 @@ public class HTTPAPIHandler extends AbstractHandler {
 	private void returnUserInfo(HttpServletResponse response) throws IOException
 	{
 		try {
-			JSONObject data = new JSONObject();
 			JSONObject user = makeUserAuthObj();
+
 			JSONObject applications = new JSONObject();
-			data.put("user", user);
-			data.put("applications", applications);
-
 			for(String plugin : this.databaseLink.getNamesOfAllPlugins()) {
-				JSONObject pluginObj = makePluginObj(plugin);
-				applications.put(plugin, pluginObj);
+				applications.put(plugin, makePluginArray(plugin));
 			}
-
-			data.write(response.getWriter());
+			user.put("applications", applications);
+			
+			user.write(response.getWriter());
 		}
 		catch (JSONException e) {
 			throw new IOException("Problem making JSON", e);
 		}
 	}
 
-	private JSONObject makePluginObj(String pluginName)
+	private JSONArray makePluginArray(String pluginName)
 	{
 		List<ToolCountStruct> counts = databaseLink.getAllToolAggregateForPlugin(pluginName);
 
-		JSONObject retVal = new JSONObject();
+		JSONArray retVal = new JSONArray();
 		for(ToolCountStruct tcs: counts)
 		{
 			JSONObject tempObject = new JSONObject();
 			try
 			{
+				tempObject.put("name", tcs.toolName);
 				tempObject.put("gui", tcs.guiToolCount);
 				tempObject.put("keyboard", tcs.keyboardCount);
-				retVal.put(tcs.toolName, tempObject);
+				retVal.put(tempObject);
 			}
 			catch (JSONException e)
 			{

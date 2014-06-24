@@ -1,60 +1,10 @@
-#panel{
-	position:relative;
-}
-#panelAndOverlay{
-	position:relative;  /*allows the overlay to be absolute, relative to this div*/	
+#panel {
+    width: 50%;
 }
 
-#panel:-webkit-full-screen {	/*work around for webkit*/
-	width:100%;
-	background-color:#F0F0F0;
-}
-
-#mediaTitle{
-	text-align:center;
-}
-
-.frame{
-	display:none;
-	width:100%;
-	height:100%;
-}
-
-.keyAnimation {
-	position:absolute;
-	bottom:4px;
-	right:2px;
-	width:35%;
-	opacity: .8;
-	display:none;
-}
-
-#staticSliderHolder, #dockedSliderHolder {
-	margin: 7px;
-	display: inline-block;
-	width: calc(100% - 150px);
-	cursor: default;
-}
-
-#editSlider, #staticSlider {
-	width: 100%;
-}
-
-#staticSlider {
-	margin-bottom: 14px;
-}
-
-#save {
-	
-}
-
-.playPause{
-	width:65px;
-	height:50px;
-}
-.playPause img{
-	width:100%;
-	height:100%;
+#playBtn img {
+    width:65px;
+    height:50px;
 }
 
 #overlay{
@@ -72,89 +22,10 @@
 	font-size:2.5em;
 }
 
-#underlay {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background-color: #000;
-}
-
 #overlay:hover{
 	opacity:0.5;
 }
 
-.playImage.play{
-	display:none;
-}
-
-.pauseImage.pause{
-	display:none;
-}
-
-#moduleControlPanel {
-	width:40%;
-	height:50px;
-	padding:5px;
-	display:none;
-	position:absolute;
-	bottom: 20px;
-	left:20px;
-	cursor:move;
-	z-index:10;
-}
-
-#controlPanel{
-	width:100%;
-}
-
-#moduleControlPanel, #controlPanel{
-	background-color: #f8f8f8;
-	border: 2px solid #ffa729;
-	padding: 1px;
-}
-
-.settings{
-	width:4%;
-	float:right;
-	display:block;
-}
-
-.settings img {
-	width:100%;
-}
-.animationSelection {
-	display:none;
-	cursor:pointer;
-}
-
-.startLabel {
-	position: relative;
-	width: 5px; 
-	height: 30px;
-	top: -10px;
-	background-color: green;
-}
-
-.viewOther{
-    color: #ffa729;
-    background-color: white;
-	margin:1px;
-	font-size:16px;
-	padding: 5px;
-}
-
-.viewOther:hover{
-	border: 3px solid #ffa729;
-	margin:0;
-}
-
-.viewOther:active, .viewOther.activated{
-	border: 3px solid black;
-	margin:0;
-}
-
-.staging {
-	display:none;
+#rating span {
+    outline: 0;
 }

@@ -1,0 +1,18 @@
+<div id="player">
+  <div id="mediaTitle">{{toolName}}</div>
+  <div id="panel">
+    <img ng-src="{{ imgDir + player.frames[player.pos] }}"/>
+  </div>
+
+  <div id="controlPanel">
+    <button id='playBtn' ng-click="player.playing = !player.playing">
+      <img ng-src="{{ playBtnImages[player.playing] }}"/>
+    </button>
+    <div ng-controller='PlaybackSliderCtrl'>
+      <slider floor='0' ceiling='{{player.frameCount -1}}' step='1' ng-model='player.pos'></slider>
+    </div>
+  </div>
+  <div ng-controller='RatingCtrl' id='rating' ng-show='showRating'>
+    <rating ng-model='score'></rating>
+  </div>
+</div>

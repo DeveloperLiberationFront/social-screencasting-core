@@ -6,25 +6,33 @@ requirejs.config({
         lib: '../lib',
         jquery: '../lib/bower/jquery/dist/jquery.min',
         bootstrap: '../lib/bower/bootstrap/dist/js',
-        'jquery-ui': '../lib/bower/jquery-ui/ui/minified/jquery-ui.min',
+//        'jquery-ui': '../lib/bower/jquery-ui/ui/minified/jquery-ui.min',
         text: '../lib/bower/requirejs-text/text',
-        'angular': '../lib/bower/angular/angular.min',
-        'angular-route': '../lib/bower/angular-route/angular-route.min',
-        'angular-bootstrap': '../lib/bower/angular-bootstrap/ui-bootstrap.min',
-        'angular-resource': '../lib/bower/angular-resource/angular-resource',
+        'angular': '../lib/bower/angular/angular',
+        'ng-route': '../lib/bower/angular-route/angular-route.min',
+        'ng-bootstrap': '../lib/bower/angular-bootstrap/ui-bootstrap-tpls.min',
+        'ng-resource': '../lib/bower/angular-resource/angular-resource',
         'ng-grid': '../lib/bower/ng-grid/ng-grid-2.0.11.min',
+        'ng-fullscreen': '../lib/bower/ng-fullscreen/ng-fullscreen',
+        'ng-slider': '../lib/bower/angular-slider/angular-slider',
+        'underscore': '../lib/bower/underscore/underscore',
 
         'tablesorter': '../lib/bower/jquery.tablesorter/js',
         'jquery.metadata': '../lib/bower/jquery.metadata/jquery.metadata'
     },
     shim: {
 	    'angular' : {'exports' : 'angular'},
-        'angular-route': ['angular'],
-        'angular-bootstrap': ['angular'],
+        'ng-route': ['angular'],
+        'ng-bootstrap': ['angular'],
+        'ng-resource': ['angular'],
+        'ng-fullscreen': ['angular'],
         'ng-grid': ['angular'],
+        'ng-slider': ['angular'],
         'bootstrap': ['jquery'],
         'jquery-ui': ['jquery'],
-        'tablesorter': ['jquery']
+        'tablesorter': ['jquery'],
+        'jquery.metadata': ['jquery'],
+        'lib/jquery.fullscreen': ['jquery'],
     },
 	priority: [
         "angular", "jquery"
@@ -34,22 +42,13 @@ requirejs.config({
 requirejs([
     'angular',
     'app',
-    'controllers',
-
     'jquery',
-    'angular-route',
+    'ng-route',
+    'ng-bootstrap',
     'ng-grid',
 
-    //legacy
-    'jquery-ui',
-    //'jquery.metadata',
-    // 'comparison',
-    // 'instrumentation',
-    // 'playback',
-    // 'setUpPlayback',
-    'lib/jquery.fullscreen',
-    'lib/jquery.form',
-    'lib/jquery.rating.pack',
+    'controllers',
+//    'playback',
 ], function(angular, app) {
   'use strict';
   angular.bootstrap(document, [app['name']]);
