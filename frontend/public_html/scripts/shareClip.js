@@ -7,6 +7,7 @@ var currentGuiClips = [];
 var currentKeyClips = [];
 
 var currentView = 0;
+var trimActive = false;
 
 function highlightNthButton(n) {
     if (currentGuiClips.length + currentKeyClips.length > 1) {
@@ -226,6 +227,18 @@ $(document).ready(function () {
     $("#sidebar").on('click', '.noClips', shareNoClips);
     $("#sidebar").on('click', '.shareClip', shareClip);
 	$("#sidebar").on('click', '.shareAll', shareAll);
+	
+	$("#trimButton").on('click', function() {
+		if (trimActive) {
+			$("#editSlider").hide(200);
+			$("#trimButton").text("Trim Video").removeClass("cancel");
+			trimActive = false;
+		} else {
+			$("#editSlider").show(200);
+			$("#trimButton").text("Cancel Trim").addClass("cancel");
+			trimActive = true;
+		}
+	});
 
     checkExistanceOfLocalClips(urlParams.pluginName, urlParams.toolName);
 
