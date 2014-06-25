@@ -1,9 +1,9 @@
-<div id="mediaTitle">{{toolName}}</div>
+<div id="mediaTitle">{{clip.tool}}</div>
 <div id="player" fullscreen='isFullscreen'>
   <div id="panel" ng-click='isFullscreen=!isFullscreen'>
     <div id='overlay' ng-hide='isFullscreen'>Click to toggle fullscreen</div>
-    <img id='keyboardOverlay' ng-hide='keyboardMode == 4' ng-src="{{ imgDir + keyboardImages[keyboardOverlay][keyboardMode % 3] }}"/>
-    <img class='img-responsive' ng-src="{{ imgDir + player.frames[player.pos] }}"/>
+    <img id='keyboardOverlay' ng-hide='keyboardMode == 4' ng-src="{{ imgDir + keyboardImages[keyboardOverlay][keyboardMode % 3] + auth}}"/>
+    <img class='img-responsive' ng-src="{{ imgDir + clip.frames[player.pos] + auth }}"/>
   </div>
 
   <div id="controlPanel" ng-class="{fullscreen: isFullscreen}">
@@ -11,7 +11,7 @@
       <img ng-src="{{ playBtnImages[player.playing] }}"/>
     </button>
     <div ng-controller='PlaybackSliderCtrl' ng-mousedown="player.playing = false">
-      <slider floor='0' ceiling='{{player.frameCount -1}}' step='1' ng-model='player.pos'>
+      <slider floor='0' ceiling='{{clip.frames.length -1}}' step='1' ng-model='player.pos'>
       </slider>
     </div>
   </div>

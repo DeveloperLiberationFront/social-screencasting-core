@@ -33,12 +33,17 @@ define(['angular', 'ng-resource'], function (ng) {
           });
       }])
 
-    .factory('Rating', ['$resource', 
+    .factory('Clip', ['$resource', 
       function($resource) {
           return $resource('http://screencaster-hub.appspot.com/api/:email/:app/:tool/:clip?:auth', {
-              email: '@email', app:'@app', tool:'@tool', clip: '@clip',
+              email: '@creator', app:'@app', tool:'@tool', clip: '@name',
           }, {
-              query: {method:'GET', isArray: false}
+              query: {method:'GET', isArray: false},
+              frame: {
+                  method:'GET',
+                  url:'http://screencaster-hub.appspot.com/api/:email/:app/:tool/:clip/:frame?:auth',
+                  isArray: false,
+              }
           });
       }])
 });

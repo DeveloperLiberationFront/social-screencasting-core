@@ -113,17 +113,14 @@ define(['angular',
         }
     }])
 
-  .controller('PlayerCtrl', ['$scope', '$interval',
-    function($scope, $interval) {
+  .controller('PlayerCtrl', ['$scope', '$interval', 'Clip', 
+    function($scope, $interval, Clip) {
         $scope.player = {
-            frames: ["frame0000.jpg","frame0001.jpg","frame0002.jpg","frame0003.jpg","frame0004.jpg","frame0005.jpg","frame0006.jpg","frame0007.jpg","frame0008.jpg","frame0009.jpg","frame0010.jpg","frame0011.jpg","frame0012.jpg","frame0013.jpg","frame0014.jpg","frame0015.jpg","frame0016.jpg","frame0017.jpg","frame0018.jpg","frame0019.jpg","frame0020.jpg","frame0021.jpg","frame0022.jpg","frame0023.jpg","frame0024.jpg","frame0025.jpg","frame0026.jpg","frame0027.jpg","frame0028.jpg","frame0029.jpg","frame0030.jpg","frame0031.jpg","frame0032.jpg","frame0033.jpg","frame0034.jpg","frame0035.jpg","frame0036.jpg","frame0037.jpg","frame0038.jpg","frame0039.jpg","frame0040.jpg","frame0041.jpg","frame0042.jpg","frame0043.jpg","frame0044.jpg"],
             pos: 0,
-            frameCount: 45,
             playing: false
-            
         };
         $scope.isFullscreen = false;
-        $scope.imgDir = 'images/Eclipse0f989895-65a6-3af3-bf02-497cd0f4f35bK/';
+        $scope.imgDir = '';
         $scope.toolName = 'test';
         $scope.showRating = false;
         $scope.playBtnImages = {
@@ -140,6 +137,19 @@ define(['angular',
             keyboardEventFrame: 25,
         }
 
+        $scope.auth = "?name=Samuel+Christie&email=schrist@ncsu.edu&token=d5154493-c7cd-40e9-8265-cfa1d0994385";
+
+        $scope.clip = Clip.get({
+            email:"dylan.bates@coker.edu",
+            app:"Eclipse",
+            tool:"Save",
+            clip:"Eclipse11e552b9-4887-35b3-9586-c2a0e9e54923K",
+            auth:"name=Samuel+Christie&email=schrist@ncsu.edu&token=d5154493-c7cd-40e9-8265-cfa1d0994385"}, function(clip) {
+                console.log(clip);
+                $scope.imgDir = 'http://screencaster-hub.appspot.com/api/'
+                    + clip.creator + '/' + clip.app + '/' + clip.tool + '/' + clip.name + '/'
+            })
+
         $scope.$watch(function(){ 
             return $scope.player.pos > $scope.clipDetails.keyboardEventFrame; 
         }, function(newVal, oldVal) {
@@ -149,7 +159,7 @@ define(['angular',
         $scope.timer = $interval(function() {
             if ($scope.player.playing) { //playing
                 console.log($scope.player.pos);
-                $scope.player.pos = (+$scope.player.pos + 1) % $scope.player.frameCount;
+                $scope.player.pos = (+$scope.player.pos + 1) % $scope.clip.frames.length;
             }
         }, 200);
     }])

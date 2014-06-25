@@ -26,6 +26,7 @@
     "ng-grid": "~2.0.11",
     "angular-resource": "~1.2.18",
     "ng-fullscreen": "*",
+    "angular-slider": "*",
     "venturocket-angular-slider": "~0.3.2"
   },
   "resolutions": {
