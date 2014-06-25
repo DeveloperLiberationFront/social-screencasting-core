@@ -44,6 +44,9 @@
 #controlPanel {
     display: flex;
     flex-direction: row;
+    position: relative;
+    align-items: center;
+    margin-top: 5px;
 }
 
 #controlPanel.fullscreen {
@@ -53,15 +56,41 @@
     width: 40%;
 }
 
+#controlPanel > div {
+    flex: 0 1 auto;
+}
+
 #playBtn {
     flex: 0 1 auto;
 }
 
-#controlPanel > div {
+#controlPanel > #sliders {
     flex: 1 1 auto;
+
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    margin-right: 10px;
+    justify-content: center;
+}
+
+#sliders > div {
+    flex: 0 1 auto;
+}
+
+#overlayMode {
+    width: 50px;
 }
 
 #playBtn img {
     width:65px;
     height:50px;
+}
+
+slider {
+    margin: 16px 5px 10px 5px;
+}
+
+slider span.bar {
+    width: auto;
 }

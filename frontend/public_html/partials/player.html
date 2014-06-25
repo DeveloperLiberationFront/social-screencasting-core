@@ -2,8 +2,8 @@
 <div id="player" fullscreen='isFullscreen'>
   <div id="panel" ng-click='isFullscreen=!isFullscreen'>
     <div id='overlay' ng-hide='isFullscreen'>Click to toggle fullscreen</div>
-    <img id='keyboardOverlay' ng-hide='keyboardMode == 4'
-         ng-src="{{ imgDir + keyboardImages[keyboardOverlay][keyboardMode % 3] + auth }}"/>
+    <img id='keyboardOverlay' ng-hide='kbdOverlay.mode == 3'
+         ng-src="{{ imgDir + kbdOverlay.images[kbdOverlay.status][kbdOverlay.mode % 3] + auth }}"/>
     <img class='img-responsive' ng-src="{{ imgDir + clip.frames[player.pos] + auth }}"/>
   </div>
 
@@ -11,9 +11,19 @@
     <button id='playBtn' ng-click="player.playing = !player.playing">
       <img ng-src="{{ playBtnImages[player.playing] }}"/>
     </button>
-    <div ng-controller='PlaybackSliderCtrl' ng-mousedown="player.playing = false">
-      <slider floor='0' ceiling='{{clip.frames.length -1}}' step='1' ng-model='player.pos'>
-      </slider>
+    <div id='sliders'>
+      <div ng-controller='PlaybackSliderCtrl' ng-mousedown="player.playing = false">
+        <slider floor='0' ceiling='{{clip.frames.length -1}}' step='1' ng-model='player.pos'>
+        </slider>
+      </div>
+      <div ng-controller='EditSliderCtrl' ng-show='player.editMode'>
+        <slider floor='0' ceiling='{{clip.frames.length -1}}' step='1'
+                ng-model='player.start' ng-model-range='player.end'>
+        </slider>
+      </div>
+    </div>
+    <div id='overlayMode'>
+      <img class='img-responsive' src="{{'images/' + kbdOverlay.images['active'][kbdOverlay.mode]}}" ng-click='kbdOverlay.mode = (kbdOverlay.mode + 1) % 4'/>
     </div>
   </div>
   <div ng-controller='RatingCtrl' id='rating' ng-show='showRating'>

@@ -109,7 +109,10 @@ define(['angular',
     function($scope, $interval, Clip, $filter) {
         $scope.player = {
             pos: 0,
-            playing: false
+            playing: false,
+            editMode: true,
+            start: 0,
+            end: 1,
         };
         $scope.isFullscreen = false;
         $scope.showRating = false;
@@ -117,16 +120,15 @@ define(['angular',
             true: 'images/playback/pause.svg',
             false:'images/playback/play.svg'
         }
-        $scope.keyboardMode = 0;
-        $scope.keyboardOverlay = 'inactive';
-        $scope.keyboardImages = {
-            'active': [ 'image_text.png', 'image.png', 'text.png' ],
-            'inactive': [ 'image_text_un.png', 'image_un.png', 'text_un.png']
+        $scope.kbdOverlay = {
+            mode: 0,
+            status: 'inactive',
+            images: {
+                'active': [ 'image_text.png', 'image.png', 'text.png', 'none.png' ],
+                'inactive': [ 'image_text_un.png', 'image_un.png', 'text_un.png', 'none.png']
+            }
         }
-        $scope.clipDetails = {
-            keyboardEventFrame: 25,
-        }
-        
+
         $scope.user.$promise.then(function() {
             $scope.clip = Clip.get(_.extend({
                 creator:"kjlubick@ncsu.edu",
@@ -138,27 +140,33 @@ define(['angular',
                     'http://screencaster-hub.appspot.com/api/:creator/:app/:tool/:name/',
                     clip
                 )
+                $scope.player.end = clip.frames.length-1;
                 clip.loaded = clip.frames.map(function(frame){
                     return new Image().src = $scope.imgDir + frame + $scope.auth;
                 })
+                clip.keyboardEventFrame = 25;
             })
         });
 
         $scope.$watch(function(){ 
-            return $scope.player.pos > $scope.clipDetails.keyboardEventFrame; 
+            return $scope.player.pos > $scope.clip.keyboardEventFrame; 
         }, function(newVal, oldVal) {
-            $scope.keyboardOverlay = (newVal ? 'active' : 'inactive')
+            $scope.kbdOverlay.status = (newVal ? 'active' : 'inactive')
         });
 
         $scope.timer = $interval(function() {
             if ($scope.player.playing) { //playing
-                console.log($scope.player.pos);
-                $scope.player.pos = (+$scope.player.pos + 1) % $scope.clip.frames.length;
+                $scope.player.pos = Math.max($scope.player.start, 
+                                             (+$scope.player.pos + 1) % ($scope.player.end+1));
             }
         }, 200);
     }])
 
   .controller('PlaybackSliderCtrl', ['$scope',
+    function($scope) {
+    }])
+
+  .controller('EditSliderCtrl', ['$scope',
     function($scope) {
     }]);
 });
