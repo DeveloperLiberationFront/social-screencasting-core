@@ -14,6 +14,14 @@ import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 
+/**
+ * 
+ * @author Kevin
+ *
+ * History:
+ * 2014/06/24 Slankas added table used to stage usages to central repositories
+ * 
+ */
 public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	
 	protected abstract Logger getLogger();
@@ -23,6 +31,8 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	protected abstract void executeStatementWithNoResults(PreparedStatement statement);
 	protected abstract ResultSet executeWithResults(PreparedStatement statement);
 
+	protected static final String[] TOOL_TABLE_NAMES = { "ToolUsages", "ToolUsagesStage" };
+	
 	protected void createTables()
 	{
 		createToolUsageTable();
@@ -31,15 +41,15 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	}
 
 
-
+	/**
+	 * creates the table used to store usages if it doesn't already exist.  
+	 * Two tables are used.  The first contains the complete history of all tool usages from the current computer
+	 * The second table is a stagin table used to send results to other repositories.
+	 */
 	private void createToolUsageTable()
 	{
-		/*
-		 * ToolUsage Schema CREATE TABLE IF NOT EXISTS ToolUsages ( use_id INTEGER PRIMARY KEY AUTOINCREMENT plugin_name TEXT, usage_timestamp INTEGER,
-		 * tool_name TEXT, tool_key_presses TEXT, class_of_tool TEXT, tool_use_duration INTEGER )
-		 */
-		// build up the sql
-		String sqlTableQuery = 		"CREATE TABLE IF NOT EXISTS ToolUsages ( " +
+		for (String tableName: TOOL_TABLE_NAMES) {
+			String sqlTableQuery = 		"CREATE TABLE IF NOT EXISTS "+ tableName+" ( " +
 				"use_id TEXT PRIMARY KEY, " +
 				"plugin_name TEXT, " +
 				"usage_timestamp INTEGER, " +
@@ -50,9 +60,10 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				"clip_score INTEGER" +
 				") ";
 
-		// execute the query
-		PreparedStatement statement = makePreparedStatement(sqlTableQuery);
-		executeStatementWithNoResults(statement);
+			// execute the query
+			PreparedStatement statement = makePreparedStatement(sqlTableQuery);
+			executeStatementWithNoResults(statement);
+		}		
 	}
 
 	private void createClipTable()
@@ -89,38 +100,36 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	@Override
 	public void storeToolUsage(ToolUsage tu, String associatedPlugin)
 	{
-		String sqlQuery = 		"INSERT INTO ToolUsages ( "+
-				"use_id, "+
-				"plugin_name, "+
-				"usage_timestamp, "+
-				"tool_name, "+
-				"tool_key_presses, "+
-				"class_of_tool, "+
-				"tool_use_duration,"+
-				"clip_score ) VALUES (?,?,?,?,?,?,?,?)";
-
-
-		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
-		{
-			String uniqueId = ToolStream.makeUniqueIdentifierForToolUsage(tu, getUserEmail());
-			statement.setString(1, uniqueId);
-			statement.setString(2, associatedPlugin);
-			statement.setLong(3, tu.getTimeStamp().getTime());
-			statement.setString(4, tu.getToolName());
-			statement.setString(5, tu.getToolKeyPresses());
-			statement.setString(6, tu.getToolClass());
-			statement.setInt(7, tu.getDuration());
-			statement.setInt(8, tu.getClipScore());
-			
-			getLogger().debug(String.format("INSERT INTO ToolUsages ( use_id, plugin_name, usage_timestamp, tool_name, tool_key_presses, class_of_tool, "+
-				"tool_use_duration, clip_score  ) VALUES (%s,%s,%d,%s,%s,%s,%d,%d)",
-				uniqueId,associatedPlugin, tu.getTimeStamp().getTime(), tu.getToolName(), tu.getToolKeyPresses(), tu.getToolClass(), tu.getDuration(), tu.getClipScore()));
-			
-			executeStatementWithNoResults(statement);
-		}
-		catch (SQLException e)
-		{
-			throw new DBAbstractionException("There was a problem in storeToolUsage()", e);
+		for (String tableName: TOOL_TABLE_NAMES) {
+			String sqlQuery = 		
+					"INSERT INTO  "+ tableName+			
+					   " ( use_id, plugin_name, usage_timestamp, tool_name, " +
+					   "  tool_key_presses, class_of_tool, tool_use_duration,clip_score ) "+
+					" VALUES (?,?,?,?,?,?,?,?)";
+	
+	
+			try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
+			{
+				String uniqueId = ToolStream.makeUniqueIdentifierForToolUsage(tu, getUserEmail());
+				statement.setString(1, uniqueId);
+				statement.setString(2, associatedPlugin);
+				statement.setLong(3, tu.getTimeStamp().getTime());
+				statement.setString(4, tu.getToolName());
+				statement.setString(5, tu.getToolKeyPresses());
+				statement.setString(6, tu.getToolClass());
+				statement.setInt(7, tu.getDuration());
+				statement.setInt(8, tu.getClipScore());
+				
+				getLogger().debug(String.format("INSERT INTO "+tableName+" ( use_id, plugin_name, usage_timestamp, tool_name, tool_key_presses, class_of_tool, "+
+					"tool_use_duration, clip_score  ) VALUES (%s,%s,%d,%s,%s,%s,%d,%d)",
+					uniqueId,associatedPlugin, tu.getTimeStamp().getTime(), tu.getToolName(), tu.getToolKeyPresses(), tu.getToolClass(), tu.getDuration(), tu.getClipScore()));
+				
+				executeStatementWithNoResults(statement);
+			}
+			catch (SQLException e)
+			{
+				throw new DBAbstractionException("There was a problem in storeToolUsage()", e);
+			}
 		}
 
 	}
