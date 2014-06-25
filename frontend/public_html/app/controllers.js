@@ -3,6 +3,7 @@ define(['angular',
         'underscore',
         'ng-bootstrap',
         'ng-grid',
+        'ng-ui-utils',
         'services'],
        function (ng, $, _) {
   /* Controllers */
@@ -21,6 +22,7 @@ define(['angular',
   
   return ng.module('socasterControllers',
                    ['ui.bootstrap',
+                    'ui.format',
                     'ngGrid',
                     'ngResource',
                     'socasterServices'])
@@ -113,15 +115,14 @@ define(['angular',
         }
     }])
 
-  .controller('PlayerCtrl', ['$scope', '$interval', 'Clip', 
-    function($scope, $interval, Clip) {
+  .controller('PlayerCtrl', ['$scope', '$interval', 'Clip', '$filter',
+    function($scope, $interval, Clip, $filter) {
         $scope.player = {
             pos: 0,
             playing: false
         };
         $scope.isFullscreen = false;
         $scope.imgDir = '';
-        $scope.toolName = 'test';
         $scope.showRating = false;
         $scope.playBtnImages = {
             true: 'images/playback/pause.svg',
@@ -143,11 +144,13 @@ define(['angular',
             email:"dylan.bates@coker.edu",
             app:"Eclipse",
             tool:"Save",
-            clip:"Eclipse11e552b9-4887-35b3-9586-c2a0e9e54923K",
+            clip:"Eclipsec9ed4c55-1432-34b2-ade1-d584656e7868K",
             auth:"name=Samuel+Christie&email=schrist@ncsu.edu&token=d5154493-c7cd-40e9-8265-cfa1d0994385"}, function(clip) {
                 console.log(clip);
-                $scope.imgDir = 'http://screencaster-hub.appspot.com/api/'
-                    + clip.creator + '/' + clip.app + '/' + clip.tool + '/' + clip.name + '/'
+                $scope.imgDir = $filter('format')(
+                    'http://screencaster-hub.appspot.com/api/:creator/:app/:tool/:name/',
+                    clip
+                )
             })
 
         $scope.$watch(function(){ 

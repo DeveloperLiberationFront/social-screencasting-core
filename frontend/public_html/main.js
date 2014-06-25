@@ -15,6 +15,7 @@ requirejs.config({
         'ng-grid': '../lib/bower/ng-grid/ng-grid-2.0.11.min',
         'ng-fullscreen': '../lib/bower/ng-fullscreen/ng-fullscreen',
         'ng-slider': '../lib/bower/angular-slider/angular-slider',
+        'ng-ui-utils': '../lib/bower/angular-ui-utils/ui-utils',
         'underscore': '../lib/bower/underscore/underscore',
 
         'tablesorter': '../lib/bower/jquery.tablesorter/js',
@@ -28,6 +29,7 @@ requirejs.config({
         'ng-fullscreen': ['angular'],
         'ng-grid': ['angular'],
         'ng-slider': ['angular'],
+        'ng-ui-utils': ['angular'],
         'bootstrap': ['jquery'],
         'jquery-ui': ['jquery'],
         'tablesorter': ['jquery'],

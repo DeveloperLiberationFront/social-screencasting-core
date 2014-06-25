@@ -27,7 +27,8 @@
     "angular-resource": "~1.2.18",
     "ng-fullscreen": "*",
     "angular-slider": "*",
-    "venturocket-angular-slider": "~0.3.2"
+    "venturocket-angular-slider": "~0.3.2",
+    "angular-ui-utils": "~0.1.1"
   },
   "resolutions": {
     "jquery": "2.1.1"
