@@ -8,18 +8,6 @@ define(['angular',
        function (ng, $, _) {
   /* Controllers */
 
-  function hashToList(hash, names) {
-      names = _.defaults(names, {key: 'name', val: 'value'})
-      result = []
-      $.each(hash, function(key, val) {
-          if (!_.isObject(val)) {
-              val = _.object([[names.val, val]]);
-          }
-          result.push(ng.extend(_.object([[names.key, key]]), val))
-      });
-      return result;
-  }
-  
   return ng.module('socasterControllers',
                    ['ui.bootstrap',
                     'ui.format',
@@ -27,9 +15,11 @@ define(['angular',
                     'ngResource',
                     'socasterServices'])
   
-  .controller('NavCtrl', ['$scope', 'User', 'Application',
-    function($scope, User, Application) {
-        $scope.user = User.query();
+  .controller('NavCtrl', ['$scope', '$filter', 'User', 'Application',
+    function($scope, $filter, User, Application) {
+        $scope.user = User.get(function(user){
+            $scope.auth = '?'+$.param(_.pick(user, 'name', 'email', 'token'));
+        });
         $scope.applications = Application.query(function() {
             $scope.$broadcast('appSelected', $scope.applications[0]);
         });
@@ -122,7 +112,6 @@ define(['angular',
             playing: false
         };
         $scope.isFullscreen = false;
-        $scope.imgDir = '';
         $scope.showRating = false;
         $scope.playBtnImages = {
             true: 'images/playback/pause.svg',
@@ -137,21 +126,23 @@ define(['angular',
         $scope.clipDetails = {
             keyboardEventFrame: 25,
         }
-
-        $scope.auth = "?name=Samuel+Christie&email=schrist@ncsu.edu&token=d5154493-c7cd-40e9-8265-cfa1d0994385";
-
-        $scope.clip = Clip.get({
-            email:"dylan.bates@coker.edu",
-            app:"Eclipse",
-            tool:"Save",
-            clip:"Eclipsec9ed4c55-1432-34b2-ade1-d584656e7868K",
-            auth:"name=Samuel+Christie&email=schrist@ncsu.edu&token=d5154493-c7cd-40e9-8265-cfa1d0994385"}, function(clip) {
-                console.log(clip);
+        
+        $scope.user.$promise.then(function() {
+            $scope.clip = Clip.get(_.extend({
+                creator:"kjlubick@ncsu.edu",
+                app:"Eclipse",
+                tool:"Extract Local Variable",
+                clip:"Eclipse8d6980ed-a27a-30bd-97c5-3174bf71017cK",
+            }, _.pick($scope.user, 'token', 'email', 'name')), function(clip) {
                 $scope.imgDir = $filter('format')(
                     'http://screencaster-hub.appspot.com/api/:creator/:app/:tool/:name/',
                     clip
                 )
+                clip.loaded = clip.frames.map(function(frame){
+                    return new Image().src = $scope.imgDir + frame + $scope.auth;
+                })
             })
+        });
 
         $scope.$watch(function(){ 
             return $scope.player.pos > $scope.clipDetails.keyboardEventFrame; 

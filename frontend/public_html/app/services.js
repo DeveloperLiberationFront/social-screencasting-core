@@ -35,15 +35,10 @@ define(['angular', 'ng-resource'], function (ng) {
 
     .factory('Clip', ['$resource', 
       function($resource) {
-          return $resource('http://screencaster-hub.appspot.com/api/:email/:app/:tool/:clip?:auth', {
-              email: '@creator', app:'@app', tool:'@tool', clip: '@name',
+          return $resource('http://screencaster-hub.appspot.com/api/:creator/:app/:tool/:clip?:auth', {
+              creator: '@creator', app:'@app', tool:'@tool', clip: '@name',
           }, {
               query: {method:'GET', isArray: false},
-              frame: {
-                  method:'GET',
-                  url:'http://screencaster-hub.appspot.com/api/:email/:app/:tool/:clip/:frame?:auth',
-                  isArray: false,
-              }
           });
       }])
 });
