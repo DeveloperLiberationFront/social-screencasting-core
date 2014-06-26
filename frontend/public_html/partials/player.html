@@ -22,7 +22,7 @@
         </slider>
       </div>
     </div>
-    <div id='overlayMode' data-original-title="{{kbdOverlay.tooltip[kbdOverlay.mode]}}" ui-jq="tooltip">
+    <div id='overlayMode' tooltip="{{kbdOverlay.tooltip[kbdOverlay.mode]}}" tooltip-placement='right'>
       <img class='img-responsive' src="{{'images/' + kbdOverlay.images['active'][kbdOverlay.mode]}}" ng-click='kbdOverlay.mode = (kbdOverlay.mode + 1) % 4'/>
     </div>
   </div>
