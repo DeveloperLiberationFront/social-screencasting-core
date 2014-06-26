@@ -138,7 +138,9 @@ public class ToolStream {
 	}
 
 	public static class ToolUsage {
-
+		
+		private String useID;
+		
 		private String toolName, toolClass, keyPresses;
 		private Date timeStamp;
 		private int duration;
@@ -170,6 +172,14 @@ public class ToolStream {
 			setPluginName(pluginName);
 		}
 
+		public ToolUsage(String useID, String toolName, String toolClass, String keyPresses, String pluginName, Date timeStamp, int duration, int score)
+		{
+			this(toolName, toolClass, keyPresses, timeStamp, duration, score);
+			this.setPluginName(pluginName);
+			this.setUseID(useID);
+		}
+		
+		
 		public static ToolUsage buildFromJSONObject(JSONObject jobj)
 		{
 			// TODO change this (eventually) to read the clip_score from the json
@@ -285,6 +295,15 @@ public class ToolStream {
 		{
 			return this.clipScore;
 		}
+		
+		public String getUseID() {
+			return useID;
+		}
+
+		public void setUseID(String newUseID) {
+			this.useID = newUseID;
+		}		
+		
 
 		@Override
 		public String toString()
