@@ -22,8 +22,12 @@ define(['angular',
   
   .config(['$routeProvider',
     function($routeProvider) {
-      $routeProvider.
-        when('/', {
+      $routeProvider
+        .when('/', {
+          templateUrl: 'partials/main.html',
+          controller: 'MainCtrl',
+        })
+        .when('/player', {
           templateUrl: 'partials/player.html',
           controller: 'PlayerCtrl'
         })

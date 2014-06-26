@@ -1,16 +1,3 @@
-.debug {
-	color:red;
-}
-
-body {
-	background-color:#F0F0F0;
-}
-
-h1 {
-   color:#ffa729;
-   font-size:2.2em;
-}
-
 .newTool { /* For marking tools in the comparison table that have not yet been used by the viewer */
 	background-color: #baeec8;
 }
@@ -22,7 +9,7 @@ h1 {
 }
 
 .container-fluid {
-    padding-top: 100px;
+    padding-top: 65px;
 }
 
 /* tool tables */
@@ -31,4 +18,15 @@ h1 {
     width: 400px;
     min-height: 400px;
     max-height: 800px;
+}
+
+#main {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: start;
+}
+
+#main > div {
+    flex: 0 1 auto;
+    margin: 0 15px 15px 0;
 }

@@ -24,7 +24,7 @@ define(['angular',
             $scope.$broadcast('appSelected', $scope.applications[0]);
         });
         $scope.$on('appSelected', function(event, app) {
-            app.$promise = app.$get();
+            app.$promise = app.$get(_.pick($scope.user, 'name', 'email', 'token'));
             $scope.application = app;
         });
     }])
@@ -42,6 +42,7 @@ define(['angular',
         });
         $scope.gridOptions = { 
             data: 'users',
+            multiSelect: false,
             columnDefs: [{field:'name', displayName:'Name'},
                          {field:'email', displayName:'Email'}]
         }
@@ -77,7 +78,15 @@ define(['angular',
             data: 'tools',
             selectedItems: $scope.selection,
             multiSelect: false,
-            columnDefs: [{field:'name', displayName:'Name'}]
+            columnDefs: [
+                {field:'name', displayName:'Name'},
+                {
+                    width: '50px',
+                    field:'video', displayName:'Video',
+                    cellTemplate:  "<div class='ngCellText'><img src='images/video_icon_tiny.png' ng-show='row.getProperty(col.field)'/></div>",
+                    sortFn: function(x,y){return (x === y)? 0 : x? -1 : 1;},
+                },
+            ]
         };
     }])
 
