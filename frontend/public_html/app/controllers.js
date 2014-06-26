@@ -1,7 +1,7 @@
 define(['angular',
         'jquery',
         'underscore',
-        'jquery-ui',
+        'jquery.cropper',
         'ng-bootstrap',
         'ng-grid',
         'ng-ui-utils',
@@ -171,6 +171,16 @@ define(['angular',
                                              (+$scope.player.pos + 1) % ($scope.player.end+1));
             }
         }, 200);
+
+        $scope.crop = function() {
+            $scope.player.isCropping = true;
+            $(".img-container img").cropper({
+                aspectRatio: "auto",
+                done: function(data) {
+                    console.log(data);
+                }
+            });
+        }
     }])
 
   .controller('PlaybackSliderCtrl', ['$scope',
@@ -179,16 +189,5 @@ define(['angular',
 
   .controller('EditSliderCtrl', ['$scope',
     function($scope) {
-    }])
-
-  .controller('CropCtrl', ['$scope',
-    function($scope) {
-        $scope.player.isCropping = true;
-        console.log($("#crop"));
-        $("#crop").resizable({
-            containment: "#panel"
-        }).draggable({
-            containment: "#panel"
-        });
-  }]);
+    }]);
 });

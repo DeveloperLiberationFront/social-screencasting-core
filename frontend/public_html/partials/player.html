@@ -1,15 +1,15 @@
 <div id="mediaTitle">{{clip.tool}}</div>
-<div id="player" fullscreen='isFullscreen' ng-controller="PlayerCtrl as player">
+<button ng-click="crop()">Crop</button>
+<div id="player" fullscreen='isFullscreen'>
   <div id="panel" ng-click='FullscreenCtrl'>
     
-      
-      <div ng-controller="CropCtrl as crop"> 
         <div id='overlay' ng-hide='(player.isCropping || isFullscreen)'>Click to toggle fullscreen</div>
-        <div id='crop' ng-show="player.isCropping"> </div>
-    </div>
+
     <img id='keyboardOverlay' ng-hide='(kbdOverlay.mode == 3 || player.isCropping)'
          ng-src="{{ imgDir + kbdOverlay.images[kbdOverlay.status][kbdOverlay.mode % 3] + auth }}"/>
-    <img class='img-responsive' ng-src="{{ imgDir + clip.frames[player.pos] + auth }}"/>
+      <div class="img-container">
+        <img class='img-responsive' ng-src="{{ imgDir + clip.frames[player.pos] + auth }}"/>
+    </div>
   </div>
 
   <div id="controlPanel" ng-class="{fullscreen: isFullscreen}">

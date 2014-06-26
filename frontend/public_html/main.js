@@ -20,7 +20,8 @@ requirejs.config({
         'underscore': '../lib/bower/underscore/underscore',
 
         'tablesorter': '../lib/bower/jquery.tablesorter/js',
-        'jquery.metadata': '../lib/bower/jquery.metadata/jquery.metadata'
+        'jquery.metadata': '../lib/bower/jquery.metadata/jquery.metadata',
+        'jquery.cropper': '../lib/cropper/cropper'
     },
     shim: {
 	    'angular' : {'exports' : 'angular'},
@@ -34,6 +35,7 @@ requirejs.config({
         'ng-ui-utils': ['angular'],
         'bootstrap': ['jquery'],
         'jquery-ui': ['jquery'],
+        'jquery.cropper':['jquery'],
         'tablesorter': ['jquery'],
         'jquery.metadata': ['jquery'],
         'lib/jquery.fullscreen': ['jquery'],
