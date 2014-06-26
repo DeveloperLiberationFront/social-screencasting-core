@@ -5,7 +5,7 @@ requirejs.config({
     paths: {
         lib: '../lib',
         jquery: '../lib/bower/jquery/dist/jquery.min',
-        bootstrap: '../lib/bower/bootstrap/dist/js',
+        bootstrap: '../lib/bower/bootstrap/dist/js/bootstrap',
 //        'jquery-ui': '../lib/bower/jquery-ui/ui/minified/jquery-ui.min',
         text: '../lib/bower/requirejs-text/text',
         'angular': '../lib/bower/angular/angular',
@@ -50,7 +50,7 @@ requirejs([
     'ng-route',
     'ng-bootstrap',
     'ng-grid',
-
+    'bootstrap',
     'controllers',
 //    'playback',
 ], function(angular, app) {

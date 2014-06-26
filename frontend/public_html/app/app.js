@@ -4,6 +4,7 @@ define(['angular',
         'services',
         'ng-bootstrap',
         'ng-fullscreen',
+        'ng-ui-utils',
         'ng-slider',
        ], function (ng) {
   'use strict';
@@ -13,6 +14,7 @@ define(['angular',
   return ng.module('socasterApp', [
     'ngRoute',
     'ui.bootstrap',
+    'ui.jq',
     'socasterControllers',
     'socasterServices',
     'ngFullscreen',
@@ -30,5 +32,13 @@ define(['angular',
             redirectTo: '/'
         });
     }
-  ]);
+  ])
+
+  .value('uiJqConfig', {
+      // The Tooltip namespace
+      tooltip: {
+          // Tooltip options. This object will be used as the defaults
+          placement: 'right'
+      }
+  });
 });

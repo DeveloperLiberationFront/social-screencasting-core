@@ -126,7 +126,8 @@ define(['angular',
             images: {
                 'active': [ 'image_text.png', 'image.png', 'text.png', 'none.png' ],
                 'inactive': [ 'image_text_un.png', 'image_un.png', 'text_un.png', 'none.png']
-            }
+            },
+            tooltip: ["Image and text", "Image only", "Text only", "No overlay"],
         }
 
         $scope.user.$promise.then(function() {
