@@ -185,6 +185,10 @@ define(['angular',
     function($scope) {
         $scope.player.isCropping = true;
         console.log($("#crop"));
-        $("#crop").resizable();
+        $("#crop").resizable({
+            containment: "#panel"
+        }).draggable({
+            containment: "#panel"
+        });
   }]);
 });
