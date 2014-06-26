@@ -1,6 +1,7 @@
 define(['angular',
         'jquery',
         'underscore',
+        'jquery-ui',
         'ng-bootstrap',
         'ng-grid',
         'ng-ui-utils',
@@ -108,8 +109,7 @@ define(['angular',
 
   .controller('FullscreenCtrl', ['$scope',
     function($scope) {
-        $scope.isFullscreen = false;
-        $scope.toggle = function() {
+        if (!$scope.isCropping) {
             $scope.isFullscreen = !$scope.isFullscreen;
         }
     }])
@@ -122,6 +122,7 @@ define(['angular',
             editMode: true,
             start: 0,
             end: 1,
+            isCropping: false
         };
         $scope.isFullscreen = false;
         $scope.showRating = false;
@@ -178,5 +179,12 @@ define(['angular',
 
   .controller('EditSliderCtrl', ['$scope',
     function($scope) {
-    }]);
+    }])
+
+  .controller('CropCtrl', ['$scope',
+    function($scope) {
+        $scope.player.isCropping = true;
+        console.log($("#crop"));
+        $("#crop").resizable();
+  }]);
 });

@@ -1,0 +1,9 @@
+#crop {
+	position:absolute;
+	background-color:white;
+	width:100px;
+	height:100px;
+	top:50px;
+	left:50px;
+	border: 1px solid black;
+}

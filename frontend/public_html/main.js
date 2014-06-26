@@ -6,7 +6,7 @@ requirejs.config({
         lib: '../lib',
         jquery: '../lib/bower/jquery/dist/jquery.min',
         bootstrap: '../lib/bower/bootstrap/dist/js/bootstrap',
-//        'jquery-ui': '../lib/bower/jquery-ui/ui/minified/jquery-ui.min',
+        'jquery-ui': '../lib/bower/jquery-ui/ui/minified/jquery-ui.min',
         text: '../lib/bower/requirejs-text/text',
         'angular': '../lib/bower/angular/angular',
         'ng-route': '../lib/bower/angular-route/angular-route.min',
