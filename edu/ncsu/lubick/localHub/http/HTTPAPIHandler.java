@@ -72,7 +72,9 @@ public class HTTPAPIHandler extends AbstractHandler {
 		if (pieces.length <= 2) {
 			response.getWriter().println("Sorry, Nothing at this URL");
 		} else if (pieces.length == 3){
-			handleEmailLeg(chopOffQueryString(pieces[2]), response);
+			handleGetUserInfo(chopOffQueryString(pieces[2]), response);
+		} else if (pieces.length == 4) {
+			handleGetAllToolsForPlugin(chopOffQueryString(pieces[3]), response);
 		} else if (pieces.length == 5) {
 			handleGetInfoAboutTool(pieces[3], chopOffQueryString(pieces[4]), response);
 		} else if (pieces.length == 6) {
@@ -82,9 +84,122 @@ public class HTTPAPIHandler extends AbstractHandler {
 		}
 	}
 
-	private void handleImageRequest(String clipId, String fileName, HttpServletResponse response) throws IOException
+	private void handleGetUserInfo(String emailTarget, HttpServletResponse response) throws IOException
 	{
-		response.sendRedirect("/"+clipId+"/"+fileName);
+		if (emailTarget.equals(userManager.getUserEmail())  || "user".equals(emailTarget) || "users".equals(emailTarget)) 
+		{
+			try {
+				JSONObject user = makeUserAuthObj();
+
+				JSONObject data = new JSONObject();
+				data.put("user", user);
+
+				data.write(response.getWriter());
+			}
+			catch (JSONException e) {
+				throw new IOException("Problem making JSON", e);
+			}
+		} 
+		else 
+		{
+			response.getWriter().println("You can only query the local hub for information about you, "+ userManager.getUserName());
+		}
+
+	}
+
+	private JSONObject makeUserAuthObj() throws JSONException
+	{
+		JSONObject user = new JSONObject();
+		user.put("email", userManager.getUserEmail());
+		user.put("name", userManager.getUserName());
+		user.put("token", userManager.getUserToken());
+		return user;
+	}
+
+	private void handleGetAllToolsForPlugin(String applicationName, HttpServletResponse response) throws IOException
+	{
+		JSONObject appObj = makePluginArray(applicationName);
+		JSONObject dataObject = new JSONObject();
+		try {
+			dataObject.put(applicationName, appObj);
+			dataObject.write(response.getWriter());
+		}
+		catch (JSONException e) {
+			throw new IOException("Problem making JSON " + dataObject, e);
+		}
+	
+	}
+	
+	private JSONObject makePluginArray(String pluginName)
+	{
+		List<ToolCountStruct> counts = databaseLink.getAllToolAggregateForPlugin(pluginName);
+
+		JSONObject retVal = new JSONObject();
+		for(ToolCountStruct tcs: counts)
+		{
+			JSONObject tempObject = new JSONObject();
+			try
+			{
+				tempObject.put("clips", 5);		//TODO FIX
+				tempObject.put("gui", tcs.guiToolCount);
+				tempObject.put("keyboard", tcs.keyboardCount);
+				retVal.put(tcs.toolName, tempObject);
+			}
+			catch (JSONException e)
+			{
+				logger.error("Unusual JSON exception, squashing: "+tempObject,e);
+			}
+		}
+		return retVal;
+	}
+
+	private void handleGetInfoAboutTool(String applicationName, String toolName, HttpServletResponse response) throws IOException
+	{
+		List<File> keyClips = databaseLink.getBestExamplesOfTool(applicationName, toolName, true);
+		List<File> guiClips = databaseLink.getBestExamplesOfTool(applicationName, toolName, false);
+		ToolCountStruct countStruct = databaseLink.getToolAggregate(applicationName, toolName);
+	
+		JSONObject clips = new JSONObject();
+	
+		try
+		{
+			JSONArray keyJarr = new JSONArray();
+			for(File f: keyClips)
+			{
+				keyJarr.put(f.getName());
+			}
+	
+			JSONArray guiJarr = new JSONArray();
+			for(File f: guiClips)
+			{
+				guiJarr.put(f.getName());
+			}
+	
+			JSONObject usage = new JSONObject();
+			JSONObject toolJson = new JSONObject();
+			toolJson.put("gui", countStruct.guiToolCount);
+			toolJson.put("keyboard", countStruct.keyboardCount);
+			usage.put(toolName, toolJson);
+	
+			// Testing data
+			keyJarr.put("Eclipse16274d13-bebb-3196-832c-70313e08cdaaK");
+			//keyJarr.put("Eclipsee667cfd3-0bd8-3af8-93d7-10d16ab2f854");
+			//guiJarr.put("Eclipsee434f382-7183-3cc5-8380-2137816a48d4");
+			//guiJarr.put("Eclipse47397aaf-c70f-3aa1-9df5-a87f5a583af3");
+			//guiJarr.put("Eclipse06ac5c3c-da64-3300-9a74-6fed83aa2722");
+	
+	
+			clips.put("keyclips",keyJarr);
+			clips.put("guiclips",guiJarr);
+			clips.put("usage", usage);
+	
+			response.setContentType("application/json");
+			clips.write(response.getWriter());
+		}
+		catch (JSONException e)
+		{
+			logger.error("Problem compiling clip names and writing them out "+clips,e);
+		}
 	}
 
 	private void handleGetClipInfo(String applicationName, String toolName, String clipId, HttpServletResponse response) throws IOException
@@ -116,9 +231,9 @@ public class HTTPAPIHandler extends AbstractHandler {
 			dataObject.put("creator", userManager.getUserEmail());
 
 			response.setContentType("application/json");
-			
+
 			logger.debug("Returning clip info "+clipId);
-			
+
 			dataObject.write(response.getWriter());
 		}
 		catch (JSONException e)
@@ -129,97 +244,9 @@ public class HTTPAPIHandler extends AbstractHandler {
 		}
 	}
 
-	private void handleGetInfoAboutTool(String applicationName, String toolName, HttpServletResponse response) throws IOException
+	private void handleImageRequest(String clipId, String fileName, HttpServletResponse response) throws IOException
 	{
-		List<File> keyClips = databaseLink.getBestExamplesOfTool(applicationName, toolName, true);
-		List<File> guiClips = databaseLink.getBestExamplesOfTool(applicationName, toolName, false);
-		ToolCountStruct countStruct = databaseLink.getToolAggregate(applicationName, toolName);
-		
-		JSONObject clips = new JSONObject();
-		
-		try
-		{
-			JSONArray keyJarr = new JSONArray();
-			for(File f: keyClips)
-			{
-				keyJarr.put(f.getName());
-			}
-			
-			JSONArray guiJarr = new JSONArray();
-			for(File f: guiClips)
-			{
-				guiJarr.put(f.getName());
-			}
-			
-			JSONObject usage = new JSONObject();
-			JSONObject toolJson = new JSONObject();
-			toolJson.put("gui", countStruct.guiToolCount);
-			toolJson.put("keyboard", countStruct.keyboardCount);
-			usage.put(toolName, toolJson);
-			
-			// Testing data
-			keyJarr.put("Eclipse16274d13-bebb-3196-832c-70313e08cdaaK");
-			//keyJarr.put("Eclipsee667cfd3-0bd8-3af8-93d7-10d16ab2f854");
-			//guiJarr.put("Eclipsee434f382-7183-3cc5-8380-2137816a48d4");
-			//guiJarr.put("Eclipse47397aaf-c70f-3aa1-9df5-a87f5a583af3");
-			//guiJarr.put("Eclipse06ac5c3c-da64-3300-9a74-6fed83aa2722");
-
-			
-			clips.put("keyclips",keyJarr);
-			clips.put("guiclips",guiJarr);
-			clips.put("usage", usage);
-
-			response.setContentType("application/json");
-			clips.write(response.getWriter());
-		}
-		catch (JSONException e)
-		{
-			logger.error("Problem compiling clip names and writing them out "+clips,e);
-		}
-	}
-
-	private void handleEmailLeg(String emailTarget, HttpServletResponse response) throws IOException
-	{
-		if (emailTarget.equals(userManager.getUserEmail())  || "user".equals(emailTarget) || "users".equals(emailTarget)) 
-		{
-			returnUserInfo(response);
-		} 
-		else 
-		{
-			response.getWriter().println("You can only query the local hub for information about you, "+ userManager.getUserName());
-		}
-
-	}
-
-	private void returnUserInfo(HttpServletResponse response) throws IOException
-	{
-		try {
-			JSONObject user = makeUserAuthObj();
-
-//			JSONObject applications = new JSONObject();
-//			for(String plugin : this.databaseLink.getNamesOfAllPlugins()) {
-//				applications.put(plugin, makePluginArray(plugin));
-//			}
-//			user.put("applications", applications);
-			
-			JSONObject data = new JSONObject();
-			data.put("user", user);
-			
-			data.write(response.getWriter());
-		}
-		catch (JSONException e) {
-			throw new IOException("Problem making JSON", e);
-		}
-	}
-
-
-	private JSONObject makeUserAuthObj() throws JSONException
-	{
-		JSONObject user = new JSONObject();
-		user.put("email", userManager.getUserEmail());
-		user.put("name", userManager.getUserName());
-		user.put("token", userManager.getUserToken());
-		return user;
+		response.sendRedirect("/"+clipId+"/"+fileName);
 	}
 
 }
