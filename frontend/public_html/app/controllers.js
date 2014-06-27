@@ -38,7 +38,7 @@ define(['angular',
     function($scope) {
         $scope.$on('appSelected', function(event, app) {
             app.$promise.then(function(){
-                $scope.users = app.users
+                $scope.users = app.users;
             });
         });
         $scope.gridOptions = { 
@@ -46,7 +46,7 @@ define(['angular',
             multiSelect: false,
             columnDefs: [{field:'name', displayName:'Name'},
                          {field:'email', displayName:'Email'}]
-        }
+        };
     }])
 
   .controller('LocalToolsCtrl', ['$scope', 'User',
@@ -54,8 +54,8 @@ define(['angular',
         $scope.selection = [];
         $scope.$on('appSelected', function(event, app) {
             $scope.data = User.get(function(user) {
-                $scope.tools = user.applications[app.name]
-            })
+                $scope.tools = user.applications[app.name];
+            });
         });
         $scope.gridOptions = { 
             data: 'tools',
@@ -100,7 +100,7 @@ define(['angular',
         $scope.application = app;
         $scope.status.isopen = false;
         $rootScope.$broadcast('appSelected', app);
-      }
+      };
     }])
 
   .controller('RatingCtrl', ['$scope',
@@ -129,7 +129,7 @@ define(['angular',
         $scope.playBtnImages = {
             true: 'images/playback/pause.svg',
             false:'images/playback/play.svg'
-        }
+        };
         $scope.kbdOverlay = {
             mode: 0,
             status: 'inactive',
@@ -138,31 +138,32 @@ define(['angular',
                 'inactive': [ 'image_text_un.png', 'image_un.png', 'text_un.png', 'none.png']
             },
             tooltip: ["Image and text", "Image only", "Text only", "No overlay"],
-        }
+        };
 
         $scope.user.$promise.then(function() {
             $scope.clip = Clip.get(_.extend({
                 creator:"kjlubick@ncsu.edu",
                 app:"Eclipse",
                 tool:"Extract Local Variable",
-                clip:"Eclipse8d6980ed-a27a-30bd-97c5-3174bf71017cK",
+                clip:"Eclipse16274d13-bebb-3196-832c-70313e08cdaaK",
             }, _.pick($scope.user, 'token', 'email', 'name')), function(clip) {
                 $scope.imgDir = $filter('format')(
-                    'http://screencaster-hub.appspot.com/api/:creator/:app/:tool/:name/',
+                    //'http://screencaster-hub.appspot.com/api/:creator/:app/:tool/:name/',
+                    'localHost:4443/api/:creator/:app/:tool/:name/',
                     clip
-                )
+                );
                 $scope.player.end = clip.frames.length-1;
                 clip.loaded = clip.frames.map(function(frame){
                     return new Image().src = $scope.imgDir + frame + $scope.auth;
-                })
+                });
                 clip.keyboardEventFrame = 25;
-            })
+            });
         });
 
         $scope.$watch(function(){ 
             return $scope.player.pos > $scope.clip.keyboardEventFrame; 
         }, function(newVal, oldVal) {
-            $scope.kbdOverlay.status = (newVal ? 'active' : 'inactive')
+            $scope.kbdOverlay.status = (newVal ? 'active' : 'inactive');
         });
 
         $scope.timer = $interval(function() {
@@ -180,7 +181,7 @@ define(['angular',
                     console.log(data);
                 }
             });
-        }
+        };
     }])
 
   .controller('PlaybackSliderCtrl', ['$scope',

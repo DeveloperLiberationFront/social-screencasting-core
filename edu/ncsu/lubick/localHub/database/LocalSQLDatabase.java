@@ -14,6 +14,7 @@ import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
+import edu.ncsu.lubick.util.ToolCountStruct;
 
 public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	
@@ -200,17 +201,55 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		
 		return null;
 	}
+	
+	@Override
+	public ToolCountStruct getToolAggregate(String applicationName, String toolName) {
+		
+		//First, find the total number of tool uses that match this application/tool 
+		String sqlQuery = "SELECT count(*) FROM ToolUsages WHERE plugin_name=? AND "
+				+ "tool_name=?";
+
+		int totalCount = 0;
+		try (PreparedStatement statement = makePreparedStatement(sqlQuery);){
+			statement.setString(1, applicationName);
+			statement.setString(2, toolName);
+			try (ResultSet results = executeWithResults(statement);) {
+				if (results.next()){
+					totalCount = results.getInt(1);
+				}
+			}
+		}catch (SQLException ex){
+			throw new DBAbstractionException(ex);
+		}
+		
+		//second, find the total number of gui uses that match this application/tool 
+		sqlQuery = "SELECT count(*) FROM ToolUsages WHERE plugin_name=? AND "
+				+ "tool_name=? AND tool_key_presses='GUI'";
+
+		int guiCount = 0;
+		try (PreparedStatement statement = makePreparedStatement(sqlQuery);){
+			statement.setString(1, applicationName);
+			statement.setString(2, toolName);
+			try (ResultSet results = executeWithResults(statement);) {
+				if (results.next()){
+					guiCount = results.getInt(1);
+				}
+			}
+		}catch (SQLException ex){
+			throw new DBAbstractionException(ex);
+		}
+		
+		return new ToolCountStruct(toolName, guiCount, totalCount-guiCount);
+	}
 
 	@Override
 	public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName)
 	{
 
 		List<ToolUsage> toolUsages = new ArrayList<>();
-		StringBuilder sqlQueryBuilder = new StringBuilder();
-		sqlQueryBuilder.append("SELECT * FROM ToolUsages ");
-		sqlQueryBuilder.append("WHERE plugin_name=?");
+		String sqlQuery = "SELECT * FROM ToolUsages WHERE plugin_name=?";
 
-		try (PreparedStatement statement = makePreparedStatement(sqlQueryBuilder.toString());)
+		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
 		{
 			statement.setString(1, currentPluginName);
 			try (ResultSet results = executeWithResults(statement);)

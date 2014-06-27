@@ -279,6 +279,12 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	}
 
 	@Override
+	public ToolCountStruct getToolAggregate(String applicationName, String toolName)
+	{
+		return databaseManager.getToolAggregate(applicationName, toolName);
+	}
+
+	@Override
 	public void reportToolStream(ToolStream ts)	//requests coming in from the web (usually async)
 	{
 		logger.debug("waiting in line at localHub");

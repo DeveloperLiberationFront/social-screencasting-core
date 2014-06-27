@@ -309,6 +309,30 @@ public class BufferedDatabaseManager
 		return retVal;
 	}
 
+	public ToolCountStruct getToolAggregate(final String applicationName, final String toolName)
+	{
+		FutureTask<ToolCountStruct > future = new FutureTask<ToolCountStruct>(new Callable<ToolCountStruct>() {
+
+			@Override
+			public ToolCountStruct call() throws Exception
+			{
+				return localDB.getToolAggregate(applicationName, toolName);
+			}
+		});
+		
+		this.localThreadPool.execute(future);
+		
+		try
+		{
+			return future.get();
+		}
+		catch (InterruptedException | ExecutionException e)
+		{
+			logger.error("Problem with query", e);
+			return new ToolCountStruct(toolName, 0, 0);
+		}
+	}
+
 	public List<String> getExcesiveTools()
 	{
 		FutureTask<List<String> > future = new FutureTask<List<String>>(new Callable<List<String>>() {

@@ -82,7 +82,7 @@ public class HandlerManager
 
 	private static void makeAndAddHandlersForMediaResources(HandlerCollection h, WebQueryInterface wqi) throws IOException, URISyntaxException
 	{
-		h.addHandler(new HTTPMediaResourceHandler("/mediaServer", wqi));
+		h.addHandler(new HTTPMediaResourceHandler(wqi));
 		
 	}
 	
