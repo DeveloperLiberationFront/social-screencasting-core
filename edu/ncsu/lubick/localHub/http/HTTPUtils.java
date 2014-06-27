@@ -42,21 +42,25 @@ public class HTTPUtils {
 		StringBuilder sb = new StringBuilder();
 		InputStream ips  = response.getEntity().getContent();
 		try(BufferedReader buf = new BufferedReader(new InputStreamReader(ips,"UTF-8"));)
-		{
-			
+		{	
 		    String s;
-			while(true )
-		    {
+			while (true) {
 		        s = buf.readLine();
 		        if(s==null || s.length()==0)
 		            break;
 		        sb.append(s);
-	
 		    }
-		
-			
 		}
 		return sb.toString();
+	}
+	
+	public static String chopOffQueryString(String target)
+	{
+		int indexOfQuery = target.indexOf('?');
+		if (indexOfQuery != -1) {
+			target = target.substring(0, indexOfQuery);
+		}
+		return target;
 	}
 
 }

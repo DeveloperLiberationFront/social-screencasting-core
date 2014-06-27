@@ -1,5 +1,7 @@
 package edu.ncsu.lubick.localHub.http;
 
+import static edu.ncsu.lubick.localHub.http.HTTPUtils.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -75,7 +77,14 @@ public class HTTPAPIHandler extends AbstractHandler {
 			handleGetInfoAboutTool(pieces[3], chopOffQueryString(pieces[4]), response);
 		} else if (pieces.length == 6) {
 			handleGetClipInfo(pieces[3], pieces[4], chopOffQueryString(pieces[5]), response);
+		} else if (pieces.length == 7) {
+			handleImageRequest(pieces[5], chopOffQueryString(pieces[6]), response);
 		}
+	}
+
+	private void handleImageRequest(String clipId, String fileName, HttpServletResponse response) throws IOException
+	{
+		response.sendRedirect("/"+clipId+"/"+fileName);
 	}
 
 	private void handleGetClipInfo(String applicationName, String toolName, String clipId, HttpServletResponse response) throws IOException
@@ -182,15 +191,6 @@ public class HTTPAPIHandler extends AbstractHandler {
 
 	}
 
-	private String chopOffQueryString(String target)
-	{
-		int indexOfQuery = target.indexOf('?');
-		if (indexOfQuery != -1) {
-			target = target.substring(0, indexOfQuery);
-		}
-		return target;
-	}
-
 	private void returnUserInfo(HttpServletResponse response) throws IOException
 	{
 		try {
@@ -212,28 +212,6 @@ public class HTTPAPIHandler extends AbstractHandler {
 		}
 	}
 
-	private JSONArray makePluginArray(String pluginName)
-	{
-		List<ToolCountStruct> counts = databaseLink.getAllToolAggregateForPlugin(pluginName);
-
-		JSONArray retVal = new JSONArray();
-		for(ToolCountStruct tcs: counts)
-		{
-			JSONObject tempObject = new JSONObject();
-			try
-			{
-				tempObject.put("name", tcs.toolName);
-				tempObject.put("gui", tcs.guiToolCount);
-				tempObject.put("keyboard", tcs.keyboardCount);
-				retVal.put(tempObject);
-			}
-			catch (JSONException e)
-			{
-				logger.error("Unusual JSON exception, squashing: ",e);
-			}
-		}
-		return retVal;
-	}
 
 	private JSONObject makeUserAuthObj() throws JSONException
 	{
