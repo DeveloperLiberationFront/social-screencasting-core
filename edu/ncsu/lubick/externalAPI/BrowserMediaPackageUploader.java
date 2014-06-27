@@ -214,7 +214,7 @@ public class BrowserMediaPackageUploader {
 	{
 		try
 		{
-			return Integer.parseInt(fileName.substring(fileName.indexOf("e") + 1, fileName.indexOf(".")));
+			return Integer.parseInt(fileName.substring(fileName.indexOf('e') + 1, fileName.indexOf('.')));
 		}
 		catch(NumberFormatException e)
 		{

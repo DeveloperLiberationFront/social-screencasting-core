@@ -88,7 +88,7 @@ public class HandlerManager
 	{
 		if (wqi instanceof WebToolReportingInterface)
 		{
-			h.addHandler(new ToolReportingHandler("/reportTool", (WebToolReportingInterface)wqi ));
+			h.addHandler(new HTTPToolReportingHandler((WebToolReportingInterface)wqi ));
 		}
 		h.addHandler(new VersionHandler("/version"));
 	}

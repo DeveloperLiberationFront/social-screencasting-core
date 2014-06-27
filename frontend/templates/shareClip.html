@@ -35,16 +35,17 @@
   </div>
 
     <h1>Select one or more clips to share with <span id="userHeader"></span></h1>
-    
+    <div id="editPanel">
+	
+	<button id="cropButton" class="editButton" title="Make a rectangular viewing window">Crop Video</button>
+	<button id="trimButton" class="editButton" title="Change the start or end time of the video">Trim Video</button>
+	</div>
     <div id="moreInfo">
         <div id="clipDoesNotExist">No clips exist locally for this tool.  This is unexpected...</div>
         <div id="clipLoading">Loading clips</div>
         <div id="clipPlayer">
             <div id="mediaTitle"></div>
             <div id="panelAndOverlay">
-                <div id="overlay">
-                    <span>Click for Full Screen</span>
-                </div>
 				<div id="underlay"></div>
                 <div id="panel" data-total-frames="" data-type="" data-playback-directory="" data-auth="">
 
@@ -82,7 +83,6 @@
                         <label class="startLabel" title="The tool gets used here">&nbsp;</label>
                     </div>
 					<div id="editSlider" class="slider"></div>
-					<button id="saveClip">Save</button>
                 </div>
             </div>
             <div id="viewOtherDiv">

@@ -67,13 +67,12 @@ public class ToolComparisionHandler extends TemplateHandlerWithDatabaseLink {
 		response.setContentType("text/html;charset=utf-8");
 		response.setStatus(HttpServletResponse.SC_OK);
 		baseRequest.setHandled(true);
-
-		List<String> pluginNames = this.databaseLink.getNamesOfAllPlugins();
-
+		
 		String pluginName = baseRequest.getParameter("pluginName");
 
 		Map<Object,Object> dataModel = getBaseDataModel();
 		if (pluginName == null) {
+			List<String> pluginNames = this.databaseLink.getNamesOfAllPlugins();
 			if (!pluginNames.isEmpty())
 			{
 				pluginName = pluginNames.get(0);

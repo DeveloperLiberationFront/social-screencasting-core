@@ -405,29 +405,6 @@ public class BufferedDatabaseManager
 			return null;		//assume it hasn't
 		}
 	}
-	
-	public ToolUsage getToolUsageByFolder(final String folder)
-	{
-		FutureTask<ToolUsage> future = new FutureTask<ToolUsage>(new Callable<ToolUsage>() {
-
-			@Override
-			public ToolUsage call() throws Exception {
-				return localDB.getClipByFolder(folder);
-			}
-		});
-		
-		this.localThreadPool.execute(future);
-		
-		try
-		{
-			return future.get();
-		}
-		catch(InterruptedException | ExecutionException e)
-		{
-			logger.error("Problem with query", e);
-			return null;
-		}
-	}
 
 	public void setClipUploaded(final String clipId, final boolean b)
 	{

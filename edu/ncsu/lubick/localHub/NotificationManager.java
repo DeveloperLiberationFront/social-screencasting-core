@@ -139,7 +139,7 @@ public class NotificationManager {
 
 	private void addNotification(MenuItem newNotification)
 	{
-		if (notificationsPending.size() == 0 )
+		if (notificationsPending.isEmpty() )
 		{
 			this.popupMenu.remove(noNotifications);
 		}
@@ -152,7 +152,7 @@ public class NotificationManager {
 	{
 		this.popupMenu.remove(oldNotification);
 		this.notificationsPending.remove(oldNotification);
-		if (this.notificationsPending.size() == 0) 
+		if (this.notificationsPending.isEmpty()) 
 		{
 			this.popupMenu.insert(noNotifications, 0);
 		}
