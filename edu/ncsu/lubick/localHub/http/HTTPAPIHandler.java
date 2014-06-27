@@ -3,7 +3,6 @@ package edu.ncsu.lubick.localHub.http;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -19,6 +18,7 @@ import org.json.JSONObject;
 
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
+import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
 public class HTTPAPIHandler extends AbstractHandler {
@@ -73,6 +73,50 @@ public class HTTPAPIHandler extends AbstractHandler {
 			handleEmailLeg(chopOffQueryString(pieces[2]), response);
 		} else if (pieces.length == 5) {
 			handleGetInfoAboutTool(pieces[3], chopOffQueryString(pieces[4]), response);
+		} else if (pieces.length == 6) {
+			handleGetClipInfo(pieces[3], pieces[4], chopOffQueryString(pieces[5]), response);
+		}
+	}
+
+	private void handleGetClipInfo(String applicationName, String toolName, String clipId, HttpServletResponse response) throws IOException
+	{
+		File clipDir = new File(PostProductionHandler.MEDIA_OUTPUT_FOLDER, clipId);
+
+		JSONArray fileNamesArr = new JSONArray();
+
+		if (clipDir.exists() && clipDir.isDirectory())
+		{
+			String[] files = clipDir.list();
+			Arrays.sort(files);
+			for(String imageFile: files)
+			{
+				fileNamesArr.put(imageFile);
+			}
+		}
+		else {
+			logger.info("Clip "+clipId+" does not exist");
+			response.getWriter().println("Could not find clip "+clipId);
+		}
+
+		JSONObject dataObject = new JSONObject();
+		try{
+			dataObject.put("frames", fileNamesArr);
+			dataObject.put("name", clipId);
+			dataObject.put("app", applicationName);
+			dataObject.put("tool", toolName);
+			dataObject.put("creator", userManager.getUserEmail());
+
+			response.setContentType("application/json");
+			
+			logger.debug("Returning clip info "+clipId);
+			
+			dataObject.write(response.getWriter());
+		}
+		catch (JSONException e)
+		{
+			logger.error("Problem compiling clip names and writing them out "+dataObject,e);
+			response.getWriter().println("There was a problem compiling the clip details");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
