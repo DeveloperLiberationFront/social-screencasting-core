@@ -18,17 +18,18 @@ define(['angular',
                     'socasterServices',
                     'restangular'])
 
-  .controller('NavCtrl', ['$scope', '$filter', 'User', 'Application',
-    function($scope, $filter, User, Application) {
-        $scope.user = User.get(function(user){
-            $scope.auth = _.pick(user, 'name', 'email', 'token');
+  .controller('NavCtrl', ['$scope', '$filter', 'Local', 'Hub',
+    function($scope, $filter, Local, Hub) {
+        Local.one('user').get().then(function(user){
+            $scope.user = user;
+            $scope.auth = user.plain();
         });
-        $scope.applications = Application.query(function() {
-            $scope.$broadcast('appSelected', $scope.applications[0]);
+        Hub.one('details').getList().then(function(apps){
+            $scope.applications = apps;
+            $scope.$broadcast('appSelected', apps[0]);
         });
         $scope.$on('appSelected', function(event, app) {
-            app.$promise = app.$get(_.pick($scope.user, 'name', 'email', 'token'));
-            $scope.application = app;
+            $scope.application = Hub.one('details').one(app.name).get($scope.auth);
         });
     }])
 
@@ -38,8 +39,8 @@ define(['angular',
 
   .controller('UserListCtrl', ['$scope',
     function($scope) {
-        $scope.$on('appSelected', function(event, app) {
-            app.$promise.then(function(){
+        $scope.$on('appSelected', function() {
+            $scope.application.then(function(app){
                 $scope.users = app.users;
             });
         });
@@ -51,21 +52,11 @@ define(['angular',
         };
     }])
 
-  .controller('ApplicationToolsCtrl', ['$scope', 'Application', '$modal', 'Tool',
-    function($scope, Application, $modal, Tool) {
+  .controller('ApplicationToolsCtrl', ['$scope', '$modal', 'Local', 'Hub',
+    function($scope, $modal, Tool) {
         $scope.selection = [];
-        $scope.$on('appSelected', function(event, app) {
-            app.$promise.then(function(){
-                app.tools = app.tools.map(function(o){
-                    var t = new Tool(_.extend(o, {app:$scope.application.name}));
-                //     t.new = _.findWhere($scope.user.applications[$scope.application.name],
-                //                         {name: t.name}) == undefined;
-                    return t;
-                });
-            });
-        });
         $scope.gridOptions = {
-            data: 'application.tools',
+            data: 'application.$object.tools',
             selectedItems: $scope.selection,
             multiSelect: false,
             columnDefs: [
@@ -88,13 +79,16 @@ define(['angular',
             },
             afterSelectionChange: function() {
                 s = $scope.selection;
+
                 if (s.length > 0 && s[0].video) {
-                    $scope.tool = s[0];
-                    $scope.tool.$promise = $scope.tool.$get($scope.auth);
+                    tool = s[0];
                     $modal.open({
                         templateUrl: 'partials/modal-player.html',
                         controller: 'ModalPlayer',
                         scope: $scope,
+                        resolve: { tool: function(){
+                            return $scope.application.$object.one(tool.name).get($scope.auth);
+                        }},
                         windowClass: 'modal-player',
                         size: 'lg'
                     });
@@ -109,7 +103,6 @@ define(['angular',
           isopen: false
       };
       $scope.setApp = function(app) {
-        $scope.application = app;
         $scope.status.isopen = false;
         $rootScope.$broadcast('appSelected', app);
       };
@@ -156,10 +149,7 @@ define(['angular',
             tooltip: ["Image and text", "Image only", "Text only", "No overlay"]
         };
 
-        $scope.imgDir = $filter('format')(
-            'http://screencaster-hub.appspot.com/api/:creator/:app/:tool/:name/',
-            $scope.clip
-        );
+        $scope.imgDir = $scope.clip.getRestangularUrl() + '/';
 
         $scope.imagePath = function(image) {
             return $scope.imgDir + image +'?'+ $.param($scope.auth);
@@ -206,25 +196,22 @@ define(['angular',
         };
     }])
 
-  .controller('ModalPlayer', ['$scope', '$modalInstance', 'Clip',
-    function($scope, $modalInstance, Clip) {
+  .controller('ModalPlayer', ['$scope', '$modalInstance', 'tool',
+    function($scope, $modalInstance, tool) {
+        //tool is a restangular object
         $scope.status = 'loading';
         $scope.close = function () {
             $modalInstance.close();
         };
-
-        $scope.tool.$promise.then(function() {
-            if ($scope.tool.clips.length > 0) {
-                $scope.clip = new Clip(_.extend($scope.tool.clips[0], {
-                    tool: $scope.tool.name,
-                    app: $scope.application
-                }));
-                $scope.clip.$get($scope.auth).then(function() {
-                    $scope.status = 'ready';
-                    $scope.$broadcast('refreshSlider');
-                });
-            }
-        });
+        console.log(tool);
+        console.log($scope.auth);
+        if (tool.clips.length > 0) {
+            tool.one(tool.clips[0].name).get($scope.auth).then(function(clip) {
+                $scope.clip = clip; 
+                $scope.status = 'ready';
+                $scope.$broadcast('refreshSlider');
+            });
+        }
     }])
 
   .controller('PlaybackSliderCtrl', ['$scope',
@@ -235,3 +222,4 @@ define(['angular',
     function($scope) {
     }]);
 });
+

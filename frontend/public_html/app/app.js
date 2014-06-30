@@ -35,6 +35,10 @@ define(['angular',
         .otherwise({
             redirectTo: '/'
         });
-    }
-  ])
+    }])
+
+  .config(['RestangularProvider',
+    function(RestangularProvider) {
+      RestangularProvider.setDefaultHttpFields({cache: true});
+    }])
 });
