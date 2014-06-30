@@ -22,7 +22,7 @@ public class HTTPUpdateClip extends TemplateHandlerWithDatabaseLink implements H
 	// static initializer
 	static
 	{
-		logger = Logger.getLogger(HTTPMediaResourceHandler.class.getName());
+		logger = Logger.getLogger(HTTPUpdateClip.class.getName());
 	}
 	
 	public HTTPUpdateClip(String matchPattern, WebQueryInterface databaseLink) throws IOException, URISyntaxException

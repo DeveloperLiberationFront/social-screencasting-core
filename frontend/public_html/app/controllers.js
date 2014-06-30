@@ -203,8 +203,7 @@ define(['angular',
         $scope.close = function () {
             $modalInstance.close();
         };
-        console.log(tool);
-        console.log($scope.auth);
+
         if (tool.clips.length > 0) {
             tool.one(tool.clips[0].name).get($scope.auth).then(function(clip) {
                 $scope.clip = clip; 
@@ -218,7 +217,33 @@ define(['angular',
     function($scope) {
     }])
 
-  .controller('EditSliderCtrl', ['$scope',
+  .controller('StatusCtrl', function() {
+
+  })
+  .controller('ShareCtrl', ['$scope', '$routeParams', 'Clip', function($scope, $routeParams, Clip) {
+    console.log($routeParams);
+    console.log($scope);
+    $scope.applicationName = $routeParams.application ? $routeParams.application : "nothing";
+    $scope.toolName = $routeParams.tool ? $routeParams.tool : "nothing";
+    $scope.clipId = $routeParams.clip ? $routeParams.clip : "nothing";
+    $scope.shareWithName = $routeParams.shareWithName;
+    $scope.shareWithEmail = $routeParams.shareWithEmail;
+
+    $scope.clip = new Clip({
+        name: $scope.clipId,
+        tool: $scope.toolName,
+        app: $scope.applicationName
+    });
+  // $scope.clip.$get($scope.auth).then(function() {
+  //   console.log("clip fetched");
+  //   $scope.status = 'ready';
+  //   $scope.$broadcast('refreshSlider');
+  // });
+
+
+}])
+
+.controller('EditSliderCtrl', ['$scope',
     function($scope) {
     }]);
 });

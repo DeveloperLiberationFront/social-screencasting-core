@@ -32,6 +32,15 @@ define(['angular',
           templateUrl: 'partials/player.html',
           controller: 'PlayerCtrl'
         })
+        .when('/status', {
+          templateUrl: 'partials/status.html',
+          controller: 'StatusCtrl'
+        })
+        .when('/share/:application/:tool/:clip', {
+          templateUrl: 'partials/share.html',
+          controller: 'ShareCtrl'
+        })
+
         .otherwise({
             redirectTo: '/'
         });
@@ -40,5 +49,5 @@ define(['angular',
   .config(['RestangularProvider',
     function(RestangularProvider) {
       RestangularProvider.setDefaultHttpFields({cache: true});
-    }])
+    }]);
 });
