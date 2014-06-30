@@ -244,6 +244,9 @@ public class RemoteToolReporter {
 		{
 			logger.error("Problem reporting tool info",e);
 		}
+		finally {
+			httpPut.releaseConnection();
+		}
 	}
 
 }
