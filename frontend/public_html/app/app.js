@@ -35,7 +35,7 @@ define(['angular',
           templateUrl: 'partials/status.html',
           controller: 'StatusCtrl'
         })
-        .when('/share', {
+        .when('/share/:application/:tool/:clip', {
           templateUrl: 'partials/share.html',
           controller: 'ShareCtrl'
         })

@@ -19,15 +19,17 @@ define(['angular', 'ng-resource'], function (ng) {
 
     .factory('Tool', ['$resource', 
       function($resource) {
-          return $resource('http://screencaster-hub.appspot.com/api/details/:app/:tool', {}, {
+          return $resource('http://screencaster-hub.appspot.com/api/details/:app/:tool', {
+              app: '@app', tool: '@name',
+          }, {
               query: {method:'GET', isArray: false}
           });
       }])
 
     .factory('Peer', ['$resource', 
       function($resource) {
-          return $resource('http://screencaster-hub.appspot.com/api/:email/:app?:auth', {
-              email:'@email', app:'', auth: '@auth'
+          return $resource('http://screencaster-hub.appspot.com/api/:email/:app', {
+              email:'@email', app:'',
           }, {
               query: {method:'GET', isArray: false}
           });

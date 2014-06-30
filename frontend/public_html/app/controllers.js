@@ -19,7 +19,7 @@ define(['angular',
   .controller('NavCtrl', ['$scope', '$filter', 'User', 'Application',
     function($scope, $filter, User, Application) {
         $scope.user = User.get(function(user){
-            $scope.auth = '?'+$.param(_.pick(user, 'name', 'email', 'token'));
+            $scope.auth = _.pick(user, 'name', 'email', 'token');
         });
         $scope.applications = Application.query(function() {
             $scope.$broadcast('appSelected', $scope.applications[0]);
@@ -67,15 +67,17 @@ define(['angular',
         };
     }])
 
-  .controller('ApplicationToolsCtrl', ['$scope', 'Application',
-    function($scope, Application) {
+  .controller('ApplicationToolsCtrl', ['$scope', 'Application', '$modal', 'Tool',
+    function($scope, Application, $modal, Tool) {
         $scope.selection = [];
         $scope.$on('appSelected', function(event, app) {
             app.$promise.then(function(){
-                $scope.tools = app.tools;
+                $scope.tools = app.tools.map(function(o){
+                    return new Tool(_.extend(o, {app:$scope.application.name}));
+                });
             });
         });
-        $scope.gridOptions = { 
+        $scope.gridOptions = {
             data: 'tools',
             selectedItems: $scope.selection,
             multiSelect: false,
@@ -85,9 +87,27 @@ define(['angular',
                     width: '50px',
                     field:'video', displayName:'Video',
                     cellTemplate:  "<div class='ngCellText'><img src='images/video_icon_tiny.png' ng-show='row.getProperty(col.field)'/></div>",
-                    sortFn: function(x,y){return (x === y)? 0 : x? -1 : 1;},
+                    sortFn: function(x,y){return (x === y)? 0 : x? 1 : -1;},
                 },
-            ]
+            ],
+            sortInfo: {
+                fields: ['video'],
+                directions: ['desc'],
+            },
+            afterSelectionChange: function() {
+                s = $scope.selection;
+                if (s.length > 0 && s[0].video) {
+                    $scope.tool = s[0];
+                    $scope.tool.$promise = $scope.tool.$get($scope.auth);
+                    $modal.open({
+                        templateUrl: 'partials/modal-player.html',
+                        controller: 'ModalPlayer',
+                        scope: $scope,
+                        windowClass: 'modal-player',
+                        size: 'lg',
+                    });
+                }
+            }, 
         };
     }])
 
@@ -120,11 +140,14 @@ define(['angular',
             pos: 0,
             playing: false,
             editMode: true,
-            start: 0,
-            end: 1,
             isCropping: false
         };
         $scope.isFullscreen = false;
+        $scope.toggleFullscreen = function() {
+            if (!$scope.player.isCropping) {
+                $scope.isFullscreen = !$scope.isFullscreen
+            }
+        }
         $scope.showRating = false;
         $scope.playBtnImages = {
             true: 'images/playback/pause.svg',
@@ -132,6 +155,7 @@ define(['angular',
         };
         $scope.kbdOverlay = {
             mode: 0,
+            enabled: $scope.clip.name.substr(-1)=='K', //only clips ending in 'k' have keyboard info
             status: 'inactive',
             images: {
                 'active': [ 'image_text.png', 'image.png', 'text.png', 'none.png' ],
@@ -140,25 +164,25 @@ define(['angular',
             tooltip: ["Image and text", "Image only", "Text only", "No overlay"],
         };
 
-        $scope.user.$promise.then(function() {
-            $scope.clip = Clip.get(_.extend({
-                creator:"kjlubick@ncsu.edu",
-                app:"Eclipse",
-                tool:"Extract Local Variable",
-                clip:"Eclipse16274d13-bebb-3196-832c-70313e08cdaaK",
-            }, _.pick($scope.user, 'token', 'email', 'name')), function(clip) {
-                $scope.imgDir = $filter('format')(
-                    //'http://screencaster-hub.appspot.com/api/:creator/:app/:tool/:name/',
-                    'localHost:4443/api/:creator/:app/:tool/:name/',
-                    clip
-                );
-                $scope.player.end = clip.frames.length-1;
-                clip.loaded = clip.frames.map(function(frame){
-                    return new Image().src = $scope.imgDir + frame + $scope.auth;
-                });
-                clip.keyboardEventFrame = 25;
-            });
-        });
+        $scope.imgDir = $filter('format')(
+            'http://screencaster-hub.appspot.com/api/:creator/:app/:tool/:name/',
+            $scope.clip
+        )
+
+        $scope.imagePath = function(image) {
+            return $scope.imgDir + image +'?'+ $.param($scope.auth);
+        }
+
+        _.extend($scope.clip, {
+            loaded: $scope.clip.frames.map(function(frame){
+                img = new Image();
+                img.src = $scope.imagePath(frame);
+                return img;
+            }),
+            keyboardEventFrame: 25,
+            start: 0,
+            end: $scope.clip.frames.length-1
+        })
 
         $scope.$watch(function(){ 
             return $scope.player.pos > $scope.clip.keyboardEventFrame; 
@@ -168,20 +192,47 @@ define(['angular',
 
         $scope.timer = $interval(function() {
             if ($scope.player.playing) { //playing
-                $scope.player.pos = Math.max($scope.player.start, 
-                                             (+$scope.player.pos + 1) % ($scope.player.end+1));
+                $scope.player.pos = Math.max($scope.clip.start, 
+                                             (+$scope.player.pos + 1) % ($scope.clip.end+1));
             }
         }, 200);
 
         $scope.crop = function() {
-            $scope.player.isCropping = true;
-            $(".img-container img").cropper({
-                aspectRatio: "auto",
-                done: function(data) {
-                    console.log(data);
-                }
-            });
+            if (!$scope.player.isCropping) {
+                $scope.player.isCropping = true;
+                $(".img-container img").cropper({
+                    aspectRatio: "auto",
+                    done: function(data) {
+                        console.log(data);
+                    }
+                }).cropper('enable');
+            } else {
+                $scope.player.isCropping = false;
+                $(".img-container img").cropper("disable");
+                //handle crop completion?
+            }
+        }
+    }])
+
+  .controller('ModalPlayer', ['$scope', '$modalInstance', 'Clip',
+    function($scope, $modalInstance, Clip) {
+        $scope.status = 'loading';
+        $scope.close = function () {
+            $modalInstance.close();
         };
+
+        $scope.tool.$promise.then(function() {
+            if ($scope.tool.clips.length > 0) {
+                $scope.clip = new Clip(_.extend($scope.tool.clips[0], {
+                    tool: $scope.tool.name,
+                    app: $scope.application,
+                }));
+                $scope.clip.$get($scope.auth).then(function() {
+                    $scope.status = 'ready';
+                    $scope.$broadcast('refreshSlider');
+                });
+            }
+        });
     }])
 
   .controller('PlaybackSliderCtrl', ['$scope',
@@ -191,11 +242,26 @@ define(['angular',
   .controller('StatusCtrl', function() {
 
   })
-  .controller('ShareCtrl', function() {
-    
-  })
+  .controller('ShareCtrl', ['$scope', '$routeParams', 'Clip', function($scope,$routeParams, Clip) {
+    console.log($routeParams);
+    console.log($scope);
+    this.applicationName = $routeParams.application ? $routeParams.application : "nothing";
+    this.toolName = $routeParams.tool ? $routeParams.tool : "nothing";
+    this.clipId = $routeParams.clip ? $routeParams.clip : "nothing";
 
-  .controller('EditSliderCtrl', ['$scope',
+    $scope.clip = new Clip({
+        name: this.clipId,
+        tool: this.toolName,
+        app: this.applicationName
+    });
+  // $scope.clip.$get($scope.auth).then(function() {
+  //   console.log("clip fetched");
+  //   $scope.status = 'ready';
+  //   $scope.$broadcast('refreshSlider');
+});
+}])
+
+.controller('EditSliderCtrl', ['$scope',
     function($scope) {
     }]);
 });
