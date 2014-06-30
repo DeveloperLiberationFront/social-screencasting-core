@@ -15,7 +15,7 @@
       <span class='glyphicon' ng-class="{'glyphicon-play': !player.playing, 'glyphicon-pause': player.playing}"></span>
     </button>
     <div id='sliders'>
-      <div ng-controller='PlaybackSliderCtrl' ng-mousedown="player.playing = false">
+      <div ng-mousedown="player.playing = false">
         <slider floor='0' ceiling='{{clip.frames.length -1}}' step='1' ng-model='player.pos'>
         </slider>
       </div>
