@@ -91,10 +91,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 			try {
 				JSONObject user = makeUserAuthObj();
 
-				JSONObject data = new JSONObject();
-				data.put("user", user);
-
-				data.write(response.getWriter());
+				user.write(response.getWriter());
 			}
 			catch (JSONException e) {
 				throw new IOException("Problem making JSON", e);

@@ -1,5 +1,9 @@
+.modal-lg {
+    width: 800px;
+}
+
 #player {
-    width: 880px;
+    width: 780px;
 }
 
 #player.isInFullScreen {

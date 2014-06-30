@@ -1,14 +1,14 @@
 define(['angular', 'ng-resource'], function (ng) {
     return ng.module('socasterServices', ['ngResource'])
 
-    .factory('User', ['$resource', 
+    .factory('User', ['$resource',
       function($resource) {
           return $resource('api/user', {}, {
               query: {method:'GET', isArray: false}
           });
       }])
 
-    .factory('Application', ['$resource', 
+    .factory('Application', ['$resource',
       function($resource) {
           return $resource('http://screencaster-hub.appspot.com/api/details/:app', {
               app: '@name'
@@ -17,30 +17,32 @@ define(['angular', 'ng-resource'], function (ng) {
           });
       }])
 
-    .factory('Tool', ['$resource', 
+    .factory('Tool', ['$resource',
       function($resource) {
           return $resource('http://screencaster-hub.appspot.com/api/details/:app/:tool', {
-              app: '@app', tool: '@name',
+              app: '@app', tool: '@name'
           }, {
-              query: {method:'GET', isArray: false}
+            get: { cache: true, method: 'get' },
+            query: {method:'GET', isArray: false}
           });
       }])
 
-    .factory('Peer', ['$resource', 
+    .factory('Peer', ['$resource',
       function($resource) {
           return $resource('http://screencaster-hub.appspot.com/api/:email/:app', {
-              email:'@email', app:'',
+              email:'@email', app:''
           }, {
               query: {method:'GET', isArray: false}
           });
       }])
 
-    .factory('Clip', ['$resource', 
+    .factory('Clip', ['$resource',
       function($resource) {
           return $resource('http://screencaster-hub.appspot.com/api/:creator/:app/:tool/:clip', {
-              creator: '@creator', app:'@app', tool:'@tool', clip: '@name',
+              creator: '@creator', app:'@app', tool:'@tool', clip: '@name'
           }, {
-              query: {method:'GET', isArray: false},
+            query: {method:'GET', isArray: false},
+            get: { cache: true, method: 'get' }
           });
-      }])
+      }]);
 });

@@ -18,6 +18,7 @@ define(['angular',
     'socasterServices',
     'ngFullscreen',
     'vr.directives.slider',
+    'restangular',
   ])
   
   .config(['$routeProvider',
