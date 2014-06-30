@@ -31,9 +31,18 @@ define(['angular',
           templateUrl: 'partials/player.html',
           controller: 'PlayerCtrl'
         })
+        .when('/status', {
+          templateUrl: 'partials/status.html',
+          controller: 'StatusCtrl'
+        })
+        .when('/share', {
+          templateUrl: 'partials/share.html',
+          controller: 'ShareCtrl'
+        })
+
         .otherwise({
             redirectTo: '/'
         });
     }
-  ])
+  ]);
 });

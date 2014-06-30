@@ -188,6 +188,13 @@ define(['angular',
     function($scope) {
     }])
 
+  .controller('StatusCtrl', function() {
+
+  })
+  .controller('ShareCtrl', function() {
+    
+  })
+
   .controller('EditSliderCtrl', ['$scope',
     function($scope) {
     }]);

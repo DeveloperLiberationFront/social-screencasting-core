@@ -41,4 +41,13 @@ define(['angular', 'ng-resource'], function (ng) {
               query: {method:'GET', isArray: false},
           });
       }])
-});
+    .factory('Clip', ['$resource', 
+      function($resource) {
+        return $resource('http://screencaster-hub.appspot.com/api/:creator/:app/:tool/:clip', {
+          creator: '@creator', app:'@app', tool:'@tool', clip: '@name',
+        }, {
+          query: {method:'GET', isArray: false},
+        });
+      }])
+    ;
+  });
