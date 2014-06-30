@@ -242,23 +242,27 @@ define(['angular',
   .controller('StatusCtrl', function() {
 
   })
-  .controller('ShareCtrl', ['$scope', '$routeParams', 'Clip', function($scope,$routeParams, Clip) {
+  .controller('ShareCtrl', ['$scope', '$routeParams', 'Clip', function($scope, $routeParams, Clip) {
     console.log($routeParams);
     console.log($scope);
-    this.applicationName = $routeParams.application ? $routeParams.application : "nothing";
-    this.toolName = $routeParams.tool ? $routeParams.tool : "nothing";
-    this.clipId = $routeParams.clip ? $routeParams.clip : "nothing";
+    $scope.applicationName = $routeParams.application ? $routeParams.application : "nothing";
+    $scope.toolName = $routeParams.tool ? $routeParams.tool : "nothing";
+    $scope.clipId = $routeParams.clip ? $routeParams.clip : "nothing";
+    $scope.shareWithName = $routeParams.shareWithName;
+    $scope.shareWithEmail = $routeParams.shareWithEmail;
 
     $scope.clip = new Clip({
-        name: this.clipId,
-        tool: this.toolName,
-        app: this.applicationName
+        name: $scope.clipId,
+        tool: $scope.toolName,
+        app: $scope.applicationName
     });
   // $scope.clip.$get($scope.auth).then(function() {
   //   console.log("clip fetched");
   //   $scope.status = 'ready';
   //   $scope.$broadcast('refreshSlider');
-});
+  // });
+
+
 }])
 
 .controller('EditSliderCtrl', ['$scope',
