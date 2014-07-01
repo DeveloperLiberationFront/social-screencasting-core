@@ -1,12 +1,24 @@
 package edu.ncsu.lubick.localHub.database;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.UnknownHostException;
 import java.sql.*;
 import java.util.Date;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 
@@ -61,12 +73,13 @@ public class EventForwarder extends Thread {
 	public static final String PROPERTY_DEST_JDBC_DRIVER = "destJDBCDriver";
 	public static final String PROPERTY_DEST_JDBC_URL    = "destJDBCURL";
 	
+	public static final String PROPERTY_DEST_SKYLR_ADD_URL   = "skylrDestAddURL";
+	public static final String PROPERTY_DEST_SKYLR_QUERY_URL = "skylrDestQueryURL";
+	
 	public static final String PROPERTY_USER_ID = "userID";
 	
 	public static final String[] REQUIRED_PROPERTIES = {PROPERTY_SLEEP_TIME, PROPERTY_SRC_JDBC_DRIVER, PROPERTY_SRC_JDBC_URL,
-		PROPERTY_DEST_JDBC_DRIVER, 
-		PROPERTY_DEST_JDBC_URL,
-		PROPERTY_USER_ID};
+		PROPERTY_DEST_JDBC_DRIVER,	PROPERTY_DEST_JDBC_URL, PROPERTY_DEST_SKYLR_ADD_URL, PROPERTY_DEST_SKYLR_QUERY_URL, PROPERTY_USER_ID};
 
 	private java.util.Properties _efProperties;
 	
@@ -245,6 +258,93 @@ public class EventForwarder extends Thread {
 		return result;
 	}
 	
+	/**
+	 * Checks if the current tool usage is in the remote destination or not.
+	 * Since we don't delete or track destinations sent success, we need to prevent 
+	 * duplicates from being sent.  (Our databases 
+	 * @param toolUsage
+	 * @return
+	 */
+	public boolean isToolUsageInSkylr(HttpClient httpClient, ToolUsage toolUsage) throws Exception {
+		boolean result = false;
+		
+		HttpPost postRequest = new HttpPost(_efProperties.getProperty(PROPERTY_DEST_SKYLR_QUERY_URL));
+		try {
+			StringEntity input = new StringEntity(createFindQueryForUseID(toolUsage).toString());
+			input.setContentType("application/json");
+			postRequest.setEntity(input);
+			 
+			HttpResponse response = httpClient.execute(postRequest);
+			 
+			if (response.getStatusLine().getStatusCode() >= 400) {
+				result = false;
+				logger.warn("Skylr - unable to find existing object - "+ response.getStatusLine().getStatusCode() +":  toolUsage use ID: "+toolUsage.getUseID());
+			}
+			else {
+				BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
+				
+				StringBuilder responseBody = new StringBuilder("{ 'results' : [");
+				String line;
+				while ((line = br.readLine()) != null) {
+					responseBody.append(line);
+				}
+				responseBody.append("] }");
+				JSONObject responseObject = new JSONObject(responseBody.toString());
+				
+				if (responseObject.getJSONArray("results").length() >0) {
+					result = true;
+				}
+			}
+		}
+		catch (Exception e) {
+			if (e.getMessage().contains("Connection refused")) {
+				throw new Exception("skylr down");
+			}
+			logger.warn("Skylr - unable in find existing object  ("+ e.getMessage() +") - toolUsage use ID: "+toolUsage.getUseID());
+			result = false;
+		}
+		postRequest.releaseConnection();
+		
+		return result; 
+	}
+	
+	/**
+	 * Inserts a toolUsage JSON Object into skylr
+	 * 
+	 * @param httpClient
+	 * @param joToolUsage
+	 * @param userID
+	 * @return
+	 */
+	public boolean insertToolUsageInSkylr(HttpClient httpClient, JSONObject joToolUsage, String userID) {
+		boolean result = false;
+		
+		HttpPost postRequest = new HttpPost(_efProperties.getProperty(PROPERTY_DEST_SKYLR_ADD_URL));
+		try {
+			StringEntity input = new StringEntity(joToolUsage.toString());
+			input.setContentType("application/json");
+			postRequest.setEntity(input);
+			 
+			HttpResponse response = httpClient.execute(postRequest);
+			 
+			if (response.getStatusLine().getStatusCode() >= 400) {
+				result = false;
+				logger.warn("Skylr - unable in insert event - "+ response.getStatusLine().getStatusCode() +":  toolUsage object: "+joToolUsage);
+			}
+			else {
+				result = true;
+				logger.trace("Skylr - inserted event - "+ response.getStatusLine().getStatusCode() +":  toolUsage object: "+joToolUsage);
+			}
+		}
+		catch (Exception e) {
+			logger.warn("Skylr - unable in insert event ("+ e.getMessage() +") - toolUsage object: "+joToolUsage);
+			result = false;
+		}
+		postRequest.releaseConnection();
+		
+		return result; 
+	}
+	
 
 	/**
 	 * Run continuously performs these steps:
@@ -271,6 +371,10 @@ public class EventForwarder extends Thread {
 			java.sql.Connection srcConn = null;
 			String[] destURLs = this.getDestinationURLs();
 			java.sql.Connection destConn[] = new java.sql.Connection[destURLs.length];
+			CloseableHttpClient  httpSkylrClient = null; 
+			
+			boolean skylrAvailable = true;
+			
 			try {
 				srcConn = DriverManager.getConnection(_efProperties.getProperty(PROPERTY_SRC_JDBC_URL));
 				java.util.List<ToolUsage> usages = this.getToolUsageInStaging(srcConn);
@@ -287,6 +391,8 @@ public class EventForwarder extends Thread {
 						}
 					}
 					
+					httpSkylrClient = HttpClientBuilder.create().build();			
+					
 					// copy over each record to all destinations
 					for (ToolUsage tu: usages) {
 						int destSuccessfulCount = 0;
@@ -300,13 +406,35 @@ public class EventForwarder extends Thread {
 								}
 							}
 						}
-						if (destSuccessfulCount == destConn.length) {
-							this.deleteToolUsageInStaging(tu.getUseID(), srcConn);
+						
+						// copy to skylr
+						boolean skylrInsert = false;
+						try {
+							if (skylrAvailable) {
+								if (!isToolUsageInSkylr(httpSkylrClient,tu)) { 
+									JSONObject jsonTU = convertToolUsageToJSONObjectForSkylr(tu, userID);
+									skylrInsert = this.insertToolUsageInSkylr(httpSkylrClient, jsonTU, userID);
+								}
+								else {
+									skylrInsert = true;
+								}
+							}
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
+						catch (Exception ex) { // this is only thrown right now if the connection fails in isToolUsageInSkylr can't connect
+							skylrAvailable = false;
+							logger.warn("skylr unavailable (not able to connect) - skipping for this cycle"); 
+						}
+						
+						
+						if (destSuccessfulCount == destConn.length && skylrInsert) {
+							this.deleteToolUsageInStaging(tu.getUseID(), srcConn);   						}
 					}
 				}
 				else {
-					logger.debug("no tool useages to forward");
+					logger.debug("no tool usages to forward");
 				}
 			}
 			catch (SQLException ex) {
@@ -330,6 +458,15 @@ public class EventForwarder extends Thread {
 						logger.warn("Unable to close destination connection");
 					}					
 				}
+				
+				if (httpSkylrClient != null) {
+					try {
+						httpSkylrClient.close();
+					}
+					catch(IOException ioe) {
+						logger.warn("Unable to close skylr http client");
+					}
+				}
 			}
 
 			// now sleep before the next
@@ -349,6 +486,8 @@ public class EventForwarder extends Thread {
     	BasicConfigurator.configure();
     	logger.setLevel(Level.ALL);
     	
+    	Logger.getLogger("org.apache.http").setLevel(org.apache.log4j.Level.WARN);
+    	
     	EventForwarder ef = new EventForwarder();
     	
     	try {
@@ -367,4 +506,62 @@ public class EventForwarder extends Thread {
     		e.printStackTrace();
     	}
     }
+    
+    
+	/**
+	 * Creates a JSONObject (manually so that the property names can be 
+	 * set appropriately for the Skylr destination 
+	 * 
+	 * @return
+	 * @throws JSONException
+	 */
+	public static JSONObject convertToolUsageToJSONObjectForSkylr(ToolUsage toolUsage, String userID) throws JSONException {
+		JSONObject appData = new JSONObject();
+		appData.put("rcdClassOfTool",toolUsage.getToolClass());
+		appData.put("rcdClipScore", toolUsage.getClipScore());
+		appData.put("rcdOriginalID", toolUsage.getUseID());
+		
+		
+		JSONObject contentObject = new JSONObject();
+		contentObject.put("UserId", userID);
+		contentObject.put("AppName", toolUsage.getPluginName());
+		contentObject.put("ProjId", "LAS/Recommender");
+		contentObject.put("ProjVer", "1.0");
+		contentObject.put("EvtTime", toolUsage.getTimeStamp().getTime());
+		contentObject.put("EvtEndTime", toolUsage.getTimeStamp().getTime() + toolUsage.getDuration());
+		try {
+			contentObject.put("NetAddr", java.net.Inet4Address.getLocalHost().getHostAddress());
+		}
+		catch (UnknownHostException uhe) {
+			contentObject.put("NetAddr", "0.0.0.0");
+		}
+		contentObject.put("EvtType", toolUsage.getToolKeyPresses().equals("[GUI]") ? "mouse event: button click" :  "keyboardevent:key press");
+		contentObject.put("EvtDesc", toolUsage.getToolKeyPresses());
+        contentObject.put("EvtAction", toolUsage.getToolName());
+		contentObject.put("AppData",appData);
+		
+		JSONObject result = new JSONObject();
+		result.put("content", contentObject);
+		
+		return result;
+	}
+    
+	/**
+	 * Creates a JSONObject that represents a query to Skylr to see if a particular event
+	 * has been uploaded or not 
+	 * 
+	 * @return
+	 * @throws JSONException
+	 */
+	public static JSONObject createFindQueryForUseID(ToolUsage toolUsage) throws JSONException {
+		JSONObject query = new JSONObject();
+		query.put("data.AppData.rcdOriginalID", toolUsage.getUseID());
+		
+		JSONObject result = new JSONObject();
+		result.put("type", "find");
+		result.put("query", query);
+		
+		return result;
+	}	
+	
 }
