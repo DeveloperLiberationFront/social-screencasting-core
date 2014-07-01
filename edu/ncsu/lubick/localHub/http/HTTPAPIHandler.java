@@ -181,10 +181,10 @@ public class HTTPAPIHandler extends AbstractHandler {
 	
 			// Testing data
 			keyJarr.put("Eclipse16274d13-bebb-3196-832c-70313e08cdaaK");
-			//keyJarr.put("Eclipsee667cfd3-0bd8-3af8-93d7-10d16ab2f854");
-			//guiJarr.put("Eclipsee434f382-7183-3cc5-8380-2137816a48d4");
-			//guiJarr.put("Eclipse47397aaf-c70f-3aa1-9df5-a87f5a583af3");
-			//guiJarr.put("Eclipse06ac5c3c-da64-3300-9a74-6fed83aa2722");
+			keyJarr.put("Eclipsea3aabc7a-d2dc-33d1-84a7-066372cb4d73K");
+			guiJarr.put("Eclipse16141cfc-87cb-32dc-bc30-fedcad3b7598G");
+			guiJarr.put("Eclipse29bf2b83-2e3d-3855-9286-ee7f69db64c1G");
+			guiJarr.put("Eclipse13d5a993-e46f-3b7f-862a-bfefa5831901G");
 	
 	
 			clips.put("keyclips",keyJarr);

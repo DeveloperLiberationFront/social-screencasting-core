@@ -119,19 +119,52 @@ define(['angular',
       $scope.toolName = $routeParams.tool ? $routeParams.tool : "nothing";
       $scope.shareWithName = $routeParams.shareWithName;
       $scope.shareWithEmail = $routeParams.shareWithEmail;
-  
-      Local.one($scope.user.email).one($scope.applicationName)
-      .one($scope.toolName).get().then(function(tool) {
+
+      $scope.selection = [];
+      $scope.ready = false;
+    
+      var toolEnd = Local.one($scope.user.email).one($scope.applicationName)
+      .one($scope.toolName);
+
+      toolEnd.get().then(function(tool) {
           console.log(tool.plain());
-          $scope.clips = [];
           for (var i in tool.keyclips) {
-              $scope.clips.push({clipId: tool.keyclips[i], type: "key", index: +i+1});
+              $scope.clips.push({clipId: tool.keyclips[i], toDisplay: "Example "+(+i+1)+" using Keyboard" });
           }
           for (i in tool.guiclips) {
-              $scope.clips.push({clipId: tool.guiclips[i], type: "gui", index: +i+1});
+              $scope.clips.push({clipId: tool.guiclips[i], toDisplay: "Example "+(+i+1)+" using GUI"});
           }
           console.log($scope.clips);
-      });
+
+        });
+
+      $scope.clips = [];
+      $scope.shareGridOptions = {
+        selectedItems: $scope.selection,
+        multiSelect: false,
+            data: "clips",   //this is a string of the name of the obj in the $scope that has data
+            columnDefs: [{ field:'toDisplay'}],
+            headerRowHeight:0,
+            afterSelectionChange: function() {
+              var c = $scope.selection;
+
+              if (c.length > 0) {
+                var clipId = c[0].clipId;
+                console.log(c[0]);
+
+                toolEnd.one(clipId).get().then(function(clip){
+                  console.log(clip);
+                  $scope.clip = clip;
+                  $scope.ready = true;
+                  $scope.$broadcast('refreshSlider');
+                });
+              }
+            }
+          };
+
+
+
+
 
       // $scope.clip = new Clip({
       //     name: $scope.clipId,
