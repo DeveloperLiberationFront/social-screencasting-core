@@ -11,3 +11,11 @@
 .shareGrid {
 	height:500px;
 }
+
+.shareClipButton {
+    background-color: white;
+	margin:5px;
+	font-size:16px;
+	padding: 5px;
+
+}
