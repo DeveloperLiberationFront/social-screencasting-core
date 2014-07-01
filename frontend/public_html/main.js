@@ -17,6 +17,7 @@ requirejs.config({
         'ng-slider': '../lib/bower/venturocket-angular-slider/build/angular-slider',
         'ng-touch': '../lib/bower/angular-touch/angular-touch',
         'ng-ui-utils': '../lib/bower/angular-ui-utils/ui-utils',
+        'ng-ui-router': '../lib/bower/angular-ui-router/release/angular-ui-router',
         'restangular': '../lib/bower/restangular/dist/restangular',
         'lodash': '../lib/bower/lodash/dist/lodash',
 
@@ -39,6 +40,7 @@ requirejs.config({
         'ng-touch': ['angular'],
         'ng-slider': ['angular', 'ng-touch'],
         'ng-ui-utils': ['angular'],
+        'ng-ui-router': ['angular'],
         'restangular': ['angular'],
         'bootstrap': ['jquery'],
         'jquery-ui': ['jquery'],
