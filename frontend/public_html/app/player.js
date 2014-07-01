@@ -60,11 +60,10 @@ define(['angular',
             end: $scope.clip.frames.length-1
         });
 
-        $scope.$watch(function(){
-            return $scope.player.pos > $scope.clip.keyboardEventFrame;
-        }, function(newVal, oldVal) {
-            $scope.kbdOverlay.status = (newVal ? 'active' : 'inactive');
-        });
+        $scope.posChange = function() {
+            var active = $scope.player.pos > $scope.clip.keyboardEventFrame;
+            $scope.kbdOverlay.status = (active ? 'active' : 'inactive');
+        }
 
         $scope.timer = $interval(function() {
             if ($scope.player.playing) { //playing
