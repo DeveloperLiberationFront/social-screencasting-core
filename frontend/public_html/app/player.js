@@ -106,21 +106,17 @@ define(['angular',
         };
     }])
 
-  .controller('ModalPlayer', ['$scope', '$modalInstance', 'tool',
-    function($scope, $modalInstance, tool) {
+  .controller('ModalPlayer', ['$scope', '$modalInstance', 'clip',
+    function($scope, $modalInstance, clip) {
         //tool is a restangular object
         $scope.status = 'loading';
         $scope.close = function () {
             $modalInstance.close();
         };
 
-        if (tool.clips.length > 0) {
-            tool.one(tool.clips[0].name).get($scope.auth).then(function(clip) {
-                $scope.clip = clip; 
-                $scope.status = 'ready';
-                $scope.$broadcast('refreshSlider');
-            });
-        }
+        $scope.clip = clip;
+        $scope.status = 'ready';
+        $scope.$broadcast('refreshSlider');
     }])
 
   .controller('RatingCtrl', ['$scope',

@@ -33,6 +33,11 @@ define(['angular',
                 templateUrl: 'partials/main.html',
                 controller: 'MainCtrl',
             })
+            .state('tools', {
+                url: '/tools/:name',
+                templateUrl: 'partials/tool-details.html',
+                controller: 'ToolCtrl'
+            })
             .state('player', {
                 url: '/player',
                 templateUrl: 'partials/player.html',

@@ -29,3 +29,14 @@
     flex: 0 1 auto;
     margin: 0 15px 15px 0;
 }
+
+#tool-view {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: start;
+}
+
+#tool-view > div {
+    flex: 0 1 auto;
+    margin: 0 15px 15px 0;
+}

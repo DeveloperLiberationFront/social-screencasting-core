@@ -10,6 +10,20 @@ define(['angular',
        function (ng, $, _) {
   /* Controllers */
 
+  var fieldDefs = {
+      'new': {
+          width: '50px',
+          field:'new', displayName:'New',
+          cellTemplate: "<div class='ngCellText'><span class='glyphicon glyphicon-ok' ng-show='row.getProperty(col.field)'></span></div>"
+      },
+      'video': {
+          width: '50px',
+          field:'video', displayName:'Video',
+          cellTemplate:  "<div class='ngCellText'><img src='images/video_icon_tiny.png' ng-show='row.getProperty(col.field)'/></div>",
+          sortFn: function(x,y){return (x === y)? 0 : x? 1 : -1;}
+      }
+  }
+
   return ng.module('socasterControllers',
                    ['ui.bootstrap',
                     'ui.format',
@@ -47,21 +61,49 @@ define(['angular',
 
   .controller('UserListCtrl', ['$scope',
     function($scope) {
-        $scope.$on('appSelected', function() {
-            $scope.application.then(function(app){
-                $scope.users = app.users;
-            });
-        });
         $scope.gridOptions = {
-            data: 'users',
+            data: 'application.$object.users',
             multiSelect: false,
             columnDefs: [{field:'name', displayName:'Name'},
                          {field:'email', displayName:'Email'}]
         };
     }])
 
-  .controller('ApplicationToolsCtrl', ['$scope', '$modal', 'Local', 'Hub',
-    function($scope, $modal, Tool) {
+  .controller('ToolUsersCtrl', ['$scope', '$modal',
+    function($scope, $modal) {
+        $scope.selection
+        $scope.gridOptions = {
+            data: 'tool.$object.users',
+            multiSelect: false,
+            columnDefs: [{field:'name', displayName:'Name'},
+                         {field:'email', displayName:'Email'},
+                         {field:'usages', displayName:'Usages'},
+                         fieldDefs['video']],
+            afterSelectionChange: function(row) {
+                if (row && row.entity && row.selected) {
+                    var user = row.entity;
+                    var userClips = _.where($scope.tool.$object.clips, {creator: user.email});
+                    if (userClips.length > 0) {
+                        $modal.open({
+                            templateUrl: 'partials/modal-player.html',
+                            controller: 'ModalPlayer',
+                            scope: $scope,
+                            resolve: { clip: function(){
+                                return $scope.tool.$object.one(userClips[0].name).get($scope.auth);
+                            }},
+                            windowClass: 'modal-player',
+                            size: 'lg'
+                        });
+                    }
+                }
+            }
+        };
+
+
+    }])
+
+  .controller('ApplicationToolsCtrl', ['$scope', '$modal', '$state', 'Local', 'Hub',
+    function($scope, $modal, $state, Tool) {
         $scope.selection = [];
         $scope.gridOptions = {
             data: 'application.$object.tools',
@@ -69,17 +111,8 @@ define(['angular',
             multiSelect: false,
             columnDefs: [
                 { field:'name', displayName:'Name' },
-                {
-                    width: '50px',
-                    field:'new', displayName:'New',
-                    cellTemplate: "<div class='ngCellText'><span class='glyphicon glyphicon-ok' ng-show='row.getProperty(col.field)'></span></div>"
-                },
-                {
-                    width: '50px',
-                    field:'video', displayName:'Video',
-                    cellTemplate:  "<div class='ngCellText'><img src='images/video_icon_tiny.png' ng-show='row.getProperty(col.field)'/></div>",
-                    sortFn: function(x,y){return (x === y)? 0 : x? 1 : -1;}
-                }
+                fieldDefs['new'],
+                fieldDefs['video']
             ],
             sortInfo: {
                 fields: ['new', 'video'],
@@ -88,18 +121,8 @@ define(['angular',
             afterSelectionChange: function() {
                 s = $scope.selection;
 
-                if (s.length > 0 && s[0].video) {
-                    tool = s[0];
-                    $modal.open({
-                        templateUrl: 'partials/modal-player.html',
-                        controller: 'ModalPlayer',
-                        scope: $scope,
-                        resolve: { tool: function(){
-                            return $scope.application.$object.one(tool.name).get($scope.auth);
-                        }},
-                        windowClass: 'modal-player',
-                        size: 'lg'
-                    });
+                if (s.length > 0) {
+                    $state.go('tools', {name: s[0].name});
                 }
             }
         };
@@ -118,6 +141,19 @@ define(['angular',
 
   .controller('StatusCtrl', function() {
   })
+
+  .controller('ToolCtrl', ['$scope', '$stateParams',
+    function($scope, $stateParams) {
+      var setHandler = function() {
+          $scope.application.then(function(app) {
+              $scope.tool = app.one($stateParams.name).get($scope.auth);
+          });
+      }
+      if ($scope.application) {
+          setHandler();
+      }
+      $scope.$on('appSelected', setHandler);
+    }])
 
   .controller('ShareCtrl', ['$scope', '$routeParams', 'Local',
     function($scope, $routeParams, Local) {

@@ -12,7 +12,7 @@ requirejs.config({
         'ng-route': '../lib/bower/angular-route/angular-route.min',
         'ng-bootstrap': '../lib/bower/angular-bootstrap/ui-bootstrap-tpls.min',
         'ng-resource': '../lib/bower/angular-resource/angular-resource',
-        'ng-grid': '../lib/bower/ng-grid/ng-grid-2.0.11.min',
+        'ng-grid': '../lib/bower/ng-grid/ng-grid-2.0.11.debug',
         'ng-fullscreen': '../lib/bower/ng-fullscreen/ng-fullscreen',
         'ng-slider': '../lib/bower/venturocket-angular-slider/build/angular-slider',
         'ng-touch': '../lib/bower/angular-touch/angular-touch',
