@@ -112,16 +112,27 @@ define(['angular',
   .controller('StatusCtrl', function() {
   })
 
-  .controller('ShareCtrl', ['$scope', '$routeParams',
-    function($scope, $routeParams) {
+  .controller('ShareCtrl', ['$scope', '$routeParams', 'Local',
+    function($scope, $routeParams, Local) {
       console.log($routeParams);
-      console.log($scope);
       $scope.applicationName = $routeParams.application ? $routeParams.application : "nothing";
       $scope.toolName = $routeParams.tool ? $routeParams.tool : "nothing";
-      $scope.clipId = $routeParams.clip ? $routeParams.clip : "nothing";
       $scope.shareWithName = $routeParams.shareWithName;
       $scope.shareWithEmail = $routeParams.shareWithEmail;
   
+      Local.one($scope.user.email).one($scope.applicationName)
+      .one($scope.toolName).get().then(function(tool) {
+          console.log(tool.plain());
+          $scope.clips = [];
+          for (var i in tool.keyclips) {
+              $scope.clips.push({clipId: tool.keyclips[i], type: "key", index: +i+1});
+          }
+          for (i in tool.guiclips) {
+              $scope.clips.push({clipId: tool.guiclips[i], type: "gui", index: +i+1});
+          }
+          console.log($scope.clips);
+      });
+
       // $scope.clip = new Clip({
       //     name: $scope.clipId,
       //     tool: $scope.toolName,

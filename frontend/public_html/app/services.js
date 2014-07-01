@@ -3,7 +3,7 @@ define(['angular', 'ng-resource', 'restangular'], function (ng) {
 
     .factory('Local', ['Restangular', function(Restangular) {
       return Restangular.withConfig(function(RestangularConfigurer) {
-        RestangularConfigurer.setBaseUrl('/api');
+        RestangularConfigurer.setBaseUrl('/api'); //relative to top level (which is already localhost:4443)
       });
     }])
 

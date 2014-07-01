@@ -1,5 +1,16 @@
 
 <div>
     <h2>Share {{applicationName}}/{{toolName}} with {{shareWithName}} [{{shareWithEmail}}]</h2>
-    <!-- <div ng-controller='ModalPlayer' ng-include="'partials/modal-player.html'"></div> -->
+
+    <ul id="clipList">
+    <li ng-repeat="clip in clips"> 
+    	<span ng-switch="clip.type">
+    		<span ng-switch-when="key">Example {{clip.index}} using Keyboard</span>
+    		<span ng-switch-when="gui">Example {{clip.index}} using GUI</span>
+    	</span>
+    </li>
+    </ul>
+    <divng-show="name !== undefined" ng-controller='PlayerCtrl' ng-include="'partials/player.html'"></div>
+
+
 </div>
