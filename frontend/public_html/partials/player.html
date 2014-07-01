@@ -2,7 +2,8 @@
 <div id="player" fullscreen='isFullscreen'>
   <div id="panel" ng-click='toggleFullscreen()'>
     <div id='overlay' ng-hide='(player.isCropping || isFullscreen)'>Click to toggle fullscreen</div>
-    <img id='keyboardOverlay' ng-hide='player.editMode || kbdOverlay.mode == 3 || player.isCropping'
+    <img id='keyboardOverlay' ng-if='kbdOverlay.enabled'
+         ng-hide='player.editMode || kbdOverlay.mode == 3 || player.isCropping'
          ng-src="{{ imagePath(kbdOverlay.images[kbdOverlay.status][kbdOverlay.mode % 3]) }}"/>
     <div class="img-container">
       <img class='img-responsive' ng-src="{{ imagePath(clip.frames[player.pos]) }}"/>
@@ -14,7 +15,7 @@
       <span class='glyphicon' ng-class="{'glyphicon-play': !player.playing, 'glyphicon-pause': player.playing}"></span>
     </button>
     <div id='sliders'>
-      <div ng-controller='PlaybackSliderCtrl' ng-mousedown="player.playing = false">
+      <div ng-mousedown="player.playing = false">
         <slider floor='0' ceiling='{{clip.frames.length -1}}' step='1' ng-model='player.pos'>
         </slider>
       </div>
@@ -25,9 +26,11 @@
       </div>
     </div>
     <div ng-switch='player.editMode'>
-      <div ng-switch-when='false' id='overlayMode' ng-if='kbdOverlay.enabled'
+      <div ng-switch-when='false'>
+        <div id='overlayMode' ng-if='kbdOverlay.enabled'
            tooltip="{{kbdOverlay.tooltip[kbdOverlay.mode]}}" tooltip-placement='right'>
-        <img class='img-responsive' ng-src="{{'images/' + kbdOverlay.images['active'][kbdOverlay.mode]}}" ng-click='kbdOverlay.mode = (kbdOverlay.mode + 1) % 4'/>
+          <img class='img-responsive' ng-src="{{'images/' + kbdOverlay.images['active'][kbdOverlay.mode]}}" ng-click='kbdOverlay.mode = (kbdOverlay.mode + 1) % 4'/>
+        </div>
       </div>
 
       <button id='cropBtn' ng-switch-when='true' tooltip="Crop" tooltip-placement='right'>

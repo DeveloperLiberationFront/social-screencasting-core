@@ -6,6 +6,7 @@ define(['angular',
         'ng-fullscreen',
         'ng-ui-utils',
         'ng-slider',
+        'player',
        ], function (ng) {
   'use strict';
 
@@ -16,8 +17,10 @@ define(['angular',
     'ui.bootstrap',
     'socasterControllers',
     'socasterServices',
+    'player',
     'ngFullscreen',
     'vr.directives.slider',
+    'restangular',
   ])
   
   .config(['$routeProvider',
@@ -43,6 +46,10 @@ define(['angular',
         .otherwise({
             redirectTo: '/'
         });
-    }
-  ]);
+    }])
+
+  .config(['RestangularProvider',
+    function(RestangularProvider) {
+      RestangularProvider.setDefaultHttpFields({cache: true});
+    }]);
 });

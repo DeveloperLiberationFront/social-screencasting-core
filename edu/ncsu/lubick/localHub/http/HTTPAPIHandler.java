@@ -91,10 +91,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 			try {
 				JSONObject user = makeUserAuthObj();
 
-				JSONObject data = new JSONObject();
-				data.put("user", user);
-
-				data.write(response.getWriter());
+				user.write(response.getWriter());
 			}
 			catch (JSONException e) {
 				throw new IOException("Problem making JSON", e);
@@ -118,23 +115,23 @@ public class HTTPAPIHandler extends AbstractHandler {
 
 	private void handleGetAllToolsForPlugin(String applicationName, HttpServletResponse response) throws IOException
 	{
-		JSONObject appObj = makePluginArray(applicationName);
-		JSONObject dataObject = new JSONObject();
+		JSONObject dataObj = new JSONObject();
+		JSONArray appArr = makePluginArray(applicationName);
 		try {
-			dataObject.put(applicationName, appObj);
-			dataObject.write(response.getWriter());
+			dataObj.put("tools", appArr);
+			dataObj.write(response.getWriter());
 		}
 		catch (JSONException e) {
-			throw new IOException("Problem making JSON " + dataObject, e);
+			throw new IOException("Problem making JSON " + dataObj, e);
 		}
 	
 	}
 	
-	private JSONObject makePluginArray(String pluginName)
+	private JSONArray makePluginArray(String pluginName)
 	{
 		List<ToolCountStruct> counts = databaseLink.getAllToolAggregateForPlugin(pluginName);
 
-		JSONObject retVal = new JSONObject();
+		JSONArray retVal = new JSONArray();
 		for(ToolCountStruct tcs: counts)
 		{
 			JSONObject tempObject = new JSONObject();
@@ -143,7 +140,8 @@ public class HTTPAPIHandler extends AbstractHandler {
 				tempObject.put("clips", 5);		//TODO FIX
 				tempObject.put("gui", tcs.guiToolCount);
 				tempObject.put("keyboard", tcs.keyboardCount);
-				retVal.put(tcs.toolName, tempObject);
+				tempObject.put("name", tcs.toolName);
+				retVal.put(tempObject);
 			}
 			catch (JSONException e)
 			{

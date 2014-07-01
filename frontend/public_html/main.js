@@ -17,11 +17,17 @@ requirejs.config({
         'ng-slider': '../lib/bower/venturocket-angular-slider/build/angular-slider',
         'ng-touch': '../lib/bower/angular-touch/angular-touch',
         'ng-ui-utils': '../lib/bower/angular-ui-utils/ui-utils',
-        'underscore': '../lib/bower/underscore/underscore',
+        'restangular': '../lib/bower/restangular/dist/restangular',
+        'lodash': '../lib/bower/lodash/dist/lodash',
 
         'tablesorter': '../lib/bower/jquery.tablesorter/js',
         'jquery.metadata': '../lib/bower/jquery.metadata/jquery.metadata',
         'jquery.cropper': '../lib/cropper/cropper'
+    },
+    map: {
+        '*': {
+            'underscore': 'lodash'
+        }
     },
     shim: {
 	    'angular' : {'exports' : 'angular'},
@@ -33,12 +39,13 @@ requirejs.config({
         'ng-touch': ['angular'],
         'ng-slider': ['angular', 'ng-touch'],
         'ng-ui-utils': ['angular'],
+        'restangular': ['angular'],
         'bootstrap': ['jquery'],
         'jquery-ui': ['jquery'],
         'jquery.cropper':['jquery'],
         'tablesorter': ['jquery'],
         'jquery.metadata': ['jquery'],
-        'lib/jquery.fullscreen': ['jquery'],
+        'lib/jquery.fullscreen': ['jquery']
     },
 	priority: [
         "angular", "jquery"
@@ -54,7 +61,6 @@ requirejs([
     'ng-grid',
     'bootstrap',
     'controllers',
-//    'playback',
 ], function(angular, app) {
   'use strict';
   angular.bootstrap(document, [app['name']]);
