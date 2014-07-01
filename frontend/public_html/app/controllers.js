@@ -19,8 +19,8 @@ define(['angular',
                     'player',
                    ])
 
-  .controller('NavCtrl', ['$scope', '$filter', 'Local', 'Hub',
-    function($scope, $filter, Local, Hub) {
+  .controller('NavCtrl', ['$scope', '$filter', '$q', 'Local', 'Hub',
+    function($scope, $filter, $q, Local, Hub) {
         Local.one('user').get().then(function(user){
             $scope.user = user;
             $scope.auth = user.plain();
@@ -30,7 +30,14 @@ define(['angular',
             $scope.$broadcast('appSelected', apps[0]);
         });
         $scope.$on('appSelected', function(event, app) {
+            var userTools = Local.one('user').one(app.name).get().get('tools');
             $scope.application = Hub.one('details').one(app.name).get($scope.auth);
+            $q.all({userTools: userTools, app: $scope.application})
+                .then(function(results){
+                    _.each(results.app.tools, function(tool) {
+                        tool.new = _.findWhere(results.userTools, {name: tool.name}) == undefined;
+                    });
+                });
         });
     }])
 

@@ -5,6 +5,7 @@ define(['angular',
         'ng-bootstrap',
         'ng-fullscreen',
         'ng-ui-utils',
+        'ng-ui-router',
         'ng-slider',
         'player',
        ], function (ng) {
@@ -13,7 +14,7 @@ define(['angular',
   /* App Module */
   
   return ng.module('socasterApp', [
-    'ngRoute',
+    'ui.router',
     'ui.bootstrap',
     'socasterControllers',
     'socasterServices',
@@ -23,29 +24,30 @@ define(['angular',
     'restangular',
   ])
   
-  .config(['$routeProvider',
-    function($routeProvider) {
-      $routeProvider
-        .when('/', {
-          templateUrl: 'partials/main.html',
-          controller: 'MainCtrl',
-        })
-        .when('/player', {
-          templateUrl: 'partials/player.html',
-          controller: 'PlayerCtrl'
-        })
-        .when('/status', {
-          templateUrl: 'partials/status.html',
-          controller: 'StatusCtrl'
-        })
-        .when('/share/:application/:tool', {
-          templateUrl: 'partials/share.html',
-          controller: 'ShareCtrl'
-        })
-
-        .otherwise({
-            redirectTo: '/'
-        });
+  .config(['$stateProvider','$urlRouterProvider',
+    function($stateProvider, $urlRouterProvider) {
+        $urlRouterProvider.otherwise('/');
+        $stateProvider
+            .state('main', {
+                url: "/",
+                templateUrl: 'partials/main.html',
+                controller: 'MainCtrl',
+            })
+            .state('player', {
+                url: '/player',
+                templateUrl: 'partials/player.html',
+                controller: 'PlayerCtrl'
+            })
+            .state('status', {
+                url: '/status',
+                templateUrl: 'partials/status.html',
+                controller: 'StatusCtrl'
+            })
+            .state('share', {
+                url: '/share/:application/:tool',
+                templateUrl: 'partials/share.html',
+                controller: 'ShareCtrl'
+            })
     }])
 
   .config(['RestangularProvider',
