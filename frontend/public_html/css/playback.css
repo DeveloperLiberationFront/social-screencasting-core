@@ -2,8 +2,12 @@
     width: 800px;
 }
 
-#player {
+#modalBox {
     width: 780px;
+}
+
+#player {
+    width: inherit;
 }
 
 #player.isInFullScreen {

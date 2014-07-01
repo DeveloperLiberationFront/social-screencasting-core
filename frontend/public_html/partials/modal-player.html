@@ -3,7 +3,7 @@
     <ng-include src="'partials/loading.html'"></ng-include>
   </div>
   <div ng-switch-when="ready">
-    <div ng-controller='PlayerCtrl' ng-include="'partials/player.html'"></div>
+    <div id="modalBox" ng-controller='PlayerCtrl' ng-include="'partials/player.html'"></div>
   </div>
 </div>
 <button class="close" ng-click="close()">&times;</button>
