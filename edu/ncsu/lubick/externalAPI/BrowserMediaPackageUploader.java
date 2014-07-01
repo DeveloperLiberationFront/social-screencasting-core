@@ -23,7 +23,6 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.util.ByteArrayOutputStream2;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
