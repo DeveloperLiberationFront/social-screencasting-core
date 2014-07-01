@@ -13,14 +13,16 @@ define(['angular',
                     'socasterServices',
                     'restangular'])
 
-  .controller('PlayerCtrl', ['$scope', '$interval', '$filter',
-    function($scope, $interval, $filter) {
+  .controller('PlayerCtrl', ['$scope', '$interval', '$filter', '$rootScope',
+    function($scope, $interval, $filter, $rootScope) {
+
         $scope.player = {
             pos: 0,
             playing: false,
-            editMode: false,
+            editMode: $scope.editMode ? $scope.editMode : false,
             isCropping: false
         };
+
         $scope.isFullscreen = false;
         $scope.toggleFullscreen = function() {
           if (!$scope.player.isCropping) {
@@ -34,7 +36,7 @@ define(['angular',
         };
         $scope.kbdOverlay = {
             mode: 0,
-            enabled: $scope.clip.name.substr(-1)=='K', //only clips ending in 'k' have keyboard info
+            enabled: $scope.clip.name.substr(-1) == 'K', //only clips ending in 'k' have keyboard info
             status: 'inactive',
             images: {
                 'active': [ 'image_text.png', 'image.png', 'text.png', 'none.png' ],
@@ -60,10 +62,25 @@ define(['angular',
             end: $scope.clip.frames.length-1
         });
 
+        $scope.$watch('clip', function(newValue, oldValue) {
+            _.extend(newValue, {
+                loaded: newValue.frames.map(function(frame){
+                    var img = new Image();
+                    img.src = $scope.imagePath(frame);
+                    return img;
+                }),
+                keyboardEventFrame: 25,
+                start: 0,
+                end: newValue.frames.length-1
+            });
+            $scope.imgDir = $scope.clip.getRestangularUrl() + '/';
+            $scope.$broadcast('refreshSlider');
+        });
+
         $scope.posChange = function() {
             var active = $scope.player.pos > $scope.clip.keyboardEventFrame;
             $scope.kbdOverlay.status = (active ? 'active' : 'inactive');
-        }
+        };
 
         $scope.timer = $interval(function() {
             if ($scope.player.playing) { //playing

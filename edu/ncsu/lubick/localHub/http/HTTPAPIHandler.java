@@ -212,7 +212,8 @@ public class HTTPAPIHandler extends AbstractHandler {
 			Arrays.sort(files);
 			for(String imageFile: files)
 			{
-				fileNamesArr.put(imageFile);
+				if (imageFile.startsWith("frame"))
+					fileNamesArr.put(imageFile);
 			}
 		}
 		else {

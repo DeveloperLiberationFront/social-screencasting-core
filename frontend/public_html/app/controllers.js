@@ -119,6 +119,7 @@ define(['angular',
       $scope.toolName = $routeParams.tool ? $routeParams.tool : "nothing";
       $scope.shareWithName = $routeParams.shareWithName;
       $scope.shareWithEmail = $routeParams.shareWithEmail;
+      $scope.editMode = true;
 
       $scope.selection = [];
       $scope.ready = false;
@@ -139,6 +140,7 @@ define(['angular',
         });
 
       $scope.clips = [];
+      $scope.isFirst = true;
       $scope.shareGridOptions = {
         selectedItems: $scope.selection,
         multiSelect: false,
@@ -150,10 +152,7 @@ define(['angular',
 
               if (c.length > 0) {
                 var clipId = c[0].clipId;
-                console.log(c[0]);
-
                 toolEnd.one(clipId).get().then(function(clip){
-                  console.log(clip);
                   $scope.clip = clip;
                   $scope.ready = true;
                   $scope.$broadcast('refreshSlider');
@@ -161,20 +160,5 @@ define(['angular',
               }
             }
           };
-
-
-
-
-
-      // $scope.clip = new Clip({
-      //     name: $scope.clipId,
-      //     tool: $scope.toolName,
-      //     app: $scope.applicationName
-      // });
-    // $scope.clip.$get($scope.auth).then(function() {
-    //   console.log("clip fetched");
-    //   $scope.status = 'ready';
-    //   $scope.$broadcast('refreshSlider');
-    // });
     }]);
 });
