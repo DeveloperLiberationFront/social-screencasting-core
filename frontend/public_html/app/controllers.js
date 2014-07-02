@@ -216,7 +216,7 @@ define(['angular',
                 recipient : shareWithAll? "all" : $scope.shareWithEmail,
                 start_frame: $scope.clip.start,
                 end_frame: $scope.clip.end,
-                crop_rect: $scope.cropData.cropData
+                crop_rect: JSON.stringify($scope.cropData.cropData)
               }
             });
           };

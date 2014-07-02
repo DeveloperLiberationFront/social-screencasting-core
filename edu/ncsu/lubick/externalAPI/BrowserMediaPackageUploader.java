@@ -5,10 +5,12 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +21,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -83,7 +86,7 @@ public class BrowserMediaPackageUploader {
 	{
 		File[] allFiles = packageDirectory.listFiles();
 		
-		if (clipOptions.cropRect != null) {
+		if (clipOptions.cropRect == null) {
 			List<String> existingFiles = getExistingFilesOnExternalServer(toolUsage);
 
 			return incrementalUploadFiles(allFiles, existingFiles, clipOptions); 
@@ -104,7 +107,11 @@ public class BrowserMediaPackageUploader {
 				try
 				{
 					int fileNum = fileNameToInt(fileName);
-					if (fileNum >= startFrame && fileNum <= endFrame || fileNum == -1) {
+					if (!fileName.startsWith("frame")) {
+						reportFile(file);
+					}
+					else if (fileNum >= startFrame && fileNum <= endFrame || fileNum == -1) {
+						logger.info("Uploading: " + fileName);
 						reportCroppedImage(file, clipOptions.cropRect);
 					}
 				}
@@ -145,13 +152,16 @@ public class BrowserMediaPackageUploader {
 			BufferedImage image = ImageIO.read(imageFile);
 			BufferedImage croppedImage = image.getSubimage(rect.x, rect.y, rect.width, rect.height);
 			
+			
 			ByteArrayOutputStream croppedJPG = new ByteArrayOutputStream();
 			
 			ImageIO.write(croppedImage, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, croppedJPG);
 			
-			ByteArrayInputStream croppedJPGForTransfer = new ByteArrayInputStream(croppedJPG.toByteArray());
+			byte[] croppedJPGForTransfer = croppedJPG.toByteArray();
 			
-			mpeBuilder.addBinaryBody("image", croppedJPGForTransfer);
+			logger.debug("sending "+croppedJPGForTransfer.length + " bytes");
+			
+			mpeBuilder.addBinaryBody("image", croppedJPGForTransfer, ContentType.DEFAULT_BINARY, "file");
 
 			HttpEntity content = mpeBuilder.build();
 
@@ -232,7 +242,11 @@ public class BrowserMediaPackageUploader {
 			CloseableHttpResponse response = client.execute(httpGet);
 			
 			String responseBody = HTTPUtils.getResponseBody(response);
+			logger.info("files that exist on server "+responseBody);
 			JSONObject clip = new JSONObject(responseBody);
+			if (clip.has("error")) {
+				return Collections.emptyList();
+			}
 			JSONArray filenames = clip.getJSONObject("clip").getJSONArray("filenames");
 			
 			existingFiles = new ArrayList<>(filenames.length());

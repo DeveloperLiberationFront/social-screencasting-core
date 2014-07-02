@@ -1,6 +1,8 @@
 package edu.ncsu.lubick.localHub.http;
 
+import java.awt.Rectangle;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -64,20 +66,33 @@ public class HTTPClipSharer extends AbstractHandler {
 	{
 		logger.debug(request.getParameterMap());
 		
-//		String clipId = request.getParameter(PARAM_CLIP_ID);
-//		String recipient = request.getParameter(PARAM_RECIPIENT);
-//		
-//		String paramStartFrame = request.getParameter(PARAM_START_FRAME);
-//		int startFrame = Integer.parseInt(paramStartFrame == null? "0" : paramStartFrame);
-//		String paramEndFrame = request.getParameter(PARAM_END_FRAME);
-//		int endFrame = Integer.parseInt(paramEndFrame == null? "0" : paramEndFrame);
-//		
-//		if (clipId == null || recipient == null)
-//		{
-//			logger.info("clipId = "+clipId +", recipient = "+recipient+", so cancelling");
-//			return;
-//		}
-//		this.databaseLink.shareClipWithUser(clipId, recipient, new ClipOptions(startFrame, endFrame));
+		String clipId = request.getParameter(PARAM_CLIP_ID);
+		String recipient = request.getParameter(PARAM_RECIPIENT);
+		
+		String paramStartFrame = request.getParameter(PARAM_START_FRAME);
+		int startFrame = Integer.parseInt(paramStartFrame == null? "0" : paramStartFrame);
+		String paramEndFrame = request.getParameter(PARAM_END_FRAME);
+		int endFrame = Integer.parseInt(paramEndFrame == null? "0" : paramEndFrame);
+		
+		String cropX = request.getParameter(PARAM_CROP_RECT+"[x1]");
+		String cropY = request.getParameter(PARAM_CROP_RECT+"[y1]");
+		String cropWidth = request.getParameter(PARAM_CROP_RECT+"[width]");
+		String cropHeight = request.getParameter(PARAM_CROP_RECT+"[height]");
+		
+		if (clipId == null || recipient == null)
+		{
+			logger.info("clipId = "+clipId +", recipient = "+recipient+", so cancelling");
+			return;
+		}
+		
+		Rectangle cropRect = null;
+		if (cropX != null && cropY != null && cropWidth != null && cropHeight != null) {
+			cropRect = new Rectangle(Integer.parseInt(cropX), Integer.parseInt(cropY),
+					Integer.parseInt(cropWidth), Integer.parseInt(cropHeight));
+		}
+		
+		
+		this.databaseLink.shareClipWithUser(clipId, recipient, new ClipOptions(startFrame, endFrame, cropRect));
 	}
 
 

@@ -13,6 +13,13 @@ public class ClipOptions {
 		this.endFrame = endFrame;
 	}
 	
+	public ClipOptions(int startFrame, int endFrame, Rectangle cropRect)
+	{
+		this.startFrame = startFrame;
+		this.endFrame = endFrame;
+		this.cropRect = cropRect;
+	}
+	
 	public ClipOptions()
 	{
 		//Default values of 0 are fine

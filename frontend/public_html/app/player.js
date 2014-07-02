@@ -88,6 +88,9 @@ define(['angular',
 
         $scope.$watch('player.pos',function() {
             if ($scope.player.isCropping) {
+                //the cropper spawns two <img> tags that don't get updated automatically.
+                //I tried doing the preferred $("#frameLoc").cropper("setImgSrc", $("#frameLoc").attr("src"));
+                //but that was buggy and jittery
                     $(".img-container").find("img").attr("src", $("#frameLoc").attr("ng-src"));
                 }
         });
@@ -95,9 +98,6 @@ define(['angular',
         $scope.posChange = function() {
             var active = $scope.player.pos > $scope.clip.keyboardEventFrame;
             $scope.kbdOverlay.status = (active ? 'active' : 'inactive');
-            // if ($scope.player.isCropping) {
-            //     $("#frameLoc").cropper("setImgSrc", $("#frameLoc").attr("src"));
-            // }
         };
 
         $scope.timer = $interval(function() {

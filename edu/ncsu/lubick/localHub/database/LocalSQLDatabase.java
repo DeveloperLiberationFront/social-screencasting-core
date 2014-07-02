@@ -507,11 +507,11 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	@Override
 	public boolean isClipUploaded(String clipId)
 	{
-		String sqlQuery = "SELECT uploaded_date FROM Clips where folder_name LIKE %?";
+		String sqlQuery = "SELECT uploaded_date FROM Clips where folder_name LIKE ?";
 		
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
 		{
-			statement.setString(1, clipId);
+			statement.setString(1, "%"+clipId);
 
 			try (ResultSet results = executeWithResults(statement);)
 			{
@@ -524,7 +524,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		}
 		catch (SQLException e)
 		{
-			throw new DBAbstractionException("There was a problem checking if this clip was uploaded", e);
+			throw new DBAbstractionException("There was a problem checking if this clip was uploaded "+clipId, e);
 		}
 		return false;
 	}
@@ -532,15 +532,15 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	@Override
 	public void setClipUploaded(String clipId, boolean b)
 	{
-		long uploadedDate = b?new Date().getTime():0;
+		long uploadedDate = b ? new Date().getTime() : 0;
 		
-		String sqlQuery = "UPDATE Clips SET uploaded_date = ? where folder_name LIKE %?";
+		String sqlQuery = "UPDATE Clips SET uploaded_date = ? where folder_name LIKE ?";
 		
 		
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
 		{
 			statement.setLong(1, uploadedDate);
-			statement.setString(2, PostProductionHandler.MEDIA_OUTPUT_FOLDER + clipId);
+			statement.setString(2, "%"+clipId);
 			executeStatementWithNoResults(statement);
 		}
 		catch (SQLException e)
