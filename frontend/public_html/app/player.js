@@ -13,8 +13,8 @@ define(['angular',
                     'socasterServices',
                     'restangular'])
 
-  .controller('PlayerCtrl', ['$scope', '$interval', '$filter',
-    function($scope, $interval, $filter) {
+  .controller('PlayerCtrl', ['$scope', '$interval',
+    function($scope, $interval) {
 
         $scope.player = {
             pos: 0,
@@ -62,7 +62,7 @@ define(['angular',
             end: $scope.clip.frames.length-1
         });
 
-        $scope.$watch('clip', function(newValue, oldValue) {
+        $scope.$watch('clip', function(newValue) {
             _.extend(newValue, {
                 loaded: newValue.frames.map(function(frame){
                     var img = new Image();
@@ -85,7 +85,7 @@ define(['angular',
             }
         });
 
-        $scope.$watch('player.pos',function(newValue, oldValue) {
+        $scope.$watch('player.pos',function() {
             if ($scope.player.isCropping) {
                     $(".img-container").find("img").attr("src", $("#frameLoc").attr("ng-src"));
                 }
