@@ -95,14 +95,13 @@ define(['angular',
                 $(".img-container img").cropper({
                     aspectRatio: "auto",
                     done: function(data) {
-                        console.log(data);
                         $scope.cropData.cropData = data;
                     }
                 }).cropper('enable');
             } else {
                 $scope.player.isCropping = false;
                 $(".img-container img").cropper("disable");
-                $scope.cropData = undefined;
+                $scope.cropData.cropData = {};
             }
         };
     }])
