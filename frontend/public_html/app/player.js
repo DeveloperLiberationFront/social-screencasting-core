@@ -13,8 +13,8 @@ define(['angular',
                     'socasterServices',
                     'restangular'])
 
-  .controller('PlayerCtrl', ['$scope', '$interval', '$filter', '$rootScope',
-    function($scope, $interval, $filter, $rootScope) {
+  .controller('PlayerCtrl', ['$scope', '$interval', '$filter',
+    function($scope, $interval, $filter) {
 
         $scope.player = {
             pos: 0,
@@ -73,26 +73,43 @@ define(['angular',
                 start: 0,
                 end: newValue.frames.length-1
             });
+            $scope.player.pos = 0;
             $scope.imgDir = $scope.clip.getRestangularUrl() + '/';
             $scope.$broadcast('refreshSlider');
+
+
+            if ($scope.player.isCropping) {
+                $scope.player.isCropping = false;
+                $("#frameLoc").cropper("disable");
+                $scope.cropData.cropData = {};
+            }
+        });
+
+        $scope.$watch('player.pos',function(newValue, oldValue) {
+            if ($scope.player.isCropping) {
+                    $(".img-container").find("img").attr("src", $("#frameLoc").attr("ng-src"));
+                }
         });
 
         $scope.posChange = function() {
             var active = $scope.player.pos > $scope.clip.keyboardEventFrame;
             $scope.kbdOverlay.status = (active ? 'active' : 'inactive');
+            // if ($scope.player.isCropping) {
+            //     $("#frameLoc").cropper("setImgSrc", $("#frameLoc").attr("src"));
+            // }
         };
 
         $scope.timer = $interval(function() {
             if ($scope.player.playing) { //playing
                 $scope.player.pos = Math.max($scope.clip.start,
-                                             (+$scope.player.pos + 1) % ($scope.clip.end+1));
+                   (+$scope.player.pos + 1) % ($scope.clip.end+1));   
             }
         }, 200);
 
         $scope.crop = function() {
             if (!$scope.player.isCropping) {
                 $scope.player.isCropping = true;
-                $(".img-container img").cropper({
+                $("#frameLoc").cropper({
                     aspectRatio: "auto",
                     done: function(data) {
                         $scope.cropData.cropData = data;
@@ -100,7 +117,7 @@ define(['angular',
                 }).cropper('enable');
             } else {
                 $scope.player.isCropping = false;
-                $(".img-container img").cropper("disable");
+                $("#frameLoc").cropper("disable");
                 $scope.cropData.cropData = {};
             }
         };

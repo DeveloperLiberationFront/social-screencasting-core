@@ -163,7 +163,7 @@ define(['angular',
       $scope.shareWithName = $routeParams.shareWithName;
       $scope.shareWithEmail = $routeParams.shareWithEmail;
       $scope.editMode = true;
-      $scope.cropData = {cropData:{}};
+      $scope.cropData = {cropData:{}};    //make cropData updateable by child scope (player)
 
       $scope.selection = [];
       $scope.ready = false;
@@ -207,10 +207,6 @@ define(['angular',
 
           $scope.shareClip = function(shareWithAll) {
             console.log("Share clip "+shareWithAll);
-
-            // if ($scope.player.isCropping) {
-            //   $scope.cropData = $(".img-container img").cropper("getData");
-            // }
 
             $.ajax({
               url: "shareClip",

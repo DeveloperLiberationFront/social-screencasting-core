@@ -6,7 +6,7 @@
          ng-hide='player.editMode || kbdOverlay.mode == 3 || player.isCropping'
          ng-src="{{ imagePath(kbdOverlay.images[kbdOverlay.status][kbdOverlay.mode % 3]) }}"/>
     <div class="img-container">
-      <img class='img-responsive' ng-src="{{ imagePath(clip.frames[player.pos]) }}"/>
+      <img id="frameLoc" class='img-responsive' ng-src="{{ imagePath(clip.frames[player.pos]) }}"/>
     </div>
   </div>
 
