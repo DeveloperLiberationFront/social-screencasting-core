@@ -46,6 +46,9 @@ import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
  *  destJDBCDriver		What is the list (separated by "|") of the destination JDBC locations?
  *  destJDBCURL			What is the list (separated by "|") of the destination JDBC URLs?
  *  
+ *  skylrDestAddURL		What is the URL to use when sending data to skylr?
+ *  skylrDestQueryURL	What is the URL to use when querying skylr?
+ *  
  *  userID				What user executed the tool usages?
  *  
  * Optional properties:
