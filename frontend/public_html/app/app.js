@@ -8,6 +8,7 @@ define(['angular',
         'ng-ui-router',
         'ng-slider',
         'player',
+        'lib/breadcrumb',
        ], function (ng) {
   'use strict';
 
@@ -22,36 +23,42 @@ define(['angular',
     'ngFullscreen',
     'vr.directives.slider',
     'restangular',
+    'breadcrumb'
   ])
   
   .config(['$stateProvider','$urlRouterProvider',
     function($stateProvider, $urlRouterProvider) {
-        $urlRouterProvider.otherwise('/');
+//        $urlRouterProvider.otherwise('');
         $stateProvider
             .state('main', {
-                url: "/",
+                url: "",
                 templateUrl: 'partials/main.html',
                 controller: 'MainCtrl',
+                breadcrumb: { title: 'Home' }
             })
             .state('tools', {
                 url: '/tools/:name',
                 templateUrl: 'partials/tool-details.html',
-                controller: 'ToolCtrl'
+                controller: 'ToolCtrl',
+                breadcrumb: { title: 'Tool: {:name}' }
             })
             .state('player', {
                 url: '/player',
                 templateUrl: 'partials/player.html',
-                controller: 'PlayerCtrl'
+                controller: 'PlayerCtrl',
+                breadcrumb: { title: '{clip.name}' }
             })
             .state('status', {
                 url: '/status',
                 templateUrl: 'partials/status.html',
-                controller: 'StatusCtrl'
+                controller: 'StatusCtrl',
+                breadcrumb: { title: 'Status' }
             })
             .state('share', {
                 url: '/share/:application/:tool?shareWithName&shareWithEmail',
                 templateUrl: 'partials/share.html',
-                controller: 'ShareCtrl'
+                controller: 'ShareCtrl',
+                breadcrumb: { title: 'Share' }
             });
     }])
 

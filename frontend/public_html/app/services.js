@@ -11,5 +11,5 @@ define(['angular', 'ng-resource', 'restangular'], function (ng) {
       return Restangular.withConfig(function(RestangularConfigurer) {
         RestangularConfigurer.setBaseUrl('http://screencaster-hub.appspot.com/api');
       });
-    }]);
+    }])
 });

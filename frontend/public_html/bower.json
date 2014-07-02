@@ -29,7 +29,7 @@
     "angular-ui-utils": "~0.1.1",
     "lodash": "~2.4.1",
     "restangular": "~1.4.0",
-    "angular-ui-router": "~0.2.10"
+    "angular-ui-router": "~0.2.10",
   },
   "resolutions": {
     "jquery": "2.1.1"
