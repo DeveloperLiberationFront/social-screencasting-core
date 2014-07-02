@@ -96,7 +96,7 @@ define(['angular',
                     aspectRatio: "auto",
                     done: function(data) {
                         console.log(data);
-                        $scope.cropData = data;
+                        $scope.cropData.cropData = data;
                     }
                 }).cropper('enable');
             } else {

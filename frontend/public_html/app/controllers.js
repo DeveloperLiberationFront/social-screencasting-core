@@ -49,7 +49,7 @@ define(['angular',
             $q.all({userTools: userTools, app: $scope.application})
                 .then(function(results){
                     _.each(results.app.tools, function(tool) {
-                        tool.new = _.findWhere(results.userTools, {name: tool.name}) == undefined;
+                        tool.new = _.findWhere(results.userTools, {name: tool.name}) === undefined;
                     });
                 });
         });
@@ -163,7 +163,7 @@ define(['angular',
       $scope.shareWithName = $routeParams.shareWithName;
       $scope.shareWithEmail = $routeParams.shareWithEmail;
       $scope.editMode = true;
-      $scope.cropData = {};
+      $scope.cropData = {cropData:{}};
 
       $scope.selection = [];
       $scope.ready = false;
@@ -220,7 +220,7 @@ define(['angular',
                 recipient : shareWithAll? "all" : $scope.shareWithEmail,
                 start_frame: $scope.clip.start,
                 end_frame: $scope.clip.end,
-                crop_rect: $scope.cropData
+                crop_rect: $scope.cropData.cropData
               }
             });
           };
