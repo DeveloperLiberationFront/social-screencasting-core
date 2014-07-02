@@ -188,8 +188,12 @@ public class BrowserMediaPackageUploader {
 				{
 					fileNum = fileNameToInt(fileName);
 					boolean doesFileExist = existingFiles.contains(fileName);
-				
-					if (!doesFileExist && (fileNum >= startFrame && fileNum <= endFrame || fileNum == -1))
+					
+					if (fileName.startsWith("frame")) {
+						logger.info("Uploading: " + fileName);
+						reportFile(file);
+					}
+					else if (!doesFileExist && (fileNum >= startFrame && fileNum <= endFrame || fileNum == -1))
 					{
 						logger.info("Uploading: " + fileName);
 						reportFile(file);
