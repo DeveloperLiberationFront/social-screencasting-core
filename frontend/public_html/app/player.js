@@ -20,13 +20,14 @@ define(['angular',
             pos: 0,
             playing: false,
             editMode: $scope.editMode ? $scope.editMode : false,
-            isCropping: false
+            isCropping: false,
+            isFullscreen: false
         };
 
-        $scope.isFullscreen = false;
         $scope.toggleFullscreen = function() {
-          if (!$scope.player.isCropping) {
-            $scope.isFullscreen = !$scope.isFullscreen;
+          var player = $scope.player;
+          if (!player.isCropping) {
+            player.isFullscreen = !player.isFullscreen;
           }
         };
         $scope.showRating = false;
