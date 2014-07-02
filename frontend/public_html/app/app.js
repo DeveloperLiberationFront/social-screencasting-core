@@ -49,10 +49,10 @@ define(['angular',
                 controller: 'StatusCtrl'
             })
             .state('share', {
-                url: '/share/:application/:tool',
+                url: '/share/:application/:tool?shareWithName&shareWithEmail',
                 templateUrl: 'partials/share.html',
                 controller: 'ShareCtrl'
-            })
+            });
     }])
 
   .config(['RestangularProvider',

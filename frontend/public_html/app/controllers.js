@@ -148,14 +148,14 @@ define(['angular',
           $scope.application.then(function(app) {
               $scope.tool = app.one($stateParams.name).get($scope.auth);
           });
-      }
+      };
       if ($scope.application) {
           setHandler();
       }
       $scope.$on('appSelected', setHandler);
     }])
 
-  .controller('ShareCtrl', ['$scope', '$routeParams', 'Local',
+  .controller('ShareCtrl', ['$scope', '$stateParams', 'Local',
     function($scope, $routeParams, Local) {
       console.log($routeParams);
       $scope.applicationName = $routeParams.application ? $routeParams.application : "nothing";
@@ -202,6 +202,13 @@ define(['angular',
                 });
               }
             }
+          };
+
+          $scope.shareClip = function(shareWithAll) {
+              console.log("Share clip "+shareWithAll);
+          };
+          $scope.cancelSharing = function() {
+              console.log("cancelSharing");
           };
     }]);
 });

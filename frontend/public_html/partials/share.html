@@ -17,11 +17,11 @@
 	 <div class="col-md-9" ng-if="ready" ng-controller='PlayerCtrl' ng-include="'partials/player.html'"></div>
 
 	 <div ng-if="ready" id="shareButtonsContainer" class="col-md-1">
-	 	<button id="shareClip" class="shareClipButton">Share With {{shareWithName}}</button>
+	 	<button id="shareClip" class="shareClipButton" ng-click="shareClip(false)">Share With {{shareWithName}}</button>
 		<br/>
-		<button id="shareAll" class="shareClipButton">Share With Everybody</button>
+		<button id="shareAll" class="shareClipButton" ng-click="shareClip(true)">Share With Everybody</button>
 		<br/>
-		<button id="noClips" class="shareClipButton">Share No Clips</button>
+		<button id="noClips" class="shareClipButton" ng-click="cancelSharing()">Share No Clips</button>
 	 </div>
 
 </div>
