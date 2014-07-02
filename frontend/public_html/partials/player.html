@@ -1,7 +1,7 @@
 <h3>{{clip.tool}}</h3>
 <div id="player" fullscreen='isFullscreen'>
   <div id="panel" ng-click='toggleFullscreen()'>
-    <div id='overlay' ng-hide='(player.isCropping || isFullscreen)'>Click to toggle fullscreen</div>
+    <div id='overlay' ng-hide='(player.editMode || isFullscreen)'>Click to toggle fullscreen</div>
     <img id='keyboardOverlay' ng-if='kbdOverlay.enabled'
          ng-hide='player.editMode || kbdOverlay.mode == 3 || player.isCropping'
          ng-src="{{ imagePath(kbdOverlay.images[kbdOverlay.status][kbdOverlay.mode % 3]) }}"/>

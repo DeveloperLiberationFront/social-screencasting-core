@@ -1,9 +1,6 @@
 package edu.ncsu.lubick.localHub.http;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -11,84 +8,78 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import edu.ncsu.lubick.localHub.ClipOptions;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
 
-public class HTTPClipSharer extends TemplateHandlerWithDatabaseLink {
+public class HTTPClipSharer extends AbstractHandler {
 
 	
+	private static final String PARAM_END_FRAME = "end_frame";
+	private static final String PARAM_START_FRAME = "start_frame";
 	private static final String PARAM_RECIPIENT = "recipient";
-	private static final String PARAM_CLIP_ID = "clipId";
-	private static final String TEMPLATE_NAME = "shareClip.html";
+	private static final String PARAM_CLIP_ID = "clip_id";
+	private static final String PARAM_CROP_RECT = "crop_rect";
 	private static final Logger logger = Logger.getLogger(HTTPClipSharer.class);
+	private WebQueryInterface databaseLink;
 
-	public HTTPClipSharer(String matchPattern, WebQueryInterface wqi) throws IOException, URISyntaxException
+	
+
+	public HTTPClipSharer(WebQueryInterface wqi)
 	{
-		super(matchPattern, wqi);
-
+		this.databaseLink = wqi;
 	}
-	
-	
+
+
 
 	@Override
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
-		if (!this.strictCheckIfWeHandleThisRequest(target))
+		if (!"/shareClip".equals(target))
 		{
 			return;
 		}
-		logger.debug(request.getParameterMap());
+		
+		baseRequest.setHandled(true);
+		//response.setContentType("application/json");
+		
+		
 		
 		if ("POST".equals(baseRequest.getMethod()))
 		{
-			handlePost(baseRequest, request);
+			handlePost(request);
 		}
 		else 
 		{
-			handleGet(baseRequest, response);
+			logger.error("I don't know how to handle a POST like this");
+			response.getWriter().println("Sorry, Nothing at this URL");
 		}
 		
 	}
 
 
 
-	private void handlePost(Request baseRequest, HttpServletRequest request)
+	private void handlePost(HttpServletRequest request)
 	{
-		baseRequest.setHandled(true);
-		String clipId = request.getParameter(PARAM_CLIP_ID);
-		String recipient = request.getParameter(PARAM_RECIPIENT);
+		logger.debug(request.getParameterMap());
 		
-		String paramStartFrame = request.getParameter("start_frame");
-		int startFrame = Integer.parseInt(paramStartFrame == null? "0" : paramStartFrame);
-		String paramEndFrame = request.getParameter("end_frame");
-		int endFrame = Integer.parseInt(paramEndFrame == null? "0" : paramEndFrame);
-		
-		if (clipId == null || recipient == null)
-		{
-			logger.info("clipId = "+clipId +", recipient = "+recipient+", so cancelling");
-			return;
-		}
-		this.databaseLink.shareClipWithUser(clipId, recipient, new ClipOptions(startFrame, endFrame));
+//		String clipId = request.getParameter(PARAM_CLIP_ID);
+//		String recipient = request.getParameter(PARAM_RECIPIENT);
+//		
+//		String paramStartFrame = request.getParameter(PARAM_START_FRAME);
+//		int startFrame = Integer.parseInt(paramStartFrame == null? "0" : paramStartFrame);
+//		String paramEndFrame = request.getParameter(PARAM_END_FRAME);
+//		int endFrame = Integer.parseInt(paramEndFrame == null? "0" : paramEndFrame);
+//		
+//		if (clipId == null || recipient == null)
+//		{
+//			logger.info("clipId = "+clipId +", recipient = "+recipient+", so cancelling");
+//			return;
+//		}
+//		this.databaseLink.shareClipWithUser(clipId, recipient, new ClipOptions(startFrame, endFrame));
 	}
 
 
-
-	private void handleGet(Request baseRequest, HttpServletResponse response) throws IOException
-	{
-		Map<Object, Object> model = addThisUserInfoToModel(new HashMap<>());
-		
-		processTemplate(response, model, TEMPLATE_NAME);
-	
-		baseRequest.setHandled(true);
-	}
-
-
-
-	@Override
-	protected Logger getLogger()
-	{
-		return logger;
-	}
 
 }

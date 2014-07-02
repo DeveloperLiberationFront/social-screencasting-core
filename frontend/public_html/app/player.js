@@ -96,12 +96,13 @@ define(['angular',
                     aspectRatio: "auto",
                     done: function(data) {
                         console.log(data);
+                        $scope.cropData = data;
                     }
                 }).cropper('enable');
             } else {
                 $scope.player.isCropping = false;
                 $(".img-container img").cropper("disable");
-                //handle crop completion?
+                $scope.cropData = undefined;
             }
         };
     }])

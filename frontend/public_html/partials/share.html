@@ -2,16 +2,6 @@
 <div>
     <h2>Share {{applicationName}}/{{toolName}} with {{shareWithName}} [{{shareWithEmail}}]</h2>
 
-   <!-- <ul id="clipList" class="list-group">
-    <li ng-repeat="clip in clips" class="list-group-item share-item"> 
-    	<span ng-switch="clip.type" ng-click="name=clip.clipId">
-    		<span ng-switch-when="key">Example {{clip.index}} using Keyboard</span>
-    		<span ng-switch-when="gui">Example {{clip.index}} using GUI</span>
-    	</span>
-    </li>
-    </ul>
-    <div ng-show="name !== undefined" ng-controller='PlayerCtrl' ng-include="'partials/player.html'"></div>
--->
 	<div class="shareGrid col-md-2" ng-grid="shareGridOptions"></div>
 
 	 <div class="col-md-9" ng-if="ready" ng-controller='PlayerCtrl' ng-include="'partials/player.html'"></div>

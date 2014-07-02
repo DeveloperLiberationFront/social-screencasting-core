@@ -163,6 +163,7 @@ define(['angular',
       $scope.shareWithName = $routeParams.shareWithName;
       $scope.shareWithEmail = $routeParams.shareWithEmail;
       $scope.editMode = true;
+      $scope.cropData = {};
 
       $scope.selection = [];
       $scope.ready = false;
@@ -205,10 +206,26 @@ define(['angular',
           };
 
           $scope.shareClip = function(shareWithAll) {
-              console.log("Share clip "+shareWithAll);
+            console.log("Share clip "+shareWithAll);
+
+            // if ($scope.player.isCropping) {
+            //   $scope.cropData = $(".img-container img").cropper("getData");
+            // }
+
+            $.ajax({
+              url: "shareClip",
+              type: "POST",
+              data: {
+                clip_id : $scope.selection[0].clipId,
+                recipient : shareWithAll? "all" : $scope.shareWithEmail,
+                start_frame: $scope.clip.start,
+                end_frame: $scope.clip.end,
+                crop_rect: $scope.cropData
+              }
+            });
           };
           $scope.cancelSharing = function() {
-              console.log("cancelSharing");
+            console.log("cancelSharing");
           };
     }]);
 });
