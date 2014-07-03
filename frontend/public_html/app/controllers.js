@@ -88,9 +88,14 @@ define(['angular',
                             templateUrl: 'partials/modal-player.html',
                             controller: 'ModalPlayer',
                             scope: $scope,
-                            resolve: { clip: function(){
-                                return $scope.tool.$object.one(userClips[0].name).get($scope.auth);
-                            }},
+                            resolve: {
+                              clips: ['$q', function($q){
+                                return $q.all(
+                                  userClips.map(function(clip) {
+                                    return $scope.tool.$object.one(clip.name).get($scope.auth);
+                                  })
+                                );
+                            }]},
                             windowClass: 'modal-player',
                             size: 'lg'
                         });

@@ -67,7 +67,7 @@ define(['angular',
               $scope.$broadcast('refreshSlider');
             })
         }
-        loadClip(clip);
+        loadClip($scope.clip);
 
         _.extend($scope.clip, {
             keyboardEventFrame: 25,
@@ -133,14 +133,15 @@ define(['angular',
         };
     }])
 
-  .controller('ModalPlayer', ['$scope', '$modalInstance', 'clip',
-    function($scope, $modalInstance, clip) {
+  .controller('ModalPlayer', ['$scope', '$modalInstance', 'clips',
+    function($scope, $modalInstance, clips) {
         //tool is a restangular object
         $scope.close = function () {
             $modalInstance.close();
         };
 
-        $scope.clip = clip;
+        $scope.clips = clips;
+        $scope.clip = clips[0];
     }])
 
   .controller('RatingCtrl', ['$scope',
