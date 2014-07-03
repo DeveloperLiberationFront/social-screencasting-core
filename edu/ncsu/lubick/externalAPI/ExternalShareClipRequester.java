@@ -18,14 +18,14 @@ import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 import edu.ncsu.lubick.localHub.forTesting.UnitTestUserManager;
 import edu.ncsu.lubick.localHub.http.HTTPUtils;
 
-public class ExternalClipRequester {
+public class ExternalShareClipRequester {
 
 	
-	private static final Logger logger = Logger.getLogger(ExternalClipRequester.class);
+	private static final Logger logger = Logger.getLogger(ExternalShareClipRequester.class);
 	private static CloseableHttpClient client = HttpClients.createDefault();
 	private UserManager userManager;
 
-	public ExternalClipRequester(UserManager userManager)
+	public ExternalShareClipRequester(UserManager userManager)
 	{
 		this.userManager = userManager;
 	}
@@ -103,7 +103,7 @@ public class ExternalClipRequester {
 		UserManager userManager = new UnitTestUserManager("Test User", "test@mailinator.com", "123");
 		
 		
-		ExternalClipRequester sharer = new ExternalClipRequester(userManager);
+		ExternalShareClipRequester sharer = new ExternalShareClipRequester(userManager);
 		
 		sharer.requestClipsFromUser("kjlubick@ncsu.edu", "Eclipse", "Organize Imports");
 		
