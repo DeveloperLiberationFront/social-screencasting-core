@@ -1,9 +1,18 @@
 
 <div>
-     <h1>Requests</h1>
+     <h2>Requests you have made</h2>
      <ul id="requestList">
-        <li ng-repeat="request in requests">
-        Requested : {{request.text}}
+        <li ng-repeat="request in sent">
+        Requested access to {{request.recipient.name}}'s usage of {{request.plugin}}/{{request.tool}}
+        {{request.updated | date : 'medium'}}
+        </li>
+     </ul>
+
+     <h2>Notifications for you</h2>
+     <ul id="notificationList">
+        <li ng-repeat="request in received">
+        {{request.message}}
+        {{request.updated | date : 'medium'}}
         </li>
      </ul>
 </div>

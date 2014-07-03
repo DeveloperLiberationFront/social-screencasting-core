@@ -144,8 +144,16 @@ define(['angular',
       };
     }])
 
-  .controller('StatusCtrl', function() {
-  })
+  .controller('StatusCtrl', ['$scope', 'Hub', function($scope, Hub) {
+      $scope.received = [{}];
+      $scope.sent = [{}];
+
+      Hub.one("notifications").get($scope.auth).then(function(data){
+        console.log(data.plain());
+        $scope.received = data.received;
+        $scope.sent = data.sent;
+      });
+  }])
 
   .controller('ToolCtrl', ['$scope', '$stateParams',
     function($scope, $stateParams) {
