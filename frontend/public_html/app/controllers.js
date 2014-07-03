@@ -186,7 +186,7 @@ define(['angular',
     };
 
     $scope.needRequestLink = function(request) {
-      if (0 === request.status.indexOf("{")) {
+      if (request.status && 0 === request.status.indexOf("{")) {
        var json = JSON.parse(request.status);
        if (json.status == "video_shared") {
         return true;
@@ -199,7 +199,7 @@ define(['angular',
   };
 
   $scope.getRequestLink = function(request) {
-    if (0 === request.status.indexOf("{")) {
+    if (request.status && 0 === request.status.indexOf("{")) {
       var json = JSON.parse(request.status);
       if (json.status == "video_shared") {
         return "#/video/"+request.plugin+"/"+request.tool+"/"+json.video_id;
