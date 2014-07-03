@@ -2,19 +2,22 @@
 <div>
      <h2>Requests you have made</h2>
      <ul id="requestList" class="list-group">
-        <li ng-repeat="request in sent" ng-attr-title="{{request.updated | date : 'medium'}}" class="list-group-item">
+        <li ng-repeat="request in sent" ng-attr-title="Created: {{request.created | date : 'medium'}} Last updated: {{request.updated | date : 'medium'}}" class="list-group-item">
         <span ng-if="showBadge(request)" class="badge">{{getText(request)}}</span>
         Requested access to {{request.recipient.name}}'s usage of {{request.plugin}}/{{request.tool}}
         
+        <a ng-if="needRequestLink(request)" ng-href="{{getRequestLink(request)}}"> </a>
+
         </li>
      </ul>
 
      <h2>Notifications for you</h2>
      <ul id="notificationList" class="list-group">
-        <li ng-repeat="request in received" ng-attr-title="{{request.updated | date : 'medium'}}" class="list-group-item">
+        <li ng-repeat="request in received" ng-attr-title="Created: {{request.created | date : 'medium'}} Last updated: {{request.updated | date : 'medium'}}" class="list-group-item">
          <span ng-if="showBadge(request)" class="badge">{{getText(request)}}</span>
         {{request.message}}
-        {{request.updated | date : 'medium'}}
+
+        <a ng-if="needShareLink(request)" ng-href="{{getShareLink(request)}}">Respond</a>
         </li>
      </ul>
 </div>

@@ -55,7 +55,7 @@ define(['angular',
                 breadcrumb: { title: 'Status' }
             })
             .state('share', {
-                url: '/share/:application/:tool?shareWithName&shareWithEmail',
+                url: '/share/:application/:tool?share_with_name&share_with_email&request_id',
                 templateUrl: 'partials/share.html',
                 controller: 'ShareCtrl',
                 breadcrumb: { title: 'Share' }

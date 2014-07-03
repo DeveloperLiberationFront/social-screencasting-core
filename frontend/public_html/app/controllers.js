@@ -145,48 +145,95 @@ define(['angular',
     }])
 
   .controller('StatusCtrl', ['$scope', 'Hub', function($scope, Hub) {
-      $scope.received = [{}];
-      $scope.sent = [{}];
+    $scope.received = [{}];
+    $scope.sent = [{}];
 
-      Hub.one("notifications").get($scope.auth).then(function(data){
-        console.log(data.plain());
-        $scope.sent = data.sent;
-        $scope.received = data.received;
+    Hub.one("notifications").get($scope.auth).then(function(data){
+      console.log(data.plain());
+      $scope.sent = data.sent;
+      $scope.received = data.received;
 
-        for (var i = data.received.length - 1; i >= 0; i--) {
-          var item = _.clone(data.received[i]), put;
-          if (item.status == "new") {
-            item.status = "seen";
-            put = Hub.one("notifications").one(""+item.id);
-            put.notification = item;
-            put.put($scope.auth);
-          } else {
-            item.status = "new";
-            put = Hub.one("notifications").one(""+item.id);
-            put.notification = item;
-            put.put($scope.auth);
+      for (var i = data.received.length - 1; i >= 0; i--) {
+        var item = _.clone(data.received[i]), put;
+        if (item.status == "new") {
+          item.status = "seen";
+          put = Hub.one("notifications").one(""+item.id);
+          put.notification = item;
+          put.put($scope.auth);
+        } else {
+            // item.status = "new";
+            // put = Hub.one("notifications").one(""+item.id);
+            // put.notification = item;
+            // put.put($scope.auth);
           }
         }
       });
 
-      $scope.showBadge = function(request) {
+    $scope.showBadge = function(request) {
+      return true;
+    };
+
+    $scope.getText = function(request) {
+      if (request.status == "new") {
+        return "new";
+      } else if (request.status == "seen") {
+        return "seen";
+      } 
+
+      else {
+        return " ";
+      }
+    };
+
+    $scope.needRequestLink = function(request) {
+      if (0 === request.status.indexOf("{")) {
+       var json = JSON.parse(request.status);
+       if (json.status == "video_shared") {
         return true;
-      };
+      }
+      return false;
+    } 
+    else {
+      return false;
+    }
+  };
 
-      $scope.getText = function(request) {
-        if (request.status == "new") {
-          return "new";
-        } else if (request.status == "seen") {
-          return "seen";
-        } 
-        else {
-          return " ";
-        }
-      };
-    }])
+  $scope.getRequestLink = function(request) {
+    if (0 === request.status.indexOf("{")) {
+      var json = JSON.parse(request.status);
+      if (json.status == "video_shared") {
+        return "#/video/"+request.plugin+"/"+request.tool+"/"+json.video_id;
+      }
+      return "/#";
+    }
+    else {
+      return "/#";
+    }
+  };
 
-  .controller('ToolCtrl', ['$scope', '$stateParams',
-    function($scope, $stateParams) {
+  $scope.needShareLink = function(request) {
+    if ("share_request" == request.type) {
+      return true;
+    } 
+    else {
+      return false;
+    }
+  };
+
+  $scope.getShareLink = function(request) {
+    if ("share_request" == request.type) {
+      return "#/share/"+request.plugin+"/"+request.tool+"?share_with_name="+
+      request.sender.name+"&share_with_email="+request.sender.email+"&request_id="+request.id;
+    }
+    else {
+      return "/#";
+    }
+  };
+
+}])
+
+.controller('ToolCtrl', ['$scope', '$stateParams',
+  function($scope, $stateParams) {
       var setHandler = function() {
           $scope.application.then(function(app) {
               $scope.tool = app.one($stateParams.name).get($scope.auth);
@@ -203,8 +250,9 @@ define(['angular',
       console.log($routeParams);
       $scope.applicationName = $routeParams.application ? $routeParams.application : "nothing";
       $scope.toolName = $routeParams.tool ? $routeParams.tool : "nothing";
-      $scope.shareWithName = $routeParams.shareWithName;
-      $scope.shareWithEmail = $routeParams.shareWithEmail;
+      $scope.shareWithName = $routeParams.share_with_name;
+      $scope.shareWithEmail = $routeParams.share_with_email;
+      $scope.respondingToNotification = $routeParams.request_id;
       $scope.editMode = true;
       $scope.cropData = {cropData:{}};    //make cropData updateable by child scope (player)
 
