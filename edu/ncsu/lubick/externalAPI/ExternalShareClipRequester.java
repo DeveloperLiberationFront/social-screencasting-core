@@ -100,12 +100,13 @@ public class ExternalShareClipRequester {
 	public static void main(String[] args) throws Exception
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
-		//UserManager userManager = new UnitTestUserManager("Test User", "test@mailinator.com", "123");
-		UserManager userManager = new UnitTestUserManager("Kevin Test", "kjlubick+test@ncsu.edu", "221ed3d8-6a09-4967-91b6-482783ec5313");
+		UserManager userManager = new UnitTestUserManager("Test User", "test@mailinator.com", "123");
+		//UserManager userManager = new UnitTestUserManager("Kevin Test", "kjlubick+test@ncsu.edu", "221ed3d8-6a09-4967-91b6-482783ec5313");
 		
 		ExternalShareClipRequester sharer = new ExternalShareClipRequester(userManager);
 		
-		sharer.requestClipsFromUser("test@mailinator.com", "Eclipse", "Organize Imports");
+		sharer.requestClipsFromUser("kjlubick+test@ncsu.edu", "Eclipse", "Organize Imports");
+		//sharer.requestClipsFromUser("test@mailinator.com", "Eclipse", "Organize Imports");
 		
 	}
 

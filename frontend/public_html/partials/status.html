@@ -1,16 +1,18 @@
 
 <div>
      <h2>Requests you have made</h2>
-     <ul id="requestList">
-        <li ng-repeat="request in sent">
+     <ul id="requestList" class="list-group">
+        <li ng-repeat="request in sent" ng-attr-title="{{request.updated | date : 'medium'}}" class="list-group-item">
+        <span ng-if="showBadge(request)" class="badge">{{getText(request)}}</span>
         Requested access to {{request.recipient.name}}'s usage of {{request.plugin}}/{{request.tool}}
-        {{request.updated | date : 'medium'}}
+        
         </li>
      </ul>
 
      <h2>Notifications for you</h2>
-     <ul id="notificationList">
-        <li ng-repeat="request in received">
+     <ul id="notificationList" class="list-group">
+        <li ng-repeat="request in received" ng-attr-title="{{request.updated | date : 'medium'}}" class="list-group-item">
+         <span ng-if="showBadge(request)" class="badge">{{getText(request)}}</span>
         {{request.message}}
         {{request.updated | date : 'medium'}}
         </li>

@@ -150,10 +150,40 @@ define(['angular',
 
       Hub.one("notifications").get($scope.auth).then(function(data){
         console.log(data.plain());
-        $scope.received = data.received;
         $scope.sent = data.sent;
+        $scope.received = data.received;
+
+        for (var i = data.received.length - 1; i >= 0; i--) {
+          var item = _.clone(data.received[i]), put;
+          if (item.status == "new") {
+            item.status = "seen";
+            put = Hub.one("notifications").one(""+item.id);
+            put.notification = item;
+            put.put($scope.auth);
+          } else {
+            item.status = "new";
+            put = Hub.one("notifications").one(""+item.id);
+            put.notification = item;
+            put.put($scope.auth);
+          }
+        }
       });
-  }])
+
+      $scope.showBadge = function(request) {
+        return true;
+      };
+
+      $scope.getText = function(request) {
+        if (request.status == "new") {
+          return "new";
+        } else if (request.status == "seen") {
+          return "seen";
+        } 
+        else {
+          return " ";
+        }
+      };
+    }])
 
   .controller('ToolCtrl', ['$scope', '$stateParams',
     function($scope, $stateParams) {
