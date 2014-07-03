@@ -2,7 +2,11 @@
     width: 800px;
 }
 
-#modalBox {
+.modal-multiclip-player .modal-lg {
+    width: 1000px;
+}
+
+#modal-player {
     width: 780px;
     display: flex;
     flex-flow: column nowrap;
@@ -116,26 +120,41 @@ slider span.bar {
     width: auto;
 }
 
-.modal-player .modal-content {
+.modal-content {
     display: flex;
-    flex-flow: column nowrap;
-    align-items: center;
+    flex-flow: row nowrap;
+    align-items: flex-start;
+    justify-content: space-between;
     padding: 10px;
 }
 
-.modal-player .modal-content > button {
-    order: -1;
-    align-self: flex-end;
-    margin: 10px;
+/* close button */
+.modal-content > button {
+    /* margin: 10px; */
+    position: absolute;
+    top: 6px;
+    right: 7px;
 }
 
-.modal-player h3 {
+#modal-player h3 {
     align-self: flex-start;
-    margin-top: -45px;
+    margin-top: 0px;
 }
 
 #cropBtn {
     width: 35px;
     height: 35px;
+}
+
+#clip-list .thumbnail {
+    width: 150px;
+    cursor: pointer;
+}
+
+#clip-list {
+    max-height: 545px;
+    overflow-y: auto;
+    margin: 20px 10px 10px 10px;
+    flex: 1 1 auto;
 }
 

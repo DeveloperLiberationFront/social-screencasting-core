@@ -1,2 +1,8 @@
-<div id="modalBox" ng-controller='PlayerCtrl' ng-include="'partials/player.html'"></div>
+<div id="modal-player" ng-controller='PlayerCtrl' ng-include="'partials/player.html'"></div>
+<div id='clip-list'>
+  <div ng-repeat='clip in clips track by $index'>
+    <ng-include src='"partials/clip-thumbnail.html"' ng-controller='ClipThumbnailCtrl'>
+    </ng-include>
+  </div>
+</div>
 <button class="close" ng-click="close()">&times;</button>

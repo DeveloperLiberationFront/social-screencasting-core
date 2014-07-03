@@ -96,7 +96,8 @@ define(['angular',
                                   })
                                 );
                             }]},
-                            windowClass: 'modal-player',
+                            windowClass: (userClips.length > 1 ? 'modal-multiclip-player'
+                                          : 'modal-player'),
                             size: 'lg'
                         });
                     }

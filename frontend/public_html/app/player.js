@@ -46,14 +46,13 @@ define(['angular',
             tooltip: ["Image and text", "Image only", "Text only", "No overlay"]
         };
 
-        $scope.imgDir = $scope.clip.getRestangularUrl() + '/';
-
         $scope.imagePath = function(image) {
-            return $scope.imgDir + image +'?'+ $.param($scope.auth);
+            return $scope.clip.getRestangularUrl() + '/' + image + '?'+ $.param($scope.auth);
         };
 
         //load all images, and then set the status to ready
-        function loadClip(clip) { 
+        function loadClip(clip) {
+          $scope.player.status = 'loading';
           $q.all(
             clip.frames.map(function(frame){
               var deferred = $q.defer()
@@ -69,20 +68,8 @@ define(['angular',
         }
         loadClip($scope.clip);
 
-        _.extend($scope.clip, {
-            keyboardEventFrame: 25,
-            start: 0,
-            end: $scope.clip.frames.length-1
-        });
-
         $scope.$watch('clip', function(newValue) {
-            _.extend(newValue, {
-                keyboardEventFrame: 25,
-                start: 0,
-                end: newValue.frames.length-1
-            });
             $scope.player.pos = 0;
-            $scope.imgDir = $scope.clip.getRestangularUrl() + '/';
             loadClip($scope.clip);
             $scope.$broadcast('refreshSlider');
 
@@ -93,26 +80,29 @@ define(['angular',
             }
         });
 
-        $scope.$watch('player.pos',function() {
-          if ($scope.player.isCropping) {
-            //the cropper spawns two <img> tags that don't get updated automatically.
-            //I tried doing the preferred $("#frameLoc").cropper("setImgSrc", $("#frameLoc").attr("src"));
-            //but that was buggy and jittery
-            $(".img-container")
-              .find("img")
-              .attr("src", $("#frameLoc").attr("ng-src"));
-          }
-        });
+      $scope.posChange = function() {
+        if ($scope.player.isCropping) {
+          //the cropper spawns two <img> tags that don't get updated automatically.
+          //I tried doing the preferred $("#frameLoc").cropper("setImgSrc", $("#frameLoc").attr("src"));
+          //but that was buggy and jittery
+          $(".img-container")
+            .find("img")
+            .attr("src", $("#frameLoc").attr("ng-src"));
+        }
 
-        $scope.posChange = function() {
-            var active = $scope.player.pos > $scope.clip.keyboardEventFrame;
-            $scope.kbdOverlay.status = (active ? 'active' : 'inactive');
-        };
+        var active = _.any($scope.clip.event_frames, function(frame) {
+          //show overlay after event, for 7 or 8 frames
+          diff = $scope.pos - frame;
+          return 0 < diff && diff < _.sample([7,8]); //Randomly choose between 7 or 8 frames. -Kevin
+        });
+        $scope.kbdOverlay.status = (active ? 'active' : 'inactive');
+      };
 
         $scope.timer = $interval(function() {
             if ($scope.player.playing) { //playing
                 $scope.player.pos = Math.max($scope.clip.start,
                    (+$scope.player.pos + 1) % ($scope.clip.end+1));   
+              posChange(); //check on keyboard overlay
             }
         }, 200);
 
@@ -135,13 +125,29 @@ define(['angular',
 
   .controller('ModalPlayer', ['$scope', '$modalInstance', 'clips',
     function($scope, $modalInstance, clips) {
-        //tool is a restangular object
-        $scope.close = function () {
-            $modalInstance.close();
-        };
+      //tool is a restangular object
+      $scope.close = function () {
+        $modalInstance.close();
+      };
 
-        $scope.clips = clips;
-        $scope.clip = clips[0];
+      $scope.clips = clips;
+      $scope.clip = clips[0];
+      
+      _.each(clips, function(clip) {
+        clip.event_frames = [25]; //temporary
+        _.extend(clip, {
+          start: 0,
+          end: clip.frames.length-1,
+          frame: function(name){
+            return clip.getRestangularUrl() + '/' + name + '?'+ $.param($scope.auth);
+          },
+          thumbnail: clip.frames[Math.min(clip.event_frames[0],
+                                          clip.frames.length-1)]
+        })});
+
+      $scope.loadClip = function(clip) {
+        $scope.clip = clip;
+      };
     }])
 
   .controller('RatingCtrl', ['$scope',
@@ -153,6 +159,10 @@ define(['angular',
         if (!$scope.isCropping) {
             $scope.isFullscreen = !$scope.isFullscreen;
         }
+    }])
+
+  .controller('ClipThumbnailCtrl', ['$scope',
+    function($scope) {
     }])
 
   .controller('EditSliderCtrl', ['$scope',
