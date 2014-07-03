@@ -4,10 +4,17 @@
 
 #modalBox {
     width: 780px;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    padding: 10px;
 }
 
 #player {
     width: inherit;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: stretch;
 }
 
 #player.isInFullScreen {
@@ -43,6 +50,10 @@
 	right:2px;
 	width:35%;
 	opacity: .8;
+}
+
+#rating {
+    align-self: flex-end;
 }
 
 #rating span {
@@ -123,3 +134,4 @@ slider span.bar {
     width: 35px;
     height: 35px;
 }
+

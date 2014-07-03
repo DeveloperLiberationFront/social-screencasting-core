@@ -1,17 +1,23 @@
-
 <div>
-    <h2>Share {{applicationName}}/{{toolName}} with {{shareWithName}} [{{shareWithEmail}}]</h2>
+  <h2>Share {{applicationName}}/{{toolName}} with {{shareWithName}} [{{shareWithEmail}}]</h2>
 
-	<div class="shareGrid col-md-2" ng-grid="shareGridOptions"></div>
+  <div class="shareGrid col-md-2" ng-grid="shareGridOptions"></div>
 
-	 <div class="col-md-9" ng-if="ready" ng-controller='PlayerCtrl' ng-include="'partials/player.html'"></div>
+  <div class="col-md-9" ng-if="ready" ng-controller='PlayerCtrl'
+       ng-include="'partials/player.html'">
+  </div>
 
-	 <div ng-if="ready" id="shareButtonsContainer" class="col-md-1">
-	 	<button id="shareClip" class="shareClipButton" ng-click="shareClip(false)">Share With {{shareWithName}}</button>
-		<br/>
-		<button id="shareAll" class="shareClipButton" ng-click="shareClip(true)">Share With Everybody</button>
-		<br/>
-		<button id="noClips" class="shareClipButton" ng-click="cancelSharing()">Share No Clips</button>
-	 </div>
-
+  <div ng-if="ready" id="shareButtonsContainer" class="col-md-1">
+	<button id="shareClip" class="shareClipButton" ng-click="shareClip(false)">
+      Share With {{shareWithName}}
+    </button>
+	<br/>
+	<button id="shareAll" class="shareClipButton" ng-click="shareClip(true)">
+      Share With Everybody
+    </button>
+	<br/>
+	<button id="noClips" class="shareClipButton" ng-click="cancelSharing()">
+      Share No Clips
+    </button>
+  </div>
 </div>

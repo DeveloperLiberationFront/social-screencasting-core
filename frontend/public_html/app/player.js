@@ -13,15 +13,16 @@ define(['angular',
                     'socasterServices',
                     'restangular'])
 
-  .controller('PlayerCtrl', ['$scope', '$interval',
-    function($scope, $interval) {
+  .controller('PlayerCtrl', ['$scope', '$interval', '$q',
+    function($scope, $interval, $q) {
 
         $scope.player = {
             pos: 0,
             playing: false,
             editMode: $scope.editMode ? $scope.editMode : false,
             isCropping: false,
-            isFullscreen: false
+            isFullscreen: false,
+            status: 'loading'
         };
 
         $scope.toggleFullscreen = function() {
@@ -30,7 +31,6 @@ define(['angular',
             player.isFullscreen = !player.isFullscreen;
           }
         };
-        $scope.showRating = false;
         $scope.playBtnImages = {
             true: 'images/playback/pause.svg',
             false:'images/playback/play.svg'
@@ -52,12 +52,24 @@ define(['angular',
             return $scope.imgDir + image +'?'+ $.param($scope.auth);
         };
 
+        //load all images, and then set the status to ready
+        function loadClip(clip) { 
+          $q.all(
+            clip.frames.map(function(frame){
+              var deferred = $q.defer()
+              var img = new Image();
+              $(img)
+                .load(function(){ deferred.resolve(img); })
+                .prop('src', $scope.imagePath(frame));
+              return deferred.promise;
+            })).then(function() {
+              $scope.player.status = 'ready';
+              $scope.$broadcast('refreshSlider');
+            })
+        }
+        loadClip(clip);
+
         _.extend($scope.clip, {
-            loaded: $scope.clip.frames.map(function(frame){
-                var img = new Image();
-                img.src = $scope.imagePath(frame);
-                return img;
-            }),
             keyboardEventFrame: 25,
             start: 0,
             end: $scope.clip.frames.length-1
@@ -65,19 +77,14 @@ define(['angular',
 
         $scope.$watch('clip', function(newValue) {
             _.extend(newValue, {
-                loaded: newValue.frames.map(function(frame){
-                    var img = new Image();
-                    img.src = $scope.imagePath(frame);
-                    return img;
-                }),
                 keyboardEventFrame: 25,
                 start: 0,
                 end: newValue.frames.length-1
             });
             $scope.player.pos = 0;
             $scope.imgDir = $scope.clip.getRestangularUrl() + '/';
+            loadClip($scope.clip);
             $scope.$broadcast('refreshSlider');
-
 
             if ($scope.player.isCropping) {
                 $scope.player.isCropping = false;
@@ -87,12 +94,14 @@ define(['angular',
         });
 
         $scope.$watch('player.pos',function() {
-            if ($scope.player.isCropping) {
-                //the cropper spawns two <img> tags that don't get updated automatically.
-                //I tried doing the preferred $("#frameLoc").cropper("setImgSrc", $("#frameLoc").attr("src"));
-                //but that was buggy and jittery
-                    $(".img-container").find("img").attr("src", $("#frameLoc").attr("ng-src"));
-                }
+          if ($scope.player.isCropping) {
+            //the cropper spawns two <img> tags that don't get updated automatically.
+            //I tried doing the preferred $("#frameLoc").cropper("setImgSrc", $("#frameLoc").attr("src"));
+            //but that was buggy and jittery
+            $(".img-container")
+              .find("img")
+              .attr("src", $("#frameLoc").attr("ng-src"));
+          }
         });
 
         $scope.posChange = function() {
@@ -127,14 +136,11 @@ define(['angular',
   .controller('ModalPlayer', ['$scope', '$modalInstance', 'clip',
     function($scope, $modalInstance, clip) {
         //tool is a restangular object
-        $scope.status = 'loading';
         $scope.close = function () {
             $modalInstance.close();
         };
 
         $scope.clip = clip;
-        $scope.status = 'ready';
-        $scope.$broadcast('refreshSlider');
     }])
 
   .controller('RatingCtrl', ['$scope',
