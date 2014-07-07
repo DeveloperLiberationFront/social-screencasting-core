@@ -148,14 +148,17 @@ define(['angular',
     Hub.one("notifications").get($scope.auth).then(function(data){
       console.log(data.plain());
       $scope.sent = data.sent;
-      $scope.received = data.received;
+      $scope.received = _.filter(data.received, function(item) { 
+          return item.status != "responded";
 
-      for (var i = data.received.length - 1; i >= 0; i--) {
-        var item = _.clone(data.received[i]), put;
+      });
+
+      for (var i = $scope.received.length - 1; i >= 0; i--) {
+        var item = $scope.received[i], put;
         if (item.status == "new") {
           item.status = "seen";
           put = Hub.one("notifications").one(""+item.id);
-          put.notification = item;
+          put.notification = {status:"seen"};
           put.put($scope.auth);
         } else {
             // item.status = "new";
@@ -343,7 +346,7 @@ define(['angular',
 
             var reasonText = $("#no-share-reason").val();
             var put = Hub.one("notifications").one(""+$scope.respondingToNotification);
-            put.notification = {type:"request_denied", message:"Your request to " + $scope.shareWithName +" for "+
+            put.notification = {status:"responded" , type:"request_denied", message:"Your request to " + $scope.shareWithName +" for " +
             $scope.applicationName+"/"+$scope.toolName +" was not fulfilled. " + reasonText};
             put.put($scope.auth);
 
