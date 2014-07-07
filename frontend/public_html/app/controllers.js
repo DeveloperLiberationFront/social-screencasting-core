@@ -186,7 +186,7 @@ define(['angular',
   $scope.getRequestLink = function(request) {
     if ("request_fulfilled" == request.type) {
       var json = JSON.parse(request.status);
-      if (json.status == "video_shared") {
+      if (json.video_id) {
         return "#/video/"+request.plugin+"/"+request.tool+"/"+json.video_id;
       }
       return undefined;
@@ -221,8 +221,8 @@ define(['angular',
       $scope.$on('appSelected', setHandler);
     }])
 
-  .controller('ShareCtrl', ['$scope', '$stateParams', 'Local',
-    function($scope, $routeParams, Local) {
+  .controller('ShareCtrl', ['$scope', '$stateParams', 'Local', 'Hub',
+    function($scope, $routeParams, Local, Hub) {
       console.log($routeParams);
       $scope.applicationName = $routeParams.application ? $routeParams.application : "nothing";
       $scope.toolName = $routeParams.tool ? $routeParams.tool : "nothing";
@@ -238,26 +238,27 @@ define(['angular',
       var toolEnd = Local.one($scope.user.email).one($scope.applicationName)
       .one($scope.toolName);
 
+      //Go fetch all the clips
       toolEnd.get().then(function(tool) {
-          console.log(tool.plain());
+          //console.log(tool.plain());
           for (var i in tool.keyclips) {
               $scope.clips.push({clipId: tool.keyclips[i], toDisplay: "Example "+(+i+1)+" using Keyboard" });
           }
           for (i in tool.guiclips) {
               $scope.clips.push({clipId: tool.guiclips[i], toDisplay: "Example "+(+i+1)+" using GUI"});
           }
-          console.log($scope.clips);
+          //console.log($scope.clips);
 
         });
 
       $scope.clips = [];
       $scope.isFirst = true;
-      $scope.shareGridOptions = {
+      $scope.shareGridOptions = {       //set up the grid to display
         selectedItems: $scope.selection,
         multiSelect: false,
             data: "clips",   //this is a string of the name of the obj in the $scope that has data
             columnDefs: [{ field:'toDisplay'}],
-            headerRowHeight:0,
+            headerRowHeight:0,    //hide the header
             afterSelectionChange: function() {
               var c = $scope.selection;
 
@@ -275,20 +276,43 @@ define(['angular',
           $scope.shareClip = function(shareWithAll) {
             console.log("Share clip "+shareWithAll);
 
-            $.ajax({
-              url: "shareClip",
-              type: "POST",
-              data: {
-                clip_id : $scope.selection[0].clipId,
-                recipient : shareWithAll? "all" : $scope.shareWithEmail,
-                start_frame: $scope.clip.start,
-                end_frame: $scope.clip.end,
-                crop_rect: JSON.stringify($scope.cropData.cropData)
-              }
-            });
+            var post = Local.one("shareClip");
+            post.data = {
+              clip_id : $scope.selection[0].clipId,
+              recipient : shareWithAll? "all" : $scope.shareWithEmail,
+              start_frame: $scope.clip.start,
+              end_frame: $scope.clip.end,
+              crop_rect: JSON.stringify($scope.cropData.cropData)
+            };
+
+            post.post();
+
+            // $.ajax({
+            //   url: "shareClip",
+            //   type: "POST",
+            //   data: {
+            //     clip_id : $scope.selection[0].clipId,
+            //     recipient : shareWithAll? "all" : $scope.shareWithEmail,
+            //     start_frame: $scope.clip.start,
+            //     end_frame: $scope.clip.end,
+            //     crop_rect: JSON.stringify($scope.cropData.cropData)
+            //   }
+            // });
+
+            var put = Hub.one("notifications").one(""+$scope.respondingToNotification);
+            put.notification = {status:{video_id:$scope.selection[0].clipId}, type:"request_fulfilled"};
+            put.put($scope.auth);
+
           };
+
+          console.log("testing updating notification");
+
           $scope.cancelSharing = function() {
             console.log("cancelSharing");
+
+            var put = Hub.one("notifications").one(""+$scope.respondingToNotification);
+            put.notification = {status:"seen"};
+            put.put($scope.auth);
           };
     }]);
 });
