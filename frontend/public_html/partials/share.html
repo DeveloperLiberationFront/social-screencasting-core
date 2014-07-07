@@ -1,29 +1,31 @@
 <div>
   <h2>Share {{applicationName}}/{{toolName}} with {{shareWithName}} [{{shareWithEmail}}]</h2>
 
-  <div class="shareGrid col-md-2" ng-grid="shareGridOptions"></div>
+  <div class="shareGrid col-md-2" ng-grid="shareGridOptions" ng-show="!cancelled"></div>
 
   <div id='share-player' class="col-md-8" ng-if="ready" ng-controller='PlayerCtrl'
-  ng-include="'partials/player.html'">
-</div>
+  ng-include="'partials/player.html'" ng-show="!cancelled"></div>
 
-<div ng-if="ready" id="shareButtonsContainer" class="col-md-1">
-	<button id="shareClip" class="shareClipButton btn btn-default" ng-click="shareClip(false)">
-    Share With {{shareWithName}}
-  </button>
-  <br/>
-  <button id="shareAll" class="shareClipButton btn btn-default" ng-click="shareClip(true)">
-    Share With Everybody
-  </button>
-  <br/>
-  <div class="btn-group" dropdown>
-    <button id="noClips" class="shareClipButton btn btn-default dropdown-toggle" >
-      Share No Clips
+  <div ng-show="ready && !cancelled" id="shareButtonsContainer" class="col-md-1" ng-controller="ShareDropDownCtrl">
+   <button id="shareClip" class="shareClipButton btn btn-default" ng-click="shareClip(false)">
+      Share With {{shareWithName}}
     </button>
-    <div class='dropdown-menu' role="menu">
-      <textarea  placeholder="Consider giving a reason for not sharing..."></textarea>
-      <button ng-click="cancelSharing()">Submit</button>
+    <br/>
+    <button id="shareAll" class="shareClipButton btn btn-default" ng-click="shareClip(true)">
+      Share With Everybody
+    </button>
+    <br/>
+    <div class="btn-group" ng-show="!hasShared" dropdown is-open="dropDownStatus.isopen" style="margin:5px">
+      <button id="noClips" type="button" class="shareClipButton btn btn-default" ng-click="toggleDropdown($event)" >
+        Share No Clips
+      </button>
+      <div class='dropdown-menu'>
+        <textarea id="no-share-reason" placeholder="Consider giving a reason for not sharing..."></textarea>
+        <button ng-click="cancelSharing()">Confirm No Sharing</button>
+      </div>
     </div>
   </div>
-</div>
+
+
+
 </div>

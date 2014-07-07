@@ -217,6 +217,24 @@ define(['angular',
       $scope.$on('appSelected', setHandler);
     }])
 
+  .controller('ShareDropDownCtrl', ['$scope',
+    function($scope) {
+
+      $('.btn-group').on('click', '.dropdown-menu',function(event){
+        console.log("click");
+       event.stopPropagation();
+       event.preventDefault();
+     });
+
+      
+
+      $scope.toggleDropdown = function($event) {
+        $event.preventDefault();
+        $event.stopPropagation();
+        $scope.dropDownStatus.isopen = !$scope.dropDownStatus.isopen;
+      };
+    }]) 
+
   .controller('ShareCtrl', ['$scope', '$stateParams', 'Local', 'Hub',
     function($scope, $routeParams, Local, Hub) {
       console.log($routeParams);
@@ -230,6 +248,10 @@ define(['angular',
 
       $scope.selection = [];
       $scope.ready = false;
+
+      $scope.dropDownStatus = {
+          isopen:false
+      };
     
       var toolEnd = Local.one($scope.user.email).one($scope.applicationName)
       .one($scope.toolName);
@@ -272,6 +294,7 @@ define(['angular',
           $scope.shareClip = function(shareWithAll) {
             console.log("Share clip "+shareWithAll);
 
+
             var post = Local.one("shareClip");
             post.data = {
               clip_id : $scope.selection[0].clipId,
@@ -295,6 +318,8 @@ define(['angular',
             //   }
             // });
 
+            $scope.hasShared = true;
+
             var put = Hub.one("notifications").one(""+$scope.respondingToNotification);
             put.notification = {status:{video_id:$scope.selection[0].clipId}, type:"request_fulfilled"};
             put.put($scope.auth);
@@ -303,13 +328,30 @@ define(['angular',
 
           console.log("testing updating notification");
 
+          $scope.toggled = function($event) {
+            $event.preventDefault();
+            $event.stopPropagation();
+            console.log("toggling ");
+            console.log($event);
+            return false;
+          };
+
+
+
           $scope.cancelSharing = function() {
             console.log("cancelSharing");
 
+            var reasonText = $("#no-share-reason").val();
             var put = Hub.one("notifications").one(""+$scope.respondingToNotification);
             put.notification = {type:"request_denied", message:"Your request to " + $scope.shareWithName +" for "+
-            $scope.applicationName+"/"+$scope.toolName +" was not fulfilled."};
+            $scope.applicationName+"/"+$scope.toolName +" was not fulfilled. " + reasonText};
             put.put($scope.auth);
+
+            console.log(reasonText);
+            $scope.dropDownStatus.isopen = false;
+
+            $scope.cancelled = true;
+            $("h2").text("Decided not to share " + $scope.applicationName+"/"+$scope.toolName +" with " + $scope.shareWithName);
           };
     }]);
 });
