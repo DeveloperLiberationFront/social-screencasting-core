@@ -1,1 +1,9 @@
-<div class='gridStyle' ng-grid='gridOptions'></div>
+<div id='tool-list' class="panel panel-default">
+  <div class="panel-heading">Tools</div>
+  <ul class="list-group">
+    <li class="list-group-item" ng-repeat='tool in tools'>
+      <ng-include src="'partials/tool-block.html'">
+      </ng-include>
+    </li>
+  </ul>
+</div>

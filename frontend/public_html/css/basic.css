@@ -40,3 +40,48 @@
     flex: 0 1 auto;
     margin: 0 15px 15px 0;
 }
+
+.text-muted {
+    font-size: 10px;
+    vertical-align: middle;
+}
+
+.active > a > .text-muted {
+    color: #E5E5E5
+}
+
+.composite-input {
+    position: relative;
+}
+
+.clearable {
+    padding-right: 24px;
+}
+
+.composite-input .clear {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    z-index: 2;
+}
+
+.input-group .composite-input:not(:first-child) .form-control {
+    border-radius: 0px 4px 4px 0px;
+}
+
+.group-heading {
+    color: #333;
+    background-color: #f5f5f5;
+    border-color: #ddd;
+    background-image: linear-gradient(to bottom, #f5f5f5 0%, #e8e8e8 100%);
+    background-repeat: repeat-x;
+    padding: 5px 10px; 
+}
+
+.panel-heading + .list-group ng-include:not(:first-child) .list-group-item {
+    border-top-width: 1px;
+}
+
+#filter-bar {
+    width: 250px;
+}

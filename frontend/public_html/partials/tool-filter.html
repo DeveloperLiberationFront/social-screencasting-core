@@ -1,0 +1,22 @@
+<li class="list-group-item group-heading">
+  Tools
+</li>
+<li id='tool-filter' class="list-group-item">
+  <div ng-repeat='filter in filters.toolFilters'>
+    {{filter}}
+  </div>
+  <div class='input-group'>
+    <span class="input-group-btn">
+      <button class="btn btn-default" type="button"
+              ng-click='addFilter(input); input=null;'>
+        <span class='glyphicon glyphicon-plus'></span>
+      </button>
+    </span>
+    <input type='text' ng-model='input'
+           typeahead='tool as tool.name for tool in application.$object.tools | filter:$viewValue | limitTo:8'
+           class='form-control'
+           placeholder='Tool'
+           clearable
+           />
+  </div>
+</li>

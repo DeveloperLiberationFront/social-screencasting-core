@@ -8,6 +8,7 @@ define(['angular',
         'ng-ui-router',
         'ng-slider',
         'player',
+        'directives',
         'lib/breadcrumb',
        ], function (ng) {
   'use strict';
@@ -23,7 +24,8 @@ define(['angular',
     'ngFullscreen',
     'vr.directives.slider',
     'restangular',
-    'breadcrumb'
+    'breadcrumb',
+    'directives'
   ])
   
   .config(['$stateProvider','$urlRouterProvider',
@@ -34,8 +36,17 @@ define(['angular',
                 url: "",
                 templateUrl: 'partials/main.html',
                 views: {
-                  center: {
+                  'left-sidebar': {
+                    templateUrl: 'partials/filter.html',
+                    controller: 'FilterCtrl'
+                  },
+                  'center': {
                     templateUrl: 'partials/tool-list.html',
+                    controller: 'ToolListCtrl'
+                  },
+                  'right-sidebar': {
+                    template: "<div class='gridStyle'\
+                                    ng-grid='gridOptions'></div>",
                     controller: 'ApplicationToolsCtrl'
                   }
                 },

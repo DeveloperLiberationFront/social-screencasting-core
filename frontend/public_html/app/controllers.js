@@ -65,6 +65,52 @@ define(['angular',
         };
     }])
 
+  .controller('MainCtrl', ['$scope',
+    function($scope) {
+      $scope.filters = {};
+    }])
+
+  .controller('FilterCtrl', ['$scope', '$filter',
+    function($scope, $filter) {
+      $scope.filters.filter = function(tool) {
+        
+      }
+    }])
+
+  .controller('UserFilterCtrl', ['$scope',
+    function($scope) {
+      $scope.filters.userFilters = [];
+      $scope.addFilter = function(input){
+        console.log(input);
+        if (input) {
+          $scope.filters.userFilters.push(input);
+        }
+      };
+    }])
+
+  .controller('ToolFilterCtrl', ['$scope',
+    function($scope) {
+      $scope.filters.toolFilters = [];
+      $scope.addFilter = function(input){
+        if (input) {
+          $scope.filters.toolFilters.push(input);
+        }
+      };
+    }])
+
+  .controller('ToolListCtrl', ['$scope',
+    function($scope) {
+      var setHandler = function() {
+        $scope.application.then(function(app) {
+          $scope.tools = app.tools;
+        });
+      };
+      if ($scope.application) {
+        setHandler();
+      }
+      $scope.$on('appSelected', setHandler);
+    }])
+
   .controller('ToolUsersCtrl', ['$scope', '$modal',
     function($scope, $modal) {
         //$scope.selection
@@ -100,8 +146,6 @@ define(['angular',
                 }
             }
         };
-
-
     }])
 
   .controller('ApplicationToolsCtrl', ['$scope', '$modal', '$state', 'Local', 'Hub',
