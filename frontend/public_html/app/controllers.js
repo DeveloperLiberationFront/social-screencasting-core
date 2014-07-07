@@ -55,10 +55,6 @@ define(['angular',
         });
     }])
 
-  .controller('MainCtrl', ['$scope',
-    function($scope) {
-    }])
-
   .controller('UserListCtrl', ['$scope',
     function($scope) {
         $scope.gridOptions = {

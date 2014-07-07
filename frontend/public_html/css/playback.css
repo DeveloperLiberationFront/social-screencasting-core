@@ -31,6 +31,17 @@
 
 #panel .img-container {
     width: 780px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#player.isInFullScreen .img-container {
+    width: 100%;
+}
+
+#share-player .img-container {
+    width: inherit;
 }
 
 #overlay{

@@ -33,7 +33,12 @@ define(['angular',
             .state('main', {
                 url: "",
                 templateUrl: 'partials/main.html',
-                controller: 'MainCtrl',
+                views: {
+                  center: {
+                    templateUrl: 'partials/tool-list.html',
+                    controller: 'ApplicationToolsCtrl'
+                  }
+                },
                 breadcrumb: { title: 'Home' }
             })
             .state('tools', {

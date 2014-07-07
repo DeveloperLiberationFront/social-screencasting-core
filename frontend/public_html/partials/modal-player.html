@@ -1,5 +1,5 @@
 <div id="modal-player" ng-controller='PlayerCtrl' ng-include="'partials/player.html'"></div>
-<div id='clip-list'>
+<div id='clip-list' ng-if='clips.length > 1'>
   <div ng-repeat='clip in clips track by $index'>
     <ng-include src='"partials/clip-thumbnail.html"' ng-controller='ClipThumbnailCtrl'>
     </ng-include>

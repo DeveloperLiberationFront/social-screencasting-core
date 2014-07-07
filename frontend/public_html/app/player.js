@@ -53,6 +53,10 @@ define(['angular',
         //load all images, and then set the status to ready
         function loadClip(clip) {
           $scope.player.status = 'loading';
+          _.extend(clip, {
+            start: 0,
+            end: clip.frames.length-1,
+          });
           $q.all(
             clip.frames.map(function(frame){
               var deferred = $q.defer()
@@ -102,7 +106,7 @@ define(['angular',
             if ($scope.player.playing) { //playing
                 $scope.player.pos = Math.max($scope.clip.start,
                    (+$scope.player.pos + 1) % ($scope.clip.end+1));   
-              posChange(); //check on keyboard overlay
+              $scope.posChange(); //check on keyboard overlay
             }
         }, 200);
 
@@ -136,8 +140,6 @@ define(['angular',
       _.each(clips, function(clip) {
         clip.event_frames = [25]; //temporary
         _.extend(clip, {
-          start: 0,
-          end: clip.frames.length-1,
           frame: function(name){
             return clip.getRestangularUrl() + '/' + name + '?'+ $.param($scope.auth);
           },
