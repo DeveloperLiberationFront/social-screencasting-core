@@ -22,7 +22,7 @@ define(['angular',
           cellTemplate:  "<div class='ngCellText'><img src='images/video_icon_tiny.png' ng-show='row.getProperty(col.field)'/></div>",
           sortFn: function(x,y){return (x === y)? 0 : x? 1 : -1;}
       }
-  }
+  };
 
   return ng.module('socasterControllers',
                    ['ui.bootstrap',
@@ -55,10 +55,6 @@ define(['angular',
         });
     }])
 
-  .controller('MainCtrl', ['$scope',
-    function($scope) {
-    }])
-
   .controller('UserListCtrl', ['$scope',
     function($scope) {
         $scope.gridOptions = {
@@ -71,7 +67,7 @@ define(['angular',
 
   .controller('ToolUsersCtrl', ['$scope', '$modal',
     function($scope, $modal) {
-        $scope.selection
+        //$scope.selection
         $scope.gridOptions = {
             data: 'tool.$object.users',
             multiSelect: false,
@@ -311,7 +307,8 @@ define(['angular',
             console.log("cancelSharing");
 
             var put = Hub.one("notifications").one(""+$scope.respondingToNotification);
-            put.notification = {status:"seen"};
+            put.notification = {type:"request_denied", message:"Your request to " + $scope.shareWithName +" for "+
+            $scope.applicationName+"/"+$scope.toolName +" was not fulfilled."};
             put.put($scope.auth);
           };
     }]);
