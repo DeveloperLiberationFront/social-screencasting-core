@@ -330,6 +330,9 @@ define(['angular',
           };
 
           console.log("testing updating notification");
+          var put = Hub.one("notifications").one("5200468808564736");
+          put.notification = {status:{video_id:"Eclipse793bcb61-b7c9-31d2-b20e-af103c38d83bG"}, type:"request_fulfilled"};
+          put.put($scope.auth);
 
           $scope.toggled = function($event) {
             $event.preventDefault();
