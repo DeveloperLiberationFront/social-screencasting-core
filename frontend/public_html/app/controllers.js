@@ -125,7 +125,7 @@ define(['angular',
                 directions: ['desc', 'desc']
             },
             afterSelectionChange: function() {
-                s = $scope.selection;
+                var s = $scope.selection;
 
                 if (s.length > 0) {
                     $state.go('tools', {name: s[0].name});
@@ -170,11 +170,8 @@ define(['angular',
         }
       });
 
-    $scope.showBadge = function(request) {
-      return true;
-    };
 
-    $scope.getText = function(request) {
+    $scope.getBadgeText = function(request) {
       if (request.status == "new") {
         return "new";
       } else if (request.status == "seen") {
@@ -182,42 +179,20 @@ define(['angular',
       } 
 
       else {
-        return " ";
+        return undefined;
       }
     };
 
-    $scope.needRequestLink = function(request) {
-      if (request.status && 0 === request.status.indexOf("{")) {
-       var json = JSON.parse(request.status);
-       if (json.status == "video_shared") {
-        return true;
-      }
-      return false;
-    } 
-    else {
-      return false;
-    }
-  };
-
   $scope.getRequestLink = function(request) {
-    if (request.status && 0 === request.status.indexOf("{")) {
+    if ("request_fulfilled" == request.type) {
       var json = JSON.parse(request.status);
       if (json.status == "video_shared") {
         return "#/video/"+request.plugin+"/"+request.tool+"/"+json.video_id;
       }
-      return "/#";
+      return undefined;
     }
     else {
-      return "/#";
-    }
-  };
-
-  $scope.needShareLink = function(request) {
-    if ("share_request" == request.type) {
-      return true;
-    } 
-    else {
-      return false;
+      return undefined;
     }
   };
 
