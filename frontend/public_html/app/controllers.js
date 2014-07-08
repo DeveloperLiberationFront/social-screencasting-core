@@ -74,7 +74,7 @@ define(['angular',
     function($scope, $filter) {
       $scope.filters.filter = function(tool) {
         
-      }
+      };
     }])
 
   .controller('UserFilterCtrl', ['$scope',
@@ -205,6 +205,11 @@ define(['angular',
             console.log(id);
             return "#/video/"+sentItem.plugin+"/"+sentItem.tool+"/"+json.video_id;
           });
+          console.log(sentItem.shared_videos);
+          sentItem.message = sentItem.recipient.name+ " granted access to "+ sentItem.plugin +"/" + sentItem.tool;
+        }
+        else {
+          sentItem.message =  "Requested access to "+sentItem.recipient.name+ "'s usage of "+ sentItem.plugin +"/" + sentItem.tool;
         }
       }
 
