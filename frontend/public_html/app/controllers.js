@@ -82,9 +82,12 @@ define(['angular',
 
   .controller('FilterCtrl', ['$scope', '$filter',
     function($scope, $filter) {
-      $scope.filters.filter = function(tool) {
-        
-      }
+      $scope.filterSet = { filters: [] }; //list of (tool) -> bool
+      $scope.filters.toolFilter = function(tool) {
+        return _.reduce($scope.filterSet.filters, function(accum, fn) {
+          return accum && fn(tool);
+        }, true)
+      };
     }])
 
   .controller('UserFilterCtrl', ['$scope',
@@ -101,11 +104,15 @@ define(['angular',
         templateUrl: 'partials/user-list-item.html'
       }
 
+      $scope.filterSet.filters.push(function(tool) {
+        return true;
+      })
+
       $scope.removeFilter = function(filter) {
-        _.pull($scope.filters.userFilters, filter);
+        _.pull($scope.filter.filters, filter);
       }
       $scope.addFilter = function(input){
-        if (input && !_.contains($scope.filters.userFilters, input)) {
+        if (input && !_.contains($scope.filter.filters, input)) {
           $scope.filter.filters.push(input);
         }
         $scope.filter.input = null;
@@ -118,8 +125,6 @@ define(['angular',
           $scope.filter.source = app.tools;
         });
 
-      $scope.filters.toolFilters = [];
-
       $scope.filter = {
         name: 'Tool',
         input: null,
@@ -128,12 +133,17 @@ define(['angular',
         templateUrl: ''
       }
 
+      $scope.filterSet.filters.push(function(tool) {
+        return $scope.filter.filters.length == 0 ||
+          _.any($scope.filter.filters, {name: tool.name})
+      })
+
       $scope.removeFilter = function(filter) {
         _.pull($scope.filter.filters, filter);
       }
 
       $scope.addFilter = function(input){
-        if (input) {
+        if (input && !_.contains($scope.filter.filters, input)) {
           $scope.filter.filters.push(input);
         }
         $scope.filter.input = null;

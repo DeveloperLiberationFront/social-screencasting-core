@@ -1,7 +1,7 @@
 <div id='tool-list' class="panel panel-default">
   <div class="panel-heading">Tools</div>
   <ul class="list-group">
-    <li class="list-group-item" ng-repeat='tool in tools'>
+    <li class="list-group-item" ng-repeat='tool in tools | filter:filters.toolFilter'>
       <ng-include src="'partials/tool-block.html'">
       </ng-include>
     </li>
