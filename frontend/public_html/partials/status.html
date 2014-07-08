@@ -6,7 +6,8 @@
         <span ng-if="getBadgeText(request) !== undefined" class="badge">{{getBadgeText(request)}}</span>
         Requested access to {{request.recipient.name}}'s usage of {{request.plugin}}/{{request.tool}}
         
-        <a ng-if="getRequestLink(request) !== undefined" ng-href="{{getRequestLink(request)}}"> </a>
+
+        <a ng-repeat="shared_video in request.shared_videos" ng-href="shared_video">{{"Example " +($index +1)}}</a>
 
         </li>
      </ul>

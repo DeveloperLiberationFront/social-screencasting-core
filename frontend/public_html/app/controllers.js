@@ -197,21 +197,27 @@ define(['angular',
 
       });
 
-      for (var i = $scope.received.length - 1; i >= 0; i--) {
+      for (var i = $scope.sent.length - 1; i >= 0; i--) {
+        var sentItem = $scope.sent[i];
+        if (sentItem.type == "request_fulfilled") {
+          var json = JSON.parse(sentItem.status);
+          sentItem.shared_videos = _.map(json.video_id, function(id){
+            console.log(id);
+            return "#/video/"+sentItem.plugin+"/"+sentItem.tool+"/"+json.video_id;
+          });
+        }
+      }
+
+      for (i = $scope.received.length - 1; i >= 0; i--) {
         var item = $scope.received[i], put;
         if (item.status == "new") {
-          item.status = "seen";
+          //item.status = "seen";
           put = Hub.one("notifications").one(""+item.id);
           put.notification = {status:"seen"};
           put.put($scope.auth);
-        } else {
-            // item.status = "new";
-            // put = Hub.one("notifications").one(""+item.id);
-            // put.notification = item;
-            // put.put($scope.auth);
-          }
-        }
-      });
+        } 
+      }
+    });
 
 
     $scope.getBadgeText = function(request) {
@@ -368,15 +374,22 @@ define(['angular',
             $scope.hasShared = true;
 
             var put = Hub.one("notifications").one(""+$scope.respondingToNotification);
-            put.notification = {status:{video_id:$scope.selection[0].clipId}, type:"request_fulfilled"};
+            put.notification = {status:JSON.stringify({video_id:$scope.selection[0].clipId}), type:"request_fulfilled"};
             put.put($scope.auth);
 
           };
 
           console.log("testing updating notification");
-          var put = Hub.one("notifications").one("5200468808564736");
-          put.notification = {status:{video_id:"Eclipse793bcb61-b7c9-31d2-b20e-af103c38d83bG"}, type:"request_fulfilled"};
-          put.put($scope.auth);
+          var put = Hub.one("notifications").one("5715999101812736");
+          // put.get().then(function(notification){
+          //   if 
+          // });
+
+
+          put.notification = {status:JSON.stringify({video_id:["Eclipse793bcb61-b7c9-31d2-b20e-af103c38d83bG"]}), type:"request_fulfilled"};
+          put.put({email:"test@mailinator.com",
+            name:"Test User",
+            token:"123"});
 
           $scope.toggled = function($event) {
             $event.preventDefault();
