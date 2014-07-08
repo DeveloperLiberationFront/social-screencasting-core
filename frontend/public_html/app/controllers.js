@@ -402,37 +402,51 @@ define(['angular',
 
             post.post();
 
-            // $.ajax({
-            //   url: "shareClip",
-            //   type: "POST",
-            //   data: {
-            //     clip_id : $scope.selection[0].clipId,
-            //     recipient : shareWithAll? "all" : $scope.shareWithEmail,
-            //     start_frame: $scope.clip.start,
-            //     end_frame: $scope.clip.end,
-            //     crop_rect: JSON.stringify($scope.cropData.cropData)
-            //   }
-            // });
-
             $scope.hasShared = true;
 
             var put = Hub.one("notifications").one(""+$scope.respondingToNotification);
-            put.notification = {status:JSON.stringify({video_id:$scope.selection[0].clipId}), type:"request_fulfilled"};
-            put.put($scope.auth);
+
+            put.get($scope.auth).then(function(notification){
+              if (notification.type == "request_fulfilled") {
+              //add this shared video to the list
+              var json = JSON.parse(notification.status);
+              json.video_id.push($scope.selection[0].clipId);
+              put.notification = {status: JSON.stringify(json)};
+              console.log("putting to array");
+              put.put($scope.auth);
+            }
+            else {
+              //mark this notification as responded, and make the status a hash with an array of clip ids
+              put.notification = {status:JSON.stringify({video_id:[$scope.selection[0].clipId]}), type:"request_fulfilled"};
+              console.log("putting first video id");
+              put.put($scope.auth);
+            }
+            });
 
           };
+          // $scope.fakeAuth = {email:"test@mailinator.com",
+          //       name:"Test User",
+          //       token:"123"};
 
-          console.log("testing updating notification");
-          var put = Hub.one("notifications").one("5715999101812736");
-          // put.get().then(function(notification){
-          //   if 
+          // console.log("testing updating notification");
+          // var put = Hub.one("notifications").one("5715999101812736");
+          // put.get($scope.fakeAuth).then(function(notification){
+          //   if (notification.type == "request_fulfilled") {
+          //     //add this shared video to the list
+          //     var json = JSON.parse(notification.status);
+          //     json.video_id.push("Eclipse793bcb61-b7c9-31d2-b20e-af103c38d83bG");
+          //     put.notification = {status: JSON.stringify(json)};
+          //     console.log("putting to array");
+          //     put.put($scope.fakeAuth);
+          //   }
+          //   else {
+          //     //mark this notification as responded, and make the status a hash with an array of clip ids
+          //     put.notification = {status:JSON.stringify({video_id:["Eclipse793bcb61-b7c9-31d2-b20e-af103c38d83bG"]}), type:"request_fulfilled"};
+          //     console.log("putting first video id");
+          //     put.put($scope.fakeAuth);
+          //   }
           // });
 
-
-          put.notification = {status:JSON.stringify({video_id:["Eclipse793bcb61-b7c9-31d2-b20e-af103c38d83bG"]}), type:"request_fulfilled"};
-          put.put({email:"test@mailinator.com",
-            name:"Test User",
-            token:"123"});
 
           $scope.toggled = function($event) {
             $event.preventDefault();

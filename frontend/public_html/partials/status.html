@@ -7,7 +7,7 @@
             {{request.message}}
             
             <ul ng-show="request.shared_videos.length > 0">
-            <li ng-repeat="shared_video in request.shared_videos">
+            <li ng-repeat="shared_video in request.shared_videos track by $index">
                 <a ng-href="{{shared_video}}">{{"Example " +($index +1)}}</a>
                 </li>
             </ul>
