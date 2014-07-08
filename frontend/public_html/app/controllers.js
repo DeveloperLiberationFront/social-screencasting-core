@@ -24,6 +24,16 @@ define(['angular',
       }
   };
 
+  function onApp($scope, callback) {
+      var setHandler = function() {
+        $scope.application.then(callback);
+      };
+      if ($scope.application) {
+        setHandler();
+      }
+      $scope.$on('appSelected', setHandler);
+  }
+
   return ng.module('socasterControllers',
                    ['ui.bootstrap',
                     'ui.format',
@@ -72,43 +82,79 @@ define(['angular',
 
   .controller('FilterCtrl', ['$scope', '$filter',
     function($scope, $filter) {
-      $scope.filters.filter = function(tool) {
-        
+      $scope.filterSet = { filters: [] }; //list of (tool) -> bool
+      $scope.filters.toolFilter = function(tool) {
+        return _.reduce($scope.filterSet.filters, function(accum, fn) {
+          return accum && fn(tool);
+        }, true);
       };
     }])
 
   .controller('UserFilterCtrl', ['$scope',
     function($scope) {
-      $scope.filters.userFilters = [];
+      onApp($scope, function(app) {
+          $scope.filter.source = app.users;
+        });
+      
+      $scope.filter = {
+        name: 'User',
+        input: null,
+        source: [],
+        filters: [],
+        templateUrl: 'partials/user-list-item.html'
+      };
+
+      $scope.filterSet.filters.push(function(tool) {
+        return true;
+      });
+
+      $scope.removeFilter = function(filter) {
+        _.pull($scope.filter.filters, filter);
+      };
+
       $scope.addFilter = function(input){
-        console.log(input);
-        if (input) {
-          $scope.filters.userFilters.push(input);
+        if (input && !_.contains($scope.filter.filters, input)) {
+          $scope.filter.filters.push(input);
         }
+        $scope.filter.input = null;
       };
     }])
 
   .controller('ToolFilterCtrl', ['$scope',
     function($scope) {
-      $scope.filters.toolFilters = [];
+      onApp($scope, function(app) {
+          $scope.filter.source = app.tools;
+        });
+
+      $scope.filter = {
+        name: 'Tool',
+        input: null,
+        source: [],
+        filters: [],
+        templateUrl: ''
+      };
+
+      $scope.filterSet.filters.push(function(tool) {
+        return $scope.filter.filters.length === 0 || _.any($scope.filter.filters, {name: tool.name});
+      });
+
+      $scope.removeFilter = function(filter) {
+        _.pull($scope.filter.filters, filter);
+      };
+
       $scope.addFilter = function(input){
-        if (input) {
-          $scope.filters.toolFilters.push(input);
+        if (input && !_.contains($scope.filter.filters, input)) {
+          $scope.filter.filters.push(input);
         }
+        $scope.filter.input = null;
       };
     }])
 
   .controller('ToolListCtrl', ['$scope',
     function($scope) {
-      var setHandler = function() {
-        $scope.application.then(function(app) {
+      onApp($scope, function(app) {
           $scope.tools = app.tools;
         });
-      };
-      if ($scope.application) {
-        setHandler();
-      }
-      $scope.$on('appSelected', setHandler);
     }])
 
   .controller('ToolUsersCtrl', ['$scope', '$modal',
@@ -120,7 +166,7 @@ define(['angular',
             columnDefs: [{field:'name', displayName:'Name'},
                          {field:'email', displayName:'Email'},
                          {field:'usages', displayName:'Usages'},
-                         fieldDefs['video']],
+                         fieldDefs.video],
             afterSelectionChange: function(row) {
                 if (row && row.entity && row.selected) {
                     var user = row.entity;
@@ -158,7 +204,7 @@ define(['angular',
             columnDefs: [
                 { field:'name', displayName:'Name' },
                 fieldDefs['new'],
-                fieldDefs['video']
+                fieldDefs.video
             ],
             sortInfo: {
                 fields: ['new', 'video'],
@@ -264,16 +310,10 @@ define(['angular',
 
 .controller('ToolCtrl', ['$scope', '$stateParams',
   function($scope, $stateParams) {
-      var setHandler = function() {
-          $scope.application.then(function(app) {
-              $scope.tool = app.one($stateParams.name).get($scope.auth);
-          });
-      };
-      if ($scope.application) {
-          setHandler();
-      }
-      $scope.$on('appSelected', setHandler);
-    }])
+    onApp($scope, function(app) {
+      $scope.tool = app.one($stateParams.name).get($scope.auth);
+    });
+  }])
 
   .controller('ShareDropDownCtrl', ['$scope',
     function($scope) {
@@ -283,8 +323,6 @@ define(['angular',
        event.stopPropagation();
        event.preventDefault();
      });
-
-      
 
       $scope.toggleDropdown = function($event) {
         $event.preventDefault();

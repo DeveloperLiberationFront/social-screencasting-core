@@ -75,7 +75,8 @@
     border-color: #ddd;
     background-image: linear-gradient(to bottom, #f5f5f5 0%, #e8e8e8 100%);
     background-repeat: repeat-x;
-    padding: 5px 10px; 
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
 
 .panel-heading + .list-group ng-include:not(:first-child) .list-group-item {
@@ -84,4 +85,14 @@
 
 #filter-bar {
     width: 250px;
+}
+
+.filter-item {
+    margin: 10px 0px;
+}
+.filter-item > span {
+    max-width: 200px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: inline-block;
 }
