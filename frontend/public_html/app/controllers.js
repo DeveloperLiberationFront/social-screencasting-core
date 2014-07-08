@@ -239,7 +239,7 @@ define(['angular',
       console.log(data.plain());
       $scope.sent = data.sent;
       $scope.received = _.filter(data.received, function(item) { 
-          return item.status != "responded";
+          return item.type != "request_fulfilled";
 
       });
 
@@ -249,7 +249,7 @@ define(['angular',
           var json = JSON.parse(sentItem.status);
           sentItem.shared_videos = _.map(json.video_id, function(id){
             console.log(id);
-            return "#/video/"+sentItem.plugin+"/"+sentItem.tool+"/"+json.video_id;
+            return "#/video/"+sentItem.plugin+"/"+sentItem.tool+"/"+id;
           });
           console.log(sentItem.shared_videos);
           sentItem.message = sentItem.recipient.name+ " granted access to "+ sentItem.plugin +"/" + sentItem.tool;
@@ -269,6 +269,15 @@ define(['angular',
         } 
       }
     });
+
+    $scope.deleteRequest = function(request) {
+      console.log("deleting "+request);
+        $scope.sent = _.reject($scope.sent, function(item) {
+          return item.id == request.id;
+        });
+
+        Hub.one("notifications").one(""+request.id).remove($scope.auth);
+    };
 
 
     $scope.getBadgeText = function(request) {
