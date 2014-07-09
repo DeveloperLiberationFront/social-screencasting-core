@@ -112,11 +112,11 @@ define(['angular',
       };
 
       $scope.filterSet.filters.push(function(tool) {
-        return $scope.filter.filters.length === 0 //all tools if no users selected
-          && tool.users.length > 0 //if it has at least one user
-          || _.every($scope.filter.filters, function(user){ //
-            return _.find(tool.users, {email: user.email}) != null; //
-          });
+        return tool.users.length > 0 //tools must have at least one user
+          && ($scope.filter.filters.length === 0 //all tools if no users selected
+              || _.every($scope.filter.filters, function(user){ //or only tools with selected users
+                return _.find(tool.users, {email: user.email}) != null; 
+              }))
       });
 
       $scope.removeFilter = function(filter) {
