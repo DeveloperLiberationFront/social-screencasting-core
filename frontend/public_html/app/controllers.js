@@ -231,7 +231,7 @@ define(['angular',
       };
     }])
 
-  .controller('StatusCtrl', ['$scope', 'Hub', function($scope, Hub) {
+  .controller('StatusCtrl', ['$scope', 'Hub', '$http', function($scope, Hub, $http) {
     $scope.received = [{}];
     $scope.sent = [{}];
 
@@ -276,7 +276,16 @@ define(['angular',
           return item.id == request.id;
         });
 
-        Hub.one("notifications").one(""+request.id).remove($scope.auth);
+        $http.delete("http://screencaster-hub.appspot.com/api/notifications/"+request.id+"?email="+
+          encodeURIComponent($scope.auth.email)+"&name="+encodeURIComponent($scope.auth.name)+"&token="+encodeURIComponent($scope.auth.token));
+        // $.ajax({
+        //   type:"DELETE",
+        //   url:"http://screencaster-hub.appspot.com/api/notifications/"+request.id,
+        //   data: $scope.auth,
+        //   dataType: "html"
+        // });
+        //Hub.one("notifications").one(""+request.id).remove($scope.auth);
+
     };
 
 
