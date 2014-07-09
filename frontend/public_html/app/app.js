@@ -81,5 +81,11 @@ define(['angular',
   .config(['RestangularProvider',
     function(RestangularProvider) {
       RestangularProvider.setDefaultHttpFields({cache: true});
-    }]);
+      RestangularProvider.setRequestInterceptor(function(elem, operation) {
+          if (operation === "remove") {
+           return undefined;
+       } 
+       return elem;
+   });
+  }]);
 });

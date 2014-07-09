@@ -276,15 +276,15 @@ define(['angular',
           return item.id == request.id;
         });
 
-        $http.delete("http://screencaster-hub.appspot.com/api/notifications/"+request.id+"?email="+
-          encodeURIComponent($scope.auth.email)+"&name="+encodeURIComponent($scope.auth.name)+"&token="+encodeURIComponent($scope.auth.token));
+        //$http.delete("http://screencaster-hub.appspot.com/api/notifications/"+request.id+"?email="+
+        //  encodeURIComponent($scope.auth.email)+"&name="+encodeURIComponent($scope.auth.name)+"&token="+encodeURIComponent($scope.auth.token));
         // $.ajax({
         //   type:"DELETE",
         //   url:"http://screencaster-hub.appspot.com/api/notifications/"+request.id,
         //   data: $scope.auth,
         //   dataType: "html"
         // });
-        //Hub.one("notifications").one(""+request.id).remove($scope.auth);
+        Hub.one("notifications").one(""+request.id).remove($scope.auth);
 
     };
 
