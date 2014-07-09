@@ -105,7 +105,10 @@ define(['angular',
       };
 
       $scope.filterSet.filters.push(function(tool) {
-        return true;
+        return $scope.filter.filters.length === 0 //all tools if no users selected
+          || _.every($scope.filter.filters, function(user){ //
+            return _.contains(tool.users, user.email); //
+          });
       });
 
       $scope.removeFilter = function(filter) {
@@ -135,7 +138,8 @@ define(['angular',
       };
 
       $scope.filterSet.filters.push(function(tool) {
-        return $scope.filter.filters.length === 0 || _.any($scope.filter.filters, {name: tool.name});
+        return $scope.filter.filters.length === 0 ||
+          _.any($scope.filter.filters, {name: tool.name});
       });
 
       $scope.removeFilter = function(filter) {
