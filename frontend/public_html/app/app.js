@@ -81,7 +81,7 @@ define(['angular',
   .config(['RestangularProvider',
     function(RestangularProvider) {
       RestangularProvider.setDefaultHttpFields({cache: true});
-      RestangularProvider.setRequestInterceptor(function(elem, operation) {
+      RestangularProvider.addRequestInterceptor(function(elem, operation) {
           if (operation === "remove") {
            return undefined;
        } 
