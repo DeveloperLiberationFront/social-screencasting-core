@@ -30,6 +30,10 @@
     margin: 0 15px 15px 0;
 }
 
+#main > .center {
+    flex: 1 1 500px;
+}
+
 #tool-view {
     display: flex;
     flex-flow: row wrap;
@@ -95,4 +99,42 @@
     text-overflow: ellipsis;
     overflow: hidden;
     display: inline-block;
+}
+
+.tool-block {
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+.tool-block > * {
+    flex: 1 1 auto;
+}
+
+.tool-header {
+    display: flex;
+    flex-flow: row nowrap;
+    
+}
+
+.tool-header > * {
+    flex: 1 1 auto;
+}
+
+.tool-statuses {
+    flex: 0 1 80px;
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+.tool-users {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.tool-users > ul {
+    flex: 1 1 100px;
+}
+
+.tool-users > span{
+    flex: 0 1 65px;
 }

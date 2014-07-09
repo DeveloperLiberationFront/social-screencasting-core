@@ -2,7 +2,7 @@
   <div class="panel-heading">Tools</div>
   <ul class="list-group">
     <li class="list-group-item" ng-repeat='tool in tools | filter:filters.toolFilter'>
-      <ng-include src="'partials/tool-block.html'">
+      <ng-include src="'partials/tool-block.html'" ng-controller='ToolBlockCtrl'>
       </ng-include>
     </li>
   </ul>
