@@ -56,6 +56,13 @@ define(['angular',
         $scope.$on('appSelected', function(event, app) {
             var userTools = Local.one('user').one(app.name).get().get('tools');
             $scope.application = Hub.one('details').one(app.name).get($scope.auth);
+            $scope.application.then(function(app) {
+              _.each(app.users, function(user) {
+                Hub.one(user.email).one(app.name).get($scope.auth).then(function(data) {
+                  _.extend(user, data);
+                })
+              })
+            })
             $q.all({userTools: userTools, app: $scope.application})
                 .then(function(results){
                     _.each(results.app.tools, function(tool) {
@@ -93,7 +100,7 @@ define(['angular',
   .controller('UserFilterCtrl', ['$scope',
     function($scope) {
       onApp($scope, function(app) {
-          $scope.filter.source = app.users;
+          $scope.filter.source = ng.copy(app.users);
         });
       
       $scope.filter = {
@@ -105,7 +112,11 @@ define(['angular',
       };
 
       $scope.filterSet.filters.push(function(tool) {
-        return true;
+        return tool.users.length > 0 //tools must have at least one user
+          && ($scope.filter.filters.length === 0 //all tools if no users selected
+              || _.every($scope.filter.filters, function(user){ //or only tools with selected users
+                return _.find(tool.users, {email: user.email}) != null; 
+              }))
       });
 
       $scope.removeFilter = function(filter) {
@@ -123,7 +134,7 @@ define(['angular',
   .controller('ToolFilterCtrl', ['$scope',
     function($scope) {
       onApp($scope, function(app) {
-          $scope.filter.source = app.tools;
+          $scope.filter.source = ng.copy(app.tools);
         });
 
       $scope.filter = {
@@ -135,7 +146,8 @@ define(['angular',
       };
 
       $scope.filterSet.filters.push(function(tool) {
-        return $scope.filter.filters.length === 0 || _.any($scope.filter.filters, {name: tool.name});
+        return $scope.filter.filters.length === 0 ||
+          _.any($scope.filter.filters, {name: tool.name});
       });
 
       $scope.removeFilter = function(filter) {
@@ -155,6 +167,19 @@ define(['angular',
       onApp($scope, function(app) {
           $scope.tools = app.tools;
         });
+    }])
+
+  .controller('ToolBlockCtrl', ['$scope',
+    function($scope) {
+      onApp($scope, function(app) {
+        $scope.tool.users = _.map($scope.tool.users, function(user) {
+          return _.find($scope.application.$object.users, {email: user});
+        });
+      });
+
+      $scope.details = function(user) {
+        return _.find(user.tools, {name: $scope.tool.name});
+      };
     }])
 
   .controller('ToolUsersCtrl', ['$scope', '$modal',
