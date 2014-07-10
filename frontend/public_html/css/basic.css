@@ -31,7 +31,8 @@
 }
 
 #main > .center {
-    flex: 1 1 500px;
+    max-width: 800px;
+    flex: 1 1 250px;
 }
 
 #tool-view {
@@ -137,4 +138,31 @@
 
 .tool-users > span{
     flex: 0 1 65px;
+}
+
+.caret.reverse {
+    border-bottom: 4px solid;
+    border-top: 0 none;
+}
+
+.unselectable,
+.unselectable * {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+#filter-bar li.ordering {
+    padding: 0px;
+}
+
+#filter-bar .ordering ul {
+    margin: 0px;
 }

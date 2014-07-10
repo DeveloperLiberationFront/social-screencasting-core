@@ -91,6 +91,7 @@ define(['angular',
   .controller('MainCtrl', ['$scope',
     function($scope) {
       $scope.filters = {};
+      $scope.ordering = {};
     }])
 
   .controller('FilterCtrl', ['$scope', '$filter',
@@ -101,6 +102,17 @@ define(['angular',
           return accum && fn(tool);
         }, true);
       };
+    }])
+
+  .controller('OrderCtrl', ['$scope',
+    function($scope) {
+      $scope.ordering.options = [
+        {name: "Usages", field:"usages"},
+        {name: "Unused", field:"unused"}, 
+        {name: "Recommended", field:""}, 
+        {name: "Video", field:"video"},
+      ];
+      $scope.ordering.reverse = false;
     }])
 
   .controller('UserFilterCtrl', ['$scope',
