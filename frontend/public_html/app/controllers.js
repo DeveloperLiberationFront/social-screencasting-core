@@ -11,9 +11,9 @@ define(['angular',
   /* Controllers */
 
   var fieldDefs = {
-      'new': {
+      'unused': {
           width: '50px',
-          field:'new', displayName:'New',
+          field:'unused', displayName:'Unused',
           cellTemplate: "<div class='ngCellText'><span class='glyphicon glyphicon-ok' ng-show='row.getProperty(col.field)'></span></div>"
       },
       'video': {
@@ -72,7 +72,7 @@ define(['angular',
             $q.all({userTools: userTools, app: $scope.application})
                 .then(function(results){
                     _.each(results.app.tools, function(tool) {
-                        tool.new = _.findWhere(results.userTools, {name: tool.name}) === undefined;
+                        tool.unused = _.findWhere(results.userTools, {name: tool.name}) === undefined;
                     });
                 });
         });
@@ -121,8 +121,8 @@ define(['angular',
         return tool.users.length > 0 //tools must have at least one user
           && ($scope.filter.filters.length === 0 //all tools if no users selected
               || _.every($scope.filter.filters, function(user){ //or only tools with selected users
-                return _.find(tool.users, {email: user.email}) !== null; 
-              }));
+                return _.contains(tool.users, user.email); 
+              }))
       });
 
       $scope.removeFilter = function(filter) {
@@ -140,7 +140,9 @@ define(['angular',
   .controller('ToolFilterCtrl', ['$scope',
     function($scope) {
       onApp($scope, function(app) {
-          $scope.filter.source = ng.copy(app.tools);
+          $scope.filter.source = _.filter(ng.copy(app.tools), function(tool) {
+            return tool.users.length > 0;
+          });
         });
 
       $scope.filter = {
@@ -173,14 +175,23 @@ define(['angular',
       onApp($scope, function(app) {
           $scope.tools = app.tools;
         });
+
+      $scope.limit = 10;
+      $scope.scroll = function() {
+        $scope.limit += 1;
+      };
     }])
 
   .controller('ToolBlockCtrl', ['$scope',
     function($scope) {
       onApp($scope, function(app) {
-        $scope.tool.users = _.map($scope.tool.users, function(user) {
-          return _.find($scope.application.$object.users, {email: user});
+        var unused = $scope.tool.unused;
+        app.one($scope.tool.name).get($scope.auth).then(function(tool) {
+          $scope.tool = _.extend(tool, {unused: unused});
         });
+        // $scope.tool.users = _.map($scope.tool.users, function(user) {
+        //   return _.find($scope.application.$object.users, {email: user});
+        // });
       });
 
       $scope.details = function(user) {

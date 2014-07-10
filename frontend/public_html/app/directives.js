@@ -1,5 +1,6 @@
 define(['angular',
-       ], function (ng) {
+        'jquery',
+       ], function (ng, $) {
   return ng.module('directives', [])
 
   .directive('clearable', ['$compile', function($compile) {
@@ -18,5 +19,20 @@ define(['angular',
           (scope));
       }
     }
-  }]);
+  }])
+
+  .directive('whenScrolled', function() {
+    return {
+      restrict: 'A',
+      link: function(scope, elm, attrs) {
+        var raw = elm[0];
+        $(document).scroll(function() {
+          if (raw.scrollTop + raw.offsetHeight >= raw.scrollHeight) {
+            scope.$apply(attrs.whenScrolled);
+          }
+        });
+      }
+    };
+  });
+
 });

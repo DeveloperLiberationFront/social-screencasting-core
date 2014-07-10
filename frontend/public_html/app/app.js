@@ -44,10 +44,7 @@ define(['angular',
                     templateUrl: 'partials/tool-list.html',
                     controller: 'ToolListCtrl'
                   },
-                  'right-sidebar': {
-                    template: "<div class='gridStyle' ng-grid='gridOptions'></div>",
-                    controller: 'ApplicationToolsCtrl'
-                  }
+                  'right-sidebar': {}
                 },
                 breadcrumb: { title: 'Home' }
             })
