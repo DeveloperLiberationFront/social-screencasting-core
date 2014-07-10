@@ -136,6 +136,7 @@ define(['angular',
 
       $scope.clips = clips;
       $scope.clip = clips[0];
+      console.log(clips);
       
       _.each(clips, function(clip) {
         clip.event_frames = [25]; //temporary
@@ -145,7 +146,8 @@ define(['angular',
           },
           thumbnail: clip.frames[Math.min(clip.event_frames[0],
                                           clip.frames.length-1)]
-        })});
+        });
+      });
 
       $scope.loadClip = function(clip) {
         $scope.clip = clip;

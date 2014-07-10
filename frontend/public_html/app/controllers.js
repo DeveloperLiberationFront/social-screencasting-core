@@ -274,7 +274,7 @@ define(['angular',
           var json = JSON.parse(sentItem.status);
           sentItem.shared_videos = _.map(json.video_id, function(id){
             console.log(id);
-            return "#/video/"+sentItem.plugin+"/"+sentItem.tool+"/"+id;
+            return "#/video/external/"+sentItem.recipient.email+"/"+sentItem.plugin+"/"+sentItem.tool+"/"+id;
           });
           console.log(sentItem.shared_videos);
           sentItem.message = sentItem.recipient.name+ " granted access to "+ sentItem.plugin +"/" + sentItem.tool;
@@ -330,7 +330,7 @@ define(['angular',
     if ("request_fulfilled" == request.type) {
       var json = JSON.parse(request.status);
       if (json.video_id) {
-        return "#/video/"+request.plugin+"/"+request.tool+"/"+json.video_id;
+        return "#/video/external/"+request.recipient.email+"/"+request.plugin+"/"+request.tool+"/"+json.video_id;
       }
       return undefined;
     }

@@ -45,8 +45,7 @@ define(['angular',
                     controller: 'ToolListCtrl'
                   },
                   'right-sidebar': {
-                    template: "<div class='gridStyle'\
-                                    ng-grid='gridOptions'></div>",
+                    template: "<div class='gridStyle' ng-grid='gridOptions'></div>",
                     controller: 'ApplicationToolsCtrl'
                   }
                 },
@@ -64,6 +63,48 @@ define(['angular',
                 controller: 'PlayerCtrl',
                 breadcrumb: { title: '{clip.name}' }
             })
+            .state('video', {
+              url: '/video/:location/:owner/:application/:tool/:clip_id',
+              onEnter: function($stateParams, $state, $modal, $rootScope, Hub, Local) {
+                $modal.open({
+                  templateUrl: 'partials/modal-player.html',
+                  controller: 'ModalPlayer',
+                  scope: $rootScope,
+                  resolve: {
+                    clips: ['$q', function($q){
+                      console.log($stateParams.location +" " + $stateParams.owner+ " "+$stateParams.application + " " +
+                       $stateParams.tool + " " + $stateParams.clip_id +" "+$rootScope.auth);
+                      if ($stateParams.location == "external") {
+                        return Hub.one($stateParams.owner)
+                                  .one($stateParams.application)
+                                  .one($stateParams.tool)
+                                  .one($stateParams.clip_id).get({
+                                    email:"kjlubick+test@ncsu.edu",
+                                    name:"Kevin Test",
+                                    token:"221ed3d8-6a09-4967-91b6-482783ec5313"
+                                  });
+                      } else {
+                          return Local.one($stateParams.owner)
+                                      .one($stateParams.application)
+                                      .one($stateParams.tool)
+                                      .one($stateParams.clip_id).get({
+                                          email:"kjlubick+test@ncsu.edu",
+                                          name:"Kevin Test",
+                                          token:"221ed3d8-6a09-4967-91b6-482783ec5313"
+                                      });
+                        }
+                      
+                    }]},
+                    windowClass: 'modal-player',
+                    size: 'lg'
+                  }).result.then(function(result) {
+                    console.log("In the then of the modal");
+                    if (result) {
+                      return $state.transitionTo("items");
+                    }
+                  });
+                }
+              })
             .state('status', {
                 url: '/status',
                 templateUrl: 'partials/status.html',
