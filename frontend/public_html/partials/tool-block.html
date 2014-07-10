@@ -2,7 +2,7 @@
   <div class='tool-header'>
     <h4>{{tool.name}}</h4>
     <div class='tool-statuses'>
-      <span class='label label-primary' ng-if='tool.new'>Unused</span>
+      <span class='label label-primary' ng-if='tool.unused'>Unused</span>
       <span class='label label-info' ng-if='tool.video'>Has Video</span>
     </div>
   </div>
@@ -12,7 +12,7 @@
       <li class='tool-user' ng-repeat='user in tool.users'>
         {{user.name}}
         <span class='glyphicon glyphicon-facetime-video'
-              ng-if='details(user).clips > 0'></span>
+              ng-if='user.video'></span>
       </li>
     </ul>
   </div>
