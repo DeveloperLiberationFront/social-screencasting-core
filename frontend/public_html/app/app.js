@@ -72,17 +72,17 @@ define(['angular',
                   scope: $rootScope,
                   resolve: {
                     clips: ['$q', function($q){
-                      console.log($stateParams.location +" " + $stateParams.owner+ " "+$stateParams.application + " " +
-                       $stateParams.tool + " " + $stateParams.clip_id);
-                      console.log($rootScope.preAuth);
+                      //promise chain - return a promise based on preAuth.  When preAuth is resolved, a new set of promises is set off
                       return $rootScope.preAuth.then(function(auth){
                         $rootScope.auth = auth;
                         if ($stateParams.location == "external") {
+                          //clips is expected to be an array, so we use $q.all which will return an array of length 1, this clip
                           return $q.all([Hub.one($stateParams.owner)
                             .one($stateParams.application)
                             .one($stateParams.tool)
                             .one($stateParams.clip_id).get(auth)]);
                         } else {
+                          //clips is expected to be an array, so we use $q.all which will return an array of length 1, this clip
                           return $q.all([Local.one($stateParams.owner)
                             .one($stateParams.application)
                             .one($stateParams.tool)

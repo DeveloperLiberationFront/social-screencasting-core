@@ -136,8 +136,6 @@ define(['angular',
 
       $scope.clips = clips;
       $scope.clip = clips[0];
-      console.log(clips);
-      console.log(clips[0]);
       
       _.each(clips, function(clip) {
         clip.event_frames = [25]; //temporary
