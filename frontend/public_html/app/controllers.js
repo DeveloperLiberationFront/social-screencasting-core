@@ -43,11 +43,17 @@ define(['angular',
                     'player',
                    ])
 
-  .controller('NavCtrl', ['$scope', '$filter', '$q', 'Local', 'Hub',
-    function($scope, $filter, $q, Local, Hub) {
-        Local.one('user').get().then(function(user){
-            $scope.user = user;
-            $scope.auth = user.plain();
+  .controller('NavCtrl', ['$scope', '$filter', '$q', 'Local', 'Hub', "$rootScope",
+    function($scope, $filter, $q, Local, Hub, $rootScope) {
+      //$rootScope.auth = 
+      var deferredAuth = $q.defer();
+      $rootScope.preAuth = deferredAuth.promise;
+
+        Local.one('user').get().then(function(user){     
+            $rootScope.user = user;
+            $rootScope.auth = user.plain();
+            //allows us to use auth in routes, e.g. modal player
+            deferredAuth.resolve(user.plain());
         });
         Hub.one('details').getList().then(function(apps){
             $scope.applications = apps;
@@ -60,9 +66,9 @@ define(['angular',
               _.each(app.users, function(user) {
                 Hub.one(user.email).one(app.name).get($scope.auth).then(function(data) {
                   _.extend(user, data);
-                })
-              })
-            })
+                });
+              });
+            });
             $q.all({userTools: userTools, app: $scope.application})
                 .then(function(results){
                     _.each(results.app.tools, function(tool) {
@@ -115,8 +121,8 @@ define(['angular',
         return tool.users.length > 0 //tools must have at least one user
           && ($scope.filter.filters.length === 0 //all tools if no users selected
               || _.every($scope.filter.filters, function(user){ //or only tools with selected users
-                return _.find(tool.users, {email: user.email}) != null; 
-              }))
+                return _.find(tool.users, {email: user.email}) !== null; 
+              }));
       });
 
       $scope.removeFilter = function(filter) {

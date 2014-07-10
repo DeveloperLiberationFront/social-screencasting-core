@@ -137,6 +137,7 @@ define(['angular',
       $scope.clips = clips;
       $scope.clip = clips[0];
       console.log(clips);
+      console.log(clips[0]);
       
       _.each(clips, function(clip) {
         clip.event_frames = [25]; //temporary
@@ -144,7 +145,8 @@ define(['angular',
           frame: function(name){
             return clip.getRestangularUrl() + '/' + name + '?'+ $.param($scope.auth);
           },
-          thumbnail: clip.frames[Math.min(clip.event_frames[0],
+          thumbnail: clip.frames[Math.min(
+            (clip.event_frames.length > 0 ? clip.event_frames[0]: 25),   //adding backwards compatibility for older clips
                                           clip.frames.length-1)]
         });
       });

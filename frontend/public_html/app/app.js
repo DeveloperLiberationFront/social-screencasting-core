@@ -73,26 +73,23 @@ define(['angular',
                   resolve: {
                     clips: ['$q', function($q){
                       console.log($stateParams.location +" " + $stateParams.owner+ " "+$stateParams.application + " " +
-                       $stateParams.tool + " " + $stateParams.clip_id +" "+$rootScope.auth);
-                      if ($stateParams.location == "external") {
-                        return Hub.one($stateParams.owner)
-                                  .one($stateParams.application)
-                                  .one($stateParams.tool)
-                                  .one($stateParams.clip_id).get({
-                                    email:"kjlubick+test@ncsu.edu",
-                                    name:"Kevin Test",
-                                    token:"221ed3d8-6a09-4967-91b6-482783ec5313"
-                                  });
-                      } else {
-                          return Local.one($stateParams.owner)
-                                      .one($stateParams.application)
-                                      .one($stateParams.tool)
-                                      .one($stateParams.clip_id).get({
-                                          email:"kjlubick+test@ncsu.edu",
-                                          name:"Kevin Test",
-                                          token:"221ed3d8-6a09-4967-91b6-482783ec5313"
-                                      });
+                       $stateParams.tool + " " + $stateParams.clip_id);
+                      console.log($rootScope.preAuth);
+                      return $rootScope.preAuth.then(function(auth){
+                        $rootScope.auth = auth;
+                        if ($stateParams.location == "external") {
+                          return $q.all([Hub.one($stateParams.owner)
+                            .one($stateParams.application)
+                            .one($stateParams.tool)
+                            .one($stateParams.clip_id).get(auth)]);
+                        } else {
+                          return $q.all([Local.one($stateParams.owner)
+                            .one($stateParams.application)
+                            .one($stateParams.tool)
+                            .one($stateParams.clip_id).get(auth)]);
                         }
+                      });
+                      
                       
                     }]},
                     windowClass: 'modal-player',
