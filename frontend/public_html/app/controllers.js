@@ -91,7 +91,10 @@ define(['angular',
   .controller('MainCtrl', ['$scope',
     function($scope) {
       $scope.filters = {};
-      $scope.ordering = {};
+      $scope.ordering = {
+        field: "video",
+        reverse: true
+      };
     }])
 
   .controller('FilterCtrl', ['$scope', '$filter',
@@ -107,12 +110,12 @@ define(['angular',
   .controller('OrderCtrl', ['$scope',
     function($scope) {
       $scope.ordering.options = [
+        {name: "Name", field:"name"},
         {name: "Usages", field:"usages"},
         {name: "Unused", field:"unused"}, 
         {name: "Recommended", field:""}, 
         {name: "Video", field:"video"},
       ];
-      $scope.ordering.reverse = false;
     }])
 
   .controller('UserFilterCtrl', ['$scope',
@@ -194,21 +197,32 @@ define(['angular',
       };
     }])
 
-  .controller('ToolBlockCtrl', ['$scope',
-    function($scope) {
+  .controller('ToolBlockCtrl', ['$scope', '$state',
+    function($scope, $state) {
       onApp($scope, function(app) {
         var unused = $scope.tool.unused;
         app.one($scope.tool.name).get($scope.auth).then(function(tool) {
           $scope.tool = _.extend(tool, {unused: unused});
         });
-        // $scope.tool.users = _.map($scope.tool.users, function(user) {
-        //   return _.find($scope.application.$object.users, {email: user});
-        // });
       });
 
       $scope.details = function(user) {
         return _.find(user.tools, {name: $scope.tool.name});
       };
+
+      $scope.userVideo = function(user) {
+        var origin = (user.email == $scope.user.email ? 'local' : 'external');
+        if (user.video) {
+          $state.go('video', {
+            location: origin,
+            owner: user.email,
+            application: $scope.application.$object.name,
+            tool: $scope.tool.name
+          });
+        } else {
+          
+        }
+      }
     }])
 
   .controller('ToolUsersCtrl', ['$scope', '$modal',

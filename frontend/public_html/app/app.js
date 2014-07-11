@@ -30,10 +30,10 @@ define(['angular',
   
   .config(['$stateProvider','$urlRouterProvider',
     function($stateProvider, $urlRouterProvider) {
-//        $urlRouterProvider.otherwise('');
+        $urlRouterProvider.otherwise('/');
         $stateProvider
             .state('main', {
-                url: "",
+                url: "/",
                 templateUrl: 'partials/main.html',
                 views: {
                   'left-sidebar': {
@@ -61,44 +61,40 @@ define(['angular',
                 breadcrumb: { title: '{clip.name}' }
             })
             .state('video', {
-              url: '/video/:location/:owner/:application/:tool/:clip_id',
+              url: '/video/:location/:owner/:application/:tool?clip_id',
               onEnter: function($stateParams, $state, $modal, $rootScope, Hub, Local) {
-                $modal.open({
-                  templateUrl: 'partials/modal-player.html',
-                  controller: 'ModalPlayer',
-                  scope: $rootScope,
-                  resolve: {
-                    clips: ['$q', function($q){
-                      //promise chain - return a promise based on preAuth.  When preAuth is resolved, a new set of promises is set off
-                      return $rootScope.preAuth.then(function(auth){
-                        $rootScope.auth = auth;
-                        if ($stateParams.location == "external") {
-                          //clips is expected to be an array, so we use $q.all which will return an array of length 1, this clip
-                          return $q.all([Hub.one($stateParams.owner)
-                            .one($stateParams.application)
-                            .one($stateParams.tool)
-                            .one($stateParams.clip_id).get(auth)]);
-                        } else {
-                          //clips is expected to be an array, so we use $q.all which will return an array of length 1, this clip
-                          return $q.all([Local.one($stateParams.owner)
-                            .one($stateParams.application)
-                            .one($stateParams.tool)
-                            .one($stateParams.clip_id).get(auth)]);
-                        }
-                      });
-                      
-                      
-                    }]},
-                    windowClass: 'modal-player',
+                var origin = ($stateParams.location == "external" ? Hub : Local);
+                var tool = origin.one($stateParams.owner)
+                  .one($stateParams.application)
+                  .one($stateParams.tool);
+                
+                $rootScope.preAuth.then(function(auth){
+                  $rootScope.auth = auth;
+                  return tool.get(auth);
+                }).then(function(tool) {
+                  return _.union(tool.keyclips, tool.guiclips);
+                }).then(function(clips) {
+                  $modal.open({
+                    templateUrl: 'partials/modal-player.html',
+                    controller: 'ModalPlayer',
+                    scope: $rootScope,
+                    resolve: {
+                      clip_id: function(){return typeof clip_id == 'string' ? clip_id : false; },
+                      clips: ['$q', function($q){
+                        //fetch all of the users clips for use in the player
+                        return $q.all(clips.map(function(clip) {
+                          return tool.one(clip).get($rootScope.auth);
+                        }));
+                      }]
+                    },
+                    windowClass: (clips.length > 1 ? 'modal-multiclip-player'
+                                  : 'modal-player'),
                     size: 'lg'
-                  }).result.then(function(result) {
-                    console.log("In the then of the modal");
-                    if (result) {
-                      return $state.transitionTo("items");
-                    }
+                  }).result.finally(function(result) {
+                    return $state.transitionTo("main");
                   });
-                }
-              })
+                });
+              }})
             .state('status', {
                 url: '/status',
                 templateUrl: 'partials/status.html',
