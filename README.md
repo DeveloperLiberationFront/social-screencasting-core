@@ -9,3 +9,11 @@
 6. Browse to the folder /src/etc and make a copy of log4j.settings.default.  Change this name to log4j.settings.  This will affect the logging habits of your build.  Feel free to change the .settings file as it is ignored by source control.  If you need to set up logging in code (for example, if you make your own main method in a new class), call `TestingUtils.makeSureLoggingIsSetUp();` to load the settings file.
 7. Run edu.ncsu.lubick.Runner to test everything is set up well.
 
+###Setting up Web Development###
+If you will be interacting with the front end, you'll need to do a bit more setup.  We use [Bower](http://bower.io/) to manage our dependencies for things like [Angular.js](https://angularjs.org/), [JQuery](http://jquery.com/), [Bootstrap](http://getbootstrap.com/), etc.  Bower uses git to fetch dependencies, so you'll need to:
+1. Install [git](http://git-scm.com/downloads).  Remember to add this to your path and restart all shells to get git in there.
+2. Install [Node.js](http://nodejs.org/). This should include npm, the node package manager. Remember to add node and npmp to your path and restart all shells.
+3. Install Bower by running `npm install -g bower` in a command line.
+4. Navigate the shell to your folder from the earlier step 2 (screencasting) and then cd ../src/frontend/public_html.  
+5. Execute `bower install`.  This will download all the dependencies from the bower.json file.  This may take a while.
+6. Refresh your ScreencastingLocalHub project in Eclipse.  If you already have a server running, it should be smart enough to get the new files.  Otherwise, open up chrome dev tools and enable Settings>Disable cache when DevTools is open, then hit Ctrl+F5 to force a full refresh.
