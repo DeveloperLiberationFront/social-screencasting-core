@@ -127,15 +127,15 @@ define(['angular',
         };
     }])
 
-  .controller('ModalPlayer', ['$scope', '$modalInstance', 'clips',
-    function($scope, $modalInstance, clips) {
+  .controller('ModalPlayer', ['$scope', '$modalInstance', 'clips', 'clip_id',
+    function($scope, $modalInstance, clips, clip_id) {
       //tool is a restangular object
       $scope.close = function () {
-        $modalInstance.close();
+        $modalInstance.close(true);
       };
 
       $scope.clips = clips;
-      $scope.clip = clips[0];
+      $scope.clip = (clip_id ? _.find(clips, {name: clip_id}) : clips[0]);
       
       _.each(clips, function(clip) {
         clip.event_frames = [25]; //temporary

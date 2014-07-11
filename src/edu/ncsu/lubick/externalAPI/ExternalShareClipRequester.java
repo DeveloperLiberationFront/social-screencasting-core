@@ -101,7 +101,8 @@ public class ExternalShareClipRequester {
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
 		//UserManager userManager = new UnitTestUserManager("Test User", "test@mailinator.com", "123");
-		UserManager userManager = new UnitTestUserManager("Kevin Test", "kjlubick+test@ncsu.edu", "221ed3d8-6a09-4967-91b6-482783ec5313");
+		//UserManager userManager = new UnitTestUserManager("Kevin Test", "kjlubick+test@ncsu.edu", "221ed3d8-6a09-4967-91b6-482783ec5313");
+		UserManager userManager = new UnitTestUserManager("Samuel Test", "schrist+test@ncsu.edu", "24B650D0-B037-11E3-A27B-5C16F148AC65");
 		
 		ExternalShareClipRequester sharer = new ExternalShareClipRequester(userManager);
 		

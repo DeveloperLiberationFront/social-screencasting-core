@@ -140,7 +140,7 @@ slider span.bar {
 }
 
 /* close button */
-.modal-content > button {
+.modal-content > button.close {
     /* margin: 10px; */
     position: absolute;
     top: 6px;

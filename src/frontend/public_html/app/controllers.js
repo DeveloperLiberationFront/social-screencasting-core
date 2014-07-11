@@ -91,7 +91,10 @@ define(['angular',
   .controller('MainCtrl', ['$scope',
     function($scope) {
       $scope.filters = {};
-      $scope.ordering = {};
+      $scope.ordering = {
+        field: "video",
+        reverse: true
+      };
     }])
 
   .controller('FilterCtrl', ['$scope', '$filter',
@@ -107,12 +110,12 @@ define(['angular',
   .controller('OrderCtrl', ['$scope',
     function($scope) {
       $scope.ordering.options = [
+        {name: "Name", field:"name"},
         {name: "Usages", field:"usages"},
         {name: "Unused", field:"unused"}, 
         {name: "Recommended", field:""}, 
         {name: "Video", field:"video"},
       ];
-      $scope.ordering.reverse = false;
     }])
 
   .controller('UserFilterCtrl', ['$scope',
@@ -194,84 +197,36 @@ define(['angular',
       };
     }])
 
-  .controller('ToolBlockCtrl', ['$scope',
-    function($scope) {
+  .controller('ToolBlockCtrl', ['$scope', '$state',
+    function($scope, $state) {
       onApp($scope, function(app) {
         var unused = $scope.tool.unused;
         app.one($scope.tool.name).get($scope.auth).then(function(tool) {
           $scope.tool = _.extend(tool, {unused: unused});
         });
-        // $scope.tool.users = _.map($scope.tool.users, function(user) {
-        //   return _.find($scope.application.$object.users, {email: user});
-        // });
       });
 
       $scope.details = function(user) {
         return _.find(user.tools, {name: $scope.tool.name});
       };
-    }])
 
-  .controller('ToolUsersCtrl', ['$scope', '$modal',
-    function($scope, $modal) {
-        //$scope.selection
-        $scope.gridOptions = {
-            data: 'tool.$object.users',
-            multiSelect: false,
-            columnDefs: [{field:'name', displayName:'Name'},
-                         {field:'email', displayName:'Email'},
-                         {field:'usages', displayName:'Usages'},
-                         fieldDefs.video],
-            afterSelectionChange: function(row) {
-                if (row && row.entity && row.selected) {
-                    var user = row.entity;
-                    var userClips = _.where($scope.tool.$object.clips, {creator: user.email});
-                    if (userClips.length > 0) {
-                        $modal.open({
-                            templateUrl: 'partials/modal-player.html',
-                            controller: 'ModalPlayer',
-                            scope: $scope,
-                            resolve: {
-                              clips: ['$q', function($q){
-                                return $q.all(
-                                  userClips.map(function(clip) {
-                                    return $scope.tool.$object.one(clip.name).get($scope.auth);
-                                  })
-                                );
-                            }]},
-                            windowClass: (userClips.length > 1 ? 'modal-multiclip-player'
-                                          : 'modal-player'),
-                            size: 'lg'
-                        });
-                    }
-                }
-            }
-        };
-    }])
-
-  .controller('ApplicationToolsCtrl', ['$scope', '$modal', '$state', 'Local', 'Hub',
-    function($scope, $modal, $state, Tool) {
-        $scope.selection = [];
-        $scope.gridOptions = {
-            data: 'application.$object.tools',
-            selectedItems: $scope.selection,
-            multiSelect: false,
-            columnDefs: [
-                { field:'name', displayName:'Name' },
-                fieldDefs['new'],
-                fieldDefs.video
-            ],
-            sortInfo: {
-                fields: ['new', 'video'],
-                directions: ['desc', 'desc']
-            },
-            afterSelectionChange: function() {
-                var s = $scope.selection;
-
-                if (s.length > 0) {
-                    $state.go('tools', {name: s[0].name});
-                }
-            }
-        };
+      $scope.userVideo = function(user) {
+        var origin = (user.email == $scope.user.email ? 'local' : 'external');
+        if (user.video) {
+          $state.go('main.video', {
+            location: origin,
+            owner: user.email,
+            application: $scope.application.$object.name,
+            tool: $scope.tool.name
+          });
+        } else {
+          $state.go('main.request', {
+            owner: user.email,
+            application: $scope.application.$object.name,
+            tool: $scope.tool.name
+          });
+        }
+      }
     }])
 
   .controller('DropdownCtrl', ['$scope', '$rootScope',
@@ -289,7 +244,7 @@ define(['angular',
     $scope.received = [{}];
     $scope.sent = [{}];
 
-    Hub.one("notifications").get($scope.auth).then(function(data){
+    Hub.one("notifications").withHttpConfig({cache:false}).get($scope.auth).then(function(data){
       console.log(data.plain());
       $scope.sent = data.sent;
       $scope.received = _.filter(data.received, function(item) { 
@@ -330,16 +285,7 @@ define(['angular',
           return item.id == request.id;
         });
 
-        //$http.delete("http://screencaster-hub.appspot.com/api/notifications/"+request.id+"?email="+
-        //  encodeURIComponent($scope.auth.email)+"&name="+encodeURIComponent($scope.auth.name)+"&token="+encodeURIComponent($scope.auth.token));
-        // $.ajax({
-        //   type:"DELETE",
-        //   url:"http://screencaster-hub.appspot.com/api/notifications/"+request.id,
-        //   data: $scope.auth,
-        //   dataType: "html"
-        // });
         Hub.one("notifications").one(""+request.id).remove($scope.auth);
-
     };
 
 
@@ -387,6 +333,20 @@ define(['angular',
     });
   }])
 
+.controller('RequestCtrl', ['$scope', '$modalInstance', '$stateParams', 'Hub',
+  function($scope, $modalInstance, $stateParams, Hub) {
+    $scope.request = function(user) {
+      _.extend(Hub.one('request-share'), {
+        plugin: $stateParams.application,
+        tool: $stateParams.tool,
+        creator: $stateParams.owner
+      }).put($scope.auth);
+      $modalInstance.close();
+    }
+
+    $scope.cancel = $modalInstance.close;
+  }])
+
   .controller('ShareDropDownCtrl', ['$scope',
     function($scope) {
 
@@ -426,15 +386,12 @@ define(['angular',
 
       //Go fetch all the clips
       toolEnd.get().then(function(tool) {
-          //console.log(tool.plain());
           for (var i in tool.keyclips) {
               $scope.clips.push({clipId: tool.keyclips[i], toDisplay: "Example "+(+i+1)+" using Keyboard" });
           }
           for (i in tool.guiclips) {
               $scope.clips.push({clipId: tool.guiclips[i], toDisplay: "Example "+(+i+1)+" using GUI"});
           }
-          //console.log($scope.clips);
-
         });
 
       $scope.clips = [];
@@ -496,29 +453,6 @@ define(['angular',
             });
 
           };
-          // $scope.fakeAuth = {email:"test@mailinator.com",
-          //       name:"Test User",
-          //       token:"123"};
-
-          // console.log("testing updating notification");
-          // var put = Hub.one("notifications").one("5715999101812736");
-          // put.get($scope.fakeAuth).then(function(notification){
-          //   if (notification.type == "request_fulfilled") {
-          //     //add this shared video to the list
-          //     var json = JSON.parse(notification.status);
-          //     json.video_id.push("Eclipse793bcb61-b7c9-31d2-b20e-af103c38d83bG");
-          //     put.notification = {status: JSON.stringify(json)};
-          //     console.log("putting to array");
-          //     put.put($scope.fakeAuth);
-          //   }
-          //   else {
-          //     //mark this notification as responded, and make the status a hash with an array of clip ids
-          //     put.notification = {status:JSON.stringify({video_id:["Eclipse793bcb61-b7c9-31d2-b20e-af103c38d83bG"]}), type:"request_fulfilled"};
-          //     console.log("putting first video id");
-          //     put.put($scope.fakeAuth);
-          //   }
-          // });
-
 
           $scope.toggled = function($event) {
             $event.preventDefault();
