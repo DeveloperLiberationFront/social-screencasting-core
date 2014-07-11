@@ -143,8 +143,7 @@ define(['angular',
           frame: function(name){
             return clip.getRestangularUrl() + '/' + name + '?'+ $.param($scope.auth);
           },
-          thumbnail: clip.frames[Math.min(
-            (clip.event_frames.length > 0 ? clip.event_frames[0]: 25),   //adding backwards compatibility for older clips
+          thumbnail: clip.frames[Math.min(clip.event_frames[0],
                                           clip.frames.length-1)]
         });
       });

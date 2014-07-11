@@ -9,7 +9,7 @@ define(['angular', 'ng-resource', 'restangular'], function (ng) {
 
     .factory('Hub', ['Restangular', function(Restangular) {
       return Restangular.withConfig(function(RestangularConfigurer) {
-        RestangularConfigurer.setBaseUrl('http://screencaster-hub.appspot.com/api');
+        RestangularConfigurer.setBaseUrl('http://recommender.oscar.ncsu.edu/api/v1');
       });
     }])
 });

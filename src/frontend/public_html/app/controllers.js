@@ -211,8 +211,9 @@ define(['angular',
       };
 
       $scope.userVideo = function(user) {
-        var origin = (user.email == $scope.user.email ? 'local' : 'external');
-        if (user.video) {
+        var self = (user.email == $scope.user.email)
+        var origin = (self ? 'local' : 'external');
+        if (user.video || self) {
           $state.go('main.video', {
             location: origin,
             owner: user.email,
