@@ -1,0 +1,168 @@
+.newTool { /* For marking tools in the comparison table that have not yet been used by the viewer */
+	background-color: #baeec8;
+}
+
+/* Bootstrap stuff */
+.container {
+	text-align: center;
+	width: 100%;
+}
+
+.container-fluid {
+    padding-top: 65px;
+}
+
+/* tool tables */
+.gridStyle {
+    border: 1px solid rgb(212,212,212);
+    width: 400px;
+    height: 500px;
+}
+
+#main {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+}
+
+#main > div {
+    flex: 0 1 auto;
+    margin: 0 15px 15px 0;
+}
+
+#main > .center {
+    max-width: 800px;
+    flex: 1 1 250px;
+}
+
+#tool-view {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: start;
+}
+
+#tool-view > div {
+    flex: 0 1 auto;
+    margin: 0 15px 15px 0;
+}
+
+.text-muted {
+    font-size: 10px;
+    vertical-align: middle;
+}
+
+.active > a > .text-muted {
+    color: #E5E5E5
+}
+
+.composite-input {
+    position: relative;
+}
+
+.clearable {
+    padding-right: 24px;
+}
+
+.composite-input .clear {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    z-index: 2;
+}
+
+.input-group .composite-input:not(:first-child) .form-control {
+    border-radius: 0px 4px 4px 0px;
+}
+
+.group-heading {
+    color: #333;
+    background-color: #f5f5f5;
+    border-color: #ddd;
+    background-image: linear-gradient(to bottom, #f5f5f5 0%, #e8e8e8 100%);
+    background-repeat: repeat-x;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.panel-heading + .list-group ng-include:not(:first-child) .list-group-item {
+    border-top-width: 1px;
+}
+
+#filter-bar {
+    width: 250px;
+}
+
+.filter-item {
+    margin: 10px 0px;
+}
+.filter-item > span {
+    max-width: 200px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.tool-block {
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+.tool-block > * {
+    flex: 1 1 auto;
+}
+
+.tool-header {
+    display: flex;
+    flex-flow: row nowrap;
+    
+}
+
+.tool-header > * {
+    flex: 1 1 auto;
+}
+
+.tool-statuses {
+    flex: 0 1 80px;
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+.tool-users {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.tool-users > ul {
+    flex: 1 1 100px;
+}
+
+.tool-users > span{
+    flex: 0 1 65px;
+}
+
+.caret.reverse {
+    border-bottom: 4px solid;
+    border-top: 0 none;
+}
+
+.unselectable,
+.unselectable * {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+#filter-bar li.ordering {
+    padding: 0px;
+}
+
+#filter-bar .ordering ul {
+    margin: 0px;
+}

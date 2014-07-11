@@ -1,0 +1,20 @@
+#crop {
+	position:absolute;
+	width:100px;
+	height:100px;
+	top:50px;
+	left:50px;
+	border: 1px solid black;
+	/*z-index: 10;*/
+}
+
+#cropBack {
+	position: absolute;
+	top:0;
+	left:0;
+	right:0;
+	bottom:0;
+	background:#000;
+	opacity: .5;
+
+}

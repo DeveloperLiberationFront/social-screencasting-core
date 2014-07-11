@@ -1,0 +1,30 @@
+
+<div>
+     <h2>Requests you have made</h2>
+     <ul id="requestList" class="list-group">
+        <li ng-repeat="request in sent" ng-attr-title="Created: {{request.created | date : 'medium'}} Last updated: {{request.updated | date : 'medium'}}" class="list-group-item">
+        <span class="badge deleteNotification" ng-click="deleteRequest(request)">Delete</span>
+            <span ng-if="getBadgeText(request) !== undefined" class="badge">{{getBadgeText(request)}}</span>
+            {{request.message}}
+            
+
+
+            <ul ng-show="request.shared_videos.length > 0">
+            <li ng-repeat="shared_video in request.shared_videos track by $index">
+                <a ng-href="{{shared_video}}">{{"Example " +($index +1)}}</a>
+                </li>
+            </ul>
+
+        </li>
+     </ul>
+
+     <h2>Notifications for you</h2>
+     <ul id="notificationList" class="list-group">
+        <li ng-repeat="request in received" ng-attr-title="Created: {{request.created | date : 'medium'}} Last updated: {{request.updated | date : 'medium'}}" class="list-group-item">
+        <span ng-if="getBadgeText(request) !== undefined" class="badge">{{getBadgeText(request)}}</span>
+        {{request.message}}
+
+        <a ng-if="getShareLink(request) !== undefined" ng-href="{{getShareLink(request)}}">Respond</a>
+        </li>
+     </ul>
+</div>

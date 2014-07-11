@@ -1,0 +1,11 @@
+<div id='filter-bar' class="panel panel-default">
+  <div class="panel-heading">Filter</div>
+  <ul class="list-group">
+    <ng-include src="'partials/typeahead-filter.html'"  ng-controller='UserFilterCtrl'>
+    </ng-include>
+    <ng-include src="'partials/typeahead-filter.html'" ng-controller='ToolFilterCtrl'>
+    </ng-include>
+    <ng-include src="'partials/ordering.html'" ng-controller='OrderCtrl'>
+    </ng-include>
+  </ul>
+</div>

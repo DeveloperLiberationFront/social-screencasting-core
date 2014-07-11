@@ -1,0 +1,13 @@
+<li class="list-group-item group-heading">
+  Ordering
+</li>
+<li class="list-group-item ordering">
+  <ul class='list-group unselectable pointer'>
+    <li ng-repeat='option in ordering.options' class='list-group-item'
+        ng-click='ordering.field=option.field; ordering.reverse = !ordering.reverse'>
+      {{option.name}}
+      <span class='caret' ng-class='{reverse: !ordering.reverse}'
+            ng-show='ordering.field == option.field'>
+    </li>
+  </ul>
+</li>
