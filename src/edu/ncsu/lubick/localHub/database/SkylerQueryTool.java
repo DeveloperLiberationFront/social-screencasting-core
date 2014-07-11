@@ -2,6 +2,7 @@ package edu.ncsu.lubick.localHub.database;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import org.apache.http.HttpResponse;
@@ -9,14 +10,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 
 
 /**
@@ -61,7 +61,7 @@ public class SkylerQueryTool extends Thread {
 
 		_efProperties = new java.util.Properties();
 		try {
-			java.io.InputStream propStream = SkylerQueryTool.class.getResourceAsStream(DEFAULT_PROPERTIES_FILE);
+			InputStream propStream = SkylerQueryTool.class.getResourceAsStream(DEFAULT_PROPERTIES_FILE);
 			if (propStream != null) {
 				_efProperties.load(propStream);
 				logger.info("Loaded SkylerQueryTool properties file from default location: "+DEFAULT_PROPERTIES_FILE);  
@@ -222,10 +222,7 @@ public class SkylerQueryTool extends Thread {
 	}
 
     public static void main(String args[]) {
-    	BasicConfigurator.configure();
-    	logger.setLevel(Level.ALL);
-    	
-    	Logger.getLogger("org.apache.http").setLevel(org.apache.log4j.Level.WARN);
+    	TestingUtils.makeSureLoggingIsSetUp();
     	
     	SkylerQueryTool sqt = new SkylerQueryTool();
     	

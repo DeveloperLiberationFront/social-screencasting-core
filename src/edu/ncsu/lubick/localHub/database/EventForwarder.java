@@ -2,25 +2,28 @@ package edu.ncsu.lubick.localHub.database;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.UnknownHostException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 
 
 /**
@@ -97,7 +100,7 @@ public class EventForwarder extends Thread {
 
 		_efProperties = new java.util.Properties();
 		try {
-			java.io.InputStream propStream = EventForwarder.class.getResourceAsStream(DEFAULT_PROPERTIES_FILE);
+			InputStream propStream = EventForwarder.class.getResourceAsStream(DEFAULT_PROPERTIES_FILE);
 			if (propStream != null) {
 				_efProperties.load(propStream);
 				logger.info("Loaded EventForwarder properties file from default location: "+DEFAULT_PROPERTIES_FILE);  
@@ -366,6 +369,7 @@ public class EventForwarder extends Thread {
      * 
      * The ordering of the destination
 	 */
+	@Override
 	public void run() {
  
     	while (true) {
@@ -486,10 +490,7 @@ public class EventForwarder extends Thread {
     }
 
     public static void main(String args[]) {
-    	BasicConfigurator.configure();
-    	logger.setLevel(Level.ALL);
-    	
-    	Logger.getLogger("org.apache.http").setLevel(org.apache.log4j.Level.WARN);
+    	TestingUtils.makeSureLoggingIsSetUp();
     	
     	EventForwarder ef = new EventForwarder();
     	
@@ -538,7 +539,7 @@ public class EventForwarder extends Thread {
 		catch (UnknownHostException uhe) {
 			contentObject.put("NetAddr", "0.0.0.0");
 		}
-		contentObject.put("EvtType", toolUsage.getToolKeyPresses().equals("[GUI]") ? "mouse event: button click" :  "keyboardevent:key press");
+		contentObject.put("EvtType", "[GUI]".equals(toolUsage.getToolKeyPresses()) ? "mouse event: button click" :  "keyboardevent:key press");
 		contentObject.put("EvtDesc", toolUsage.getToolKeyPresses());
         contentObject.put("EvtAction", toolUsage.getToolName());
 		contentObject.put("AppData",appData);
