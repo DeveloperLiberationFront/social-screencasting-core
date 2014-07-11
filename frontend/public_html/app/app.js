@@ -60,7 +60,8 @@ define(['angular',
                 controller: 'PlayerCtrl',
                 breadcrumb: { title: '{clip.name}' }
             })
-            .state('video', {
+
+            .state('main.video', {
               url: '/video/:location/:owner/:application/:tool?clip_id',
               onEnter: function($stateParams, $state, $modal, $rootScope, Hub, Local) {
                 var origin = ($stateParams.location == "external" ? Hub : Local);
@@ -95,6 +96,19 @@ define(['angular',
                   });
                 });
               }})
+
+            .state('main.request', {
+                url: '/request/:owner/:application/:tool',
+                onEnter: function($stateParams, $state, $rootScope, $modal) {
+                  $modal.open({
+                    templateUrl: 'partials/request-share.html',
+                    controller: 'RequestCtrl',
+                    scope: $rootScope,
+                  }).result.finally(function(result) {
+                    return $state.transitionTo("main");
+                  });
+                }
+            })
             .state('status', {
                 url: '/status',
                 templateUrl: 'partials/status.html',
