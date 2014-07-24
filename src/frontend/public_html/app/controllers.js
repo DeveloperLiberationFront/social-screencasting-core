@@ -277,6 +277,7 @@ define(['angular',
       $scope.setApp = function(app) {
         $scope.status.isopen = false;
         $rootScope.$broadcast('appSelected', app);
+        $scope.$emit('instrumented', 'Changed Plugin', app);
       };
     }])
 
