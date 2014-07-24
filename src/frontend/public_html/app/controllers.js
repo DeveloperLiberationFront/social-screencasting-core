@@ -24,6 +24,15 @@ define(['angular',
       }
   };
 
+  function ToolUsage(toolName, keypress, otherInfo) {
+    //all the this.names are the same as on the server ToolStream.java
+    this.Tool_Name = toolName;
+    this.Tool_Key_Presses = keypress;
+    this.Tool_Class = otherInfo;
+    this.Tool_Timestamp = new Date().getTime();
+    this.Tool_Duration = 1000;    //duration doesn't matter
+  }
+
   function onApp($scope, callback) {
       var setHandler = function() {
         $scope.application.then(callback);
@@ -77,10 +86,34 @@ define(['angular',
                 });
         });
 
+        $scope.queuedToolUsages = [];
+
         $scope.$on('instrumented', function(e, event, info) {
           console.log(e);
           console.log(event);
           console.log(info);
+
+          info = info ? info : undefined;
+          $scope.queuedToolUsages.push(new ToolUsage(event, "[GUI]")); 
+
+          var toReport = JSON.stringify($scope.queuedToolUsages);
+          var oldUsages = [];
+          oldUsages.concat($scope.queuedToolUsages); //copy old ones in case error contacting server
+          $scope.queuedToolUsages = [];
+
+          $.ajax("http://localhost:4443/reportTool", {
+            type: "POST",
+            data: { pluginName: "[ScreencastingHub]",
+             toolUsages: toReport
+            },
+            error: function () {
+              console.error("There was a problem sending things to the server.  Most likely, the server was not up");
+              //stick the previously queued elements onto the end of the current
+              $scope.queuedToolUsages.concat(oldUsages);
+            }
+          });
+
+
         });
     }])
 
@@ -143,7 +176,7 @@ define(['angular',
           && ($scope.filter.filters.length === 0 //all tools if no users selected
               || _.every($scope.filter.filters, function(user){ //or only tools with selected users
                 return _.contains(tool.users, user.email); 
-              }))
+              }));
       });
 
       $scope.removeFilter = function(filter) {
@@ -217,7 +250,7 @@ define(['angular',
       };
 
       $scope.userVideo = function(user) {
-        var self = (user.email == $scope.user.email)
+        var self = (user.email == $scope.user.email);
         var origin = (self ? 'local' : 'external');
         if (user.video || self) {
           $state.go('main.video', {
@@ -233,7 +266,7 @@ define(['angular',
             tool: $scope.tool.name
           });
         }
-      }
+      };
     }])
 
   .controller('DropdownCtrl', ['$scope', '$rootScope',
@@ -247,7 +280,7 @@ define(['angular',
       };
     }])
 
-  .controller('StatusCtrl', ['$scope', 'Hub', '$http', function($scope, Hub, $http) {
+  .controller('StatusCtrl', ['$scope', 'Hub', '$http', function($scope, Hub) {
     
     $scope.$emit('instrumented', "View Status");
 
@@ -352,7 +385,7 @@ define(['angular',
         creator: $stateParams.owner
       }).put($scope.auth);
       $modalInstance.close();
-    }
+    };
 
     $scope.cancel = $modalInstance.close;
   }])
