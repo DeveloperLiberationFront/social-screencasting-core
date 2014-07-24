@@ -76,6 +76,12 @@ define(['angular',
                     });
                 });
         });
+
+        $scope.$on('instrumented', function(e, event, info) {
+          console.log(e);
+          console.log(event);
+          console.log(info);
+        });
     }])
 
   .controller('UserListCtrl', ['$scope',
@@ -242,6 +248,9 @@ define(['angular',
     }])
 
   .controller('StatusCtrl', ['$scope', 'Hub', '$http', function($scope, Hub, $http) {
+    
+    $scope.$emit('instrumented', "View Status");
+
     $scope.received = [{}];
     $scope.sent = [{}];
 

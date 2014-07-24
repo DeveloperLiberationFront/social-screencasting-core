@@ -39,6 +39,7 @@ public class HTTPServer {
 			userManager = um;
 		}
 		httpServer.underlyingServer = new Server(new InetSocketAddress("localhost", SERVER_PORT));
+		//httpServer.underlyingServer = new Server(SERVER_PORT);  this can be uncommented for dev
 		httpServer.underlyingServer.setHandler(HandlerManager.makeHandler(wqi));
 
 		try

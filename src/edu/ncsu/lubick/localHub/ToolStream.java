@@ -280,7 +280,7 @@ public class ToolStream {
 			return useID;
 		}
 
-		public void setUseID(String newUseID) {
+		public final void setUseID(String newUseID) {
 			this.useID = newUseID;
 		}		
 		

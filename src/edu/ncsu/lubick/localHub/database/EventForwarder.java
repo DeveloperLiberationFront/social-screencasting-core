@@ -304,9 +304,9 @@ public class EventForwarder extends Thread {
 		}
 		catch (Exception e) {
 			if (e.getMessage().contains("Connection refused")) {
-				throw new Exception("skylr down");
+				throw new Exception("skylr down", e);
 			}
-			logger.warn("Skylr - unable in find existing object  ("+ e.getMessage() +") - toolUsage use ID: "+toolUsage.getUseID());
+			logger.warn("Skylr - unable in find existing object - toolUsage use ID: "+toolUsage.getUseID(), e);
 			result = false;
 		}
 		postRequest.releaseConnection();
