@@ -6,4 +6,6 @@ public interface ExternalDBAbstraction {
 
 	void storeToolUsage(ToolUsage tu, String associatedPlugin);
 
+	void connect();
+
 }

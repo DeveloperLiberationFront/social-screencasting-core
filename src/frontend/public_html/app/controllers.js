@@ -86,6 +86,8 @@ define(['angular',
                 });
         });
 
+
+        //report interface usage to Local Hub
         $scope.queuedToolUsages = [];
 
         $scope.$on('instrumented', function(e, event, info) {

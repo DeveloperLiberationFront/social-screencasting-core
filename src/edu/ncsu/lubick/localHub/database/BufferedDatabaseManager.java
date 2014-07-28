@@ -52,6 +52,20 @@ public class BufferedDatabaseManager
 		
 		
 		startThreadPools();
+		
+		connectExternal();
+	}
+
+	private void connectExternal()
+	{
+		remoteThreadPool.execute(new Runnable() {
+			
+			@Override
+			public void run()
+			{
+				externalDB.connect();
+			}
+		});
 	}
 
 	// This is synchronized to appease FindBugs. I doubt this will ever be

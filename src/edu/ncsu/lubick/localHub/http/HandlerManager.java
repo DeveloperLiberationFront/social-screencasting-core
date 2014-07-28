@@ -75,8 +75,7 @@ public class HandlerManager
 
 	private static void makeAndAddHandlersForBrowsing(HandlerCollection h, WebQueryInterface wqi) throws IOException, URISyntaxException
 	{
-		h.addHandler(new ToolComparisionHandler("/", wqi));
-		h.addHandler(new ToolComparisionHandler("/index", wqi));
+		h.addHandler(new IndexHandler());
 	}
 	
 	private static void makeAndAddHandlersForStatus(HandlerCollection h, WebQueryInterface wqi) throws IOException, URISyntaxException

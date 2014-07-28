@@ -37,6 +37,13 @@ public class ExternalDBFactory {
 		{
 			//This is a dummy implementation
 		}
+
+		@Override
+		public void connect()
+		{
+			//This is a dummy implementation
+			
+		}
 		
 	}
 	

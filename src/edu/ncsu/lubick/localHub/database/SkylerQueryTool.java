@@ -32,7 +32,7 @@ import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
  * History:
  * 20140701	Slankas	Initial version feature complete.
  * 
- * Posible future enhancements:
+ * Possible future enhancements:
  * - Should use the build pattern to build up a query object, then apply the wrapper and send to skylr
  */
 public class SkylerQueryTool extends Thread {

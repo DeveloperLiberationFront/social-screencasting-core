@@ -48,7 +48,7 @@ public class RemoteMySQLDatabase implements ExternalDBAbstraction {
 			throw new DBAbstractionException("Could not find driver for MySQLDatabase", e);
 		}
 		loadQueuedStatements();
-		maybeTryConnectionReset();
+		
 	}
 
 	private void loadDatabaseDriver() throws ClassNotFoundException
@@ -276,6 +276,12 @@ public class RemoteMySQLDatabase implements ExternalDBAbstraction {
 			logger.error("Problem validating connection", e);
 			return false;
 		}
+	}
+
+	@Override
+	public void connect()
+	{
+		maybeTryConnectionReset();
 	}
 
 }
