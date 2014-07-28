@@ -184,6 +184,17 @@ define(['angular',
     function($scope, $stateParams) {
       onApp($scope, function(app) {
           $scope.filter.source = ng.copy(app.users);
+          //update any placeholders
+          console.log(app.users);
+          for(var i in $scope.filter.filters) {
+            var oldUser = $scope.filter.filters[i];
+            if (oldUser.needsRefresh) {
+              var fullUsers = _.where(app.users, {email:oldUser.email});
+              if (fullUsers.length !== 0) {
+                $scope.filter.filters[i] = fullUsers[0];
+              }
+            }
+          }
         });
 
       console.log($stateParams);
@@ -201,7 +212,7 @@ define(['angular',
         //treats it as if the query params were &tool=foo,bar
         var users = $stateParams.user_filter.split(",");
         for (var i in users) {
-          $scope.filter.filters.push({email: users[i]});
+          $scope.filter.filters.push({name: users[i], email: users[i], needsRefresh:true});
         }
       }
 
@@ -222,6 +233,7 @@ define(['angular',
       $scope.addFilter = function(input){
         if (input && !_.contains($scope.filter.filters, input)) {
           $scope.filter.filters.push(input);
+          console.log(input);
           appendQueryParam("user_filter",input.email);
         }
         $scope.filter.input = null;
