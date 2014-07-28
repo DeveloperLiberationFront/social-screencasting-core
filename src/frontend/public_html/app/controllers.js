@@ -35,7 +35,7 @@ define(['angular',
     this.Tool_Duration = 1000;    //duration doesn't matter
   }
 
-  function onApp($scope, callback) {
+  function onJSONFetched($scope, callback) {
       var setHandler = function() {
         $scope.application.then(callback);
       };
@@ -182,7 +182,7 @@ define(['angular',
 
   .controller('UserFilterCtrl', ['$scope','$stateParams',
     function($scope, $stateParams) {
-      onApp($scope, function(app) {
+      onJSONFetched($scope, function(app) {       //previously known as onApp()
           $scope.filter.source = ng.copy(app.users);
           //update any placeholders
           console.log(app.users);
@@ -242,7 +242,7 @@ define(['angular',
 
   .controller('ToolFilterCtrl', ['$scope','$stateParams',
     function($scope, $stateParams) {
-      onApp($scope, function(app) {
+      onJSONFetched($scope, function(app) {
           $scope.filter.source = _.filter(ng.copy(app.tools), function(tool) {
             return tool.users.length > 0;
           });
@@ -286,7 +286,7 @@ define(['angular',
 
   .controller('ToolListCtrl', ['$scope',
     function($scope) {
-      onApp($scope, function(app) {
+      onJSONFetched($scope, function(app) {
           $scope.tools = app.tools;
         });
 
@@ -298,7 +298,7 @@ define(['angular',
 
   .controller('ToolBlockCtrl', ['$scope', '$state',
     function($scope, $state) {
-      onApp($scope, function(app) {
+      onJSONFetched($scope, function(app) {
         var unused = $scope.tool.unused;
         app.one($scope.tool.name).get($scope.auth).then(function(tool) {
           $scope.tool = _.extend(tool, {unused: unused});
@@ -432,7 +432,7 @@ define(['angular',
 
 .controller('ToolCtrl', ['$scope', '$stateParams',
   function($scope, $stateParams) {
-    onApp($scope, function(app) {
+    onJSONFetched($scope, function(app) {
       $scope.tool = app.one($stateParams.name).get($scope.auth);
     });
   }])
