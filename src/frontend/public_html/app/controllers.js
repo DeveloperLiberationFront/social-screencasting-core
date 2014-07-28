@@ -45,14 +45,15 @@ define(['angular',
       $scope.$on('appSelected', setHandler);
   }
 
-  function appendQueryParam(param) {
+  function appendQueryParam(key, param) {
     var qMark = (window.location.href.indexOf("?") == -1 ? "?" : "&");
 
-    window.location.href = window.location.href + qMark+ encodeURI(param);
+    window.location.href = window.location.href + qMark + encodeURIComponent(key)+ 
+                            "="+encodeURIComponent(param);
   }
 
-  function removeQueryParam(param) {
-    var toRemove = encodeURI(param);
+  function removeQueryParam(key, param) {
+    var toRemove = encodeURIComponent(key)+"="+encodeURIComponent(param);
     //removes one instance of toRemove
     window.location.href = window.location.href.replace(toRemove, "").replace(/&+/g, "&").replace("?&","?");
 
@@ -157,9 +158,8 @@ define(['angular',
       };
     }])
 
-  .controller('FilterCtrl', ['$scope', '$filter', '$stateParams',
-    function($scope, $filter, $stateParams) {
-      console.log($stateParams);
+  .controller('FilterCtrl', ['$scope', '$filter',
+    function($scope, $filter) {
       $scope.filterSet = { filters: [] }; //list of (tool) -> bool
 
       $scope.filters.toolFilter = function(tool) {
@@ -196,6 +196,15 @@ define(['angular',
         templateUrl: 'partials/user-list-item.html'
       };
 
+      if ($stateParams.user_filter) {
+        //ui-router does not turn &tool=foo&tool=bar into [foo,bar] as you might expect, but
+        //treats it as if the query params were &tool=foo,bar
+        var users = $stateParams.user_filter.split(",");
+        for (var i in users) {
+          $scope.filter.filters.push({email: users[i]});
+        }
+      }
+
       $scope.filterSet.filters.push(function(tool) {
         return tool.users.length > 0 //tools must have at least one user
           && ($scope.filter.filters.length === 0 //all tools if no users selected
@@ -206,12 +215,14 @@ define(['angular',
 
       $scope.removeFilter = function(filter) {
         _.pull($scope.filter.filters, filter);
-        
+        console.log(filter);
+        removeQueryParam("user_filter",filter.email);
       };
 
       $scope.addFilter = function(input){
         if (input && !_.contains($scope.filter.filters, input)) {
           $scope.filter.filters.push(input);
+          appendQueryParam("user_filter",input.email);
         }
         $scope.filter.input = null;
       };
@@ -232,12 +243,11 @@ define(['angular',
         filters: [],
         templateUrl: ''
       };
-
-      console.log($stateParams);
-
       
-      if ($stateParams.tools) {
-        var tools = $stateParams.tools.split(",");
+      if ($stateParams.tool_filter) {
+        //ui-router does not turn &tool=foo&tool=bar into [foo,bar] as you might expect, but
+        //treats it as if the query params were &tool=foo,bar
+        var tools = $stateParams.tool_filter.split(",");
         for (var i in tools) {
           $scope.filter.filters.push({name: tools[i]});
         }
@@ -250,15 +260,13 @@ define(['angular',
 
       $scope.removeFilter = function(filter) {
         _.pull($scope.filter.filters, filter);
-        console.log(filter);
-        removeQueryParam("tools="+filter.name);
+        removeQueryParam("tool_filter",filter.name);
       };
 
       $scope.addFilter = function(input){
         if (input && !_.contains($scope.filter.filters, input)) {
-          console.log(input);
           $scope.filter.filters.push(input);
-          appendQueryParam("tools="+input.name);
+          appendQueryParam("tool_filter",input.name);
         }
         $scope.filter.input = null;
       };

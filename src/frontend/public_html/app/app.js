@@ -34,7 +34,7 @@ define(['angular',
         $urlRouterProvider.otherwise('/');
         $stateProvider
             .state('main', {
-                url: "/?users&tools",
+                url: "/?user_filter&tool_filter", //can't call it tool because tool already used in video player
                 views: {
                   'left-sidebar': {
                     templateUrl: 'partials/filter.html',
