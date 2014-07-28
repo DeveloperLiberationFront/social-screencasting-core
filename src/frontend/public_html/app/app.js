@@ -1,3 +1,4 @@
+/*global define, _*/
 define(['angular',
         'ng-route',
         'controllers',
@@ -33,8 +34,7 @@ define(['angular',
         $urlRouterProvider.otherwise('/');
         $stateProvider
             .state('main', {
-                url: "/",
-                templateUrl: 'partials/main.html',
+                url: "/?users&tools",
                 views: {
                   'left-sidebar': {
                     templateUrl: 'partials/filter.html',

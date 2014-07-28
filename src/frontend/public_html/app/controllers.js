@@ -1,3 +1,5 @@
+/*global define */
+
 define(['angular',
         'jquery',
         'lodash',
@@ -41,6 +43,23 @@ define(['angular',
         setHandler();
       }
       $scope.$on('appSelected', setHandler);
+  }
+
+  function appendQueryParam(param) {
+    var qMark = (window.location.href.indexOf("?") == -1 ? "?" : "&");
+
+    window.location.href = window.location.href + qMark+ encodeURI(param);
+  }
+
+  function removeQueryParam(param) {
+    var toRemove = encodeURI(param);
+    //removes one instance of toRemove
+    window.location.href = window.location.href.replace(toRemove, "").replace(/&+/g, "&").replace("?&","?");
+
+    //remove question mark if it's the last thing
+    if (window.location.href.indexOf("?") == window.location.href.length - 1) {
+      window.location.href = window.location.href.substring(0, window.location.href.length - 1);
+    }
   }
 
   return ng.module('socasterControllers',
@@ -138,9 +157,11 @@ define(['angular',
       };
     }])
 
-  .controller('FilterCtrl', ['$scope', '$filter',
-    function($scope, $filter) {
+  .controller('FilterCtrl', ['$scope', '$filter', '$stateParams',
+    function($scope, $filter, $stateParams) {
+      console.log($stateParams);
       $scope.filterSet = { filters: [] }; //list of (tool) -> bool
+
       $scope.filters.toolFilter = function(tool) {
         return _.reduce($scope.filterSet.filters, function(accum, fn) {
           return accum && fn(tool);
@@ -159,11 +180,13 @@ define(['angular',
       ];
     }])
 
-  .controller('UserFilterCtrl', ['$scope',
-    function($scope) {
+  .controller('UserFilterCtrl', ['$scope','$stateParams',
+    function($scope, $stateParams) {
       onApp($scope, function(app) {
           $scope.filter.source = ng.copy(app.users);
         });
+
+      console.log($stateParams);
       
       $scope.filter = {
         name: 'User',
@@ -176,13 +199,14 @@ define(['angular',
       $scope.filterSet.filters.push(function(tool) {
         return tool.users.length > 0 //tools must have at least one user
           && ($scope.filter.filters.length === 0 //all tools if no users selected
-              || _.every($scope.filter.filters, function(user){ //or only tools with selected users
+              || _.every($scope.filter.filters, function(user){ //or only tools with all selected users
                 return _.contains(tool.users, user.email); 
               }));
       });
 
       $scope.removeFilter = function(filter) {
         _.pull($scope.filter.filters, filter);
+        
       };
 
       $scope.addFilter = function(input){
@@ -193,8 +217,8 @@ define(['angular',
       };
     }])
 
-  .controller('ToolFilterCtrl', ['$scope',
-    function($scope) {
+  .controller('ToolFilterCtrl', ['$scope','$stateParams',
+    function($scope, $stateParams) {
       onApp($scope, function(app) {
           $scope.filter.source = _.filter(ng.copy(app.tools), function(tool) {
             return tool.users.length > 0;
@@ -209,6 +233,16 @@ define(['angular',
         templateUrl: ''
       };
 
+      console.log($stateParams);
+
+      
+      if ($stateParams.tools) {
+        var tools = $stateParams.tools.split(",");
+        for (var i in tools) {
+          $scope.filter.filters.push({name: tools[i]});
+        }
+      }
+
       $scope.filterSet.filters.push(function(tool) {
         return $scope.filter.filters.length === 0 ||
           _.any($scope.filter.filters, {name: tool.name});
@@ -216,11 +250,15 @@ define(['angular',
 
       $scope.removeFilter = function(filter) {
         _.pull($scope.filter.filters, filter);
+        console.log(filter);
+        removeQueryParam("tools="+filter.name);
       };
 
       $scope.addFilter = function(input){
         if (input && !_.contains($scope.filter.filters, input)) {
+          console.log(input);
           $scope.filter.filters.push(input);
+          appendQueryParam("tools="+input.name);
         }
         $scope.filter.input = null;
       };
