@@ -74,38 +74,15 @@ define(['angular',
 
   .controller('NavCtrl', ['$scope', '$filter', '$q', 'Local', 'Hub', "$rootScope",
     function($scope, $filter, $q, Local, Hub, $rootScope) {
-      //$rootScope.auth = 
-      var deferredAuth = $q.defer();
-      $rootScope.preAuth = deferredAuth.promise;
-
         Local.one('user').get().then(function(user){     
+            Hub.setDefaultHeaders({'Authorization': 'Basic ' + btoa(user.name + '|' + user.email + ':' + user.token)});
             $rootScope.user = user;
-            $rootScope.auth = user.plain();
-            //allows us to use auth in routes, e.g. modal player
-            deferredAuth.resolve(user.plain());
-        });
-        Hub.one('details').getList().then(function(apps){
-            $scope.applications = apps;
-            $scope.$broadcast('appSelected', apps[0]);
-        });
-        $scope.$on('appSelected', function(event, app) {
-            var userTools = Local.one('user').one(app.name).get().get('tools');
-            $scope.application = Hub.one('details').one(app.name).get($scope.auth);
-            $scope.application.then(function(app) {
-              _.each(app.users, function(user) {
-                Hub.one(user.email).one(app.name).get($scope.auth).then(function(data) {
-                  _.extend(user, data);
-                });
-              });
-            });
-            $q.all({userTools: userTools, app: $scope.application})
-                .then(function(results){
-                    _.each(results.app.tools, function(tool) {
-                        tool.unused = _.findWhere(results.userTools, {name: tool.name}) === undefined;
-                    });
-                });
-        });
+            var userTools = Hub.all('tools').getList({where: {user: user.email}});
 
+            return Hub.all('applications').getList();
+        }).then(function(apps){
+            $scope.applications = apps;
+        });
 
         //report interface usage to Local Hub
         $scope.queuedToolUsages = [];

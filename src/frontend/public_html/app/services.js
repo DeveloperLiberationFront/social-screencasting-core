@@ -9,7 +9,22 @@ define(['angular', 'ng-resource', 'restangular'], function (ng) {
 
     .factory('Hub', ['Restangular', function(Restangular) {
       return Restangular.withConfig(function(RestangularConfigurer) {
-        RestangularConfigurer.setBaseUrl('http://recommender.oscar.ncsu.edu/api/v1');
+          var rc = RestangularConfigurer;
+          rc.setBaseUrl('http://recommender.oscar.ncsu.edu/api/v2');
+          rc.setRestangularFields({ id: "_id", etag: '_etag' });
+          rc.addResponseInterceptor(function(data, operation, what, url, response, deferred) {
+              var extractedData;
+              // .. to look for getList operations
+              if (operation === "getList") {
+                  // .. and handle the data and meta data
+                  extractedData = data._items;
+                  extractedData._meta = data._meta;
+                  extractedData._links = data._links;
+              } else {
+                  extractedData = data;
+              }
+              return extractedData;
+          });
       });
     }])
 });
