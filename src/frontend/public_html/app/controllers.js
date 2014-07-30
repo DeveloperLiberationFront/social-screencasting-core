@@ -92,6 +92,7 @@ define(['angular',
         reverse: true
       };
       $scope.user_list = Hub.all('users').getList();
+      $scope.tools = Hub.all('tools').getList();
     }])
 
   .controller('ToolListCtrl', ['$scope','Hub',
@@ -99,8 +100,7 @@ define(['angular',
       $scope.user.usages = Hub.all('usages').getList({
         'where': {'user': $scope.user.email},
       });
-      Hub.all('tools').getList().then(function(tools) {
-        $scope.tools = tools;
+      $scope.tools.then(function(tools) {
         _.each(tools, function(tool) {
           Hub.all('usages').getList({
             where: {user: $scope.user.email, tool: tool._id}
@@ -156,15 +156,16 @@ define(['angular',
           //treats it as if the query params were &tool=foo,bar
           var users = $stateParams.user_filter.split(",");
           _.each(users, function(email) {
-            name = _.find(user_list, {email: email}).name;
-            $scope.filter.filters.push({name: name, email: email});
+            if (email) {
+              name = _.find(user_list, {email: email}).name;
+              $scope.filter.filters.push({name: name, email: email});
+            }
           });
         }
       });
 
       $scope.filterSet.filters.push(function(tool) {
-        return tool.users && tool.users.length > 0 //tools must have at least one user
-          && ($scope.filter.filters.length === 0 //all tools if no users selected
+        return tool.users && ($scope.filter.filters.length === 0 //all tools if no users selected
               || _.every($scope.filter.filters, function(user){ //or only tools with all selected users
                 return _.contains(tool.users, user.email); 
               }));
@@ -177,19 +178,20 @@ define(['angular',
       };
 
       $scope.addFilter = function(input){
+        var user_filter = ($stateParams.user_filter ?
+                           _.union($stateParams.user_filter.split(','), [input.email])
+                           : [input.email]);
         $state.go('main', {
-          user_filter: _.union($stateParams.user_filter.split(','), [input.email])
+          user_filter: user_filter
         });
         $scope.filter.input = null;
       };
     }])
 
-  .controller('ToolFilterCtrl', ['$scope','$stateParams',
-    function($scope, $stateParams) {
-      onAppLoaded($scope, function(app) {
-        $scope.filter.source = _.filter(ng.copy(app.tools), function(tool) {
-          return tool.users.length > 0;
-        });
+  .controller('ToolFilterCtrl', ['$scope','$state','$stateParams',
+    function($scope, $state, $stateParams) {
+      $scope.tools.then(function(tools) {
+        $scope.filter.source = ng.copy(tools);
       });
 
       $scope.filter = {
@@ -204,9 +206,11 @@ define(['angular',
         //ui-router does not turn &tool=foo&tool=bar into [foo,bar] as you might expect, but
         //treats it as if the query params were &tool=foo,bar
         var tools = $stateParams.tool_filter.split(",");
-        for (var i in tools) {
-          $scope.filter.filters.push({name: tools[i]});
-        }
+        _.each(tools, function(tool) {
+          if (tool) {
+            $scope.filter.filters.push({name: tool});
+          }
+        });
       }
 
       $scope.filterSet.filters.push(function(tool) {
@@ -215,15 +219,18 @@ define(['angular',
       });
 
       $scope.removeFilter = function(filter) {
-        _.pull($scope.filter.filters, filter);
-        removeQueryParam("tool_filter",filter.name);
+        $state.go('main', {
+          tool_filter: _.without($state.params.tool_filter.split(','), filter.name, "")
+        })
       };
 
       $scope.addFilter = function(input){
-        if (input && !_.contains($scope.filter.filters, input)) {
-          $scope.filter.filters.push(input);
-          appendQueryParam("tool_filter",input.name);
-        }
+        var tool_filter = ($stateParams.tool_filter ?
+                           _.union($stateParams.tool_filter.split(','), [input.name])
+                           : [input.name]);
+        $state.go('main', {
+          tool_filter: tool_filter
+        });
         $scope.filter.input = null;
       };
     }])
