@@ -72,7 +72,7 @@ define(['angular',
                     'player',
                    ])
 
-  .controller('NavCtrl', ['$scope', '$filter', '$q', 'Local', 'Hub', "$rootScope",
+  .controller('RootCtrl', ['$scope', '$filter', '$q', 'Local', 'Hub', "$rootScope",
     function($scope, $filter, $q, Local, Hub, $rootScope) {
         var user = Local.one('user').get();
         user.then(function(user){     
@@ -114,16 +114,6 @@ define(['angular',
 
 
         });
-    }])
-
-  .controller('UserListCtrl', ['$scope',
-    function($scope) {
-        $scope.gridOptions = {
-            data: 'application.$object.users',
-            multiSelect: false,
-            columnDefs: [{field:'name', displayName:'Name'},
-                         {field:'email', displayName:'Email'}]
-        };
     }])
 
   .controller('MainCtrl', ['$scope',
