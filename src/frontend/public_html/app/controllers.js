@@ -20,16 +20,6 @@ define(['angular',
     this.Tool_Duration = 1000;    //duration doesn't matter
   }
 
-  function onAppLoaded($scope, callback) {
-    var setHandler = function() {
-      $scope.application.then(callback);
-    };
-    if ($scope.application) {
-      setHandler();
-    }
-    $scope.$on('appSelected', setHandler);
-  }
-
   function appendQueryParam(key, param) {
     var qMark = (window.location.href.indexOf("?") == -1 ? "?" : "&");
 
@@ -57,15 +47,10 @@ define(['angular',
                                'player',
                               ]);
   Controllers
-  .controller('RootCtrl', ['$scope', '$filter', '$q', 'Local', 'Hub', "$rootScope",
-    function($scope, $filter, $q, Local, Hub, $rootScope) {
-      var user = Local.one('user').get();
-      user.then(function(user){     
-        Hub.setDefaultHeaders({'Authorization': 'Basic ' + btoa(user.email + '|' + user.name + ':' + user.token)});
-        $rootScope.user = user;
-
-        return Hub.all('applications').getList();
-      }).then(function(apps){
+  .controller('RootCtrl', ['$scope', '$filter', 'Hub', 'User',
+    function($scope, $filter, Hub, User) {
+      $scope.user = User;
+      Hub.all('applications').getList().then(function(apps){
         $scope.applications = apps;
       });
 
@@ -99,12 +84,35 @@ define(['angular',
       });
     }])
 
-  .controller('MainCtrl', ['$scope',
-    function($scope) {
+  .controller('MainCtrl', ['$scope', 'Hub',
+    function($scope, Hub) {
       $scope.filters = {};
       $scope.ordering = {
         field: "video",
         reverse: true
+      };
+      $scope.user_list = Hub.all('users').getList();
+    }])
+
+  .controller('ToolListCtrl', ['$scope','Hub',
+    function($scope, Hub) {
+      $scope.user.usages = Hub.all('usages').getList({
+        'where': {'user': $scope.user.email},
+      });
+      Hub.all('tools').getList().then(function(tools) {
+        $scope.tools = tools;
+        _.each(tools, function(tool) {
+          Hub.all('usages').getList({
+            where: {user: $scope.user.email, tool: tool._id}
+          }).then(function(usages) {
+            tool.usages = usages;
+            tool.users = _.pluck(usages, 'user');
+          });
+        });
+      });
+      
+      $scope.scroll = function() {
+        //todo: get more tools...
       };
     }])
 
@@ -130,23 +138,8 @@ define(['angular',
       ];
     }])
 
-  .controller('UserFilterCtrl', ['$scope','$stateParams',
-    function($scope, $stateParams) {
-      onAppLoaded($scope, function(app) {       //previously known as onApp()
-        $scope.filter.source = ng.copy(app.users);
-        //update any placeholders
-        console.log(app.users);
-        for(var i in $scope.filter.filters) {
-          var oldUser = $scope.filter.filters[i];
-          if (oldUser.needsRefresh) {
-            var fullUsers = _.where(app.users, {email:oldUser.email});
-            if (fullUsers.length !== 0) {
-              $scope.filter.filters[i] = fullUsers[0];
-            }
-          }
-        }
-      });
-
+  .controller('UserFilterCtrl', ['$scope','$state', '$stateParams',
+    function($scope, $state, $stateParams) {
       $scope.filter = {
         name: 'User',
         input: null,
@@ -155,14 +148,19 @@ define(['angular',
         templateUrl: 'partials/user-list-item.html'
       };
 
-      if ($stateParams.user_filter) {
-        //ui-router does not turn &tool=foo&tool=bar into [foo,bar] as you might expect, but
-        //treats it as if the query params were &tool=foo,bar
-        var users = $stateParams.user_filter.split(",");
-        for (var i in users) {
-          $scope.filter.filters.push({name: users[i], email: users[i], needsRefresh:true});
+      $scope.user_list.then(function(user_list) {
+        $scope.filter.source = ng.copy(user_list);
+
+        if ($stateParams.user_filter) {
+          //ui-router does not turn &tool=foo&tool=bar into [foo,bar] as you might expect, but
+          //treats it as if the query params were &tool=foo,bar
+          var users = $stateParams.user_filter.split(",");
+          _.each(users, function(email) {
+            name = _.find(user_list, {email: email}).name;
+            $scope.filter.filters.push({name: name, email: email});
+          });
         }
-      }
+      });
 
       $scope.filterSet.filters.push(function(tool) {
         return tool.users && tool.users.length > 0 //tools must have at least one user
@@ -173,17 +171,15 @@ define(['angular',
       });
 
       $scope.removeFilter = function(filter) {
-        _.pull($scope.filter.filters, filter);
-        console.log(filter);
-        removeQueryParam("user_filter",filter.email);
+        $state.go('main', {
+          user_filter: _.without($state.params.user_filter.split(','), filter.email)
+        })
       };
 
       $scope.addFilter = function(input){
-        if (input && !_.contains($scope.filter.filters, input)) {
-          $scope.filter.filters.push(input);
-          console.log(input);
-          appendQueryParam("user_filter",input.email);
-        }
+        $state.go('main', {
+          user_filter: _.union($stateParams.user_filter.split(','), [input.email])
+        });
         $scope.filter.input = null;
       };
     }])
@@ -229,19 +225,6 @@ define(['angular',
           appendQueryParam("tool_filter",input.name);
         }
         $scope.filter.input = null;
-      };
-    }])
-
-  .controller('ToolListCtrl', ['$scope','Hub',
-    function($scope, Hub) {
-      $scope.user.usages = Hub.all('usages').getList({
-        'where': {'user': $scope.user.email},
-      });
-      $scope.tools = Hub.all('tools').getList();
-      
-      $scope.limit = 10;
-      $scope.scroll = function() {
-        $scope.limit += 1;
       };
     }])
 
