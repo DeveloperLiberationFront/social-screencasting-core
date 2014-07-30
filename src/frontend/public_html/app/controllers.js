@@ -12,20 +12,6 @@ define(['angular',
        function (ng, $, _) {
   /* Controllers */
 
-  var fieldDefs = {
-      'unused': {
-          width: '50px',
-          field:'unused', displayName:'Unused',
-          cellTemplate: "<div class='ngCellText'><span class='glyphicon glyphicon-ok' ng-show='row.getProperty(col.field)'></span></div>"
-      },
-      'video': {
-          width: '50px',
-          field:'video', displayName:'Video',
-          cellTemplate:  "<div class='ngCellText'><img src='images/video_icon_tiny.png' ng-show='row.getProperty(col.field)'/></div>",
-          sortFn: function(x,y){return (x === y)? 0 : x? 1 : -1;}
-      }
-  };
-
   function ToolUsage(toolName, keypress, otherInfo) {
     //all the this.names are the same as on the server ToolStream.java
     this.Tool_Name = toolName;
@@ -63,20 +49,21 @@ define(['angular',
     }
   }
 
-  return ng.module('socasterControllers',
+  var Controllers = ng.module('socasterControllers',
                    ['ui.bootstrap',
                     'ui.format',
                     'ngGrid',
                     'restangular',
                     'socasterServices',
                     'player',
-                   ])
+                   ]);
 
+  Controllers
   .controller('RootCtrl', ['$scope', '$filter', '$q', 'Local', 'Hub', "$rootScope",
     function($scope, $filter, $q, Local, Hub, $rootScope) {
         var user = Local.one('user').get();
         user.then(function(user){     
-            Hub.setDefaultHeaders({'Authorization': 'Basic ' + btoa(user.name + '|' + user.email + ':' + user.token)});
+            Hub.setDefaultHeaders({'Authorization': 'Basic ' + btoa(user.email + '|' + user.name + ':' + user.token)});
             $rootScope.user = user;
 
             return Hub.all('applications').getList();
@@ -164,8 +151,6 @@ define(['angular',
           }
         });
 
-      console.log($stateParams);
-      
       $scope.filter = {
         name: 'User',
         input: null,
@@ -184,7 +169,7 @@ define(['angular',
       }
 
       $scope.filterSet.filters.push(function(tool) {
-        return tool.users.length > 0 //tools must have at least one user
+        return tool.users && tool.users.length > 0 //tools must have at least one user
           && ($scope.filter.filters.length === 0 //all tools if no users selected
               || _.every($scope.filter.filters, function(user){ //or only tools with all selected users
                 return _.contains(tool.users, user.email); 
@@ -253,8 +238,9 @@ define(['angular',
 
   .controller('ToolListCtrl', ['$scope','Hub',
     function($scope, Hub) {
-        var userTools = Hub.all('tools').getList({'where':
-                                                  {'user': $scope.user.email}});
+        $scope.user.usages = Hub.all('usages').getList({
+            'where': {'user': $scope.user.email},
+        });
         $scope.tools = Hub.all('tools').getList();
         
         $scope.limit = 10;
@@ -265,17 +251,6 @@ define(['angular',
 
   .controller('ToolBlockCtrl', ['$scope', '$state',
     function($scope, $state) {
-      onAppLoaded($scope, function(app) {
-        var unused = $scope.tool.unused;
-        app.one($scope.tool.name).get($scope.auth).then(function(tool) {
-          $scope.tool = _.extend(tool, {unused: unused});
-        });
-      });
-
-      $scope.details = function(user) {
-        return _.find(user.tools, {name: $scope.tool.name});
-      };
-
       $scope.userVideo = function(user) {
         var self = (user.email == $scope.user.email);
         var origin = (self ? 'local' : 'external');
@@ -283,117 +258,95 @@ define(['angular',
           $state.go('main.video', {
             location: origin,
             owner: user.email,
-            application: $scope.application.$object.name,
-            tool: $scope.tool.name
+            tool: $scope.tool._id
           });
         } else {
           $state.go('main.request', {
             owner: user.email,
-            application: $scope.application.$object.name,
-            tool: $scope.tool.name
+            tool: $scope.tool._id
           });
         }
       };
-    }])
+    }]);
 
-  .controller('DropdownCtrl', ['$scope', '$rootScope',
-    function($scope, $rootScope) {
-      $scope.status = {
-          isopen: false
-      };
-      $scope.setApp = function(app) {
-        $scope.status.isopen = false;
-        $rootScope.$broadcast('appSelected', app);
-        $scope.$emit('instrumented', 'Changed Plugin', app);
-      };
-    }])
-
-  .controller('StatusCtrl', ['$scope', 'Hub', '$http', function($scope, Hub) {
-    
-    $scope.$emit('instrumented', "View Status");
-
-    $scope.received = [{}];
-    $scope.sent = [{}];
-
-    Hub.all("notifications").withHttpConfig({cache:false}).getList().then(function(notifications){
-      console.log(notifications);
-      $scope.sent = _.where(notifications, {sender: $scope.user.email});
-      $scope.received = _(notifications).where({recipient: $scope.user.email}).filter(data.received, function(item) { 
-          return item.type != "request_fulfilled";
+  function prepareMessagesForSentRequests(sent) {
+      $interpolate = angular.injector(['ng']).get('$interpolate');
+      _.each(sent, function(sentItem) {
+          if (sentItem.type == "request_fulfilled") {
+              var json = JSON.parse(sentItem.status);
+              sentItem.shared_videos = _.map(json.video_id, function(id){
+                  return $interpolate(
+                      "#/video/external/{{recipient.email}}/"
+                          + "{{application}}/{{tool}}/" + id
+                  )(sentItem);
+              });
+              sentItem.message = $interpolate(
+                  "{{recipient.name}} granted access to {{application}}/{{tool}}"
+              )(sentItem);
+          }
+          else {
+              sentItem.message = $interpolate(
+                  "Requested access to {{recipient.name}}'s usage of {{application}}/{{tool}}"
+              )(sentItem);
+          }
       });
+  }
 
-      for (var i = $scope.sent.length - 1; i >= 0; i--) {
-        var sentItem = $scope.sent[i];
-        if (sentItem.type == "request_fulfilled") {
-          var json = JSON.parse(sentItem.status);
-          sentItem.shared_videos = _.map(json.video_id, function(id){
-            console.log(id);
-            return "#/video/external/"+sentItem.recipient.email+"/"+sentItem.plugin+"/"+sentItem.tool+"/"+id;
-          });
-          console.log(sentItem.shared_videos);
-          sentItem.message = sentItem.recipient.name+ " granted access to "+ sentItem.plugin +"/" + sentItem.tool;
-        }
-        else {
-          sentItem.message =  "Requested access to "+sentItem.recipient.name+ "'s usage of "+ sentItem.plugin +"/" + sentItem.tool;
-        }
-      }
-
-      for (i = $scope.received.length - 1; i >= 0; i--) {
-        var item = $scope.received[i], put;
-        if (item.status == "new") {
-            item.status = "seen";
-            item.put($scope.auth);
-            console.log(item);
-        }
-      }
-    });
-
-    $scope.deleteRequest = function(request) {
-      console.log("deleting "+request);
-        $scope.sent = _.reject($scope.sent, function(item) {
-          return item._id == request._id;
+  Controllers
+  .controller('StatusCtrl', ['$scope', 'Hub', '$interpolate',
+    function($scope, Hub, $interpolate) {
+      $scope.$emit('instrumented', "View Status");
+  
+      $scope.received = [{}];
+      $scope.sent = [{}];
+  
+      Hub.all("notifications").withHttpConfig({cache:false}).getList({
+          'embedded': {'recipient': 1} //pull in recipient details instead of just id
+      }).then(function(notifications) {
+        $scope.sent = _.where(notifications, {sender: $scope.user.email});
+        $scope.received = _(notifications)
+              .where({recipient: $scope.user.email})
+              .reject(function(item) { //user doesn't need to see requests they have responded to
+                  return item.type == "request_fulfilled";
+              });
+  
+        prepareMessagesForSentRequests($scope.sent);
+  
+        _.each($scope.received, function(item) {
+            if (item.status == "new") {
+                item.status = "seen";
+                item.put($scope.auth);
+                console.log(item);
+            }
         });
-
-        request.remove();
-    };
-
-
-    $scope.getBadgeText = function(request) {
-      if (request.status == "new") {
-        return "new";
-      } else if (request.status == "seen") {
-        return "seen";
-      } 
-
-      else {
-        return undefined;
+      });
+  
+      $scope.deleteRequest = function(request) {
+          $scope.sent = _.reject($scope.sent, function(item) {
+            return item._id == request._id;
+          });
+          request.remove();
+      };
+    
+      $scope.getBadgeText = function(request) {
+          if (_.contains(["new", "seen"], request.status) {
+              return request.status;
+          }
+          return undefined;
+      };
+  
+    $scope.getShareLink = function(request) {
+      if ("share_request" == request.type) {
+        return $interpolate(
+            "#/share/{{application}}/{{tool}}"
+                + "?share_with_name={{sender.name}}"
+                + "&share_with_email={{sender.email}}"
+                + "&request_id={{_id}}"
+        )(request);
       }
+      return "#";
     };
-
-  $scope.getRequestLink = function(request) {
-    if ("request_fulfilled" == request.type) {
-      var json = JSON.parse(request.status);
-      if (json.video_id) {
-        return "#/video/external/"+request.recipient.email+"/"+request.plugin+"/"+request.tool+"/"+json.video_id;
-      }
-      return undefined;
-    }
-    else {
-      return undefined;
-    }
-  };
-
-  $scope.getShareLink = function(request) {
-    if ("share_request" == request.type) {
-      return "#/share/"+request.plugin+"/"+request.tool+"?share_with_name="+
-      request.sender.name+"&share_with_email="+request.sender.email+"&request_id="+request.id;
-    }
-    else {
-      return "/#";
-    }
-  };
-
-}])
+  }])
 
 .controller('RequestCtrl', ['$scope', '$modalInstance', '$stateParams', 'Hub',
   function($scope, $modalInstance, $stateParams, Hub) {
