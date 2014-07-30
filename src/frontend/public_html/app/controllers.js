@@ -74,10 +74,10 @@ define(['angular',
 
   .controller('NavCtrl', ['$scope', '$filter', '$q', 'Local', 'Hub', "$rootScope",
     function($scope, $filter, $q, Local, Hub, $rootScope) {
-        Local.one('user').get().then(function(user){     
+        var user = Local.one('user').get();
+        user.then(function(user){     
             Hub.setDefaultHeaders({'Authorization': 'Basic ' + btoa(user.name + '|' + user.email + ':' + user.token)});
             $rootScope.user = user;
-            var userTools = Hub.all('tools').getList({where: {user: user.email}});
 
             return Hub.all('applications').getList();
         }).then(function(apps){
@@ -261,16 +261,16 @@ define(['angular',
       };
     }])
 
-  .controller('ToolListCtrl', ['$scope',
-    function($scope) {
-      onAppLoaded($scope, function(app) {
-          $scope.tools = app.tools;
-        });
-
-      $scope.limit = 10;
-      $scope.scroll = function() {
-        $scope.limit += 1;
-      };
+  .controller('ToolListCtrl', ['$scope','Hub',
+    function($scope, Hub) {
+        var userTools = Hub.all('tools').getList({'where':
+                                                  {'user': $scope.user.email}});
+        $scope.tools = Hub.all('tools').getList();
+        
+        $scope.limit = 10;
+        $scope.scroll = function() {
+            $scope.limit += 1;
+        };
     }])
 
   .controller('ToolBlockCtrl', ['$scope', '$state',
@@ -325,12 +325,11 @@ define(['angular',
     $scope.received = [{}];
     $scope.sent = [{}];
 
-    Hub.one("notifications").withHttpConfig({cache:false}).get($scope.auth).then(function(data){
-      console.log(data.plain());
-      $scope.sent = data.sent;
-      $scope.received = _.filter(data.received, function(item) { 
+    Hub.all("notifications").withHttpConfig({cache:false}).getList().then(function(notifications){
+      console.log(notifications);
+      $scope.sent = _.where(notifications, {sender: $scope.user.email});
+      $scope.received = _(notifications).where({recipient: $scope.user.email}).filter(data.received, function(item) { 
           return item.type != "request_fulfilled";
-
       });
 
       for (var i = $scope.sent.length - 1; i >= 0; i--) {
@@ -352,21 +351,20 @@ define(['angular',
       for (i = $scope.received.length - 1; i >= 0; i--) {
         var item = $scope.received[i], put;
         if (item.status == "new") {
-          //item.status = "seen";
-          put = Hub.one("notifications").one(""+item.id);
-          put.notification = {status:"seen"};
-          put.put($scope.auth);
-        } 
+            item.status = "seen";
+            item.put($scope.auth);
+            console.log(item);
+        }
       }
     });
 
     $scope.deleteRequest = function(request) {
       console.log("deleting "+request);
         $scope.sent = _.reject($scope.sent, function(item) {
-          return item.id == request.id;
+          return item._id == request._id;
         });
 
-        Hub.one("notifications").one(""+request.id).remove($scope.auth);
+        request.remove();
     };
 
 
@@ -406,13 +404,6 @@ define(['angular',
   };
 
 }])
-
-.controller('ToolCtrl', ['$scope', '$stateParams',
-  function($scope, $stateParams) {
-    onAppLoaded($scope, function(app) {
-      $scope.tool = app.one($stateParams.name).get($scope.auth);
-    });
-  }])
 
 .controller('RequestCtrl', ['$scope', '$modalInstance', '$stateParams', 'Hub',
   function($scope, $modalInstance, $stateParams, Hub) {
