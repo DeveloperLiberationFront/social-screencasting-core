@@ -376,8 +376,8 @@ define(['angular',
       };
     }]) 
 
-  .controller('ShareCtrl', ['$scope', '$stateParams', 'Local', 'Hub',
-    function($scope, $routeParams, Local, Hub) {
+  .controller('ShareCtrl', ['$scope', '$stateParams', 'Local', 'Hub', '$interpolate',
+    function($scope, $routeParams, Local, Hub, $interpolate) {
       $scope.displayInfo = $routeParams;
       $scope.respondingToNotification = $routeParams.request_id;
       $scope.editMode = true;
@@ -439,49 +439,44 @@ define(['angular',
 
         $scope.hasShared = true;
 
-        var put = Hub.one("notifications").one(""+$scope.respondingToNotification);
+        note = Hub.one("notifications",$scope.respondingToNotification).get();
 
-        put.get($scope.auth).then(function(notification){
+        note.then(function(notification){
           if (notification.type == "request_fulfilled") {
             //add this shared video to the list
             var json = JSON.parse(notification.status);
             json.video_id.push($scope.selection[0].clipId);
-            put.notification = {status: JSON.stringify(json)};
-            console.log("putting to array");
-            put.put($scope.auth);
+            notification.status = JSON.stringify(json);
+            notification.put();
           }
           else {
             //mark this notification as responded, and make the status a hash with an array of clip ids
-            put.notification = {status:JSON.stringify({video_id:[$scope.selection[0].clipId]}), type:"request_fulfilled"};
-            console.log("putting first video id");
-            put.put($scope.auth);
+            _.assign(notification, {
+              status: JSON.stringify({video_id:[$scope.selection[0].clipId]}),
+              type: "request_fulfilled"
+            });
+            notification.put();
           }
         });
-
-      };
-
-      $scope.toggled = function($event) {
-        $event.preventDefault();
-        $event.stopPropagation();
-        console.log("toggling ");
-        console.log($event);
-        return false;
       };
 
       $scope.cancelSharing = function() {
-        console.log("cancelSharing");
-
         var reasonText = $("#no-share-reason").val();
-        var put = Hub.one("notifications").one(""+$scope.respondingToNotification);
-        put.notification = {status:"responded" , type:"request_denied", message:"Your request to " + $scope.shareWithName +" for " +
-                            $scope.applicationName+"/"+$scope.toolName +" was not fulfilled. " + reasonText};
-        put.put($scope.auth);
+        note = Hub.one("notifications",$scope.respondingToNotification);
+        _.assign(note, {
+          status:"responded",
+          type:"request_denied",
+          message: $interpolate(
+            "Your request to {{share_with_name}} for {{application}}/{{tool}} was not fulfilled. "
+              + reasonText)($scope.displayInfo)
+        });
+        note.put();
 
-        console.log(reasonText);
         $scope.dropDownStatus.isopen = false;
-
         $scope.cancelled = true;
-        $("h2").text("Decided not to share " + $scope.applicationName+"/"+$scope.toolName +" with " + $scope.shareWithName);
+        $("h2").text($interpolate(
+          "Decided not to share {{application}}/{{tool}} with {{share_with_name}}"
+        )($scope.displayInfo));
       };
     }]);
   });
