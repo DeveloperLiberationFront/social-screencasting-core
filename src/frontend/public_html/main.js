@@ -20,6 +20,7 @@ requirejs.config({
         'ng-ui-router': '../lib/bower/angular-ui-router/release/angular-ui-router',
         'restangular': '../lib/bower/restangular/dist/restangular',
         'lodash': '../lib/bower/lodash/dist/lodash',
+        'deferredBootstrapper': '../lib/bower/angular-deferred-bootstrap/angular-deferred-bootstrap',
 
         'tablesorter': '../lib/bower/jquery.tablesorter/js',
         'jquery.metadata': '../lib/bower/jquery.metadata/jquery.metadata',
@@ -41,6 +42,7 @@ requirejs.config({
         'ng-slider': ['angular', 'ng-touch'],
         'ng-ui-utils': ['angular'],
         'ng-ui-router': ['angular'],
+        'deferredBootstrapper': {'exports': 'deferredBootstrapper', deps: ['angular']},
         'restangular': ['angular'],
         'bootstrap': ['jquery'],
         'jquery-ui': ['jquery'],
@@ -57,13 +59,25 @@ requirejs.config({
 requirejs([
     'angular',
     'app',
+    'deferredBootstrapper',
     'jquery',
     'ng-route',
     'ng-bootstrap',
     'ng-grid',
     'bootstrap',
     'controllers',
-], function(angular, app) {
-  'use strict';
-  angular.bootstrap(document, [app['name']]);
+    'services',
+], function(angular, app, boot) {
+  boot.bootstrap({
+    element: document,
+    module: app['name'],
+    injectorModules: 'socasterServices',
+    resolve: {
+      User: function(Local, Hub) {
+        console.log(Hub);
+        var user = Local.one('user').get();
+        return user;
+      }
+    }
+  });
 });

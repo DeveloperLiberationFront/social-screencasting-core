@@ -1,9 +1,9 @@
 /*global define, _*/
 define(['angular',
+        'services',
         'ng-route',
         'controllers',
         'share',
-        'services',
         'ng-bootstrap',
         'ng-fullscreen',
         'ng-ui-utils',
@@ -12,10 +12,12 @@ define(['angular',
         'player',
         'directives',
         'lib/breadcrumb',
-       ], function (ng) {
+       ], function (ng, services) {
   'use strict';
 
   /* App Module */
+
+  console.log(services);
   
   return ng.module('socasterApp', [
     'ui.router',
@@ -124,14 +126,18 @@ define(['angular',
             });
     }])
 
-  .config(['RestangularProvider',
-    function(RestangularProvider) {
+  .config(['RestangularProvider', 'User',
+    function(RestangularProvider, User) {
       RestangularProvider.setDefaultHttpFields({cache: true});
       RestangularProvider.addRequestInterceptor(function(elem, operation) {
-          if (operation === "remove") {
-           return undefined;
-       } 
-       return elem;
-   });
-  }]);
+        if (operation === "remove") {
+          return undefined;
+        }
+        return elem;
+      });
+      RestangularProvider.setDefaultHeaders({
+        'Authorization': 'Basic ' + btoa(User.email + '|'
+                                         + User.name + ':'
+                                         + User.token)});
+  }])
 });
