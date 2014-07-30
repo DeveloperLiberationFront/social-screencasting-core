@@ -43,17 +43,6 @@
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
             <p class="navbar-text"><span ng-bind='user.name'></span></p>
-            <li ng-controller='DropdownCtrl'>
-              <div class="btn-group navbar-btn" dropdown is-open="status.isopen">
-                <button type="button" class="btn btn-default dropdown-toggle">
-                  <span  ng-bind="application.$object.name">Application</span>
-                  <span class='caret'></span>
-                </button>
-                <ul class="dropdown-menu" role="menu">
-                  <li ng-repeat='app in applications'><a ng-click='setApp(app)'>{{app.name}}</a></li>
-                </ul>
-              </div>
-            </li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <li><a href="#about">About</a></li>
