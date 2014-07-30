@@ -8,8 +8,7 @@ define(['angular',
         'ng-ui-utils',
         'restangular',
         'services',
-        'player'],
-       function (ng, $, _) {
+        'player'], function (ng, $, _) {
   /* Controllers */
 
   function ToolUsage(toolName, keypress, otherInfo) {
@@ -374,109 +373,7 @@ define(['angular',
         $event.stopPropagation();
         $scope.dropDownStatus.isopen = !$scope.dropDownStatus.isopen;
       };
-    }]) 
-
-  .controller('ShareCtrl', ['$scope', '$stateParams', 'Local', 'Hub', '$interpolate',
-    function($scope, $routeParams, Local, Hub, $interpolate) {
-      $scope.displayInfo = $routeParams;
-      $scope.respondingToNotification = $routeParams.request_id;
-      $scope.editMode = true;
-      $scope.cropData = {cropData:{}};    //make cropData updateable by child scope (player)
-      $scope.clips = [];
-      $scope.isFirst = true;
-      $scope.selection = [];
-      $scope.ready = false;
-
-      $scope.dropDownStatus = {
-        isopen:false
-      };
-      
-      var toolEnd = Local.one($scope.user.email)
-        .one($routeParams.application)
-        .one($routeParams.tool);
-
-      //Go fetch all the clips
-      toolEnd.get().then(function(tool) {
-        _.each(tool.keyclips, function(clip, i) {
-          $scope.clips.push({clipId: clip, toDisplay: "Example "+(+i+1)+" using Keyboard" });
-        });
-        _.each(tool.guiclips, function(clip, i) {
-          $scope.clips.push({clipId: clip, toDisplay: "Example "+(+i+1)+" using GUI"});
-        });
-      });
-
-      $scope.shareGridOptions = {       //set up the grid to display
-        selectedItems: $scope.selection,
-        multiSelect: false,
-        data: "clips",   //this is a string of the name of the obj in the $scope that has data
-        columnDefs: [{ field:'toDisplay'}],
-        headerRowHeight:0,    //hide the header
-        afterSelectionChange: function() {
-          var c = $scope.selection;
-
-          if (c.length > 0) {
-            var clipId = c[0].clipId;
-            toolEnd.one(clipId).get().then(function(clip){
-              $scope.clip = clip;
-              $scope.ready = true;
-              $scope.$broadcast('refreshSlider');
-            });
-          }
-        }
-      };
-
-      $scope.shareClip = function(shareWithAll) {
-        var post = Local.one("shareClip");
-        post.data = {
-          clip_id : $scope.selection[0].clipId,
-          recipient : shareWithAll? "all" : $scope.shareWithEmail,
-          start_frame: $scope.clip.start,
-          end_frame: $scope.clip.end,
-          crop_rect: JSON.stringify($scope.cropData.cropData)
-        };
-
-        post.post();
-
-        $scope.hasShared = true;
-
-        note = Hub.one("notifications",$scope.respondingToNotification).get();
-
-        note.then(function(notification){
-          if (notification.type == "request_fulfilled") {
-            //add this shared video to the list
-            var json = JSON.parse(notification.status);
-            json.video_id.push($scope.selection[0].clipId);
-            notification.status = JSON.stringify(json);
-            notification.put();
-          }
-          else {
-            //mark this notification as responded, and make the status a hash with an array of clip ids
-            _.assign(notification, {
-              status: JSON.stringify({video_id:[$scope.selection[0].clipId]}),
-              type: "request_fulfilled"
-            });
-            notification.put();
-          }
-        });
-      };
-
-      $scope.cancelSharing = function() {
-        var reasonText = $("#no-share-reason").val();
-        note = Hub.one("notifications",$scope.respondingToNotification);
-        _.assign(note, {
-          status:"responded",
-          type:"request_denied",
-          message: $interpolate(
-            "Your request to {{share_with_name}} for {{application}}/{{tool}} was not fulfilled. "
-              + reasonText)($scope.displayInfo)
-        });
-        note.put();
-
-        $scope.dropDownStatus.isopen = false;
-        $scope.cancelled = true;
-        $("h2").text($interpolate(
-          "Decided not to share {{application}}/{{tool}} with {{share_with_name}}"
-        )($scope.displayInfo));
-      };
     }]);
-  });
+
+    return Controllers;
+ });

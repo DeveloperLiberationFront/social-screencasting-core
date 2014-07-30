@@ -2,6 +2,7 @@
 define(['angular',
         'ng-route',
         'controllers',
+        'share',
         'services',
         'ng-bootstrap',
         'ng-fullscreen',
