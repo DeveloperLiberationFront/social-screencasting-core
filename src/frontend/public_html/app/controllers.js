@@ -351,11 +351,12 @@ define(['angular',
 .controller('RequestCtrl', ['$scope', '$modalInstance', '$stateParams', 'Hub',
   function($scope, $modalInstance, $stateParams, Hub) {
     $scope.request = function(user) {
-      _.extend(Hub.one('request-share'), {
-        plugin: $stateParams.application,
-        tool: $stateParams.tool,
-        creator: $stateParams.owner
-      }).put($scope.auth);
+      Hub.all('notifications').post({
+        application: $stateParams.application,
+        tool: $stateParams.tool._id,
+        recipient: $stateParams.owner,
+        type: "share_request"
+      });
       $modalInstance.close();
     };
 
@@ -364,14 +365,14 @@ define(['angular',
 
   .controller('ShareDropDownCtrl', ['$scope',
     function($scope) {
-
-      $('.btn-group').on('click', '.dropdown-menu',function(event){
-        console.log("click");
-       event.stopPropagation();
-       event.preventDefault();
-     });
+      $('.btn-group').on('click', '.dropdown-menu', function(event){
+        //stop propagation to prevent clicking in the text area from closing the dropdown
+        event.stopPropagation();
+        event.preventDefault();
+      });
 
       $scope.toggleDropdown = function($event) {
+        //todo: perhaps don't need to stop propagation
         $event.preventDefault();
         $event.stopPropagation();
         $scope.dropDownStatus.isopen = !$scope.dropDownStatus.isopen;
@@ -380,15 +381,12 @@ define(['angular',
 
   .controller('ShareCtrl', ['$scope', '$stateParams', 'Local', 'Hub',
     function($scope, $routeParams, Local, Hub) {
-      console.log($routeParams);
-      $scope.applicationName = $routeParams.application ? $routeParams.application : "nothing";
-      $scope.toolName = $routeParams.tool ? $routeParams.tool : "nothing";
-      $scope.shareWithName = $routeParams.share_with_name;
-      $scope.shareWithEmail = $routeParams.share_with_email;
+      $scope.displayInfo = $routeParams;
       $scope.respondingToNotification = $routeParams.request_id;
       $scope.editMode = true;
       $scope.cropData = {cropData:{}};    //make cropData updateable by child scope (player)
-
+      $scope.clips = [];
+      $scope.isFirst = true;
       $scope.selection = [];
       $scope.ready = false;
 
@@ -396,40 +394,39 @@ define(['angular',
           isopen:false
       };
     
-      var toolEnd = Local.one($scope.user.email).one($scope.applicationName)
-      .one($scope.toolName);
+      var toolEnd = Local.one($scope.user.email)
+            .one($routeParams.application)
+            .one($routeParams.tool);
 
       //Go fetch all the clips
       toolEnd.get().then(function(tool) {
-          for (var i in tool.keyclips) {
-              $scope.clips.push({clipId: tool.keyclips[i], toDisplay: "Example "+(+i+1)+" using Keyboard" });
-          }
-          for (i in tool.guiclips) {
-              $scope.clips.push({clipId: tool.guiclips[i], toDisplay: "Example "+(+i+1)+" using GUI"});
-          }
+          _.each(tool.keyclips, function(clip, i) {
+              $scope.clips.push({clipId: clip, toDisplay: "Example "+(+i+1)+" using Keyboard" });
+          });
+          _.each(tool.guiclips, function(clip, i) {
+              $scope.clips.push({clipId: clip, toDisplay: "Example "+(+i+1)+" using GUI"});
+          });
         });
 
-      $scope.clips = [];
-      $scope.isFirst = true;
       $scope.shareGridOptions = {       //set up the grid to display
-        selectedItems: $scope.selection,
-        multiSelect: false,
-            data: "clips",   //this is a string of the name of the obj in the $scope that has data
-            columnDefs: [{ field:'toDisplay'}],
-            headerRowHeight:0,    //hide the header
-            afterSelectionChange: function() {
+          selectedItems: $scope.selection,
+          multiSelect: false,
+          data: "clips",   //this is a string of the name of the obj in the $scope that has data
+          columnDefs: [{ field:'toDisplay'}],
+          headerRowHeight:0,    //hide the header
+          afterSelectionChange: function() {
               var c = $scope.selection;
 
               if (c.length > 0) {
-                var clipId = c[0].clipId;
-                toolEnd.one(clipId).get().then(function(clip){
-                  $scope.clip = clip;
-                  $scope.ready = true;
-                  $scope.$broadcast('refreshSlider');
-                });
+                  var clipId = c[0].clipId;
+                  toolEnd.one(clipId).get().then(function(clip){
+                      $scope.clip = clip;
+                      $scope.ready = true;
+                      $scope.$broadcast('refreshSlider');
+                  });
               }
-            }
-          };
+          }
+      };
 
           $scope.shareClip = function(shareWithAll) {
             console.log("Share clip "+shareWithAll);
