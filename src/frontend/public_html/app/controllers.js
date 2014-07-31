@@ -226,7 +226,7 @@ define(['angular',
       $scope.removeFilter = function(filter) {
         $state.go('main', {
           tool_filter: _.without($state.params.tool_filter.split(','), filter.name, "")
-        })
+        });
       };
 
       $scope.addFilter = function(input){
@@ -243,7 +243,7 @@ define(['angular',
   .controller('ApplicationFilterCtrl', ['$scope', '$state',
     function($scope, $state) {
       $scope.filter = {
-        name: 'Tool',
+        name: 'Application',
         input: null,
         source: [],
         apps: {},
@@ -255,6 +255,40 @@ define(['angular',
       });
 
       if ($state.params.app_filter) {
+        var apps = $state.params.app_filter.split(',');
+        $scope.filter.apps = _.zipObject(apps, _.times(apps.length, function(){return true;}));
+      }
+
+      $scope.filterSet.filters.push(function(tool) {
+        return !_.any($scope.filter.apps) //unchecking all apps shows all tools
+          || $scope.filter.apps[tool.application];
+      });
+
+      $scope.updateFilters = function() {
+        $state.go('main', {
+          app_filter: _.keys(_.pick($scope.filter.apps, function(v){return v;}))
+        });
+      };
+    }])
+
+  .controller('MiscFilterCtrl', ['$scope', '$state',
+    function($scope, $state) {
+      $scope.filter = {
+        name: 'Misc Filters',
+        input: null,
+        source: [{
+          text: "I haven't used yet",
+          id:"not_used"
+        },
+        { text: "have a screencast",
+          id:"yes_video"
+        },
+        ],
+        apps: {},
+        templateUrl: ''
+      };
+
+      /*if ($state.params.misc_filter) {
         apps = $state.params.app_filter.split(',');
         $scope.filter.apps = _.zipObject(apps, _.times(apps.length, function(){return true}));
       }
@@ -268,7 +302,7 @@ define(['angular',
         $state.go('main', {
           app_filter: _.keys(_.pick($scope.filter.apps, function(v){return v}))
         });
-      }
+      }*/
     }])
 
   .controller('ToolBlockCtrl', ['$scope', '$state',
