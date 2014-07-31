@@ -1,4 +1,4 @@
-/*global define */
+/*global define, angular */
 
 define(['angular',
         'jquery',
@@ -19,24 +19,6 @@ define(['angular',
     this.Tool_Class = otherInfo;
     this.Tool_Timestamp = new Date().getTime();
     this.Tool_Duration = 1000;    //duration doesn't matter
-  }
-
-  function appendQueryParam(key, param) {
-    var qMark = (window.location.href.indexOf("?") == -1 ? "?" : "&");
-
-    window.location.href = window.location.href + qMark + encodeURIComponent(key)+ 
-      "="+encodeURIComponent(param);
-  }
-
-  function removeQueryParam(key, param) {
-    var toRemove = encodeURIComponent(key)+"="+encodeURIComponent(param);
-    //removes one instance of toRemove
-    window.location.href = window.location.href.replace(toRemove, "").replace(/&+/g, "&").replace("?&","?");
-
-    //remove question mark if it's the last thing
-    if (window.location.href.indexOf("?") == window.location.href.length - 1) {
-      window.location.href = window.location.href.substring(0, window.location.href.length - 1);
-    }
   }
 
   var Controllers = ng.module('socasterControllers',
@@ -162,7 +144,7 @@ define(['angular',
           var users = $stateParams.user_filter.split(",");
           _.each(users, function(email) {
             if (email) {
-              name = _.find(useri_list, {email: email}).name;
+              var name = _.find(user_list, {email: email}).name;
               $scope.filter.filters.push({name: name, email: email});
             }
           });
@@ -179,7 +161,7 @@ define(['angular',
       $scope.removeFilter = function(filter) {
         $state.go('main', {
           user_filter: _.without($state.params.user_filter.split(','), filter.email)
-        })
+        });
       };
 
       $scope.addFilter = function(input){
@@ -256,6 +238,7 @@ define(['angular',
 
       if ($state.params.app_filter) {
         var apps = $state.params.app_filter.split(',');
+        //creates an object like {active_app_1:true, active_app_2:true ...}
         $scope.filter.apps = _.zipObject(apps, _.times(apps.length, function(){return true;}));
       }
 
@@ -273,6 +256,7 @@ define(['angular',
 
   .controller('MiscFilterCtrl', ['$scope', '$state',
     function($scope, $state) {
+
       $scope.filter = {
         name: 'Misc Filters',
         input: null,
@@ -284,32 +268,39 @@ define(['angular',
           id:"yes_video"
         },
         ],
-        apps: {},
+        active_filters: {},
         templateUrl: ''
       };
 
-      /*if ($state.params.misc_filter) {
-        apps = $state.params.app_filter.split(',');
-        $scope.filter.apps = _.zipObject(apps, _.times(apps.length, function(){return true}));
+      if ($state.params.misc_filter) {
+        var misc_filters = $state.params.misc_filter.split(',');
+        //creates an object like {active_app_1:true, active_app_2:true ...}
+        $scope.filter.active_filters = _.zipObject(misc_filters, _.times(misc_filters.length, function(){return true;}));
       }
 
       $scope.filterSet.filters.push(function(tool) {
-        return !_.any($scope.filter.apps) //unchecking all apps shows all tools
-          || $scope.filter.apps[tool.application];
+        return !_.any($scope.filter.active_filters) || //no filters shows all apps
+          //or
+          ($scope.filter.active_filters.not_used && !_.find(tool.users, {email : $scope.user.email})) ||
+          //or
+          ($scope.filter.active_filters.yes_video && tool.clips.$object.length > 0);
+
       });
 
       $scope.updateFilters = function() {
         $state.go('main', {
-          app_filter: _.keys(_.pick($scope.filter.apps, function(v){return v}))
+          misc_filter: _.keys(_.pick($scope.filter.active_filters, function(v){return v;}))
         });
-      }*/
+      };
+
     }])
 
   .controller('ToolBlockCtrl', ['$scope', '$state',
     function($scope, $state) {
       $scope.hasVideo = function(user) {
         return _.find($scope.tool.clips.$object, {user: user.email});
-      }
+      };
+
       $scope.getVideo = function(user) {
         var self = (user == $scope.user.email);
         var origin = (self ? 'local' : 'external');

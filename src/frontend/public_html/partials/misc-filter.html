@@ -1,10 +1,10 @@
 <li class="list-group-item group-heading">
-  Show tools that...
+  Show only tools that...
 </li>
 <li class="list-group-item ordering">
   <ul class='list-group unselectable pointer'>
     <li ng-repeat='option in filter.source' class='list-group-item'>
-      <input type="checkbox" ng-model="filter.options[app]" ng-change='updateFilters()'/>
+      <input type="checkbox" ng-model="filter.active_filters[option.id]" ng-change='updateFilters()'/>
       {{option.text}}
     </li>
   </ul>
