@@ -3,12 +3,13 @@
 define(['angular',
         'jquery',
         'lodash',
+        'Q',
         'ng-bootstrap',
         'ng-grid',
         'ng-ui-utils',
         'restangular',
         'services',
-        'player'], function (ng, $, _) {
+        'player'], function (ng, $, _, Q) {
   /* Controllers */
 
   function ToolUsage(toolName, keypress, otherInfo) {
@@ -98,13 +99,16 @@ define(['angular',
       $scope.user.usages = Hub.all('usages').getList({
         'where': {'user': $scope.user.email},
       });
-      $scope.tools.then(function(tools) {
+      
+      Q.spread([$scope.tools, $scope.user_list], function(tools, users) {
         _.each(tools, function(tool) {
           Hub.all('usages').getList({
             where: {user: $scope.user.email, tool: tool._id}
           }).then(function(usages) {
             tool.usages = usages;
-            tool.users = _.pluck(usages, 'user');
+            tool.users = _.where(users, function(u) {
+              return _.contains(_.pluck(usages, 'user'), u.email);
+            });
           });
         });
       });
@@ -155,7 +159,7 @@ define(['angular',
           var users = $stateParams.user_filter.split(",");
           _.each(users, function(email) {
             if (email) {
-              name = _.find(user_list, {email: email}).name;
+              name = _.find(useri_list, {email: email}).name;
               $scope.filter.filters.push({name: name, email: email});
             }
           });
@@ -165,7 +169,7 @@ define(['angular',
       $scope.filterSet.filters.push(function(tool) {
         return tool.users && ($scope.filter.filters.length === 0 //all tools if no users selected
               || _.every($scope.filter.filters, function(user){ //or only tools with all selected users
-                return _.contains(tool.users, user.email); 
+                return _.find(tool.users, {email: user.email}); 
               }));
       });
 
@@ -267,17 +271,17 @@ define(['angular',
   .controller('ToolBlockCtrl', ['$scope', '$state',
     function($scope, $state) {
       $scope.userVideo = function(user) {
-        var self = (user.email == $scope.user.email);
+        var self = (user == $scope.user.email);
         var origin = (self ? 'local' : 'external');
         if (user.video || self) {
           $state.go('main.video', {
             location: origin,
-            owner: user.email,
+            owner: user,
             tool: $scope.tool._id
           });
         } else {
           $state.go('main.request', {
-            owner: user.email,
+            owner: user,
             tool: $scope.tool._id
           });
         }

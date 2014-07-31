@@ -21,6 +21,7 @@ requirejs.config({
         'restangular': '../lib/bower/restangular/dist/restangular',
         'lodash': '../lib/bower/lodash/dist/lodash',
         'deferredBootstrapper': '../lib/bower/angular-deferred-bootstrap/angular-deferred-bootstrap',
+        'Q': '../lib/bower/q/q',
 
         'tablesorter': '../lib/bower/jquery.tablesorter/js',
         'jquery.metadata': '../lib/bower/jquery.metadata/jquery.metadata',
