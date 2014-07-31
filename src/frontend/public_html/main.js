@@ -74,7 +74,6 @@ requirejs([
     injectorModules: 'socasterServices',
     resolve: {
       User: function(Local, Hub) {
-        console.log(Hub);
         var user = Local.one('user').get();
         return user;
       }

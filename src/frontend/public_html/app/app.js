@@ -17,8 +17,6 @@ define(['angular',
 
   /* App Module */
 
-  console.log(services);
-  
   return ng.module('socasterApp', [
     'ui.router',
     'ui.bootstrap',
@@ -65,7 +63,7 @@ define(['angular',
             })
 
             .state('main.video', {
-              url: '/video/:location/:owner/:application/:tool?clip_id',
+              url: '/video?location&owner&tool_id&clip_id',
               onEnter: function($stateParams, $state, $modal, $rootScope, Hub, Local) {
                 var origin = ($stateParams.location == "external" ? Hub : Local);
                 var tool = origin.one($stateParams.owner)

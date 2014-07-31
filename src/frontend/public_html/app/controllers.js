@@ -50,9 +50,7 @@ define(['angular',
   .controller('RootCtrl', ['$scope', '$filter', 'Hub', 'User',
     function($scope, $filter, Hub, User) {
       $scope.user = User;
-      Hub.all('applications').getList().then(function(apps){
-        $scope.applications = apps;
-      });
+      $scope.applications = Hub.all('applications').getList();
 
       //report interface usage to Local Hub
       $scope.queuedToolUsages = [];
@@ -235,6 +233,37 @@ define(['angular',
       };
     }])
 
+  .controller('ApplicationFilterCtrl', ['$scope', '$state',
+    function($scope, $state) {
+      $scope.filter = {
+        name: 'Tool',
+        input: null,
+        source: [],
+        apps: {},
+        templateUrl: ''
+      };
+
+      $scope.applications.then(function(apps) {
+        $scope.filter.source = _.pluck(apps, 'name');
+      });
+
+      if ($state.params.app_filter) {
+        apps = $state.params.app_filter.split(',');
+        $scope.filter.apps = _.zipObject(apps, _.times(apps.length, function(){return true}));
+      }
+
+      $scope.filterSet.filters.push(function(tool) {
+        return !_.any($scope.filter.apps) //unchecking all apps shows all tools
+          || $scope.filter.apps[tool.application];
+      });
+
+      $scope.updateFilters = function() {
+        $state.go('main', {
+          app_filter: _.keys(_.pick($scope.filter.apps, function(v){return v}))
+        });
+      }
+    }])
+
   .controller('ToolBlockCtrl', ['$scope', '$state',
     function($scope, $state) {
       $scope.userVideo = function(user) {
@@ -302,7 +331,6 @@ define(['angular',
           if (item.status == "new") {
             item.status = "seen";
             item.put($scope.auth);
-            console.log(item);
           }
         });
       });
