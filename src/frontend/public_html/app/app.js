@@ -45,7 +45,10 @@ define(['angular',
                     templateUrl: 'partials/tool-list.html',
                     controller: 'ToolListCtrl'
                   },
-                  'right-sidebar': {}
+                  'right-sidebar': {
+                    templateUrl: 'partials/ordering.html',
+                    controller: 'OrderCtrl'
+                  }
                 },
                 breadcrumb: { title: 'Home' }
             })
