@@ -110,6 +110,9 @@ define(['angular',
               return _.contains(_.pluck(usages, 'user'), u.email);
             });
           });
+          tool.clips = Hub.all('clips').getList({
+            where: {tool: tool._id}
+          });
         });
       });
       
@@ -270,7 +273,10 @@ define(['angular',
 
   .controller('ToolBlockCtrl', ['$scope', '$state',
     function($scope, $state) {
-      $scope.userVideo = function(user) {
+      $scope.hasVideo = function(user) {
+        return _.find($scope.tool.clips.$object, {user: user.email});
+      }
+      $scope.getVideo = function(user) {
         var self = (user == $scope.user.email);
         var origin = (self ? 'local' : 'external');
         if (user.video || self) {

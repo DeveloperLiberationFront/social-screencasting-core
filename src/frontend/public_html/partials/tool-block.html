@@ -10,9 +10,9 @@
     <span>Used by:</span>
     <ul class='list-inline'>
       <li class='tool-user' ng-repeat='user in tool.users'>
-        <a ng-click='userVideo(user)' class='pointer'>{{user.name}}</a>
+        <a ng-click='getVideo(user)' class='pointer'>{{user.name}}</a>
         <span class='glyphicon glyphicon-facetime-video'
-              ng-if='user.video'></span>
+              ng-if='hasVideo(user)'></span>
       </li>
     </ul>
   </div>
