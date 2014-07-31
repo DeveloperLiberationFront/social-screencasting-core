@@ -85,7 +85,7 @@ define(['angular',
       Q.spread([$scope.tools, $scope.user_list], function(tools, users) {
         _.each(tools, function(tool) {
           Hub.all('usages').getList({
-            where: {user: $scope.user.email, tool: tool._id}
+            where: {tool: tool._id}
           }).then(function(usages) {
             tool.usages = usages;
             tool.users = _.where(users, function(u) {
