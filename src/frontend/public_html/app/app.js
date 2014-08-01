@@ -1,5 +1,6 @@
 /*global define, _*/
 define(['angular',
+        'bluebird',
         'services',
         'ng-route',
         'controllers',
@@ -12,7 +13,7 @@ define(['angular',
         'player',
         'directives',
         'lib/breadcrumb',
-       ], function (ng, services) {
+       ], function (ng, Promise) {
   'use strict';
 
   /* App Module */
@@ -52,54 +53,48 @@ define(['angular',
                 },
                 breadcrumb: { title: 'Home' }
             })
-            .state('tools', {
-                url: '/tools/:name',
-                templateUrl: 'partials/tool-details.html',
-                controller: 'ToolCtrl',
-                breadcrumb: { title: 'Tool: {:name}' }
-            })
-            .state('player', {
-                url: '/player',
-                templateUrl: 'partials/player.html',
-                controller: 'PlayerCtrl',
-                breadcrumb: { title: '{clip.name}' }
-            })
 
             .state('main.video', {
-              url: '/video?location&owner&tool_id&clip_id',
-              onEnter: function($stateParams, $state, $modal, $rootScope, Hub, Local) {
-                var origin = ($stateParams.location == "external" ? Hub : Local);
-                var tool = origin.one($stateParams.owner)
-                  .one($stateParams.application)
-                  .one($stateParams.tool);
-                
-                $rootScope.preAuth.then(function(auth){
-                  $rootScope.auth = auth;
-                  return tool.get(auth);
-                }).then(function(tool) {
-                  return _.union(tool.keyclips, tool.guiclips);
-                }).then(function(clips) {
-                  $modal.open({
-                    templateUrl: 'partials/modal-player.html',
-                    controller: 'ModalPlayer',
-                    scope: $rootScope,
-                    resolve: {
-                      clip_id: function(){return typeof clip_id == 'string' ? clip_id : false; },
-                      clips: ['$q', function($q){
-                        //fetch all of the users clips for use in the player
-                        return $q.all(clips.map(function(clip) {
-                          return tool.one(clip).get($rootScope.auth);
-                        }));
-                      }]
+              url: '/video?location&owner&tool&tool_id&clip_id&application',
+              onEnter: function($$state, $modal, $rootScope, Hub, Local) {
+                var clips;
+                if ($stateParams.location == "external") {
+                  //remote clips; fetch from hub
+                  clips = Hub.all('clips').getList({
+                    where: {
+                      tool: $state.params.tool_id, 
+                      user: $state.params.owner //restrict to clips by owner, if specified
                     },
-                    windowClass: (clips.length > 1 ? 'modal-multiclip-player'
-                                  : 'modal-player'),
-                    size: 'lg'
-                  }).result.finally(function(result) {
-                    return $state.transitionTo("main");
                   });
+                } else {
+                  tool = Local.one($state.params.owner)
+                    .one($state.params.application)
+                    .one($state.params.tool);
+                  clips = Promise.all(tool.get().then(function(tool) {
+                    return _.union(tool.keyclips, tool.guiclips).map(function(clip) {
+                      return tool.one(clip).get();
+                    })
+                  }));
+                }
+
+                $modal.open({
+                  templateUrl: 'partials/modal-player.html',
+                  controller: 'ModalPlayer',
+                  scope: $rootScope,
+                  resolve: {
+                    clip_name: function(){
+                      return typeof clip_id == 'string' ? clip_id : false;
+                    },
+                    clips: function() { return clips; }
+                  },
+                  windowClass: (clips.length > 1 ? 'modal-multiclip-player'
+                                : 'modal-player'),
+                  size: 'lg'
+                }).result.finally(function(result) {
+                  return $state.transitionTo("main");
                 });
-              }})
+              }
+            })
 
             .state('main.request', {
                 url: '/request/:owner/:application/:tool',

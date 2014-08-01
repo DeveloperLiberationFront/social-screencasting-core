@@ -127,13 +127,12 @@ define(['angular',
         };
     }])
 
-  .controller('ModalPlayer', ['$scope', '$modalInstance', 'clips', 'clip_id',
+  .controller('ModalPlayer', ['$scope', '$modalInstance', 'clips', 'clip_name',
     function($scope, $modalInstance, clips, clip_id) {
       //tool is a restangular object
 
-
       $scope.clips = clips;
-      $scope.clip = (clip_id ? _.find(clips, {name: clip_id}) : clips[0]);
+      $scope.clip = (clip_id ? _.find(clips, {name: clip_name}) : clips[0]);
 
       $scope.$emit('instrumented', "Loaded ModalPlayer", $scope.clip);
 
