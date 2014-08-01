@@ -64,7 +64,6 @@ public class HandlerManager
 	private static void makeAndAddHandlersForClipSharing(HandlerCollection h, WebQueryInterface wqi) throws IOException, URISyntaxException
 	{
 		h.addHandler(new HTTPClipSharer(wqi));	
-		h.addHandler(new HTTPShareRequester("/shareRequest", wqi));
 		h.addHandler(new HTTPUpdateClip("/updateClip", wqi));
 	}
 

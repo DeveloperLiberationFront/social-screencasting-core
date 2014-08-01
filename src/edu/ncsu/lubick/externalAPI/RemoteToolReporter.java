@@ -91,7 +91,7 @@ public class RemoteToolReporter {
 			return;
 		}
 		
-		logger.debug("preparing to report data "+reportingArray.toString());
+		logger.debug("preparing to report data "+reportingArray);
 
 		HttpPost httpPost = new HttpPost(preparePostURL());
 		HTTPUtils.addAuth(httpPost, userManager);

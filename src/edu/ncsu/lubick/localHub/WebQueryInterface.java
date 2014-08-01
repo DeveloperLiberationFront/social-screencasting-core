@@ -13,8 +13,6 @@ public interface WebQueryInterface {
 
 	void shareClipWithUser(String clipId, String recipient, ClipOptions clipOptions);
 
-	void requestClipsFromUser(String owner, String pluginName, String toolName);
-
 	List<ToolCountStruct> getAllToolAggregateForPlugin(String pluginName);
 	
 	ToolCountStruct getToolAggregate(String applicationName, String toolName);

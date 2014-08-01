@@ -16,7 +16,6 @@ import org.apache.log4j.Logger;
 import edu.ncsu.lubick.ScreenRecordingModule;
 import edu.ncsu.lubick.externalAPI.BrowserMediaPackageSharer;
 import edu.ncsu.lubick.externalAPI.BrowserMediaPackageUploader;
-import edu.ncsu.lubick.externalAPI.ExternalShareClipRequester;
 import edu.ncsu.lubick.externalAPI.RemoteToolReporter;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.database.BufferedDatabaseManager;
@@ -65,7 +64,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	private ClipQualityManager clipQualityManager;
 	private BrowserMediaPackageSharer clipSharingManager;
 	private BrowserMediaPackageUploader clipUploader;
-	private ExternalShareClipRequester clipShareRequester;
 	
 	private Map<String, Boolean> pluginsRecordingStatusMap = new HashMap<>();
 	private Timer pausingTimer = new Timer(true);	//Daemon timer
@@ -151,7 +149,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 		this.postProductionHandler = new PostProductionHandler(this.screencastMonitorDirectory, userManager);
 		this.clipSharingManager = new BrowserMediaPackageSharer(userManager);
 		this.clipUploader = new BrowserMediaPackageUploader(userManager);
-		this.clipShareRequester = new ExternalShareClipRequester(userManager);
 		
 		if (shouldReportToolsRemotely)
 		{
@@ -487,12 +484,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	public void setTrayIconMenu(PopupMenu pm)
 	{
 		this.notificationManager.setTrayIconMenu(pm);
-	}
-
-	@Override
-	public void requestClipsFromUser(String owner, String pluginName, String toolName)
-	{
-		this.clipShareRequester.requestClipsFromUser(owner, pluginName, toolName);
 	}
 
 	@Override
