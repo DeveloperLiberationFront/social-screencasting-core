@@ -3,7 +3,7 @@
 </li>
 <li class="list-group-item ordering">
   <ul class='list-group unselectable pointer'>
-    <li ng-repeat='option in filter.source' class='list-group-item'>
+    <li ng-repeat='option in filter.source' class='list-group-item' ng-click="filter.active_filters[option.id] = !filter.active_filters[option.id]">
       <input type="checkbox" ng-model="filter.active_filters[option.id]" ng-change='updateFilters()'/>
       {{option.text}}
     </li>
