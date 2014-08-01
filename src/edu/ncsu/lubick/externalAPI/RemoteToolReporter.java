@@ -8,11 +8,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -208,32 +210,33 @@ public class RemoteToolReporter {
 	
 	
 	@SuppressWarnings("unused")
-	private static void main(String[] args) throws Exception
+	public static void main(String[] args) throws Exception
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
 		CloseableHttpClient client = HttpClients.createDefault();
-		JSONObject reportingObject = new JSONObject("{\"data\": {\"Eclipse\": {\"Undo\": 10, \"Save\": 50, \"Toggle Comment\": 3}}}");
+		JSONObject reportingObject = new JSONObject("{\"data\" : [{\"app_name\":\"Eclipse\", \"tool_name\": \"Toggle Comment\", \"keyboard\": 53, \"mouse\": 67}]}");
 		
-		logger.debug("preparing to report data "+reportingObject.toString(2));
+		JSONArray reportingArray = new JSONArray("[{\"app_name\":\"Eclipse\", \"tool_name\": \"Toggle Comment\", \"keyboard\": 53, \"mouse\": 67}]");
+		
+		logger.debug("preparing to report data "+reportingArray.toString(2));
 
-		StringBuilder pathBuilder = new StringBuilder("/api/");
-		
 		UserManager um = new UnitTestUserManager("Kevins Bad Test", "kjlubick%2btest@ncsu.edu", "221ed3d8-6a09-4967-91b6-482783ec5313");
 		
-		pathBuilder.append(um.getUserEmail());
-		URI u = HTTPUtils.buildExternalHttpURI(pathBuilder.toString(), um);
+		URI u = HTTPUtils.buildExternalHttpURI("/report-usage");
 		
-		HttpPut httpPut = new HttpPut(u);
+		HttpPost httpPost = new HttpPost(u);
+		HTTPUtils.addAuth(httpPost, um);
 		
-		logger.info(httpPut);
+		
+		logger.info(httpPost);
 
 		try
 		{
-			StringEntity content = new StringEntity(reportingObject.toString());
+			StringEntity content = new StringEntity(reportingArray.toString());
 			content.setContentType("application/json");
 
-			httpPut.setEntity(content);
-			try(CloseableHttpResponse response = client.execute(httpPut);)
+			httpPost.setEntity(content);
+			try(CloseableHttpResponse response = client.execute(httpPost);)
 			{
 				String responseBody = HTTPUtils.getResponseBody(response);
 				logger.info("response: " +responseBody);
@@ -245,7 +248,7 @@ public class RemoteToolReporter {
 			logger.error("Problem reporting tool info",e);
 		}
 		finally {
-			httpPut.releaseConnection();
+			httpPost.releaseConnection();
 		}
 	}
 

@@ -320,7 +320,7 @@ define(['angular',
     }]);
 
   function prepareMessagesForSentRequests(sent) {
-    $interpolate = angular.injector(['ng']).get('$interpolate');
+    var $interpolate = angular.injector(['ng']).get('$interpolate');
     _.each(sent, function(sentItem) {
       if (sentItem.type == "request_fulfilled") {
         var json = JSON.parse(sentItem.status);

@@ -51,7 +51,6 @@ public class HandlerManager
 
 		Resource[] staticWebResources = setUpWebResources(h.getClass());
 		
-
 		Resource[] allWebResources = setUpLocalMediaAssets(staticWebResources);
 
 		logger.info("Web Resources "+Arrays.toString(allWebResources));
@@ -62,30 +61,11 @@ public class HandlerManager
 		return h;
 	}
 
-	private static void makeAndAddHandlersForAPI(HandlerCollection h, WebQueryInterface wqi)
-	{
-		h.addHandler(new HTTPAPIHandler(wqi));
-	}
-
 	private static void makeAndAddHandlersForClipSharing(HandlerCollection h, WebQueryInterface wqi) throws IOException, URISyntaxException
 	{
 		h.addHandler(new HTTPClipSharer(wqi));	
 		h.addHandler(new HTTPShareRequester("/shareRequest", wqi));
 		h.addHandler(new HTTPUpdateClip("/updateClip", wqi));
-	}
-
-	private static void makeAndAddHandlersForBrowsing(HandlerCollection h, WebQueryInterface wqi) throws IOException, URISyntaxException
-	{
-		h.addHandler(new IndexHandler());
-	}
-
-	private static void makeAndAddHandlersForWebReporting(HandlerCollection h, WebQueryInterface wqi)
-	{
-		if (wqi instanceof WebToolReportingInterface)
-		{
-			h.addHandler(new HTTPToolReportingHandler((WebToolReportingInterface)wqi ));
-		}
-		h.addHandler(new VersionHandler("/version"));
 	}
 
 	private static Resource[] setUpWebResources(Class<?> classForJarResources)	//this will work whether running from Eclipse
