@@ -3,13 +3,13 @@
 define(['angular',
         'jquery',
         'lodash',
-        'Q',
+        'bluebird',
         'ng-bootstrap',
         'ng-grid',
         'ng-ui-utils',
         'restangular',
         'services',
-        'player'], function (ng, $, _, Q) {
+        'player'], function (ng, $, _, Promise) {
   /* Controllers */
 
   function ToolUsage(toolName, keypress, otherInfo) {
@@ -81,11 +81,11 @@ define(['angular',
       $scope.user.usages = Hub.all('usages').getList({
         'where': {'user': $scope.user.email},
       });
-      
-      Q.spread([$scope.tools, $scope.user_list], function(tools, users) {
+
+      Promise.all([$scope.tools, $scope.user_list]).spread(function(tools, users) {
         _.each(tools, function(tool) {
           Hub.all('usages').getList({
-            where: {user: $scope.user.email, tool: tool._id}
+            where: {tool: tool._id}
           }).then(function(usages) {
             tool.usages = usages;
             tool.users = _.where(users, function(u) {
