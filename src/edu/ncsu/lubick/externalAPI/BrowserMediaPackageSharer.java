@@ -30,19 +30,6 @@ public class BrowserMediaPackageSharer {
 		this.userManager = userManager;
 	}
 
-	@SuppressWarnings("unused")
-	private static void main(String[] args) throws Exception
-	{
-		TestingUtils.makeSureLoggingIsSetUp();
-		//UserManager userManager = new UnitTestUserManager("Kevin Lubick", "kjlubick@ncsu.edu", "0216427e-b0e0-4102-8274-9ce3bc7a74a0");
-		UserManager userManager = new UnitTestUserManager("Test User", "test@mailinator.com", "123");
-		
-		BrowserMediaPackageSharer sharer = new BrowserMediaPackageSharer(userManager);
-		
-		sharer.shareClipWithUser("Eclipsedc3a37d4-4469-391f-bd62-0324ac2b7091K", "kjlubick@ncsu.edu");
-		
-	}
-	
 	public boolean shareClipWithUser(String clipId, String email)
 	{
 		try
@@ -102,5 +89,18 @@ public class BrowserMediaPackageSharer {
 		StringBuilder pathBuilder = new StringBuilder("/api/share");
 
 		return HTTPUtils.buildExternalHttpURI(pathBuilder.toString(), userManager);
+	}
+
+	@SuppressWarnings("unused")
+	private static void main(String[] args) throws Exception
+	{
+		TestingUtils.makeSureLoggingIsSetUp();
+		//UserManager userManager = new UnitTestUserManager("Kevin Lubick", "kjlubick@ncsu.edu", "0216427e-b0e0-4102-8274-9ce3bc7a74a0");
+		UserManager userManager = new UnitTestUserManager("Test User", "test@mailinator.com", "123");
+		
+		BrowserMediaPackageSharer sharer = new BrowserMediaPackageSharer(userManager);
+		
+		sharer.shareClipWithUser("Eclipsedc3a37d4-4469-391f-bd62-0324ac2b7091K", "kjlubick@ncsu.edu");
+		
 	}
 }

@@ -41,7 +41,6 @@ public class HTTPUtils {
 
 	public static URI buildExternalHttpURI(String path) throws URISyntaxException
 	{
-
 		return new URI("http", BASE_URL, path, null);
 	}
 
