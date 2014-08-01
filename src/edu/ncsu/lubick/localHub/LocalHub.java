@@ -163,15 +163,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	private void setUpUserManager()
 	{
 		File initDirectory = new File(System.getProperty("user.dir"));
-//		try
-//		{
-//			initDirectory = new File(getClass().getResource("").toURI());
-//		}
-//		catch (URISyntaxException e)
-//		{
-//			logger.error("Could not find launch directory",e);
-//			initDirectory = new File("");
-//		}
 		userManager = new UserManager(initDirectory);		//this will block and prompt for use input if needed
 	}
 
@@ -234,18 +225,21 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 
 	private void enableRemoteToolReporting(boolean wantRemoteToolReporting)
 	{
+		logger.debug("Remote Tool Reporting "+(wantRemoteToolReporting?"":"not")+" set up");
 		this.shouldReportToolsRemotely = wantRemoteToolReporting;
 		
 	}
 
 	private void enableHTTPServer(boolean wantHTTPServer)
 	{
+		logger.debug("Local HTTP Server "+(wantHTTPServer?"":"not")+" set up");
 		this.shouldUseHTTPServer = wantHTTPServer;
 
 	}
 
 	private void enableScreenRecording(boolean wantScreenRecording)
 	{
+		logger.debug("Screen recording "+(wantScreenRecording?"":"not")+" set up");
 		this.shouldUseScreenRecording = wantScreenRecording;
 
 	}

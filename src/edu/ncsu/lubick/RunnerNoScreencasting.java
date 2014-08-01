@@ -14,7 +14,11 @@ public class RunnerNoScreencasting
 	public static void main(String[] args) throws Exception
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
-		LocalHub.startServer("HF/Screencasting/", Runner.DEFAULT_DB_LOC, true, false, false, false);
+		LocalHub.startServer("HF/Screencasting/", Runner.DEFAULT_DB_LOC,
+				true,  //want http
+				false, //want screen recording
+				false, //want remote tool reporting
+				false); //is debug  (sets a dummy remote database, prevents screencasts from being made, etc)
 		Thread.sleep(1000);
 		Desktop.getDesktop().browse(buildStartingURI());
 	}

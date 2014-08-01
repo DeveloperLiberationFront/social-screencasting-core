@@ -9,7 +9,6 @@ import java.util.TimerTask;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -81,10 +80,10 @@ public class RemoteToolReporter {
 
 	private void reportTools() throws JSONException
 	{
-		JSONObject reportingObject;
+		JSONArray reportingArray;
 		try
 		{
-			reportingObject = assembleReportingJSONObject();
+			reportingArray = makeAggregateForAllPlugins();
 		}
 		catch (NoToolDataException e)
 		{
@@ -92,17 +91,18 @@ public class RemoteToolReporter {
 			return;
 		}
 		
-		logger.debug("preparing to report data "+reportingObject.toString(2));
+		logger.debug("preparing to report data "+reportingArray.toString());
 
-		HttpPut httpPut = new HttpPut(preparePutURL());
+		HttpPost httpPost = new HttpPost(preparePostURL());
+		HTTPUtils.addAuth(httpPost, userManager);
 
 		try
 		{
-			StringEntity content = new StringEntity(reportingObject.toString());
+			StringEntity content = new StringEntity(reportingArray.toString());
 			content.setContentType("application/json");
 
-			httpPut.setEntity(content);
-			try(CloseableHttpResponse response = client.execute(httpPut);)
+			httpPost.setEntity(content);
+			try(CloseableHttpResponse response = client.execute(httpPost);)
 			{
 				String responseBody = HTTPUtils.getResponseBody(response);
 				logger.info("response: " +responseBody);
@@ -115,19 +115,19 @@ public class RemoteToolReporter {
 			logger.error("Problem reporting tool info",e);
 		}
 		finally {
-			httpPut.releaseConnection();
+			httpPost.releaseConnection();
 		}
 		
 	}
 
 
-	private URI preparePutURL()
+	private URI preparePostURL()
 	{
 		StringBuilder pathBuilder = new StringBuilder("/api/");
 		pathBuilder.append(userManager.getUserEmail());
 		try
 		{
-			return HTTPUtils.buildExternalHttpURI(pathBuilder.toString(), userManager);
+			return HTTPUtils.buildExternalHttpURI("/report-usage");
 		}
 		catch (URISyntaxException e)
 		{
@@ -137,62 +137,46 @@ public class RemoteToolReporter {
 
 	}
 
-
-	private JSONObject assembleReportingJSONObject() throws JSONException, NoToolDataException
-	{
-		JSONObject pluginAggregate = makeAggregateForAllPlugins();
-		
-		JSONObject reportingObject = new JSONObject();
-		reportingObject.put("data", pluginAggregate);
-		return reportingObject;
-	}
-
 	
-	private JSONObject makeAggregateForAllPlugins() throws NoToolDataException
+	private JSONArray makeAggregateForAllPlugins() throws NoToolDataException
 	{
 		List<String> plugins = databaseManager.getNamesOfAllNonHiddenPlugins(); 
 		if (plugins.isEmpty()) 
 		{
 			throw new NoToolDataException();
 		}
-		JSONObject allPlugins = new JSONObject();
+		JSONArray allPlugins = new JSONArray();
 		
 		for(String pluginName: plugins)
 		{
-			try
-			{
-				allPlugins.put(pluginName, this.getAggregateForPlugin(pluginName));
-			}
-			catch (JSONException e)
-			{
-				logger.error("Unusual JSON exception, squashing: ",e);
-			}
+			allPlugins = this.getAggregateForApplication(pluginName, allPlugins);
 		}
 		
 		return allPlugins;
 	}
 
 
-	private JSONObject getAggregateForPlugin(String pluginName)
+	private JSONArray getAggregateForApplication(String applicationName, JSONArray accumulator)
 	{
-		List<ToolCountStruct> counts = databaseManager.getAllToolAggregateForPlugin(pluginName);
+		List<ToolCountStruct> counts = databaseManager.getAllToolAggregateForPlugin(applicationName);
 		
-		JSONObject retVal = new JSONObject();
 		for(ToolCountStruct tcs: counts)
 		{
 			JSONObject tempObject = new JSONObject();
 			try
 			{
-				tempObject.put("gui", tcs.guiToolCount);
+				tempObject.put("app_name", applicationName);
+				tempObject.put("tool_name", tcs.toolName);
+				tempObject.put("mouse", tcs.guiToolCount);
 				tempObject.put("keyboard", tcs.keyboardCount);
-				retVal.put(tcs.toolName, tempObject);
+				accumulator.put(tempObject);
 			}
 			catch (JSONException e)
 			{
 				logger.error("Unusual JSON exception, squashing: ",e);
 			}
 		}
-		return retVal;
+		return accumulator;
 	}
 
 
@@ -210,12 +194,10 @@ public class RemoteToolReporter {
 	
 	
 	@SuppressWarnings("unused")
-	public static void main(String[] args) throws Exception
+	private static void main(String[] args) throws Exception
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
-		CloseableHttpClient client = HttpClients.createDefault();
-		JSONObject reportingObject = new JSONObject("{\"data\" : [{\"app_name\":\"Eclipse\", \"tool_name\": \"Toggle Comment\", \"keyboard\": 53, \"mouse\": 67}]}");
-		
+		CloseableHttpClient client = HttpClients.createDefault();	
 		JSONArray reportingArray = new JSONArray("[{\"app_name\":\"Eclipse\", \"tool_name\": \"Toggle Comment\", \"keyboard\": 53, \"mouse\": 67}]");
 		
 		logger.debug("preparing to report data "+reportingArray.toString(2));
