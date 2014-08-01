@@ -7,20 +7,15 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 import javax.imageio.ImageIO;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -79,12 +74,12 @@ public class BrowserMediaPackageUploader {
 		File packageDirectory = new File(expectedLocationOnDisk);
 
 		logger.info("Searching for browser package in directory "+packageDirectory);
-		
+
 		if (packageDirectory.exists() && packageDirectory.isDirectory())
 		{
 			try
 			{
-				return uploadToolUsage(toolUsage, clipOptions, packageDirectory);
+				return uploadToolUsage(clipOptions, packageDirectory);
 			}
 			catch (IOException e)
 			{
@@ -97,24 +92,24 @@ public class BrowserMediaPackageUploader {
 	}
 
 
-	private boolean uploadToolUsage(ToolUsage toolUsage, ClipOptions clipOptions, File packageDirectory) throws IOException
+	private boolean uploadToolUsage(ClipOptions clipOptions, File packageDirectory) throws IOException
 	{
 		try
 		{
-			this.current_external_tool_id = getExternalToolId(toolUsage);
+			this.current_external_tool_id = getExternalToolId();
 
 			logger.debug("Found external id "+current_external_tool_id);
-			
+
 			if (current_external_tool_id == null) {
 				return false;
 			}
-			
-			this.current_external_clip_id = makeExternalClip(toolUsage, packageDirectory);
-			
+
+			this.current_external_clip_id = makeExternalClip(packageDirectory);
+
 			logger.info("Made clip id "+current_external_clip_id);
-			
+
 			File[] allFiles = packageDirectory.listFiles();
-			return uploadCroppedFiles(allFiles, clipOptions);
+			return uploadAllFiles(allFiles, clipOptions);
 		}
 		catch (Exception e) {
 			throw new IOException("Problem sharing", e);
@@ -122,12 +117,12 @@ public class BrowserMediaPackageUploader {
 	}
 
 
-	private String makeExternalClip(ToolUsage toolUsage, File packageDirectory) throws JSONException, URISyntaxException
+	private String makeExternalClip(File packageDirectory) throws JSONException, URISyntaxException
 	{
 		JSONObject jobj = new JSONObject();
 		jobj.put("name", packageDirectory.getName());
 		jobj.put("tool", current_external_tool_id);
-		if (ToolStream.MENU_KEY_PRESS.equals(toolUsage.getToolKeyPresses())) {
+		if (ToolStream.MENU_KEY_PRESS.equals(currentToolUsage.getToolKeyPresses())) {
 			jobj.put("type", "mouse");
 		} else {
 			jobj.put("type", "keyboard");
@@ -137,7 +132,7 @@ public class BrowserMediaPackageUploader {
 
 		HttpPost httpPost = new HttpPost(postUri);	
 		HTTPUtils.addAuth(httpPost, userManager);
-		
+
 		String clipId = null;
 		try
 		{
@@ -149,7 +144,7 @@ public class BrowserMediaPackageUploader {
 
 			String responseBody = HTTPUtils.getResponseBody(response);
 			logger.info("Reply: "+responseBody);
-			
+
 			JSONObject responseObj = new JSONObject(responseBody);
 			clipId = responseObj.optString("_id");
 
@@ -165,11 +160,11 @@ public class BrowserMediaPackageUploader {
 	}
 
 
-	private String getExternalToolId(ToolUsage toolUsage) throws JSONException, URISyntaxException
+	private String getExternalToolId() throws JSONException, URISyntaxException
 	{
 		JSONObject jobj = new JSONObject();
-		jobj.put("name", toolUsage.getToolName());
-		jobj.put("application", toolUsage.getPluginName());
+		jobj.put("name", currentToolUsage.getToolName());
+		jobj.put("application", currentToolUsage.getPluginName());
 
 		URI getUri = new URIBuilder(HTTPUtils.buildExternalHttpURI("/tools")).addParameter("where",jobj.toString()).build();
 
@@ -182,7 +177,7 @@ public class BrowserMediaPackageUploader {
 
 			String responseBody = HTTPUtils.getResponseBody(response);
 			logger.info("Reply: "+responseBody);
-			
+
 			JSONArray responseArray = new JSONObject(responseBody).optJSONArray("_items");
 			if (responseArray != null && responseArray.length() > 0) {
 				toolid = responseArray.getJSONObject(0).optString("_id");
@@ -197,8 +192,8 @@ public class BrowserMediaPackageUploader {
 		}
 		return toolid;
 	}
-	
-	private boolean uploadCroppedFiles(File[] files, ClipOptions clipOptions)
+
+	private boolean uploadAllFiles(File[] files, ClipOptions clipOptions)
 	{
 		int startFrame = clipOptions.startFrame;
 		int endFrame = clipOptions.endFrame > 0 ? clipOptions.endFrame : files.length;
@@ -207,13 +202,16 @@ public class BrowserMediaPackageUploader {
 			String fileName = file.getName();
 			try
 			{
+
+				if (!fileName.startsWith("frame")) {
+					logger.info("Uploading: " + fileName);
+					reportUncroppedImage(file);
+					continue;
+				}
 				try
 				{
 					int fileNum = fileNameToInt(fileName);
-					if (!fileName.startsWith("frame")) {
-						reportFile(file);
-					}
-					else if (fileNum >= startFrame && fileNum <= endFrame || fileNum == -1) {
+					if (fileNum >= startFrame && fileNum <= endFrame || fileNum == -1) {
 						logger.info("Uploading: " + fileName);
 						reportCroppedImage(file, clipOptions.cropRect);
 					}
@@ -221,20 +219,26 @@ public class BrowserMediaPackageUploader {
 				catch(NumberFormatException e)
 				{
 					logger.info("Uploading: " + file.getAbsolutePath());
-					reportFile(file);
+					reportUncroppedImage(file);
 				}
 			}
 			catch(IOException e)
 			{
-				logger.fatal("Could not report/unreport file " + file.getAbsolutePath(), e);
+				logger.fatal("Could not report file " + file.getAbsolutePath(), e);
 				return false;
 			}
 		}
-		
-		logger.info("Done uploading/unuploading files");
+
+		logger.info("Done uploading files");
 		return true;
 	}
-	
+
+	private void reportUncroppedImage(File imageFile) throws IOException
+	{
+		reportCroppedImage(imageFile, null);
+	}
+
+
 	private void reportCroppedImage(File imageFile, Rectangle rect) throws IOException
 	{
 		URI putUri;
@@ -255,16 +259,16 @@ public class BrowserMediaPackageUploader {
 
 			BufferedImage image = ImageIO.read(imageFile);
 			BufferedImage croppedImage = rect == null? image: image.getSubimage(rect.x, rect.y, rect.width, rect.height);
-			
-			
+
+
 			ByteArrayOutputStream croppedJPG = new ByteArrayOutputStream();
-			
+
 			ImageIO.write(croppedImage, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, croppedJPG);
-			
+
 			byte[] croppedJPGForTransfer = croppedJPG.toByteArray();
-			
+
 			logger.debug("sending "+croppedJPGForTransfer.length + " bytes");
-			
+
 			mpeBuilder.addBinaryBody("data", croppedJPGForTransfer, ContentType.DEFAULT_BINARY, "");
 
 			mpeBuilder.addTextBody("name", imageFile.getName());
@@ -273,7 +277,7 @@ public class BrowserMediaPackageUploader {
 
 			httpPost.setEntity(content);
 			CloseableHttpResponse response = client.execute(httpPost);
-			
+
 			String responseBody = HTTPUtils.getResponseBody(response);
 			logger.info("Reply: "+responseBody);
 		}
@@ -282,54 +286,6 @@ public class BrowserMediaPackageUploader {
 			httpPost.reset();
 		}
 
-	}
-		
-	private boolean incrementalUploadFiles(File[] files, List<String> existingFiles, ClipOptions clipOptions)
-	{
-		int startFrame = clipOptions.startFrame;
-		int endFrame = clipOptions.endFrame > 0 ? clipOptions.endFrame : files.length;
-		for(File file : files)
-		{
-			String fileName = file.getName();
-			int fileNum = -1;
-			
-			try
-			{
-				try
-				{
-					fileNum = fileNameToInt(fileName);
-					boolean doesFileExist = existingFiles.contains(fileName);
-					
-					if (fileName.startsWith("frame")) {
-						logger.info("Uploading: " + fileName);
-						reportFile(file);
-					}
-					else if (!doesFileExist && (fileNum >= startFrame && fileNum <= endFrame || fileNum == -1))
-					{
-						logger.info("Uploading: " + fileName);
-						reportFile(file);
-					}
-					else if (doesFileExist && (fileNum != -1 && (fileNum < startFrame || fileNum > endFrame)))
-					{
-						logger.info("Unuploading: " + fileName);
-						unreportFile(file);
-					}
-				}
-				catch(NumberFormatException e)
-				{
-					logger.info("Uploading: " + file.getAbsolutePath());
-					reportFile(file);
-				}
-			}
-			catch(IOException e)
-			{
-				logger.fatal("Could not report/unreport file " + file.getAbsolutePath(), e);
-				return false;
-			}
-		}
-		
-		logger.info("Done uploading/unuploading files");
-		return true;
 	}
 
 	private int fileNameToInt(String fileName)
@@ -344,145 +300,9 @@ public class BrowserMediaPackageUploader {
 		}
 	}
 
-	private List<String> getExistingFilesOnExternalServer(ToolUsage toolUsage) {
-		List<String> existingFiles = null;
-		
-		URI getUri = makeURIForExistingFiles(toolUsage);
-
-		HttpGet httpGet = new HttpGet(getUri);
-		try
-		{
-			CloseableHttpResponse response = client.execute(httpGet);
-			
-			String responseBody = HTTPUtils.getResponseBody(response);
-			logger.info("files that exist on server "+responseBody);
-			JSONObject clip = new JSONObject(responseBody);
-			if (clip.has("error")) {
-				return Collections.emptyList();
-			}
-			JSONArray filenames = clip.getJSONObject("clip").getJSONArray("filenames");
-			
-			existingFiles = new ArrayList<>(filenames.length());
-			
-			for(int i=0; i<filenames.length(); i++)
-			{
-				existingFiles.add(filenames.getString(i));
-			}
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			httpGet.reset();
-		}
-		
-		
-		return existingFiles;
-	}
-
-
-	private URI makeURIForExistingFiles(ToolUsage toolUsage)
-	{
-		URI getUri = null;
-		try
-		{
-			StringBuilder sb = new StringBuilder("/api/");
-			sb.append(userManager.getUserEmail());
-			sb.append("/");
-			sb.append(toolUsage.getPluginName());
-			sb.append("/");
-			sb.append(toolUsage.getToolName());
-			sb.append("/");
-			sb.append(ToolStream.makeUniqueIdentifierForToolUsage(toolUsage, userManager.getUserEmail()));
-			getUri = HTTPUtils.buildExternalHttpURI(sb.toString(), userManager);
-			logger.info(getUri);
-			
-		} catch (URISyntaxException e)
-		{
-			e.printStackTrace();
-		}
-		return getUri;
-	}
-
-
 	private void setCurrentToolUsage(ToolUsage toolUsage)
 	{
 		this.currentToolUsage = toolUsage;
-	}
-
-
-	private void reportFile(File file) throws IOException
-	{
-		URI putUri;
-		try
-		{
-			putUri = this.preparePutURI(file.getName());
-		}
-		catch (URISyntaxException e)
-		{
-			throw new IOException("Problem making the uri to send", e);
-		}
-
-		HttpPut httpPut = new HttpPut(putUri);
-		try 
-		{
-			MultipartEntityBuilder mpeBuilder = MultipartEntityBuilder.create();
-
-			mpeBuilder.addBinaryBody("image", file);
-
-			HttpEntity content = mpeBuilder.build();
-
-			httpPut.setEntity(content);
-			client.execute(httpPut);
-		}
-		finally 
-		{
-			httpPut.reset();
-		}
-
-	}
-	
-	private void unreportFile(File file) throws IOException
-	{
-		URI deleteUri;
-		try
-		{
-			deleteUri = preparePutURI(file.getName());
-		}
-		catch (URISyntaxException e)
-		{
-			throw new IOException("Problem making the uri to send", e);
-		}
-
-		HttpDelete request = new HttpDelete(deleteUri);
-		try
-		{
-			logger.debug(request.getURI());
-			client.execute(request);
-		}
-		finally
-		{
-			request.reset();
-		}
-	}
-
-
-	private URI preparePutURI(String reportingName) throws URISyntaxException
-	{
-		StringBuilder pathBuilder = new StringBuilder("/api/");
-		pathBuilder.append(userManager.getUserEmail());
-		pathBuilder.append("/");
-		pathBuilder.append(currentToolUsage.getPluginName());
-		pathBuilder.append("/");
-		pathBuilder.append(currentToolUsage.getToolName());
-		pathBuilder.append("/");
-		pathBuilder.append(ToolStream.makeUniqueIdentifierForToolUsage(currentToolUsage, userManager.getUserEmail()));
-		pathBuilder.append("/");
-		pathBuilder.append(reportingName);
-
-		return HTTPUtils.buildExternalHttpURI(pathBuilder.toString(), userManager);
 	}
 
 
