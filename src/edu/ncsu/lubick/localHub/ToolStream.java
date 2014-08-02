@@ -1,6 +1,7 @@
 package edu.ncsu.lubick.localHub;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -45,22 +46,14 @@ public class ToolStream {
 		sb.append(toolUsage.getTimeStamp().getTime());
 
 		UUID u;
-		try
-		{
-			u = UUID.nameUUIDFromBytes(sb.toString().getBytes("UTF-8"));
-			
-			String lastLetter = MENU_KEY_PRESS.equals(toolUsage.keyPresses) ? "G" : "K";
+		u = UUID.nameUUIDFromBytes(sb.toString().getBytes(StandardCharsets.UTF_8));
+		
+		String lastLetter = MENU_KEY_PRESS.equals(toolUsage.keyPresses) ? "G" : "K";
 
-			// add a truncatedName for readability (so we know, when browsing in the files,
-			//what plugin it belongs to)
-			String truncatedName = name.substring(0, name.length() >= 8 ? 8 : name.length());
-			return truncatedName + u + lastLetter;
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			logger.fatal("Severly wrong encoding", e);
-		}
-		return null;
+		// add a truncatedName for readability (so we know, when browsing in the files,
+		//what plugin it belongs to)
+		String truncatedName = name.substring(0, name.length() >= 8 ? 8 : name.length());
+		return truncatedName + u + lastLetter;
 
 	}
 

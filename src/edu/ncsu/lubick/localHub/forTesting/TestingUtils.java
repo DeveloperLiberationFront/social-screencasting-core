@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Date;
 import java.util.zip.ZipEntry;
@@ -96,11 +97,10 @@ public class TestingUtils {
 			return null;
 		}
 
-		// Using try with resources. This automatically closes up afterwards,
-		// ignoring(?) thrown exception
+		// Using try with resources. 
 		try (FileOutputStream fos = new FileOutputStream(newFile);)
 		{
-			fos.write(fileContents.getBytes("UTF-8"));  
+			fos.write(fileContents.getBytes(StandardCharsets.UTF_8));  
 		}
 		catch (IOException e)
 		{

@@ -7,10 +7,12 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpMessage;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.log4j.Logger;
 
@@ -44,11 +46,11 @@ public class HTTPUtils {
 		return new URI("http", BASE_URL, path, null);
 	}
 
-	public static String getResponseBody(HttpResponse response) throws IOException, UnsupportedEncodingException
+	public static String getResponseBody(HttpResponse response) throws IOException
 	{
 		StringBuilder sb = new StringBuilder();
 		InputStream ips = response.getEntity().getContent();
-		try (BufferedReader buf = new BufferedReader(new InputStreamReader(ips, "UTF-8"));)
+		try (BufferedReader buf = new BufferedReader(new InputStreamReader(ips, StandardCharsets.UTF_8));)
 		{
 			String s;
 			while (true)
@@ -76,14 +78,7 @@ public class HTTPUtils {
 	{
 		String authString = String.format("%s|%s:%s", um.getUserEmail(),
 				um.getUserName(), um.getUserToken());
-		try
-		{
-			httpMessage.addHeader("Authorization", "Basic "+Base64.encodeBase64String(authString.getBytes("UTF-8")));
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			logger.fatal("Problem encoding authString "+authString, e);
-		}
-	}
+		httpMessage.addHeader("Authorization", "Basic "+Base64.encodeBase64String(authString.getBytes(StandardCharsets.UTF_8)));
+	}	
 
 }
