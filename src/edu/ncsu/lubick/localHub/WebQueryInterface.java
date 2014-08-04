@@ -11,7 +11,7 @@ public interface WebQueryInterface {
 
 	List<File> getBestExamplesOfTool(String pluginName, String toolName, boolean isKeyboardHuh);
 
-	void shareClipWithUser(String clipId, String recipient, ClipOptions clipOptions);
+	void shareClipWithUser(String clipId, ClipOptions clipOptions);
 
 	List<ToolCountStruct> getAllToolAggregateForPlugin(String pluginName);
 	

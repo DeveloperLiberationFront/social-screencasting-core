@@ -14,7 +14,6 @@ import java.util.TimerTask;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.ScreenRecordingModule;
-import edu.ncsu.lubick.externalAPI.BrowserMediaPackageSharer;
 import edu.ncsu.lubick.externalAPI.BrowserMediaPackageUploader;
 import edu.ncsu.lubick.externalAPI.RemoteToolReporter;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
@@ -62,7 +61,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	private NotificationManager notificationManager;
 	private boolean shouldReportToolsRemotely;
 	private ClipQualityManager clipQualityManager;
-	private BrowserMediaPackageSharer clipSharingManager;
 	private BrowserMediaPackageUploader clipUploader;
 	
 	private Map<String, Boolean> pluginsRecordingStatusMap = new HashMap<>();
@@ -147,7 +145,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 		}
 		this.clipQualityManager = new ClipQualityManager(this.databaseManager);
 		this.postProductionHandler = new PostProductionHandler(this.screencastMonitorDirectory, userManager);
-		this.clipSharingManager = new BrowserMediaPackageSharer(userManager);
 		this.clipUploader = new BrowserMediaPackageUploader(userManager);
 		
 		if (shouldReportToolsRemotely)
@@ -467,7 +464,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	 * @see edu.ncsu.lubick.localHub.WebQueryInterface#shareClipWithUser(java.lang.String, java.lang.String, edu.ncsu.lubick.localHub.ClipOptions)
 	 */
 	@Override
-	public void shareClipWithUser(String clipId, String recipient, ClipOptions clipOptions)
+	public void shareClipWithUser(String clipId, ClipOptions clipOptions)
 	{
 		if (!this.databaseManager.isClipUploaded(clipId))
 		{
@@ -477,8 +474,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 		}
 		
 		updateClipOptions(PostProductionHandler.MEDIA_OUTPUT_FOLDER + clipId, clipOptions, false);
-		
-		this.clipSharingManager.shareClipWithUser(clipId, recipient);
 	}
 
 	public void setTrayIconMenu(PopupMenu pm)

@@ -104,7 +104,7 @@ public class BrowserMediaPackageUploader {
 				return false;
 			}
 
-			this.current_external_clip_id = makeExternalClip(packageDirectory);
+			this.current_external_clip_id = makeExternalClip(packageDirectory, clipOptions.shareWithEmail);
 
 			logger.info("Made clip id "+current_external_clip_id);
 
@@ -117,7 +117,7 @@ public class BrowserMediaPackageUploader {
 	}
 
 
-	private String makeExternalClip(File packageDirectory) throws JSONException, URISyntaxException
+	private String makeExternalClip(File packageDirectory, String shareWithEmail) throws JSONException, URISyntaxException
 	{
 		JSONObject jobj = new JSONObject();
 		jobj.put("name", packageDirectory.getName());
@@ -127,6 +127,7 @@ public class BrowserMediaPackageUploader {
 		} else {
 			jobj.put("type", "keyboard");
 		}
+		jobj.put("share", shareWithEmail);
 
 		URI postUri = HTTPUtils.buildExternalHttpURI("/clips");
 
@@ -320,9 +321,9 @@ public class BrowserMediaPackageUploader {
 		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
 		toolStream.setAssociatedPlugin("Eclipse");
 
-		ToolUsage testToolUsage1 = toolStream.getAsList().get(0);
-
-		ToolUsage testToolUsage = testToolUsage1;
+		ToolUsage testToolUsage = toolStream.getAsList().get(0);
+		
+		logger.info(FileUtilities.makeLocalFolderNameForBrowserMediaPackage(testToolUsage, newManager.getUserEmail()));
 
 		logger.info(uploader.uploadToolUsage(testToolUsage, new ClipOptions()));
 

@@ -92,7 +92,7 @@ public class HTTPClipSharer extends AbstractHandler {
 		}
 		
 		
-		this.databaseLink.shareClipWithUser(clipId, recipient, new ClipOptions(startFrame, endFrame, cropRect));
+		this.databaseLink.shareClipWithUser(clipId, new ClipOptions(recipient, startFrame, endFrame, cropRect));
 	}
 
 
