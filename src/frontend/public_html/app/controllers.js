@@ -304,13 +304,14 @@ define(['angular',
   .controller('ToolBlockCtrl', ['$scope', '$state',
     function($scope, $state) {
       $scope.hasVideo = function(user) {
-        return _.find($scope.tool.clips.$object, {user: user.email});
+        return _.find($scope.tool.clips.$object, {user: user.email})
+          || user.email == $scope.user.email;
       };
 
       $scope.getVideo = function(user) {
-        var self = (user == $scope.user.email);
+        var self = (user.email == $scope.user.email);
         var origin = (self ? 'local' : 'external');
-        if (user.video || self) {
+        if ($scope.hasVideo(user) || self) {
           $state.go('main.video', {
             location: origin,
             owner: user.email,
