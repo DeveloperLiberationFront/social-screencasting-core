@@ -83,7 +83,7 @@ define(['angular',
       Promise.all([$scope.tools, $scope.user_list]).spread(function(tools, users) {
         _.each(tools, function(tool) {
           tool.video = false;
-          tool.users = _.where(users, function(u) {
+          tool.userObjects = _.where(users, function(u) {
             //overwrite user list with more detailed user objects
             return _.contains(tool.users, u.email);
           });
@@ -169,6 +169,7 @@ define(['angular',
       };
 
       $scope.addFilter = function(input){
+        if (!input) return;
         var user_filter = ($stateParams.user_filter ?
                            _.union($stateParams.user_filter.split(','), [input.email])
                            : [input.email]);
@@ -216,6 +217,7 @@ define(['angular',
       };
 
       $scope.addFilter = function(input){
+        if (!input) return;
         var tool_filter = ($stateParams.tool_filter ?
                            _.union($stateParams.tool_filter.split(','), [input.name])
                            : [input.name]);
