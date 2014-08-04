@@ -127,7 +127,9 @@ public class BrowserMediaPackageUploader {
 		} else {
 			jobj.put("type", "keyboard");
 		}
-		jobj.put("share", shareWithEmail);
+		JSONArray emailJarr = new JSONArray();
+		emailJarr.put(shareWithEmail);
+		jobj.put("share", emailJarr);
 
 		URI postUri = HTTPUtils.buildExternalHttpURI("/clips");
 
@@ -325,7 +327,7 @@ public class BrowserMediaPackageUploader {
 		
 		logger.info(FileUtilities.makeLocalFolderNameForBrowserMediaPackage(testToolUsage, newManager.getUserEmail()));
 
-		logger.info(uploader.uploadToolUsage(testToolUsage, new ClipOptions()));
+		logger.info(uploader.uploadToolUsage(testToolUsage, new ClipOptions("public")));
 
 
 	}
