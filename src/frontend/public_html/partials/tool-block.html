@@ -8,10 +8,10 @@
   <div class='tool-users' ng-if='tool.users.length > 0'>
     <span>Used by:</span>
     <ul class='list-inline'>
-      <li class='tool-user' ng-repeat='email in tool.users'>
-        <a ng-click='getVideo(email)' class='pointer'>{{userName(email)}}</a>
+      <li class='tool-user' ng-repeat='user in tool.users'>
+        <a ng-click='getVideo(user)' class='pointer'>{{user.name}}</a>
         <span class='glyphicon glyphicon-facetime-video'
-              ng-if='hasVideo(email)'></span>
+              ng-if='hasVideo(user)'></span>
       </li>
     </ul>
   </div>

@@ -72,7 +72,6 @@ define(['angular',
         reverse: true
       };
       $scope.tools = Hub.all('tools').getList();
-      $scope.userName = function(email) { return _.find($scope.user_list.$object, {email: email}).name; }
     }])
 
   .controller('ToolListCtrl', ['$scope','Hub',
@@ -84,6 +83,10 @@ define(['angular',
       Promise.all([$scope.tools, $scope.user_list]).spread(function(tools, users) {
         _.each(tools, function(tool) {
           tool.video = false;
+          tool.users = _.where(users, function(u) {
+            //overwrite user list with more detailed user objects
+            return _.contains(tool.users, u.email);
+          });
 
           tool.usages = Hub.all('usages').getList({
             where: {tool: tool._id}
@@ -96,7 +99,6 @@ define(['angular',
               tool.video = clips.length > 0;
           });
         });
-        $scope.$digest();
       });
       
       $scope.limit = 10;
@@ -156,7 +158,7 @@ define(['angular',
       $scope.filterSet.filters.push(function(tool) {
         return $scope.filter.filters.length === 0 //all tools if no users selected
               || tool.users && _.every($scope.filter.filters, function(user){ //or only tools with all selected users
-                  return _.contains(tool.users, user.email); 
+                  return _.find(tool.users, {email: user.email}); 
               });
       });
 
@@ -167,7 +169,6 @@ define(['angular',
       };
 
       $scope.addFilter = function(input){
-        if (!input) return;
         var user_filter = ($stateParams.user_filter ?
                            _.union($stateParams.user_filter.split(','), [input.email])
                            : [input.email]);
@@ -215,7 +216,6 @@ define(['angular',
       };
 
       $scope.addFilter = function(input){
-        if (!input) return;
         var tool_filter = ($stateParams.tool_filter ?
                            _.union($stateParams.tool_filter.split(','), [input.name])
                            : [input.name]);
@@ -285,7 +285,7 @@ define(['angular',
       $scope.filterSet.filters.push(function(tool) {
         return !_.any($scope.filter.active_filters) || //no filters shows all apps
           //or
-          ($scope.filter.active_filters.not_used && !_.contains(tool.users, $scope.user.email)) ||
+          ($scope.filter.active_filters.not_used && !_.find(tool.users, {email : $scope.user.email})) ||
           //or
           ($scope.filter.active_filters.yes_video && tool.clips.$object.length > 0);
 
@@ -302,19 +302,17 @@ define(['angular',
   .controller('ToolBlockCtrl', ['$scope', '$state',
     function($scope, $state) {
       $scope.hasVideo = function(user) {
-        return _.find($scope.tool.clips.$object, {user: user})
-          || user == $scope.user.email;
+        return _.find($scope.tool.clips.$object, {user: user.email});
       };
 
       $scope.getVideo = function(user) {
-        var self = (user.email == $scope.user.email);
+        var self = (user == $scope.user.email);
         var origin = (self ? 'local' : 'external');
         if (user.video || self) {
           $state.go('main.video', {
             location: origin,
             owner: user.email,
-            tool: $scope.tool.name,
-            application: $scope.tool.application
+            tool: $scope.tool._id
           });
         } else {
           $state.go('main.request', {
