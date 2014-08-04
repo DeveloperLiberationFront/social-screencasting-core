@@ -8,9 +8,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.server.handler.StatisticsHandler;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import edu.ncsu.lubick.localHub.UserManager;
 
@@ -62,5 +67,19 @@ public class HTTPUtils {
 		}
 		return target;
 	}
-
+	
+	public static String getRequestBody(HttpServletRequest request) throws IOException{
+		StringBuilder sb = new StringBuilder();
+		BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
+		String data;
+		while((data= br.readLine())!=null){
+			sb.append(data).append('\n');
+		}	
+		return sb.toString();
+	}
+	
+	public static JSONObject getRequestJSON(HttpServletRequest request) throws JSONException, IOException{
+		String jsonString=getRequestBody(request);
+		return new JSONObject(jsonString);
+	}
 }

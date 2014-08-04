@@ -78,7 +78,10 @@ public class Runner
 		localHub.shutDown();
 		cleanUpSystemTray();
 	}
-
+	
+	public static boolean isRunning(){
+		return localHub.isRunning();
+	}
 
 	private static void cleanUpSystemTray()
 	{

@@ -14,3 +14,4 @@ screencasting.log*
 test.png
 sampleScreencastMinute.zip
 PlanningImages
+.DS_Store

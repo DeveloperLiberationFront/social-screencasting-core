@@ -38,12 +38,15 @@ public class HandlerManager
 		HandlerCollection h = new HandlerList();
 
 		try {
+
 			h.addHandler(new IndexHandler());
 			h.addHandler(new HTTPAPIHandler(wqi));
 			h.addHandler(new VersionHandler("/version"));
 			
 			h.addHandler(new HTTPToolReportingHandler((WebToolReportingInterface)wqi ));
+
 			makeAndAddHandlersForClipSharing(h, wqi);
+
 		}
 		catch (IOException | URISyntaxException e) {
 			logger.error("Problem setting up handlers",e);
@@ -61,7 +64,7 @@ public class HandlerManager
 		logger.debug("logger for HTTP Handlers set up with "+h.getChildHandlers().length+" handlers");
 		return h;
 	}
-
+		
 	private static void makeAndAddHandlersForAPI(HandlerCollection h, WebQueryInterface wqi)
 	{
 		h.addHandler(new HTTPAPIHandler(wqi));
@@ -76,8 +79,11 @@ public class HandlerManager
 
 	private static void makeAndAddHandlersForBrowsing(HandlerCollection h, WebQueryInterface wqi) throws IOException, URISyntaxException
 	{
+
 		h.addHandler(new IndexHandler());
+
 	}
+
 
 	private static void makeAndAddHandlersForWebReporting(HandlerCollection h, WebQueryInterface wqi)
 	{

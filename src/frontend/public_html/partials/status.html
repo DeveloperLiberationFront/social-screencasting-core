@@ -1,5 +1,22 @@
 
 <div>
+    
+    <div ng-controller="RecordingCtrl">
+
+    <h2>Recording Status</h2>
+        
+     <button class="btn no-outline {{recordingStatus() ? 'btn-danger' : 'btn-default'}}" ng-model="recordingStatus" btn-checkbox ng-model-options="{getterSetter:true}">
+    {{recordingStatus() ? "Stop": "Start"}} Recording
+    </button>
+    
+    <!-- <button class="btn btn-primary" ng-model="recordingStatus" btn-checkbox>
+    {{recordingStatus() ? "Stop": "Start"}} Recording
+    </button>
+
+    <button class="btn btn-primary" ng-click="stopRecording()" > Stop Recording </button>
+{{recordingStatus()}}
+    </div> -->
+
      <h2>Requests you have made</h2>
      <ul id="requestList" class="list-group">
         <li ng-repeat="request in sent" ng-attr-title="Created: {{request.created | date : 'medium'}} Last updated: {{request.updated | date : 'medium'}}" class="list-group-item">
@@ -27,4 +44,5 @@
         <a ng-if="getShareLink(request) !== undefined" ng-href="{{getShareLink(request)}}">Respond</a>
         </li>
      </ul>
+
 </div>

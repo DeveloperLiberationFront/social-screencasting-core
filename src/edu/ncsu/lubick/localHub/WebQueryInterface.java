@@ -21,4 +21,6 @@ public interface WebQueryInterface {
 
 	void updateClipOptions(String folder, ClipOptions clipOptions, boolean upload);
 
+	void userPause(boolean boolean1);
+
 }
