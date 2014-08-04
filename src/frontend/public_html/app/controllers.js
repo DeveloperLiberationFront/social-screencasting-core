@@ -12,8 +12,6 @@ define(['angular',
         'player'], function (ng, $, _, Promise) {
   /* Controllers */
 
-  _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
-
   function ToolUsage(toolName, keypress, otherInfo) {
     //all the this.names are the same as on the server ToolStream.java
     this.Tool_Name = toolName;
@@ -36,12 +34,15 @@ define(['angular',
     function($scope, $filter, Hub, User) {
       $scope.user = User;
       $scope.applications = Hub.all('applications').getList();
-      $scope.user_list = Hub.all('users').getList();
 
       //report interface usage to Local Hub
       $scope.queuedToolUsages = [];
 
       $scope.$on('instrumented', function(e, event, info) {
+        console.log(e);
+        console.log(event);
+        console.log(info);
+
         info = info ? info : undefined;
         $scope.queuedToolUsages.push(new ToolUsage(event, "[GUI]")); 
 
@@ -71,6 +72,7 @@ define(['angular',
         field: "video",
         reverse: true
       };
+      $scope.user_list = Hub.all('users').getList();
       $scope.tools = Hub.all('tools').getList();
     }])
 
@@ -101,9 +103,8 @@ define(['angular',
         });
       });
       
-      $scope.limit = 10;
       $scope.scroll = function() {
-        $scope.limit += 1;
+        //todo: get more tools...
       };
     }])
 
@@ -205,7 +206,7 @@ define(['angular',
       }
 
       $scope.filterSet.filters.push(function(tool) {
-      return $scope.filter.filters.length === 0 ||
+        return $scope.filter.filters.length === 0 ||
           _.any($scope.filter.filters, {name: tool.name});
       });
 
@@ -311,37 +312,37 @@ define(['angular',
         if (user.video || self) {
           $state.go('main.video', {
             location: origin,
-            owner: user.email,
+            owner: user,
             tool: $scope.tool._id
           });
         } else {
           $state.go('main.request', {
-            owner: user._id,
-            tool: $scope.tool._id,
-            application: $scope.tool.application
+            owner: user,
+            tool: $scope.tool._id
           });
         }
       };
     }]);
 
   function prepareMessagesForSentRequests(sent) {
+    var $interpolate = angular.injector(['ng']).get('$interpolate');
     _.each(sent, function(sentItem) {
       if (sentItem.type == "request_fulfilled") {
         var json = JSON.parse(sentItem.status);
         sentItem.shared_videos = _.map(json.video_id, function(id){
-          return _.template(
+          return $interpolate(
             "#/video/external/{{recipient.email}}/"
               + "{{application}}/{{tool}}/" + id
-          , sentItem);
+          )(sentItem);
         });
-        sentItem.message = _.template(
-          "{{recipient.name}} granted access to {{application}}/{{tool.name}}",
-          sentItem);
+        sentItem.message = $interpolate(
+          "{{recipient.name}} granted access to {{application}}/{{tool}}"
+        )(sentItem);
       }
       else {
-        sentItem.message = _.template(
-          "Requested access to {{recipient.name}}'s usage of {{application}}/{{tool.name}}",
-          sentItem);
+        sentItem.message = $interpolate(
+          "Requested access to {{recipient.name}}'s usage of {{application}}/{{tool}}"
+        )(sentItem);
       }
     });
   }
@@ -355,25 +356,28 @@ define(['angular',
       $scope.sent = [{}];
       
       Hub.all("notifications").withHttpConfig({cache:false}).getList({
-        'embedded': {'recipient': 1, 'tool': 1} //pull in recipient details instead of just id
+        'embedded': {'recipient': 1} //pull in recipient details instead of just id
       }).then(function(notifications) {
+        console.log(notifications);
         $scope.sent = _.where(notifications, {sender: $scope.user.email});
-        $scope.received = _(notifications)
-          .where({recipient: $scope.user.email})
+        $scope.received = _(notifications)  //wraps for lodash chaining
+        .where({recipient: $scope.user.email})
           .reject(function(item) { //user doesn't need to see requests they have responded to
             return item.type == "request_fulfilled";
-          })
-          .value();
-        
-        prepareMessagesForSentRequests($scope.sent, $scope.user_list.$object);
-        
-        _.each($scope.received, function(item) {
-          if (item.status == "new") {
-            item.status = "seen";
-            item.put($scope.auth);
-          }
-        });
-      });
+          }).value();   //unwraps array result
+
+          console.log($scope.sent);
+          console.log($scope.received);
+          prepareMessagesForSentRequests($scope.sent);
+
+          _.each($scope.received, function(item) {
+            if (item.status == "new") {
+              item.status = "seen";
+              item.put($scope.auth);
+            }
+          });
+        }
+      );
       
       $scope.deleteRequest = function(request) {
         $scope.sent = _.reject($scope.sent, function(item) {
@@ -404,10 +408,10 @@ define(['angular',
 
 .controller('RequestCtrl', ['$scope', '$modalInstance', '$stateParams', 'Hub',
   function($scope, $modalInstance, $stateParams, Hub) {
-    $scope.request = function() {
+    $scope.request = function(user) {
       Hub.all('notifications').post({
         application: $stateParams.application,
-        tool: $stateParams.tool,
+        tool: $stateParams.tool._id,
         recipient: $stateParams.owner,
         type: "share_request"
       });

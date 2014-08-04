@@ -323,7 +323,7 @@ public class BrowserMediaPackageUploader {
 		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
 		toolStream.setAssociatedPlugin("Eclipse");
 
-		ToolUsage testToolUsage = toolStream.getAsList().get(0);
+		ToolUsage testToolUsage = toolStream.getAsList().get(0); 
 		
 		logger.info(FileUtilities.makeLocalFolderNameForBrowserMediaPackage(testToolUsage, newManager.getUserEmail()));
 

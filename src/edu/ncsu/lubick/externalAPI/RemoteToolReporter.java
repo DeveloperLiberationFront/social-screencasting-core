@@ -106,7 +106,12 @@ public class RemoteToolReporter {
 			{
 				String responseBody = HTTPUtils.getResponseBody(response);
 				logger.info("response: " +responseBody);
-				this.notificationManager.handlePossibleNotification(new JSONObject(responseBody));
+				if (responseBody.startsWith("<!DOCTYPE")) {
+					logger.error("Got html message back, probably an error ");
+					logger.debug(responseBody);
+				} else {
+					this.notificationManager.handlePossibleNotification(new JSONObject(responseBody));
+				}
 			}
 
 		}
