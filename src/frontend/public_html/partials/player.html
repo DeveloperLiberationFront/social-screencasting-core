@@ -11,9 +11,9 @@
         </div>
         <img id='keyboardOverlay' ng-if='kbdOverlay.enabled'
              ng-hide='player.editMode || kbdOverlay.mode == 3 || player.isCropping'
-             ng-src="{{ imagePath(kbdOverlay.images[kbdOverlay.status][kbdOverlay.mode % 3]) }}"/>
+             ng-src="{{ getImage(kbdOverlay.images[kbdOverlay.status][kbdOverlay.mode % 3]) }}"/>
         <div class="img-container">
-          <img id="frameLoc" class='img-responsive' ng-src="{{ imagePath(clip.frames[player.pos]) }}"/>
+          <img id="frameLoc" class='img-responsive' ng-src="{{ getImage(clip.frames[player.pos]) }}"/>
         </div>
       </div>
       <div id="controlPanel" ng-class="{fullscreen: player.isFullscreen}">

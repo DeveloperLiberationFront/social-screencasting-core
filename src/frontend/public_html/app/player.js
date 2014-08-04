@@ -8,6 +8,7 @@ define(['angular',
         'restangular'],
         function (ng, $, _) {
   /* Video player */
+
   return ng.module('player',
                    ['ui.bootstrap',
                     'socasterServices',
@@ -46,31 +47,27 @@ define(['angular',
             tooltip: ["Image and text", "Image only", "Text only", "No overlay"]
         };
 
-        $scope.imagePath = function(image) {
-            return $scope.clip.getRestangularUrl() + '/' + image + '?'+ $.param($scope.auth);
-        };
-
         //load all images, and then set the status to ready
-        function loadClip(clip) {
-          $scope.player.status = 'loading';
+      function loadClip(clip) {
+        images = clip.all('images').getList()
+        
+        $scope.player.status = 'loading';
+        
+        images.then(function(images) {
+          clip.images = images;
           _.extend(clip, {
             start: 0,
             end: clip.frames.length-1,
           });
-          $q.all(
-            clip.frames.map(function(frame){
-              var deferred = $q.defer()
-              var img = new Image();
-              $(img)
-                .load(function(){ deferred.resolve(img); })
-                .prop('src', $scope.imagePath(frame));
-              return deferred.promise;
-            })).then(function() {
-              $scope.player.status = 'ready';
-              $scope.$broadcast('refreshSlider');
-            })
-        }
+          $scope.player.status = 'ready';
+          $scope.$broadcast('refreshSlider');
+        });
+      }
         loadClip($scope.clip);
+
+        $scope.getImage = function(name) {
+          return 'data:image/jpg;base64,' + _.find($scope.clip.images, {name: name}).data;
+        };
 
         $scope.$watch('clip', function(newValue) {
             $scope.player.pos = 0;
@@ -133,24 +130,12 @@ define(['angular',
 
       $scope.clips = clips;
       $scope.clip = (clip_id ? _.find(clips, {name: clip_name}) : clips[0]);
-
       $scope.$emit('instrumented', "Loaded ModalPlayer", $scope.clip);
 
       $scope.close = function () {
         $modalInstance.close(true);
         $scope.$emit('instrumented', "Closed ModalPlayer", $scope.clip);
       };
-      
-      _.each(clips, function(clip) {
-        clip.event_frames = [25]; //temporary
-        _.extend(clip, {
-          frame: function(name){
-            return clip.getRestangularUrl() + '/' + name + '?'+ $.param($scope.auth);
-          },
-          thumbnail: clip.frames[Math.min(clip.event_frames[0],
-                                          clip.frames.length-1)]
-        });
-      });
 
       $scope.loadClip = function(clip) {
         $scope.clip = clip;

@@ -1,6 +1,6 @@
 <div class='thumbnail' ng-click='loadClip(clip)'>
   {{clip.tool}}
-  <img ng-src='{{ clip.frame(clip.thumbnail) }}'/>
+  <img ng-src='{{ 'data:image/jpg;base64,' + clip.thumbnail }}'/>
   <span>
     <rating ng-model='clip.rating' readonly='true'></rating>
     {{clip.rating}}

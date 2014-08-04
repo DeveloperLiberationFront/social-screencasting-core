@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
@@ -33,6 +34,8 @@ public class HTTPAPIHandler extends AbstractHandler {
 	private static final Logger logger = Logger.getLogger(HTTPAPIHandler.class);
 	private WebQueryInterface databaseLink;
 	private UserManager userManager = HTTPServer.getUserManager();
+	private ByteArrayOutputStream byteBufferForImage = new ByteArrayOutputStream();
+	private Map<String, String[]> queryParams;
 
 	public HTTPAPIHandler(WebQueryInterface wqi)
 	{
@@ -47,6 +50,8 @@ public class HTTPAPIHandler extends AbstractHandler {
 		}
 		baseRequest.setHandled(true);
 		response.setContentType("application/json");
+		
+		this.queryParams = request.getParameterMap();
 
 		String type = baseRequest.getMethod();
 
@@ -74,9 +79,9 @@ public class HTTPAPIHandler extends AbstractHandler {
 		 * pieces[1] will be the the string "api" or "clips"
 		 */
 		logger.info("Broken up target "+Arrays.toString(pieces));
-		if (pieces.length < 2) {
+		if (pieces.length <= 2) {
 			response.getWriter().println("Sorry, Nothing at this URL");
-		} else if ("clips".equals(pieces[1])){ 
+		} else if ("clips".equals(pieces[2])){ 
 			handleClipsAPI(pieces, response);
 		} else if (pieces.length == 3){
 			handleGetUserInfo(chopOffQueryString(pieces[2]), response);
@@ -85,7 +90,8 @@ public class HTTPAPIHandler extends AbstractHandler {
 		} else if (pieces.length == 5) {
 			handleGetInfoAboutTool(pieces[3], chopOffQueryString(pieces[4]), response);
 		} else if (pieces.length == 6) {
-			handleGetClipInfo(pieces[3], pieces[4], chopOffQueryString(pieces[5]), response);
+			//handleGetClipInfo(pieces[3], pieces[4], chopOffQueryString(pieces[5]), response);
+			response.getWriter().println("Sorry, This url was deprecated");
 		} else if (pieces.length == 7) {
 			handleImageRequest(pieces[5], chopOffQueryString(pieces[6]), response);
 		} else {
@@ -93,42 +99,59 @@ public class HTTPAPIHandler extends AbstractHandler {
 		}
 	}
 	
-	private ByteArrayOutputStream byteBufferForImage = new ByteArrayOutputStream();
-
 	private void handleClipsAPI(String[] pieces, HttpServletResponse response) throws IOException
 	{
-		//"/clips/[clip_id]/images"
+		if (pieces.length == 3) {
+			//just "/api/clips"
+			//TODO null checks
+			String application = queryParams.get("app")[0];
+			String tool = queryParams.get("tool")[0];
+			
+			handleGetClipInfo(application, tool, response);
+			return;
+		}
+		
+		//"/api/clips/[clip_id]/images"
 		//"return {name , data}"
-		if (pieces.length != 4) {
+		if (pieces.length != 5) {
 			response.getWriter().println("Sorry, Nothing at this URL");
 			return;
 		}
-		File file = new File("bin/public_html/images/frame000.jpg");
-		logger.info(file.getAbsolutePath());
-		BufferedImage img = ImageIO.read(file);
-
-		ImageIO.write(img, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, byteBufferForImage);
-
-		byte[] imageAsBytes = byteBufferForImage.toByteArray();
+		
+		String clipId = pieces[3];
+		
+		JSONArray frameList = makeFrameList(new File("renderedVideos",clipId));
 		
 		try
 		{
 			JSONArray returnArray = new JSONArray();
 			
-			
-			for(int i = 0;i< 50; i++) {
+			for(int i = 0;i< frameList.length(); i++) {
+				File file = new File("renderedVideos/"+clipId, frameList.getString(i));
+				logger.info(file.getAbsolutePath());
+				BufferedImage img = ImageIO.read(file);
+
+				ImageIO.write(img, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, byteBufferForImage);
+
+				byte[] imageAsBytes = byteBufferForImage.toByteArray();
+				
+				
 				JSONObject jobj = new JSONObject();
 				jobj.put("name", "frame"+FileUtilities.padIntTo4Digits(i)+".jpg");
 				jobj.put("data", Base64.encodeBase64String(imageAsBytes));
 
 
 				returnArray.put(jobj);
+				byteBufferForImage.reset();
 			}
 			
 			returnArray.write(response.getWriter());
 		}
 		catch (JSONException e) {
 			throw new IOException("Problem encoding image" , e);
+		}
+		finally {
+			byteBufferForImage.reset();
 		}
 		
 	}
@@ -249,40 +272,55 @@ public class HTTPAPIHandler extends AbstractHandler {
 		}
 	}
 
-	private void handleGetClipInfo(String applicationName, String toolName, String clipId, HttpServletResponse response) throws IOException
+	private void handleGetClipInfo(String applicationName, String toolName, HttpServletResponse response) throws IOException
 	{
-		File clipDir = new File(PostProductionHandler.MEDIA_OUTPUT_FOLDER, clipId);
+		List<File> clips = databaseLink.getBestExamplesOfTool(applicationName, toolName, true);
+		clips.addAll(databaseLink.getBestExamplesOfTool(applicationName, toolName, false));
+		
+		//XXX REMOVE TEST DATA
+		//clips.add(new File("Eclipse21e0149b-f0e7-31ee-85bf-6abb88ddc5c2G"));
+		
+		JSONArray jarr = new JSONArray();
+		for(File clip: clips) {
+			JSONArray fileNamesArr = makeFrameList(clip);
+			if (fileNamesArr == null) {
+				logger.info("Clip "+clip.getName()+" does not exist");
+				response.getWriter().println("Could not find clip "+clip.getName());
+				return;
+			}
 
-		JSONArray fileNamesArr = makeClipList(clipDir);
-		if (fileNamesArr == null) {
-			logger.info("Clip "+clipId+" does not exist");
-			response.getWriter().println("Could not find clip "+clipId);
-			return;
+			JSONObject clipObject = new JSONObject();
+			try{	
+				clipObject.put("frames", fileNamesArr);
+				clipObject.put("name", clip.getName());
+				clipObject.put("app", applicationName);
+				clipObject.put("tool", toolName);
+				clipObject.put("creator", userManager.getUserEmail());		
+				
+				jarr.put(clipObject);
+			}
+			catch (JSONException e)
+			{
+				logger.error("Problem compiling clip names and writing them out "+clipObject,e);
+				response.getWriter().println("There was a problem compiling the clip details");
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			}
 		}
-
-		JSONObject dataObject = new JSONObject();
-		try{
-			dataObject.put("frames", fileNamesArr);
-			dataObject.put("name", clipId);
-			dataObject.put("app", applicationName);
-			dataObject.put("tool", toolName);
-			dataObject.put("creator", userManager.getUserEmail());
-
-			response.setContentType("application/json");
-
-			logger.debug("Returning clip info "+clipId);
-
-			dataObject.write(response.getWriter());
-		}
-		catch (JSONException e)
-		{
-			logger.error("Problem compiling clip names and writing them out "+dataObject,e);
+		
+		response.setContentType("application/json");
+		try {
+			jarr.write(response.getWriter());
+		} catch (JSONException e) {	
 			response.getWriter().println("There was a problem compiling the clip details");
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new IOException("Problem writing to response", e);
 		}
+		
+	
+		
 	}
 
-	public static JSONArray makeClipList(File clipDir) 
+	public static JSONArray makeFrameList(File clipDir) 
 	{
 		JSONArray fileNamesArr = new JSONArray();
 

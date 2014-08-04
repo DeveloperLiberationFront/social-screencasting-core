@@ -315,10 +315,13 @@ define(['angular',
           $state.go('main.video', {
             location: origin,
             owner: user.email,
-            tool: $scope.tool._id
+            application: $scope.tool.application,
+            tool_name: $scope.tool.name,
+            tool_id: $scope.tool._id,
           });
         } else {
           $state.go('main.request', {
+            location: origin,
             owner: user._id,
             tool: $scope.tool._id,
             application: $scope.tool.application

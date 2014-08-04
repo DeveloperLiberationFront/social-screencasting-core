@@ -55,26 +55,27 @@ define(['angular',
             })
 
             .state('main.video', {
-              url: '/video?location&owner&tool&tool_id&clip_id&application',
-              onEnter: function($$state, $modal, $rootScope, Hub, Local) {
+              url: '/video?location&owner&tool_name&tool_id&clip_id&application',
+              onEnter: function($state, $stateParams, $modal, $rootScope, Hub, Local) {
                 var clips;
                 if ($stateParams.location == "external") {
                   //remote clips; fetch from hub
                   clips = Hub.all('clips').getList({
                     where: {
-                      tool: $state.params.tool_id, 
-                      user: $state.params.owner //restrict to clips by owner, if specified
+                      tool: $stateParams.tool_id, 
+                      user: $stateParams.owner //restrict to clips by owner, if specified
                     },
                   });
                 } else {
-                  tool = Local.one($state.params.owner)
-                    .one($state.params.application)
-                    .one($state.params.tool);
-                  clips = Promise.all(tool.get().then(function(tool) {
-                    return _.union(tool.keyclips, tool.guiclips).map(function(clip) {
-                      return tool.one(clip).get();
+                  clips = Local.all('clips').getList({
+                    app: $stateParams.application,
+                    tool: $stateParams.tool_name
+                  });
+                  clips.then(function(clips) {
+                    _.each(clips, function(clip) {
+                      clip.id = clip.name; //add id so restangular can find images
                     })
-                  }));
+                  })
                 }
 
                 $modal.open({

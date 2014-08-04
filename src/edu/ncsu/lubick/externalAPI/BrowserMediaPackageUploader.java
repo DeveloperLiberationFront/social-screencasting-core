@@ -133,7 +133,7 @@ public class BrowserMediaPackageUploader {
 		JSONArray emailJarr = new JSONArray();
 		emailJarr.put(shareWithEmail);
 		jobj.put("share", emailJarr);
-		jobj.put("frames", HTTPAPIHandler.makeClipList(packageDirectory));
+		jobj.put("frames", HTTPAPIHandler.makeFrameList(packageDirectory));
 		jobj.put("thumbnail", "base64_encoded_thumbnail");
 
 		URI postUri = HTTPUtils.buildExternalHttpURI("/clips");

@@ -154,7 +154,7 @@ public class ToolStream {
 			
 			this.timeStamp = timeStamp;
 			this.duration = duration;
-			this.clipScore = clipScore;
+			this.clipScore = duration;
 		}
 
 		public ToolUsage(String toolName, String toolClass, String keyPresses, String pluginName, Date timeStamp, int duration, int score)
@@ -169,7 +169,6 @@ public class ToolStream {
 			this.setPluginName(pluginName);
 			this.setUseID(useID);
 		}
-		
 		
 		public static ToolUsage buildFromJSONObject(JSONObject jobj)
 		{
