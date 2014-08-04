@@ -34,6 +34,7 @@ import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 import edu.ncsu.lubick.localHub.forTesting.UnitTestUserManager;
+import edu.ncsu.lubick.localHub.http.HTTPAPIHandler;
 import edu.ncsu.lubick.localHub.http.HTTPUtils;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.FileUtilities;
@@ -57,6 +58,8 @@ public class BrowserMediaPackageUploader {
 	private String current_external_tool_id;
 
 	private String current_external_clip_id;
+	
+	private ByteArrayOutputStream byteBufferForImage = new ByteArrayOutputStream();
 
 
 	public BrowserMediaPackageUploader(UserManager userManager)
@@ -130,6 +133,8 @@ public class BrowserMediaPackageUploader {
 		JSONArray emailJarr = new JSONArray();
 		emailJarr.put(shareWithEmail);
 		jobj.put("share", emailJarr);
+		jobj.put("frames", HTTPAPIHandler.makeClipList(packageDirectory));
+		jobj.put("thumbnail", "base64_encoded_thumbnail");
 
 		URI postUri = HTTPUtils.buildExternalHttpURI("/clips");
 
@@ -263,12 +268,9 @@ public class BrowserMediaPackageUploader {
 			BufferedImage image = ImageIO.read(imageFile);
 			BufferedImage croppedImage = rect == null? image: image.getSubimage(rect.x, rect.y, rect.width, rect.height);
 
+			ImageIO.write(croppedImage, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, byteBufferForImage);
 
-			ByteArrayOutputStream croppedJPG = new ByteArrayOutputStream();
-
-			ImageIO.write(croppedImage, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, croppedJPG);
-
-			byte[] croppedJPGForTransfer = croppedJPG.toByteArray();
+			byte[] croppedJPGForTransfer = byteBufferForImage.toByteArray();
 
 			logger.debug("sending "+croppedJPGForTransfer.length + " bytes");
 
@@ -287,6 +289,7 @@ public class BrowserMediaPackageUploader {
 		finally 
 		{
 			httpPost.reset();
+			byteBufferForImage.reset();
 		}
 
 	}

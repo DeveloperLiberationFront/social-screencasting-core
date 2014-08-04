@@ -2,15 +2,19 @@ package edu.ncsu.lubick.localHub.http;
 
 import static edu.ncsu.lubick.localHub.http.HTTPUtils.*;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -21,6 +25,7 @@ import org.json.JSONObject;
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
+import edu.ncsu.lubick.util.FileUtilities;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
 public class HTTPAPIHandler extends AbstractHandler {
@@ -37,7 +42,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 	@Override
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
-		if (!target.startsWith("/api")) {
+		if (!target.startsWith("/api") && !target.startsWith("/clips")) {
 			return;
 		}
 		baseRequest.setHandled(true);
@@ -66,11 +71,13 @@ public class HTTPAPIHandler extends AbstractHandler {
 		/*
 		 * /api/:creator/:app/:tool/:clip-name/'
 		 * pieces[0] will be an empty string
-		 * pieces[1] will be the the string "api"
+		 * pieces[1] will be the the string "api" or "clips"
 		 */
 		logger.info("Broken up target "+Arrays.toString(pieces));
-		if (pieces.length <= 2) {
+		if (pieces.length < 2) {
 			response.getWriter().println("Sorry, Nothing at this URL");
+		} else if ("clips".equals(pieces[1])){ 
+			handleClipsAPI(pieces, response);
 		} else if (pieces.length == 3){
 			handleGetUserInfo(chopOffQueryString(pieces[2]), response);
 		} else if (pieces.length == 4) {
@@ -81,7 +88,49 @@ public class HTTPAPIHandler extends AbstractHandler {
 			handleGetClipInfo(pieces[3], pieces[4], chopOffQueryString(pieces[5]), response);
 		} else if (pieces.length == 7) {
 			handleImageRequest(pieces[5], chopOffQueryString(pieces[6]), response);
+		} else {
+			response.getWriter().println("Sorry, Nothing at this URL");
 		}
+	}
+	
+	private ByteArrayOutputStream byteBufferForImage = new ByteArrayOutputStream();
+
+	private void handleClipsAPI(String[] pieces, HttpServletResponse response) throws IOException
+	{
+		//"/clips/[clip_id]/images"
+		//"return {name , data}"
+		if (pieces.length != 4) {
+			response.getWriter().println("Sorry, Nothing at this URL");
+			return;
+		}
+		File file = new File("bin/public_html/images/frame000.jpg");
+		logger.info(file.getAbsolutePath());
+		BufferedImage img = ImageIO.read(file);
+
+		ImageIO.write(img, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, byteBufferForImage);
+
+		byte[] imageAsBytes = byteBufferForImage.toByteArray();
+		
+		try
+		{
+			JSONArray returnArray = new JSONArray();
+			
+			
+			for(int i = 0;i< 50; i++) {
+				JSONObject jobj = new JSONObject();
+				jobj.put("name", "frame"+FileUtilities.padIntTo4Digits(i)+".jpg");
+				jobj.put("data", Base64.encodeBase64String(imageAsBytes));
+
+
+				returnArray.put(jobj);
+			}
+			
+			returnArray.write(response.getWriter());
+		}
+		catch (JSONException e) {
+			throw new IOException("Problem encoding image" , e);
+		}
+		
 	}
 
 	private void handleGetUserInfo(String emailTarget, HttpServletResponse response) throws IOException
@@ -204,21 +253,11 @@ public class HTTPAPIHandler extends AbstractHandler {
 	{
 		File clipDir = new File(PostProductionHandler.MEDIA_OUTPUT_FOLDER, clipId);
 
-		JSONArray fileNamesArr = new JSONArray();
-
-		if (clipDir.exists() && clipDir.isDirectory())
-		{
-			String[] files = clipDir.list();
-			Arrays.sort(files);
-			for(String imageFile: files)
-			{
-				if (imageFile.startsWith("frame"))
-					fileNamesArr.put(imageFile);
-			}
-		}
-		else {
+		JSONArray fileNamesArr = makeClipList(clipDir);
+		if (fileNamesArr == null) {
 			logger.info("Clip "+clipId+" does not exist");
 			response.getWriter().println("Could not find clip "+clipId);
+			return;
 		}
 
 		JSONObject dataObject = new JSONObject();
@@ -241,6 +280,26 @@ public class HTTPAPIHandler extends AbstractHandler {
 			response.getWriter().println("There was a problem compiling the clip details");
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	public static JSONArray makeClipList(File clipDir) 
+	{
+		JSONArray fileNamesArr = new JSONArray();
+
+		if (clipDir.exists() && clipDir.isDirectory())
+		{
+			String[] files = clipDir.list();
+			Arrays.sort(files);
+			for(String imageFile: files)
+			{
+				if (imageFile.startsWith("frame"))
+					fileNamesArr.put(imageFile);
+			}
+		}
+		else {
+			return null;
+		}
+		return fileNamesArr;
 	}
 
 	private void handleImageRequest(String clipId, String fileName, HttpServletResponse response) throws IOException
