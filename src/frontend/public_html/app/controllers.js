@@ -84,16 +84,21 @@ define(['angular',
 
       Promise.all([$scope.tools, $scope.user_list]).spread(function(tools, users) {
         _.each(tools, function(tool) {
-          Hub.all('usages').getList({
-            where: {tool: tool._id}
-          }).then(function(usages) {
-            tool.usages = usages;
-            tool.users = _.where(users, function(u) {
-              return _.contains(_.pluck(usages, 'user'), u.email);
-            });
+          tool.video = false;
+          tool.users = _.where(users, function(u) {
+            //overwrite user list with more detailed user objects
+            return _.contains(tool.users, u.email);
           });
+
+          tool.usages = Hub.all('usages').getList({
+            where: {tool: tool._id}
+          });
+
           tool.clips = Hub.all('clips').getList({
             where: {tool: tool._id}
+          });
+          tool.clips.then(function(clips) {
+              tool.video = clips.length > 0;
           });
         });
       });
@@ -121,7 +126,7 @@ define(['angular',
         {name: "Usages", field:"usages"},
         {name: "Unused", field:"unused"}, 
         {name: "Recommended", field:""}, 
-        {name: "Video", field:"video"},
+        {name: "Video", field: "video"},
       ];
     }])
 
@@ -152,10 +157,10 @@ define(['angular',
       });
 
       $scope.filterSet.filters.push(function(tool) {
-        return tool.users && ($scope.filter.filters.length === 0 //all tools if no users selected
-              || _.every($scope.filter.filters, function(user){ //or only tools with all selected users
-                return _.find(tool.users, {email: user.email}); 
-              }));
+        return $scope.filter.filters.length === 0 //all tools if no users selected
+              || tool.users && _.every($scope.filter.filters, function(user){ //or only tools with all selected users
+                  return _.find(tool.users, {email: user.email}); 
+              });
       });
 
       $scope.removeFilter = function(filter) {
