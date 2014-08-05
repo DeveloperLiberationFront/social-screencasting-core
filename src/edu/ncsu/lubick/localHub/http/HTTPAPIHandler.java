@@ -181,6 +181,9 @@ public class HTTPAPIHandler extends AbstractHandler {
 		List<File> clips = databaseLink.getBestExamplesOfTool(applicationName, toolName, true);
 		clips.addAll(databaseLink.getBestExamplesOfTool(applicationName, toolName, false));
 		
+		//XXX sample data
+		clips.add(new File("renderedVideos/Eclipse16141cfc-87cb-32dc-bc30-fedcad3b7598G"));
+		
 		JSONArray jarr = new JSONArray();
 		for(File clip: clips) {
 			JSONArray fileNamesArr = makeFrameListForClip(clip);
@@ -265,8 +268,8 @@ public class HTTPAPIHandler extends AbstractHandler {
 			scaledImage.createGraphics().drawImage(img, 0, 0, newWidth, 200, 0, 0, img.getWidth(), img.getHeight(), null);
 
 			byteBufferForImage.reset();
-			ImageIO.write(img, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, new FileOutputStream("./test.jpg"));
-			ImageIO.write(img, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, byteBufferForImage);
+			//ImageIO.write(scaledImage, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, new FileOutputStream("./test.jpg"));
+			ImageIO.write(scaledImage, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, byteBufferForImage);
 
 			return Base64.encodeBase64String(byteBufferForImage.toByteArray());
 		}
