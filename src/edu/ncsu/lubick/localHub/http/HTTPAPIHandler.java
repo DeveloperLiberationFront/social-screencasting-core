@@ -254,7 +254,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 				clipObject.put("name", clip.getName());
 				clipObject.put("app", applicationName);
 				clipObject.put("tool", toolName);
-				clipObject.put("creator", userManager.getUserEmail());		
+				clipObject.put("user", userManager.getUserEmail());		
 				clipObject.put("thumbnail", makeThumbnail(clip.getName(), fileNamesArr));
 				
 				JSONArray eventFrames = new JSONArray().put(25);
