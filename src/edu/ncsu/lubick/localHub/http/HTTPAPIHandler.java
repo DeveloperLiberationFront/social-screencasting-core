@@ -183,6 +183,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 		
 		//XXX sample data
 		clips.add(new File("renderedVideos/Eclipse16141cfc-87cb-32dc-bc30-fedcad3b7598G"));
+		clips.add(new File("renderedVideos/Eclipse1a46c017-a154-323b-824f-caa732caa84aG"));
 		
 		JSONArray jarr = new JSONArray();
 		for(File clip: clips) {
