@@ -15,6 +15,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
@@ -126,37 +127,68 @@ public class BrowserMediaPackageUploader {
 	private String makeExternalClip(File packageDirectory, ClipOptions clipOptions) throws JSONException, URISyntaxException, IOException
 	{
 		JSONObject jobj = prepareClipObject(packageDirectory, clipOptions);
-		current_external_clip_id = postClipObject(jobj);
+		 JSONObject postObj = postClipObject(jobj);
 		
+		 current_external_clip_id = postObj.optString("_id",null);
 		if (current_external_clip_id == null) {
 			return null;
 		}
 		
 		//we have to do this in two steps, because the server doesn't handle lists well in conjunction with Multipart entities
-		reportThumbnail(packageDirectory, jobj);
+		JSONObject thumbnailUpdateObj = reportThumbnail(packageDirectory, jobj);
+		
+		URI putUri = HTTPUtils.buildExternalHttpURI("/clips/"+current_external_clip_id);
+
+		logger.info("Patching to include thumbnail");
+		HttpPatch httpPatch = new HttpPatch(putUri);	
+		HTTPUtils.addAuth(httpPatch, userManager);
+		httpPatch.addHeader("If-Match",postObj.optString("_etag",null));
+		try
+		{
+			StringEntity content = new StringEntity(thumbnailUpdateObj.toString());
+			content.setContentType("application/json");
+
+			httpPatch.setEntity(content);
+			HttpResponse response = client.execute(httpPatch);
+
+			String responseBody = HTTPUtils.getResponseBody(response);
+			logger.info("Reply: "+responseBody);
+
+		}
+		catch (IOException e)
+		{
+			logger.error("Problem getting tool id",e);
+		}
+		finally {
+			httpPatch.reset();
+		}
 		
 		return current_external_clip_id;
 	}
 
 
-	private void reportThumbnail(File packageDirectory, JSONObject jobj) throws JSONException, IOException
+	private JSONObject reportThumbnail(File packageDirectory, JSONObject jobj) throws JSONException, IOException
 	{
 		JSONArray frameList = jobj.getJSONArray("frames");
 		int eventFrame = jobj.getJSONArray("event_frames").getInt(0);
 		logger.debug("Uploading thumbnail");
-		reportImageByteArray(ClipUtils.makeThumbnail(new File(packageDirectory, frameList.getString(eventFrame))),
+		String responseString = reportImageByteArray(ClipUtils.makeThumbnail(new File(packageDirectory, frameList.getString(eventFrame))),
 		"thumbnail");		//no jpg needed
+		JSONObject responseObject = new JSONObject(responseString);
+		
+		JSONObject returnObject = new JSONObject();
+		returnObject.put("thumbnail", responseObject.optString("_id", null));
+		return responseObject;
 	}
 
 
-	private String postClipObject(JSONObject jobj) throws URISyntaxException, JSONException
+	private JSONObject postClipObject(JSONObject jobj) throws URISyntaxException, JSONException
 	{
 		URI postUri = HTTPUtils.buildExternalHttpURI("/clips");
 
 		HttpPost httpPost = new HttpPost(postUri);	
 		HTTPUtils.addAuth(httpPost, userManager);
 
-		String clipId = null;
 		try
 		{
 			StringEntity content = new StringEntity(jobj.toString());
@@ -170,18 +202,18 @@ public class BrowserMediaPackageUploader {
 
 			JSONObject responseObj = new JSONObject(responseBody);
 			if (!"ERR".equals(responseObj.optString("_status","ERR"))) {
-				clipId = responseObj.optString("_id");
-			}
-
+				return responseObj;
+			}		
 		}
 		catch (IOException e)
 		{
 			logger.error("Problem getting tool id",e);
+			
 		}
 		finally {
 			httpPost.reset();
 		}
-		return clipId;
+		return null;
 	}
 
 
@@ -311,7 +343,7 @@ public class BrowserMediaPackageUploader {
 		}
 	}
 	
-	private void reportImageByteArray(byte[] imageByteArray, String fileName) throws IOException {
+	private String reportImageByteArray(byte[] imageByteArray, String fileName) throws IOException {
 		URI postUri;
 		try
 		{
@@ -340,6 +372,7 @@ public class BrowserMediaPackageUploader {
 
 			String responseBody = HTTPUtils.getResponseBody(response);
 			logger.info("Reply: "+responseBody);
+			return responseBody;
 		}
 		finally 
 		{
