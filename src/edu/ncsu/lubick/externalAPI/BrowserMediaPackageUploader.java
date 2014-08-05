@@ -123,45 +123,34 @@ public class BrowserMediaPackageUploader {
 	}
 
 
-	private String makeExternalClip(File packageDirectory, ClipOptions clipOptions) throws JSONException, URISyntaxException
+	private String makeExternalClip(File packageDirectory, ClipOptions clipOptions) throws JSONException, URISyntaxException, IOException
 	{
-		MultipartEntityBuilder mpeBuilder = MultipartEntityBuilder.create();
-		mpeBuilder.addTextBody("name", packageDirectory.getName());
-		mpeBuilder.addTextBody("tool", current_external_tool_id);
+		JSONObject jobj = prepareClipObject(packageDirectory, clipOptions);
+		current_external_clip_id = postClipObject(jobj);
 		
-		if (ToolStream.MENU_KEY_PRESS.equals(currentToolUsage.getToolKeyPresses())) {
-			mpeBuilder.addTextBody("type", "mouse");
-		} else {
-			mpeBuilder.addTextBody("type", "keyboard");
+		if (current_external_clip_id == null) {
+			return null;
 		}
-		JSONArray emailJarr = new JSONArray();
-		emailJarr.put(clipOptions.shareWithEmail);
-		mpeBuilder.addTextBody("share", emailJarr.toString());
 		
+		//we have to do this in two steps, because the server doesn't handle lists well in conjunction with Multipart entities
+		reportThumbnail(packageDirectory, jobj);
 		
-		//by default, the action happens 5 seconds after the beginning of the clip
-		//Cropping this 
-		int eventFrame = 5 * PostProductionHandler.FRAME_RATE - clipOptions.startFrame;
-		
-		
-		JSONArray eventFrames = new JSONArray().put(eventFrame);
-		mpeBuilder.addTextBody("event_frames", eventFrames.toString());
-		
-		JSONArray frameList = ClipUtils.makeFrameListForClip(packageDirectory, clipOptions.startFrame, clipOptions.endFrame);
-		mpeBuilder.addTextBody("frames", frameList.toString(), ContentType.APPLICATION_JSON);
-		
-		try
-		{
-			mpeBuilder.addBinaryBody("thumbnail",
-					ClipUtils.makeThumbnail(new File(packageDirectory, frameList.getString(eventFrame))),
-					ContentType.DEFAULT_BINARY,
-					"");
-		}
-		catch (IOException e)
-		{
-			logger.error("Could not make thumbnail "+frameList +" [ "+eventFrame+"]", e);
-		}
+		return current_external_clip_id;
+	}
 
+
+	private void reportThumbnail(File packageDirectory, JSONObject jobj) throws JSONException, IOException
+	{
+		JSONArray frameList = jobj.getJSONArray("frames");
+		int eventFrame = jobj.getJSONArray("event_frames").getInt(0);
+		logger.debug("Uploading thumbnail.jpg");
+		reportImageByteArray(ClipUtils.makeThumbnail(new File(packageDirectory, frameList.getString(eventFrame))),
+		"thumbnail."+PostProductionHandler.INTERMEDIATE_FILE_FORMAT);
+	}
+
+
+	private String postClipObject(JSONObject jobj) throws URISyntaxException, JSONException
+	{
 		URI postUri = HTTPUtils.buildExternalHttpURI("/clips");
 
 		HttpPost httpPost = new HttpPost(postUri);	
@@ -170,10 +159,10 @@ public class BrowserMediaPackageUploader {
 		String clipId = null;
 		try
 		{
-			HttpEntity content = mpeBuilder.build();
-			content.writeTo(System.out);
+			StringEntity content = new StringEntity(jobj.toString());
+			content.setContentType("application/json");
+
 			httpPost.setEntity(content);
-			
 			HttpResponse response = client.execute(httpPost);
 
 			String responseBody = HTTPUtils.getResponseBody(response);
@@ -193,6 +182,34 @@ public class BrowserMediaPackageUploader {
 			httpPost.reset();
 		}
 		return clipId;
+	}
+
+
+	private JSONObject prepareClipObject(File packageDirectory, ClipOptions clipOptions) throws JSONException
+	{
+		JSONObject jobj = new JSONObject();
+		jobj.put("name", packageDirectory.getName());
+		jobj.put("tool", current_external_tool_id);
+		if (ToolStream.MENU_KEY_PRESS.equals(currentToolUsage.getToolKeyPresses())) {
+			jobj.put("type", "mouse");
+		} else {
+			jobj.put("type", "keyboard");
+		}
+		JSONArray emailJarr = new JSONArray();
+		emailJarr.put(clipOptions.shareWithEmail);
+		
+		//by default, the action happens 5 seconds after the beginning of the clip
+		//Cropping this 
+		int eventFrame = 5 * PostProductionHandler.FRAME_RATE - clipOptions.startFrame;
+		
+		
+		JSONArray eventFrames = new JSONArray().put(eventFrame);
+		jobj.put("event_frames", eventFrames);
+		jobj.put("share", emailJarr);
+		
+		JSONArray frameList = ClipUtils.makeFrameListForClip(packageDirectory, clipOptions.startFrame, clipOptions.endFrame);
+		jobj.put("frames", frameList);
+		return jobj;
 	}
 
 
@@ -277,22 +294,8 @@ public class BrowserMediaPackageUploader {
 
 	private void reportCroppedImage(File imageFile, Rectangle rect) throws IOException
 	{
-		URI putUri;
-		try
-		{
-			putUri = HTTPUtils.buildExternalHttpURI("/clips/"+current_external_clip_id+"/images");
-		}
-		catch (URISyntaxException e)
-		{
-			throw new IOException("Problem making the uri to send", e);
-		}
-
-		HttpPost httpPost = new HttpPost(putUri);
-		HTTPUtils.addAuth(httpPost, userManager);
 		try 
 		{
-			MultipartEntityBuilder mpeBuilder = MultipartEntityBuilder.create();
-
 			BufferedImage image = ImageIO.read(imageFile);
 			BufferedImage croppedImage = rect == null? image: image.getSubimage(rect.x, rect.y, rect.width, rect.height);
 
@@ -300,11 +303,35 @@ public class BrowserMediaPackageUploader {
 
 			byte[] croppedJPGForTransfer = byteBufferForImage.toByteArray();
 
-			logger.debug("sending "+croppedJPGForTransfer.length + " bytes");
+			this.reportImageByteArray(croppedJPGForTransfer, imageFile.getName());
+		}
+		finally 
+		{
+			byteBufferForImage.reset();
+		}
+	}
+	
+	private void reportImageByteArray(byte[] imageByteArray, String fileName) throws IOException {
+		URI postUri;
+		try
+		{
+			postUri = HTTPUtils.buildExternalHttpURI("/clips/"+current_external_clip_id+"/images");
+		}
+		catch (URISyntaxException e)
+		{
+			throw new IOException("Problem making the uri to send", e);
+		}
 
-			mpeBuilder.addBinaryBody("data", croppedJPGForTransfer, ContentType.DEFAULT_BINARY, "");
+		HttpPost httpPost = new HttpPost(postUri);
+		HTTPUtils.addAuth(httpPost, userManager);
+		try 
+		{
+			MultipartEntityBuilder mpeBuilder = MultipartEntityBuilder.create();
+			
+			logger.debug("sending "+imageByteArray.length + " bytes");
+			mpeBuilder.addBinaryBody("data", imageByteArray, ContentType.DEFAULT_BINARY, "");
 
-			mpeBuilder.addTextBody("name", imageFile.getName());
+			mpeBuilder.addTextBody("name", fileName);
 
 			HttpEntity content = mpeBuilder.build();
 
@@ -317,9 +344,7 @@ public class BrowserMediaPackageUploader {
 		finally 
 		{
 			httpPost.reset();
-			byteBufferForImage.reset();
 		}
-
 	}
 
 	private int fileNameToInt(String fileName)
