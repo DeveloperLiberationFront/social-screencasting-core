@@ -139,7 +139,7 @@ public class BrowserMediaPackageUploader {
 		
 		URI putUri = HTTPUtils.buildExternalHttpURI("/clips/"+current_external_clip_id);
 
-		logger.info("Patching to include thumbnail");
+		logger.info("Patching to include thumbnail " + thumbnailUpdateObj.toString(2));
 		HttpPatch httpPatch = new HttpPatch(putUri);	
 		HTTPUtils.addAuth(httpPatch, userManager);
 		httpPatch.addHeader("If-Match",postObj.optString("_etag",null));
@@ -178,7 +178,7 @@ public class BrowserMediaPackageUploader {
 		
 		JSONObject returnObject = new JSONObject();
 		returnObject.put("thumbnail", responseObject.optString("_id", null));
-		return responseObject;
+		return returnObject;
 	}
 
 
