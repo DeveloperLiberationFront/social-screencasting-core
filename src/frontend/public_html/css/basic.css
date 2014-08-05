@@ -171,3 +171,11 @@
 .no-outline.active:focus {
     outline: 0;
 }
+
+.user-thumbnail {
+    margin: 0px;
+}
+
+.user-thumbnail > img {
+    max-height: 50px;
+}

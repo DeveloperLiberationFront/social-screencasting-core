@@ -27,4 +27,10 @@ define(['angular', 'ng-resource', 'restangular'], function (ng) {
           });
       });
     }])
+
+    .factory('Base64Img', function() {
+      return function(data) {
+        return 'data:image/jpg;base64,' + data;
+      };
+    })
 });

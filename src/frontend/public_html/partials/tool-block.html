@@ -5,13 +5,11 @@
       <span class='label label-info' ng-if='tool.unused'>Unused</span>
     </div>
   </div>
+  <span>Used by:</span>
   <div class='tool-users' ng-if='tool.users.length > 0'>
-    <span>Used by:</span>
     <ul class='list-inline'>
       <li class='tool-user' ng-repeat='user in tool.userObjects'>
-        <a ng-click='getVideo(user)' class='pointer'>{{user.name}}</a>
-        <span class='glyphicon glyphicon-facetime-video'
-              ng-if='hasVideo(user)'></span>
+        <ng-include src="'partials/user-thumbnail.html'">
       </li>
     </ul>
   </div>
