@@ -34,9 +34,9 @@ import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 import edu.ncsu.lubick.localHub.forTesting.UnitTestUserManager;
-import edu.ncsu.lubick.localHub.http.HTTPAPIHandler;
 import edu.ncsu.lubick.localHub.http.HTTPUtils;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
+import edu.ncsu.lubick.util.ClipUtils;
 import edu.ncsu.lubick.util.FileUtilities;
 
 /**
@@ -107,9 +107,12 @@ public class BrowserMediaPackageUploader {
 				return false;
 			}
 
-			this.current_external_clip_id = makeExternalClip(packageDirectory, clipOptions.shareWithEmail);
+			this.current_external_clip_id = makeExternalClip(packageDirectory, clipOptions);
 
 			logger.info("Made clip id "+current_external_clip_id);
+			if (current_external_clip_id == null) {
+				return false;
+			}
 
 			File[] allFiles = packageDirectory.listFiles();
 			return uploadAllFiles(allFiles, clipOptions);
@@ -120,21 +123,44 @@ public class BrowserMediaPackageUploader {
 	}
 
 
-	private String makeExternalClip(File packageDirectory, String shareWithEmail) throws JSONException, URISyntaxException
+	private String makeExternalClip(File packageDirectory, ClipOptions clipOptions) throws JSONException, URISyntaxException
 	{
-		JSONObject jobj = new JSONObject();
-		jobj.put("name", packageDirectory.getName());
-		jobj.put("tool", current_external_tool_id);
+		MultipartEntityBuilder mpeBuilder = MultipartEntityBuilder.create();
+		mpeBuilder.addTextBody("name", packageDirectory.getName());
+		mpeBuilder.addTextBody("tool", current_external_tool_id);
+		
 		if (ToolStream.MENU_KEY_PRESS.equals(currentToolUsage.getToolKeyPresses())) {
-			jobj.put("type", "mouse");
+			mpeBuilder.addTextBody("type", "mouse");
 		} else {
-			jobj.put("type", "keyboard");
+			mpeBuilder.addTextBody("type", "keyboard");
 		}
 		JSONArray emailJarr = new JSONArray();
-		emailJarr.put(shareWithEmail);
-		jobj.put("share", emailJarr);
-		jobj.put("frames", HTTPAPIHandler.makeFrameListForClip(packageDirectory));
-		jobj.put("thumbnail", "base64_encoded_thumbnail");
+		emailJarr.put(clipOptions.shareWithEmail);
+		mpeBuilder.addTextBody("share", emailJarr.toString());
+		
+		
+		//by default, the action happens 5 seconds after the beginning of the clip
+		//Cropping this 
+		int eventFrame = 5 * PostProductionHandler.FRAME_RATE - clipOptions.startFrame;
+		
+		
+		JSONArray eventFrames = new JSONArray().put(eventFrame);
+		mpeBuilder.addTextBody("event_frames", eventFrames.toString());
+		
+		JSONArray frameList = ClipUtils.makeFrameListForClip(packageDirectory, clipOptions.startFrame, clipOptions.endFrame);
+		mpeBuilder.addTextBody("frames", frameList.toString(), ContentType.APPLICATION_JSON);
+		
+		try
+		{
+			mpeBuilder.addBinaryBody("thumbnail",
+					ClipUtils.makeThumbnail(new File(packageDirectory, frameList.getString(eventFrame))),
+					ContentType.DEFAULT_BINARY,
+					"");
+		}
+		catch (IOException e)
+		{
+			logger.error("Could not make thumbnail "+frameList +" [ "+eventFrame+"]", e);
+		}
 
 		URI postUri = HTTPUtils.buildExternalHttpURI("/clips");
 
@@ -144,17 +170,19 @@ public class BrowserMediaPackageUploader {
 		String clipId = null;
 		try
 		{
-			StringEntity content = new StringEntity(jobj.toString());
-			content.setContentType("application/json");
-
+			HttpEntity content = mpeBuilder.build();
+			content.writeTo(System.out);
 			httpPost.setEntity(content);
+			
 			HttpResponse response = client.execute(httpPost);
 
 			String responseBody = HTTPUtils.getResponseBody(response);
 			logger.info("Reply: "+responseBody);
 
 			JSONObject responseObj = new JSONObject(responseBody);
-			clipId = responseObj.optString("_id");
+			if (!"ERR".equals(responseObj.optString("_status","ERR"))) {
+				clipId = responseObj.optString("_id");
+			}
 
 		}
 		catch (IOException e)
@@ -330,7 +358,7 @@ public class BrowserMediaPackageUploader {
 		
 		logger.info(FileUtilities.makeLocalFolderNameForBrowserMediaPackage(testToolUsage, newManager.getUserEmail()));
 
-		logger.info(uploader.uploadToolUsage(testToolUsage, new ClipOptions("public")));
+		logger.info(uploader.uploadToolUsage(testToolUsage, new ClipOptions("public", 2, 0)));
 
 
 	}

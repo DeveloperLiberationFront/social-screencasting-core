@@ -2,15 +2,11 @@ package edu.ncsu.lubick.localHub.http;
 
 import static edu.ncsu.lubick.localHub.http.HTTPUtils.*;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -30,8 +26,8 @@ import org.json.JSONObject;
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
+import edu.ncsu.lubick.util.ClipUtils;
 import edu.ncsu.lubick.util.FileUtilities;
-import edu.ncsu.lubick.util.ToolCountStruct;
 
 public class HTTPAPIHandler extends AbstractHandler {
 
@@ -120,7 +116,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 		
 		String clipId = pieces[3];
 		
-		JSONArray frameList = makeFrameListForClip(new File("renderedVideos",clipId));
+		JSONArray frameList = ClipUtils.makeFrameListForClip(new File("renderedVideos",clipId));
 		
 		try
 		{
@@ -187,7 +183,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 		
 		JSONArray jarr = new JSONArray();
 		for(File clip: clips) {
-			JSONArray fileNamesArr = makeFrameListForClip(clip);
+			JSONArray fileNamesArr = ClipUtils.makeFrameListForClip(clip);
 			if (fileNamesArr == null) {
 				logger.info("Clip "+clip.getName()+" does not exist");
 				response.getWriter().println("Could not find clip "+clip.getName());
@@ -202,6 +198,9 @@ public class HTTPAPIHandler extends AbstractHandler {
 				clipObject.put("tool", toolName);
 				clipObject.put("creator", userManager.getUserEmail());		
 				clipObject.put("thumbnail", makeThumbnail(clip.getName(), fileNamesArr));
+				
+				JSONArray eventFrames = new JSONArray().put(25);
+				clipObject.put("event_frames", eventFrames);
 				jarr.put(clipObject);
 			}
 			catch (JSONException e)
@@ -260,140 +259,14 @@ public class HTTPAPIHandler extends AbstractHandler {
 			int indexForThumbnail = fileNamesArr.length() > 25? 25 : fileNamesArr.length()/2;
 
 			File file = new File("renderedVideos/"+clipId, fileNamesArr.getString(indexForThumbnail));
-			logger.info(file.getAbsolutePath());
-			BufferedImage img = ImageIO.read(file);
 
-			int newWidth = (img.getWidth() * 200) / img.getHeight();
-			BufferedImage scaledImage = new BufferedImage(newWidth, 200, BufferedImage.TYPE_INT_RGB);
-
-			scaledImage.createGraphics().drawImage(img, 0, 0, newWidth, 200, 0, 0, img.getWidth(), img.getHeight(), null);
-
-			byteBufferForImage.reset();
-			//ImageIO.write(scaledImage, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, new FileOutputStream("./test.jpg"));
-			ImageIO.write(scaledImage, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, byteBufferForImage);
-
-			return Base64.encodeBase64String(byteBufferForImage.toByteArray());
+			return ClipUtils.makeBase64EncodedThumbnail(file);
 		}
 		catch (IOException | JSONException e)
 		{
 			logger.error("Problem making a thumbnail " + clipId + " " + fileNamesArr);
 			return null;
 		}
-		finally {
-			byteBufferForImage.reset();
-		}
-	}
-
-	public static JSONArray makeFrameListForClip(File clipDir) 
-	{
-		JSONArray fileNamesArr = new JSONArray();
-
-		if (clipDir.exists() && clipDir.isDirectory())
-		{
-			String[] files = clipDir.list();
-			Arrays.sort(files);
-			for(String imageFile: files)
-			{
-				if (imageFile.startsWith("frame"))
-					fileNamesArr.put(imageFile);
-			}
-		}
-		else {
-			return null;
-		}
-		return fileNamesArr;
-	}
-
-	private void handleImageRequest(String clipId, String fileName, HttpServletResponse response) throws IOException
-	{
-		response.sendRedirect("/"+clipId+"/"+fileName);
-	}
-
-	private void handleGetAllToolsForPlugin(String applicationName, HttpServletResponse response) throws IOException
-	{
-		JSONObject dataObj = new JSONObject();
-		JSONArray appArr = makePluginArray(applicationName);
-		try {
-			dataObj.put("tools", appArr);
-			dataObj.write(response.getWriter());
-		}
-		catch (JSONException e) {
-			throw new IOException("Problem making JSON " + dataObj, e);
-		}
-	
-	}
-
-	private void handleGetInfoAboutTool(String applicationName, String toolName, HttpServletResponse response) throws IOException
-	{
-		List<File> keyClips = databaseLink.getBestExamplesOfTool(applicationName, toolName, true);
-		List<File> guiClips = databaseLink.getBestExamplesOfTool(applicationName, toolName, false);
-		ToolCountStruct countStruct = databaseLink.getToolAggregate(applicationName, toolName);
-	
-		JSONObject clips = new JSONObject();
-	
-		try
-		{
-			JSONArray keyJarr = new JSONArray();
-			for(File f: keyClips)
-			{
-				keyJarr.put(f.getName());
-			}
-	
-			JSONArray guiJarr = new JSONArray();
-			for(File f: guiClips)
-			{
-				guiJarr.put(f.getName());
-			}
-	
-			JSONObject usage = new JSONObject();
-			JSONObject toolJson = new JSONObject();
-			toolJson.put("gui", countStruct.guiToolCount);
-			toolJson.put("keyboard", countStruct.keyboardCount);
-			usage.put(toolName, toolJson);
-	
-			// Testing data
-			keyJarr.put("Eclipse16274d13-bebb-3196-832c-70313e08cdaaK");
-			keyJarr.put("Eclipsea3aabc7a-d2dc-33d1-84a7-066372cb4d73K");
-			guiJarr.put("Eclipse16141cfc-87cb-32dc-bc30-fedcad3b7598G");
-			guiJarr.put("Eclipse29bf2b83-2e3d-3855-9286-ee7f69db64c1G");
-			guiJarr.put("Eclipse13d5a993-e46f-3b7f-862a-bfefa5831901G");
-	
-	
-			clips.put("keyclips",keyJarr);
-			clips.put("guiclips",guiJarr);
-			clips.put("usage", usage);
-	
-			response.setContentType("application/json");
-			clips.write(response.getWriter());
-		}
-		catch (JSONException e)
-		{
-			logger.error("Problem compiling clip names and writing them out "+clips,e);
-		}
-	}
-
-	private JSONArray makePluginArray(String pluginName)
-	{
-		List<ToolCountStruct> counts = databaseLink.getAllToolAggregateForPlugin(pluginName);
-	
-		JSONArray retVal = new JSONArray();
-		for(ToolCountStruct tcs: counts)
-		{
-			JSONObject tempObject = new JSONObject();
-			try
-			{
-				tempObject.put("clips", 5);		//TODO FIX
-				tempObject.put("gui", tcs.guiToolCount);
-				tempObject.put("keyboard", tcs.keyboardCount);
-				tempObject.put("name", tcs.toolName);
-				retVal.put(tempObject);
-			}
-			catch (JSONException e)
-			{
-				logger.error("Unusual JSON exception, squashing: "+tempObject,e);
-			}
-		}
-		return retVal;
 	}
 
 }
