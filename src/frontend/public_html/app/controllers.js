@@ -80,6 +80,12 @@ define(['angular',
         'where': {'user': $scope.user.email},
       });
 
+      Promise.all([$scope.user.usages, $scope.tools]).spread(function(usages, tools) {
+        _.each(tools, function(tool) {
+          tool.unused = !_.find(usages, {tool: tool._id});
+        })
+      });
+
       Promise.all([$scope.tools, $scope.user_list]).spread(function(tools, users) {
         _.each(tools, function(tool) {
           tool.video = false;
@@ -287,7 +293,7 @@ define(['angular',
       $scope.filterSet.filters.push(function(tool) {
         return !_.any($scope.filter.active_filters) || //no filters shows all apps
           //or
-          ($scope.filter.active_filters.not_used && !_.find(tool.users, {email : $scope.user.email})) ||
+          ($scope.filter.active_filters.not_used && !_.contains(tool.users, $scope.user.email)) ||
           //or
           ($scope.filter.active_filters.yes_video && tool.clips.$object.length > 0);
 
