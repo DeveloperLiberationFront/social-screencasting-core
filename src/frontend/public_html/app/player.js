@@ -14,8 +14,8 @@ define(['angular',
                     'socasterServices',
                     'restangular'])
 
-  .controller('PlayerCtrl', ['$scope', '$interval', '$q',
-    function($scope, $interval, $q) {
+  .controller('PlayerCtrl', ['$scope', '$interval', '$q', 'Base64Img',
+    function($scope, $interval, $q, Base64Img) {
 
         $scope.player = {
             pos: 0,
@@ -66,7 +66,9 @@ define(['angular',
         loadClip($scope.clip);
 
         $scope.getImage = function(name) {
-          return 'data:image/jpg;base64,' + _.find($scope.clip.images, {name: name}).data;
+          image = _.find($scope.clip.images, {name: name})
+          if (image)
+            return Base64Img(image.data);
         };
 
         $scope.$watch('clip', function(newValue) {

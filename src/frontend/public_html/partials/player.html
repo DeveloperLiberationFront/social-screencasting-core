@@ -44,7 +44,7 @@
           </button>
         </div>
       </div>
-      <div ng-controller='RatingCtrl' id='rating' ng-show='!player.editMode'>
+      <div ng-controller='RatingCtrl' id='rating' ng-show='!player.editMode && clip.origin == "external"'>
         <rating ng-model='score'></rating>
       </div>
     </div>    

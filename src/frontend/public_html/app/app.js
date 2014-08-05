@@ -78,6 +78,13 @@ define(['angular',
                   })
                 }
 
+                clips.then(function(clips) {
+                  console.log('loaded');
+                  _.each(clips, function(clip) {
+                    clip.origin = $stateParams.location;
+                  });
+                });
+
                 $modal.open({
                   templateUrl: 'partials/modal-player.html',
                   controller: 'ModalPlayer',

@@ -74,8 +74,8 @@ define(['angular',
       $scope.tools = Hub.all('tools').getList();
     }])
 
-  .controller('ToolListCtrl', ['$scope','Hub',
-    function($scope, Hub) {
+  .controller('ToolListCtrl', ['$scope','Hub','Local',
+    function($scope, Hub, Local) {
       $scope.user.usages = Hub.all('usages').getList({
         'where': {'user': $scope.user.email},
       });
@@ -98,11 +98,18 @@ define(['angular',
             where: {tool: tool._id}
           });
 
-          tool.clips = Hub.all('clips').getList({
+          hub_clips = Hub.all('clips').getList({
             where: {tool: tool._id}
           });
-          tool.clips.then(function(clips) {
-              tool.video = clips.length > 0;
+
+          local_clips = Local.all('clips').getList({
+            app: tool.application,
+            tool: tool.name
+          });
+
+          Promise.all([hub_clips, local_clips]).spread(function(hub_clips, local_clips) {
+            tool.clips = _.union(hub_clips, local_clips);
+            tool.video = hub_clips.length > 0;
           });
         });
       });
@@ -276,7 +283,7 @@ define(['angular',
           text: "I haven't used yet",
           id:"not_used"
         },
-        { text: "have a screencast",
+        { text: "Have a screencast",
           id:"yes_video"
         },
         ],
@@ -295,7 +302,7 @@ define(['angular',
           //or
           ($scope.filter.active_filters.not_used && !_.contains(tool.users, $scope.user.email)) ||
           //or
-          ($scope.filter.active_filters.yes_video && tool.clips.$object.length > 0);
+          ($scope.filter.active_filters.yes_video && tool.video);
 
       });
 
@@ -307,11 +314,19 @@ define(['angular',
 
     }])
 
-  .controller('ToolBlockCtrl', ['$scope', '$state',
-    function($scope, $state) {
+  .controller('ToolBlockCtrl', ['$scope', '$state', 'Local', 'Base64Img',
+    function($scope, $state, Local, Base64Img) {
       $scope.hasVideo = function(user) {
-        return _.find($scope.tool.clips.$object, {user: user.email})
+        return _.find($scope.tool.clips, {user: user.email})
           || user.email == $scope.user.email;
+      };
+
+      $scope.thumbnail = function(user) {
+        clips = _.where(_.where($scope.tool.clips, {user: user.email}), 'thumbnail')
+        if (clips.length > 0) {
+          c = clips[0]; //should be something like _.max(clips, 'rating');
+          return Base64Img(_.isObject(c.thumbnail) ? c.thumbnail.data : c.thumbnail);
+        }
       };
 
       $scope.getVideo = function(user) {
