@@ -143,9 +143,9 @@ public class BrowserMediaPackageUploader {
 	{
 		JSONArray frameList = jobj.getJSONArray("frames");
 		int eventFrame = jobj.getJSONArray("event_frames").getInt(0);
-		logger.debug("Uploading thumbnail.jpg");
+		logger.debug("Uploading thumbnail");
 		reportImageByteArray(ClipUtils.makeThumbnail(new File(packageDirectory, frameList.getString(eventFrame))),
-		"thumbnail."+PostProductionHandler.INTERMEDIATE_FILE_FORMAT);
+		"thumbnail");		//no jpg needed
 	}
 
 
