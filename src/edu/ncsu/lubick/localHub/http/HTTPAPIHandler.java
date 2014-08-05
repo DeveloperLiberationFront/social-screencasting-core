@@ -2,11 +2,15 @@ package edu.ncsu.lubick.localHub.http;
 
 import static edu.ncsu.lubick.localHub.http.HTTPUtils.*;
 
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -103,11 +107,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 	{
 		if (pieces.length == 3) {
 			//just "/api/clips"
-			//TODO null checks
-			String application = queryParams.get("app")[0];
-			String tool = queryParams.get("tool")[0];
-			
-			getAllClipsForTool(application, tool, response);
+			handleGetClipsForTool(response);
 			return;
 		}
 		
@@ -120,7 +120,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 		
 		String clipId = pieces[3];
 		
-		JSONArray frameList = makeFrameList(new File("renderedVideos",clipId));
+		JSONArray frameList = makeFrameListForClip(new File("renderedVideos",clipId));
 		
 		try
 		{
@@ -156,9 +156,74 @@ public class HTTPAPIHandler extends AbstractHandler {
 		
 	}
 
+	private void handleGetClipsForTool(HttpServletResponse response) throws IOException
+	{
+		String application = null;
+		String tool = null;
+		try
+		{
+			application = queryParams.get("app")[0];
+			tool = queryParams.get("tool")[0];
+		}
+		catch (NullPointerException | ArrayIndexOutOfBoundsException e)
+		{
+			logger.error("Malformed query params, no app or tool params: "+queryParams, e);
+			response.getWriter().println("Malformed query params, no app or tool params");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			return;
+		}
+	
+		replyWithAllClipsForTool(application, tool, response);
+	}
+
+	private void replyWithAllClipsForTool(String applicationName, String toolName, HttpServletResponse response) throws IOException
+	{
+		List<File> clips = databaseLink.getBestExamplesOfTool(applicationName, toolName, true);
+		clips.addAll(databaseLink.getBestExamplesOfTool(applicationName, toolName, false));
+		
+		JSONArray jarr = new JSONArray();
+		for(File clip: clips) {
+			JSONArray fileNamesArr = makeFrameListForClip(clip);
+			if (fileNamesArr == null) {
+				logger.info("Clip "+clip.getName()+" does not exist");
+				response.getWriter().println("Could not find clip "+clip.getName());
+				return;
+			}
+	
+			JSONObject clipObject = new JSONObject();
+			try{	
+				clipObject.put("frames", fileNamesArr);
+				clipObject.put("name", clip.getName());
+				clipObject.put("app", applicationName);
+				clipObject.put("tool", toolName);
+				clipObject.put("creator", userManager.getUserEmail());		
+				clipObject.put("thumbnail", makeThumbnail(clip.getName(), fileNamesArr));
+				jarr.put(clipObject);
+			}
+			catch (JSONException e)
+			{
+				logger.error("Problem compiling clip names and writing them out "+clipObject,e);
+				response.getWriter().println("There was a problem compiling the clip details");
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			}
+		}
+		
+		response.setContentType("application/json");
+		try {
+			jarr.write(response.getWriter());
+		} catch (JSONException e) {	
+			response.getWriter().println("There was a problem compiling the clip details");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new IOException("Problem writing to response", e);
+		}
+		
+	
+		
+	}
+
 	private void handleGetUserInfo(String emailTarget, HttpServletResponse response) throws IOException
 	{
-		if (emailTarget.equals(userManager.getUserEmail())  || "user".equals(emailTarget) || "users".equals(emailTarget)) 
+		if (emailTarget.equals(userManager.getUserEmail()) || "user".equals(emailTarget) || "users".equals(emailTarget)) 
 		{
 			try {
 				JSONObject user = makeUserAuthObj();
@@ -185,76 +250,37 @@ public class HTTPAPIHandler extends AbstractHandler {
 		return user;
 	}
 
-	private JSONArray makePluginArray(String pluginName)
+	private String makeThumbnail(String clipId, JSONArray fileNamesArr)
 	{
-		List<ToolCountStruct> counts = databaseLink.getAllToolAggregateForPlugin(pluginName);
-
-		JSONArray retVal = new JSONArray();
-		for(ToolCountStruct tcs: counts)
-		{
-			JSONObject tempObject = new JSONObject();
-			try
-			{
-				tempObject.put("clips", 5);		//TODO FIX
-				tempObject.put("gui", tcs.guiToolCount);
-				tempObject.put("keyboard", tcs.keyboardCount);
-				tempObject.put("name", tcs.toolName);
-				retVal.put(tempObject);
-			}
-			catch (JSONException e)
-			{
-				logger.error("Unusual JSON exception, squashing: "+tempObject,e);
-			}
-		}
-		return retVal;
-	}
-
-	private void getAllClipsForTool(String applicationName, String toolName, HttpServletResponse response) throws IOException
-	{
-		List<File> clips = databaseLink.getBestExamplesOfTool(applicationName, toolName, true);
-		clips.addAll(databaseLink.getBestExamplesOfTool(applicationName, toolName, false));
-		
-		JSONArray jarr = new JSONArray();
-		for(File clip: clips) {
-			JSONArray fileNamesArr = makeFrameList(clip);
-			if (fileNamesArr == null) {
-				logger.info("Clip "+clip.getName()+" does not exist");
-				response.getWriter().println("Could not find clip "+clip.getName());
-				return;
-			}
-
-			JSONObject clipObject = new JSONObject();
-			try{	
-				clipObject.put("frames", fileNamesArr);
-				clipObject.put("name", clip.getName());
-				clipObject.put("app", applicationName);
-				clipObject.put("tool", toolName);
-				clipObject.put("creator", userManager.getUserEmail());		
-				
-				jarr.put(clipObject);
-			}
-			catch (JSONException e)
-			{
-				logger.error("Problem compiling clip names and writing them out "+clipObject,e);
-				response.getWriter().println("There was a problem compiling the clip details");
-				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			}
-		}
-		
-		response.setContentType("application/json");
 		try {
-			jarr.write(response.getWriter());
-		} catch (JSONException e) {	
-			response.getWriter().println("There was a problem compiling the clip details");
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			throw new IOException("Problem writing to response", e);
+			int indexForThumbnail = fileNamesArr.length() > 25? 25 : fileNamesArr.length()/2;
+
+			File file = new File("renderedVideos/"+clipId, fileNamesArr.getString(indexForThumbnail));
+			logger.info(file.getAbsolutePath());
+			BufferedImage img = ImageIO.read(file);
+
+			int newWidth = (img.getWidth() * 200) / img.getHeight();
+			BufferedImage scaledImage = new BufferedImage(newWidth, 200, BufferedImage.TYPE_INT_RGB);
+
+			scaledImage.createGraphics().drawImage(img, 0, 0, newWidth, 200, 0, 0, img.getWidth(), img.getHeight(), null);
+
+			byteBufferForImage.reset();
+			ImageIO.write(img, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, new FileOutputStream("./test.jpg"));
+			ImageIO.write(img, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, byteBufferForImage);
+
+			return Base64.encodeBase64String(byteBufferForImage.toByteArray());
 		}
-		
-	
-		
+		catch (IOException | JSONException e)
+		{
+			logger.error("Problem making a thumbnail " + clipId + " " + fileNamesArr);
+			return null;
+		}
+		finally {
+			byteBufferForImage.reset();
+		}
 	}
 
-	public static JSONArray makeFrameList(File clipDir) 
+	public static JSONArray makeFrameListForClip(File clipDir) 
 	{
 		JSONArray fileNamesArr = new JSONArray();
 
@@ -340,6 +366,30 @@ public class HTTPAPIHandler extends AbstractHandler {
 		{
 			logger.error("Problem compiling clip names and writing them out "+clips,e);
 		}
+	}
+
+	private JSONArray makePluginArray(String pluginName)
+	{
+		List<ToolCountStruct> counts = databaseLink.getAllToolAggregateForPlugin(pluginName);
+	
+		JSONArray retVal = new JSONArray();
+		for(ToolCountStruct tcs: counts)
+		{
+			JSONObject tempObject = new JSONObject();
+			try
+			{
+				tempObject.put("clips", 5);		//TODO FIX
+				tempObject.put("gui", tcs.guiToolCount);
+				tempObject.put("keyboard", tcs.keyboardCount);
+				tempObject.put("name", tcs.toolName);
+				retVal.put(tempObject);
+			}
+			catch (JSONException e)
+			{
+				logger.error("Unusual JSON exception, squashing: "+tempObject,e);
+			}
+		}
+		return retVal;
 	}
 
 }
