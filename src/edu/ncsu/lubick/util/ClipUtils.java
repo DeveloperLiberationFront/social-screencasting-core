@@ -57,6 +57,36 @@ public class ClipUtils {
 		return fileNamesArr;
 	}
 	
+	public static JSONArray makeFrameListForClipNoExtensions(File clipDir, int startFrame, int endFrame) 
+	{
+		JSONArray fileNamesArr = new JSONArray();
+
+		if (endFrame == 0)
+			endFrame = Integer.MAX_VALUE;
+		
+		if (clipDir.exists() && clipDir.isDirectory())
+		{
+			String[] files = clipDir.list();
+			Arrays.sort(files);
+			
+			int frameCount = 0;
+			for(String imageFile: files)
+			{
+				if (imageFile.startsWith("frame")) {
+					if (frameCount >= startFrame && frameCount <= endFrame) {
+						fileNamesArr.put(imageFile.substring(0, imageFile.indexOf('.')));
+					}
+					frameCount++;
+				}
+					
+			}
+		}
+		else {
+			return null;
+		}
+		return fileNamesArr;
+	}
+	
 	public static String makeBase64EncodedThumbnail(File image) throws IOException {
 		return Base64.encodeBase64String(makeThumbnail(image));
 	}

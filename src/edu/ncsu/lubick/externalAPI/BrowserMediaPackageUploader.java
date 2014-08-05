@@ -4,6 +4,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -134,6 +135,7 @@ public class BrowserMediaPackageUploader {
 			return null;
 		}
 		
+		jobj.put("frames", ClipUtils.makeFrameListForClip(packageDirectory, clipOptions.startFrame, clipOptions.endFrame));
 		//we have to do this in two steps, because the server doesn't handle lists well in conjunction with Multipart entities
 		JSONObject thumbnailUpdateObj = reportThumbnail(packageDirectory, jobj);
 		
@@ -239,7 +241,7 @@ public class BrowserMediaPackageUploader {
 		jobj.put("event_frames", eventFrames);
 		jobj.put("share", emailJarr);
 		
-		JSONArray frameList = ClipUtils.makeFrameListForClip(packageDirectory, clipOptions.startFrame, clipOptions.endFrame);
+		JSONArray frameList = ClipUtils.makeFrameListForClipNoExtensions(packageDirectory, clipOptions.startFrame, clipOptions.endFrame);
 		jobj.put("frames", frameList);
 		return jobj;
 	}
@@ -289,7 +291,6 @@ public class BrowserMediaPackageUploader {
 			{
 
 				if (!fileName.startsWith("frame")) {
-					logger.info("Uploading: " + fileName);
 					reportUncroppedImage(file);
 					continue;
 				}
@@ -297,13 +298,11 @@ public class BrowserMediaPackageUploader {
 				{
 					int fileNum = fileNameToInt(fileName);
 					if (fileNum >= startFrame && fileNum <= endFrame || fileNum == -1) {
-						logger.info("Uploading: " + fileName);
 						reportCroppedImage(file, clipOptions.cropRect);
 					}
 				}
 				catch(NumberFormatException e)
 				{
-					logger.info("Uploading: " + file.getAbsolutePath());
 					reportUncroppedImage(file);
 				}
 			}
@@ -329,13 +328,19 @@ public class BrowserMediaPackageUploader {
 		try 
 		{
 			BufferedImage image = ImageIO.read(imageFile);
-			BufferedImage croppedImage = rect == null? image: image.getSubimage(rect.x, rect.y, rect.width, rect.height);
+			BufferedImage croppedImage = (rect == null? image: image.getSubimage(rect.x, rect.y, rect.width, rect.height));
 
-			ImageIO.write(croppedImage, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, byteBufferForImage);
+			BufferedImage rbgImage = new BufferedImage(croppedImage.getWidth(), croppedImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+			
+			rbgImage.createGraphics().drawImage(croppedImage, null, null);
+			
+			ImageIO.write(rbgImage, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, byteBufferForImage);
 
 			byte[] croppedJPGForTransfer = byteBufferForImage.toByteArray();
 
-			this.reportImageByteArray(croppedJPGForTransfer, imageFile.getName());
+			String fileName = imageFile.getName();
+			
+			this.reportImageByteArray(croppedJPGForTransfer, fileName.substring(0, fileName.indexOf('.')));
 		}
 		finally 
 		{
@@ -344,6 +349,10 @@ public class BrowserMediaPackageUploader {
 	}
 	
 	private String reportImageByteArray(byte[] imageByteArray, String fileName) throws IOException {
+		//forDebugging
+//		FileOutputStream fos = new FileOutputStream(fileName+".jpg");
+//		fos.write(imageByteArray);
+//		return "{foo:bar}";
 		URI postUri;
 		try
 		{
@@ -360,7 +369,7 @@ public class BrowserMediaPackageUploader {
 		{
 			MultipartEntityBuilder mpeBuilder = MultipartEntityBuilder.create();
 			
-			logger.debug("sending "+imageByteArray.length + " bytes");
+			logger.debug("sending "+imageByteArray.length + " bytes as "+fileName);
 			mpeBuilder.addBinaryBody("data", imageByteArray, ContentType.DEFAULT_BINARY, "");
 
 			mpeBuilder.addTextBody("name", fileName);
