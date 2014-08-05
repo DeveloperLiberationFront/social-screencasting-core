@@ -9,12 +9,16 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpMessage;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import edu.ncsu.lubick.localHub.UserManager;
 
@@ -63,7 +67,22 @@ public class HTTPUtils {
 		}
 		return sb.toString();
 	}
-
+	
+	public static String getRequestBody(HttpServletRequest request) throws IOException{
+		StringBuilder sb = new StringBuilder();
+		BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream()));
+		String data;
+		while((data= br.readLine())!=null){
+			sb.append(data).append('\n');
+		}	
+		return sb.toString();
+	}
+	
+	public static JSONObject getRequestJSON(HttpServletRequest request) throws JSONException, IOException{
+		String jsonString=getRequestBody(request);
+		return new JSONObject(jsonString);
+	}
+	
 	public static String chopOffQueryString(String target)
 	{
 		int indexOfQuery = target.indexOf('?');

@@ -121,4 +121,9 @@ public class Runner
 	public static void setTrayIcon(TrayIcon addedTrayIcon) {
 		Runner.addedTrayIcon = addedTrayIcon;
 	}
+
+	public static boolean isRunning(){
+		return localHub.isRunning();
+	}
+
 }

@@ -23,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.ncsu.lubick.Runner;
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
@@ -64,26 +65,62 @@ public class HTTPAPIHandler extends AbstractHandler {
 		{
 			response.getWriter().println("Sorry, Nothing at this URL");
 		}
-		else
+		else if ("GET".equals(type))
 		{
 			handleGet(target, response);
+		}else if("PUT".equals(type)){
+			handlePUT(target,request,response);
 		}
 	}
+	
+	private void handlePUT(String target, HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
 
+		String[] pieces = target.split("/");
+
+		if ("status".equals(pieces[2])){
+			handlePUTStatus(pieces,request,response);
+		}else {	
+			response.getWriter().println("Sorry, Nothing at this URL");
+		}
+	}
+	private void handlePUTStatus(String[] pieces, HttpServletRequest request,
+		HttpServletResponse response) throws IOException {	
+		if ("recording".equals(pieces[3])){
+			handlePUTRecording(request, response);
+		}else {
+			response.getWriter().println("Sorry, Nothing at this URL");
+		}
+	}
+	
+	private void handlePUTRecording(HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
+		try {
+			JSONObject jsonObject = HTTPUtils.getRequestJSON(request);
+			databaseLink.userPause(jsonObject.getBoolean("status"));
+		} catch (JSONException e) {
+			response.sendError(500);
+			e.printStackTrace();
+		}
+	}
+	
 	private void handleGet(String target, HttpServletResponse response) throws IOException
 	{
 		String[] pieces = target.split("/");
 		/*
 		 * /api/:creator/:app/:tool/:clip-name/'
 		 * pieces[0] will be an empty string
-		 * pieces[1] will be the the string "api" or "clips"
+		 * pieces[1] will be the the string "api" 
+		 * pieces[2] could be "clips" or "status"
 		 */
 		logger.info("Broken up target "+Arrays.toString(pieces));
 		if (pieces.length <= 2) {
 			response.getWriter().println("Sorry, Nothing at this URL");
 		} else if ("clips".equals(pieces[2])){ 
 			handleClipsAPI(pieces, response);
-		} else if (pieces.length == 3){
+		}else if("status".equals(pieces[2])){
+			handleGetStatus(pieces, response);
+		}else if (pieces.length == 3){
 			handleGetUserInfo(chopOffQueryString(pieces[2]), response);
 		} else if (pieces.length == 4) {
 			handleGetAllToolsForPlugin(chopOffQueryString(pieces[3]), response);
@@ -98,6 +135,26 @@ public class HTTPAPIHandler extends AbstractHandler {
 			response.getWriter().println("Sorry, Nothing at this URL");
 		}
 	}
+	
+	private void handleGetStatus(String[] pieces, HttpServletResponse response)
+			throws IOException {
+			if ("recording".equals(pieces[3])){
+				handleGetRecording(response);
+			}else {
+				response.getWriter().println("Sorry, Nothing at this URL");
+			}
+	}
+	
+	private void handleGetRecording(HttpServletResponse response)
+			throws IOException {
+		try {
+			JSONObject status = makeRecordingObj();
+			status.write(response.getWriter());
+		} catch (JSONException e) {
+			throw new IOException("Problem making JSON", e);
+		}
+	}
+	
 	
 	private void handleClipsAPI(String[] pieces, HttpServletResponse response) throws IOException
 	{
@@ -185,6 +242,13 @@ public class HTTPAPIHandler extends AbstractHandler {
 		return user;
 	}
 
+	private JSONObject makeRecordingObj() throws JSONException {
+		JSONObject status = new JSONObject();
+		status.put("id", "recording");
+		status.put("status", Runner.isRunning());
+		return status;
+	}
+		
 	private void handleGetAllToolsForPlugin(String applicationName, HttpServletResponse response) throws IOException
 	{
 		JSONObject dataObj = new JSONObject();

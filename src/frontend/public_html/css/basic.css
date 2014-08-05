@@ -166,3 +166,8 @@
 #filter-bar .ordering ul {
     margin: 0px;
 }
+
+.no-outline:focus,
+.no-outline.active:focus {
+    outline: 0;
+}

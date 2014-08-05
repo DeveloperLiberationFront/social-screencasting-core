@@ -43,8 +43,12 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	{
 		logger = Logger.getLogger(LocalHub.class.getName());
 		singletonHub = new LocalHub();
+		// TODO Following line added for Debugging status page's recording button. The dummy plugin 
+		// lets userPause(boolean) to start the recording module even when there is no actual plugin 
+		// running 		
+		singletonHub.pluginsRecordingStatusMap.put("debug", true);
 	}
-
+	private boolean userOverridePause = false;
 	private boolean isRunning = false;
 	private File screencastMonitorDirectory = null;
 
@@ -77,7 +81,25 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	{
 		return startServer(screencastMonitorLocation, databaseLocation, wantHTTP, wantScreenRecording, wantRemoteToolReporting, true);
 	}
-
+	
+	public void userPause(boolean pauseButton) {
+		userOverridePause = pauseButton;
+		if (!pauseButton && singletonHub.screenRecordingModule != null) {
+			logger.info("Pausing Recording module");
+			screenRecordingModule.pauseRecording();
+		} else if (pauseButton) {			
+			boolean areAnyActive = false;
+			for (Entry<String, Boolean> status : pluginsRecordingStatusMap
+					.entrySet()) {
+				areAnyActive = areAnyActive || status.getValue();
+			}
+			if (areAnyActive) {
+				screenRecordingModule.unpauseRecording();
+				logger.info("Unpausing Recording module");
+			} else
+				logger.error("Can't unpause Recording module because there is no active plugin.");
+		}
+	}
 	public static LocalHubDebugAccess startServer(String screencastMonitorLocation, String databaseLocation, boolean wantHTTP, boolean wantScreenRecording,
 			boolean wantRemoteToolReporting, boolean isDebug)
 	{

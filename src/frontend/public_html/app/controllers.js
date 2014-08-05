@@ -415,6 +415,26 @@ define(['angular',
       };
   }])
 
+ // To handle requests made by status page's recording button
+  .controller('RecordingCtrl', ['$scope','Local',
+    function($scope, Local){     
+      Local.one('status','recording').get().then( function (st){ //st is restangular object        
+        $scope.recordingStatus = function(value){
+          console.log(st);
+          if (value==undefined){
+            return st.status;
+            console.log("undefined");
+          }
+          else
+          {
+            console.log("value is "+value);
+            st.status=value;            
+            st.put();
+          }
+        };            
+      }); 
+    }])
+
 .controller('RequestCtrl', ['$scope', '$modalInstance', '$stateParams', 'Hub',
   function($scope, $modalInstance, $stateParams, Hub) {
     $scope.request = function() {

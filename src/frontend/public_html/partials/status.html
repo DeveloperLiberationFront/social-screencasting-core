@@ -1,5 +1,14 @@
 
 <div>
+    <div ng-controller="RecordingCtrl">
+        <h2>Recording Status</h2>       
+        <button class="btn no-outline {{recordingStatus() ? 'btn-danger' : 'btn-default'}}" ng-model="recordingStatus" btn-checkbox ng-model-options="{getterSetter:true}">
+            {{recordingStatus() ? "Stop": "Start"}} Recording
+        </button>
+    </div> 
+    
+    {{recordingStatus()}}
+
      <h2>Requests you have made</h2>
      <ul id="requestList" class="list-group">
         <li ng-repeat="request in sent" ng-attr-title="Created: {{request.created | date : 'medium'}} Last updated: {{request.updated | date : 'medium'}}" class="list-group-item">
