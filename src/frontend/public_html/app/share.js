@@ -67,13 +67,9 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
       $scope.dropDownStatus = {
         isopen:false
       };
-      
-      var toolEnd = Local.one($scope.user.email)
-        .one($routeParams.application)
-        .one($routeParams.tool);
 
       //Go fetch all the clips
-      toolEnd.get().then(function(tool) {
+      Local.getList("clips").then(function(tool) {
         _.each(tool.keyclips, function(clip, i) {
           $scope.clips.push({clipId: clip, toDisplay: "Example "+(+i+1)+" using Keyboard" });
         });
@@ -93,7 +89,7 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
 
           if (c.length > 0) {
             var clipId = c[0].clipId;
-            toolEnd.one(clipId).get().then(function(clip){
+            toolEnd.one(clipId).get().then(function(clip){      //TODO fix for updated local API
               $scope.clip = clip;
               $scope.ready = true;
               $scope.$broadcast('refreshSlider');

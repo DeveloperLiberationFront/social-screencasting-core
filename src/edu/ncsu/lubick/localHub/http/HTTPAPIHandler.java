@@ -94,15 +94,6 @@ public class HTTPAPIHandler extends AbstractHandler {
 			handleClipsAPI(pieces, response);
 		} else if (pieces.length == 3){		//api/user
 			handleGetUserInfo(chopOffQueryString(pieces[2]), response);
-		} else if (pieces.length == 4) {
-			handleGetAllToolsForPlugin(chopOffQueryString(pieces[3]), response);
-		} else if (pieces.length == 5) {  //api/user/application/tool 
-			handleGetInfoAboutTool(pieces[3], chopOffQueryString(pieces[4]), response);
-		} else if (pieces.length == 6) {
-			//handleGetClipInfo(pieces[3], pieces[4], chopOffQueryString(pieces[5]), response);
-			response.getWriter().println("Sorry, This url was deprecated");
-		} else if (pieces.length == 7) {
-			handleImageRequest(pieces[5], chopOffQueryString(pieces[6]), response);
 		} else {
 			response.getWriter().println("Sorry, Nothing at this URL");
 		}
@@ -116,7 +107,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 			String application = queryParams.get("app")[0];
 			String tool = queryParams.get("tool")[0];
 			
-			handleGetClipInfo(application, tool, response);
+			getAllClipsForTool(application, tool, response);
 			return;
 		}
 		
@@ -194,20 +185,6 @@ public class HTTPAPIHandler extends AbstractHandler {
 		return user;
 	}
 
-	private void handleGetAllToolsForPlugin(String applicationName, HttpServletResponse response) throws IOException
-	{
-		JSONObject dataObj = new JSONObject();
-		JSONArray appArr = makePluginArray(applicationName);
-		try {
-			dataObj.put("tools", appArr);
-			dataObj.write(response.getWriter());
-		}
-		catch (JSONException e) {
-			throw new IOException("Problem making JSON " + dataObj, e);
-		}
-	
-	}
-	
 	private JSONArray makePluginArray(String pluginName)
 	{
 		List<ToolCountStruct> counts = databaseLink.getAllToolAggregateForPlugin(pluginName);
@@ -232,62 +209,10 @@ public class HTTPAPIHandler extends AbstractHandler {
 		return retVal;
 	}
 
-	private void handleGetInfoAboutTool(String applicationName, String toolName, HttpServletResponse response) throws IOException
-	{
-		List<File> keyClips = databaseLink.getBestExamplesOfTool(applicationName, toolName, true);
-		List<File> guiClips = databaseLink.getBestExamplesOfTool(applicationName, toolName, false);
-		ToolCountStruct countStruct = databaseLink.getToolAggregate(applicationName, toolName);
-	
-		JSONObject clips = new JSONObject();
-	
-		try
-		{
-			JSONArray keyJarr = new JSONArray();
-			for(File f: keyClips)
-			{
-				keyJarr.put(f.getName());
-			}
-	
-			JSONArray guiJarr = new JSONArray();
-			for(File f: guiClips)
-			{
-				guiJarr.put(f.getName());
-			}
-	
-			JSONObject usage = new JSONObject();
-			JSONObject toolJson = new JSONObject();
-			toolJson.put("gui", countStruct.guiToolCount);
-			toolJson.put("keyboard", countStruct.keyboardCount);
-			usage.put(toolName, toolJson);
-	
-			// Testing data
-			keyJarr.put("Eclipse16274d13-bebb-3196-832c-70313e08cdaaK");
-			keyJarr.put("Eclipsea3aabc7a-d2dc-33d1-84a7-066372cb4d73K");
-			guiJarr.put("Eclipse16141cfc-87cb-32dc-bc30-fedcad3b7598G");
-			guiJarr.put("Eclipse29bf2b83-2e3d-3855-9286-ee7f69db64c1G");
-			guiJarr.put("Eclipse13d5a993-e46f-3b7f-862a-bfefa5831901G");
-	
-	
-			clips.put("keyclips",keyJarr);
-			clips.put("guiclips",guiJarr);
-			clips.put("usage", usage);
-	
-			response.setContentType("application/json");
-			clips.write(response.getWriter());
-		}
-		catch (JSONException e)
-		{
-			logger.error("Problem compiling clip names and writing them out "+clips,e);
-		}
-	}
-
-	private void handleGetClipInfo(String applicationName, String toolName, HttpServletResponse response) throws IOException
+	private void getAllClipsForTool(String applicationName, String toolName, HttpServletResponse response) throws IOException
 	{
 		List<File> clips = databaseLink.getBestExamplesOfTool(applicationName, toolName, true);
 		clips.addAll(databaseLink.getBestExamplesOfTool(applicationName, toolName, false));
-		
-		//XXX REMOVE TEST DATA
-		//clips.add(new File("Eclipse21e0149b-f0e7-31ee-85bf-6abb88ddc5c2G"));
 		
 		JSONArray jarr = new JSONArray();
 		for(File clip: clips) {
@@ -352,6 +277,69 @@ public class HTTPAPIHandler extends AbstractHandler {
 	private void handleImageRequest(String clipId, String fileName, HttpServletResponse response) throws IOException
 	{
 		response.sendRedirect("/"+clipId+"/"+fileName);
+	}
+
+	private void handleGetAllToolsForPlugin(String applicationName, HttpServletResponse response) throws IOException
+	{
+		JSONObject dataObj = new JSONObject();
+		JSONArray appArr = makePluginArray(applicationName);
+		try {
+			dataObj.put("tools", appArr);
+			dataObj.write(response.getWriter());
+		}
+		catch (JSONException e) {
+			throw new IOException("Problem making JSON " + dataObj, e);
+		}
+	
+	}
+
+	private void handleGetInfoAboutTool(String applicationName, String toolName, HttpServletResponse response) throws IOException
+	{
+		List<File> keyClips = databaseLink.getBestExamplesOfTool(applicationName, toolName, true);
+		List<File> guiClips = databaseLink.getBestExamplesOfTool(applicationName, toolName, false);
+		ToolCountStruct countStruct = databaseLink.getToolAggregate(applicationName, toolName);
+	
+		JSONObject clips = new JSONObject();
+	
+		try
+		{
+			JSONArray keyJarr = new JSONArray();
+			for(File f: keyClips)
+			{
+				keyJarr.put(f.getName());
+			}
+	
+			JSONArray guiJarr = new JSONArray();
+			for(File f: guiClips)
+			{
+				guiJarr.put(f.getName());
+			}
+	
+			JSONObject usage = new JSONObject();
+			JSONObject toolJson = new JSONObject();
+			toolJson.put("gui", countStruct.guiToolCount);
+			toolJson.put("keyboard", countStruct.keyboardCount);
+			usage.put(toolName, toolJson);
+	
+			// Testing data
+			keyJarr.put("Eclipse16274d13-bebb-3196-832c-70313e08cdaaK");
+			keyJarr.put("Eclipsea3aabc7a-d2dc-33d1-84a7-066372cb4d73K");
+			guiJarr.put("Eclipse16141cfc-87cb-32dc-bc30-fedcad3b7598G");
+			guiJarr.put("Eclipse29bf2b83-2e3d-3855-9286-ee7f69db64c1G");
+			guiJarr.put("Eclipse13d5a993-e46f-3b7f-862a-bfefa5831901G");
+	
+	
+			clips.put("keyclips",keyJarr);
+			clips.put("guiclips",guiJarr);
+			clips.put("usage", usage);
+	
+			response.setContentType("application/json");
+			clips.write(response.getWriter());
+		}
+		catch (JSONException e)
+		{
+			logger.error("Problem compiling clip names and writing them out "+clips,e);
+		}
 	}
 
 }
