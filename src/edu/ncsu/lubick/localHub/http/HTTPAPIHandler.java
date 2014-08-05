@@ -34,18 +34,21 @@ public class HTTPAPIHandler extends AbstractHandler {
 	private static final Logger logger = Logger.getLogger(HTTPAPIHandler.class);
 	private WebQueryInterface databaseLink;
 	private UserManager userManager = HTTPServer.getUserManager();
+
 	private ByteArrayOutputStream byteBufferForImage = new ByteArrayOutputStream();
 	private Map<String, String[]> queryParams;
+	private HTTPClipSharer clipSharer; 
 
 	public HTTPAPIHandler(WebQueryInterface wqi)
 	{
 		this.databaseLink = wqi;
+		clipSharer = new HTTPClipSharer(wqi);
 	}
 
 	@Override
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
-		if (!target.startsWith("/api") && !target.startsWith("/clips")) {
+		if (!(target.startsWith("/api"))) {
 			return;
 		}
 		baseRequest.setHandled(true);
@@ -56,9 +59,15 @@ public class HTTPAPIHandler extends AbstractHandler {
 		String type = baseRequest.getMethod();
 
 		if ("POST".equals(type))
-		{
-			logger.error("I don't know how to handle a POST like this");
-			response.getWriter().println("Sorry, Nothing at this URL");
+		{	
+			//pass this off to clipSharer
+			if (target.startsWith("/api/shareClip")) {
+				clipSharer.handle(target, baseRequest, request, response);
+			}
+			else {
+				logger.error("I don't know how to handle a POST like this " + target);
+				response.getWriter().println("Sorry, Nothing at this URL");
+			}
 		}
 		else if (target.length() < 5)			
 		{
@@ -83,11 +92,11 @@ public class HTTPAPIHandler extends AbstractHandler {
 			response.getWriter().println("Sorry, Nothing at this URL");
 		} else if ("clips".equals(pieces[2])){ 
 			handleClipsAPI(pieces, response);
-		} else if (pieces.length == 3){
+		} else if (pieces.length == 3){		//api/user
 			handleGetUserInfo(chopOffQueryString(pieces[2]), response);
 		} else if (pieces.length == 4) {
 			handleGetAllToolsForPlugin(chopOffQueryString(pieces[3]), response);
-		} else if (pieces.length == 5) {
+		} else if (pieces.length == 5) {  //api/user/application/tool 
 			handleGetInfoAboutTool(pieces[3], chopOffQueryString(pieces[4]), response);
 		} else if (pieces.length == 6) {
 			//handleGetClipInfo(pieces[3], pieces[4], chopOffQueryString(pieces[5]), response);
