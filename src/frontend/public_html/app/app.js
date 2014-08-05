@@ -79,7 +79,6 @@ define(['angular',
                 }
 
                 clips.then(function(clips) {
-                  console.log('loaded');
                   _.each(clips, function(clip) {
                     clip.origin = $stateParams.location;
                   });
@@ -93,7 +92,8 @@ define(['angular',
                     clip_name: function(){
                       return typeof clip_id == 'string' ? clip_id : false;
                     },
-                    clips: function() { return clips; }
+                    clips: function() { return clips; },
+                    tool: function() { return $stateParams.tool_name;}
                   },
                   windowClass: (clips.length > 1 ? 'modal-multiclip-player'
                                 : 'modal-player'),

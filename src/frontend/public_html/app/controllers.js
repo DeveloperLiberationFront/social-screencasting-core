@@ -326,6 +326,8 @@ define(['angular',
         if (clips.length > 0) {
           c = clips[0]; //should be something like _.max(clips, 'rating');
           return Base64Img(_.isObject(c.thumbnail) ? c.thumbnail.data : c.thumbnail);
+        } else {
+          return 'images/no-video.jpg';
         }
       };
 

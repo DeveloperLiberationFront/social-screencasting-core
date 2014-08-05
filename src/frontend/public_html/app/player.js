@@ -41,8 +41,8 @@ define(['angular',
             enabled: $scope.clip.name.substr(-1) == 'K', //only clips ending in 'k' have keyboard info
             status: 'inactive',
             images: {
-                'active': [ 'image_text.png', 'image.png', 'text.png', 'none.png' ],
-                'inactive': [ 'image_text_un.png', 'image_un.png', 'text_un.png', 'none.png']
+                'active': [ 'image_text', 'image', 'text', 'none' ],
+                'inactive': [ 'image_text_un', 'image_un', 'text_un', 'none']
             },
             tooltip: ["Image and text", "Image only", "Text only", "No overlay"]
         };
@@ -65,10 +65,10 @@ define(['angular',
       }
         loadClip($scope.clip);
 
-        $scope.getImage = function(name) {
+        $scope.getImage = function(name, type) {
           image = _.find($scope.clip.images, {name: name})
           if (image)
-            return Base64Img(image.data);
+            return Base64Img(image.data,type);
         };
 
         $scope.$watch('clip', function(newValue) {
@@ -126,10 +126,9 @@ define(['angular',
         };
     }])
 
-  .controller('ModalPlayer', ['$scope', '$modalInstance', 'clips', 'clip_name',
-    function($scope, $modalInstance, clips, clip_id) {
-      //tool is a restangular object
-
+  .controller('ModalPlayer', ['$scope', '$modalInstance', 'clips', 'clip_name', 'tool',
+    function($scope, $modalInstance, clips, clip_id, tool) {
+      $scope.title
       $scope.clips = clips;
       $scope.clip = (clip_id ? _.find(clips, {name: clip_name}) : clips[0]);
       $scope.$emit('instrumented', "Loaded ModalPlayer", $scope.clip);

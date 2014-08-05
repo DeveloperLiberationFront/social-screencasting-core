@@ -1,4 +1,4 @@
-define(['angular', 'ng-resource', 'restangular'], function (ng) {
+define(['angular', 'lodash', 'ng-resource', 'restangular'], function (ng, _) {
     return ng.module('socasterServices', ['ngResource', 'restangular'])
 
     .factory('Local', ['Restangular', function(Restangular) {
@@ -29,8 +29,9 @@ define(['angular', 'ng-resource', 'restangular'], function (ng) {
     }])
 
     .factory('Base64Img', function() {
-      return function(data) {
-        return 'data:image/jpg;base64,' + data;
+      return function(data, type) {
+        type = _.isUndefined(type) ? 'jpg' : type; 
+        return 'data:image/' + type + ';base64,' + data;
       };
     })
 });
