@@ -12,5 +12,6 @@ screencasting.log*
 *.sqlite-journal
 *.ini
 test.png
+test.jpg
 sampleScreencastMinute.zip
 PlanningImages

@@ -27,26 +27,29 @@ import edu.ncsu.lubick.Runner;
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
+import edu.ncsu.lubick.util.ClipUtils;
 import edu.ncsu.lubick.util.FileUtilities;
-import edu.ncsu.lubick.util.ToolCountStruct;
 
 public class HTTPAPIHandler extends AbstractHandler {
 
 	private static final Logger logger = Logger.getLogger(HTTPAPIHandler.class);
 	private WebQueryInterface databaseLink;
 	private UserManager userManager = HTTPServer.getUserManager();
+
 	private ByteArrayOutputStream byteBufferForImage = new ByteArrayOutputStream();
 	private Map<String, String[]> queryParams;
+	private HTTPClipSharer clipSharer; 
 
 	public HTTPAPIHandler(WebQueryInterface wqi)
 	{
 		this.databaseLink = wqi;
+		clipSharer = new HTTPClipSharer(wqi);
 	}
 
 	@Override
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
-		if (!target.startsWith("/api") && !target.startsWith("/clips")) {
+		if (!(target.startsWith("/api"))) {
 			return;
 		}
 		baseRequest.setHandled(true);
@@ -57,9 +60,15 @@ public class HTTPAPIHandler extends AbstractHandler {
 		String type = baseRequest.getMethod();
 
 		if ("POST".equals(type))
-		{
-			logger.error("I don't know how to handle a POST like this");
-			response.getWriter().println("Sorry, Nothing at this URL");
+		{	
+			//pass this off to clipSharer
+			if (target.startsWith("/api/shareClip")) {
+				clipSharer.handle(target, baseRequest, request, response);
+			}
+			else {
+				logger.error("I don't know how to handle a POST like this " + target);
+				response.getWriter().println("Sorry, Nothing at this URL");
+			}
 		}
 		else if (target.length() < 5)			
 		{
@@ -118,19 +127,11 @@ public class HTTPAPIHandler extends AbstractHandler {
 			response.getWriter().println("Sorry, Nothing at this URL");
 		} else if ("clips".equals(pieces[2])){ 
 			handleClipsAPI(pieces, response);
+
 		}else if("status".equals(pieces[2])){
 			handleGetStatus(pieces, response);
-		}else if (pieces.length == 3){
+		} else if (pieces.length == 3){		//api/user
 			handleGetUserInfo(chopOffQueryString(pieces[2]), response);
-		} else if (pieces.length == 4) {
-			handleGetAllToolsForPlugin(chopOffQueryString(pieces[3]), response);
-		} else if (pieces.length == 5) {
-			handleGetInfoAboutTool(pieces[3], chopOffQueryString(pieces[4]), response);
-		} else if (pieces.length == 6) {
-			//handleGetClipInfo(pieces[3], pieces[4], chopOffQueryString(pieces[5]), response);
-			response.getWriter().println("Sorry, This url was deprecated");
-		} else if (pieces.length == 7) {
-			handleImageRequest(pieces[5], chopOffQueryString(pieces[6]), response);
 		} else {
 			response.getWriter().println("Sorry, Nothing at this URL");
 		}
@@ -160,11 +161,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 	{
 		if (pieces.length == 3) {
 			//just "/api/clips"
-			//TODO null checks
-			String application = queryParams.get("app")[0];
-			String tool = queryParams.get("tool")[0];
-			
-			handleGetClipInfo(application, tool, response);
+			handleGetClipsForTool(response);
 			return;
 		}
 		
@@ -177,7 +174,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 		
 		String clipId = pieces[3];
 		
-		JSONArray frameList = makeFrameList(new File("renderedVideos",clipId));
+		JSONArray frameList = ClipUtils.makeFrameListForClip(new File("renderedVideos",clipId));
 		
 		try
 		{
@@ -213,9 +210,81 @@ public class HTTPAPIHandler extends AbstractHandler {
 		
 	}
 
+	private void handleGetClipsForTool(HttpServletResponse response) throws IOException
+	{
+		String application = null;
+		String tool = null;
+		try
+		{
+			application = queryParams.get("app")[0];
+			tool = queryParams.get("tool")[0];
+		}
+		catch (NullPointerException | ArrayIndexOutOfBoundsException e)
+		{
+			logger.error("Malformed query params, no app or tool params: "+queryParams, e);
+			response.getWriter().println("Malformed query params, no app or tool params");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			return;
+		}
+	
+		replyWithAllClipsForTool(application, tool, response);
+	}
+
+	private void replyWithAllClipsForTool(String applicationName, String toolName, HttpServletResponse response) throws IOException
+	{
+		List<File> clips = databaseLink.getBestExamplesOfTool(applicationName, toolName, true);
+		clips.addAll(databaseLink.getBestExamplesOfTool(applicationName, toolName, false));
+		
+		//XXX sample data
+		clips.add(new File("renderedVideos/Eclipse16141cfc-87cb-32dc-bc30-fedcad3b7598G"));
+		clips.add(new File("renderedVideos/Eclipse1a46c017-a154-323b-824f-caa732caa84aG"));
+		
+		JSONArray jarr = new JSONArray();
+		for(File clip: clips) {
+			JSONArray fileNamesArr = ClipUtils.makeFrameListForClip(clip);
+			if (fileNamesArr == null) {
+				logger.info("Clip "+clip.getName()+" does not exist");
+				response.getWriter().println("Could not find clip "+clip.getName());
+				return;
+			}
+	
+			JSONObject clipObject = new JSONObject();
+			try{	
+				clipObject.put("frames", fileNamesArr);
+				clipObject.put("name", clip.getName());
+				clipObject.put("app", applicationName);
+				clipObject.put("tool", toolName);
+				clipObject.put("creator", userManager.getUserEmail());		
+				clipObject.put("thumbnail", makeThumbnail(clip.getName(), fileNamesArr));
+				
+				JSONArray eventFrames = new JSONArray().put(25);
+				clipObject.put("event_frames", eventFrames);
+				jarr.put(clipObject);
+			}
+			catch (JSONException e)
+			{
+				logger.error("Problem compiling clip names and writing them out "+clipObject,e);
+				response.getWriter().println("There was a problem compiling the clip details");
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			}
+		}
+		
+		response.setContentType("application/json");
+		try {
+			jarr.write(response.getWriter());
+		} catch (JSONException e) {	
+			response.getWriter().println("There was a problem compiling the clip details");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new IOException("Problem writing to response", e);
+		}
+		
+	
+		
+	}
+
 	private void handleGetUserInfo(String emailTarget, HttpServletResponse response) throws IOException
 	{
-		if (emailTarget.equals(userManager.getUserEmail())  || "user".equals(emailTarget) || "users".equals(emailTarget)) 
+		if (emailTarget.equals(userManager.getUserEmail()) || "user".equals(emailTarget) || "users".equals(emailTarget)) 
 		{
 			try {
 				JSONObject user = makeUserAuthObj();
@@ -249,164 +318,20 @@ public class HTTPAPIHandler extends AbstractHandler {
 		return status;
 	}
 		
-	private void handleGetAllToolsForPlugin(String applicationName, HttpServletResponse response) throws IOException
+	private String makeThumbnail(String clipId, JSONArray fileNamesArr)
 	{
-		JSONObject dataObj = new JSONObject();
-		JSONArray appArr = makePluginArray(applicationName);
 		try {
-			dataObj.put("tools", appArr);
-			dataObj.write(response.getWriter());
-		}
-		catch (JSONException e) {
-			throw new IOException("Problem making JSON " + dataObj, e);
-		}
-	
-	}
-	
-	private JSONArray makePluginArray(String pluginName)
-	{
-		List<ToolCountStruct> counts = databaseLink.getAllToolAggregateForPlugin(pluginName);
+			int indexForThumbnail = fileNamesArr.length() > 25? 25 : fileNamesArr.length()/2;
 
-		JSONArray retVal = new JSONArray();
-		for(ToolCountStruct tcs: counts)
+			File file = new File("renderedVideos/"+clipId, fileNamesArr.getString(indexForThumbnail));
+
+			return ClipUtils.makeBase64EncodedThumbnail(file);
+		}
+		catch (IOException | JSONException e)
 		{
-			JSONObject tempObject = new JSONObject();
-			try
-			{
-				tempObject.put("clips", 5);		//TODO FIX
-				tempObject.put("gui", tcs.guiToolCount);
-				tempObject.put("keyboard", tcs.keyboardCount);
-				tempObject.put("name", tcs.toolName);
-				retVal.put(tempObject);
-			}
-			catch (JSONException e)
-			{
-				logger.error("Unusual JSON exception, squashing: "+tempObject,e);
-			}
-		}
-		return retVal;
-	}
-
-	private void handleGetInfoAboutTool(String applicationName, String toolName, HttpServletResponse response) throws IOException
-	{
-		List<File> keyClips = databaseLink.getBestExamplesOfTool(applicationName, toolName, true);
-		List<File> guiClips = databaseLink.getBestExamplesOfTool(applicationName, toolName, false);
-		ToolCountStruct countStruct = databaseLink.getToolAggregate(applicationName, toolName);
-	
-		JSONObject clips = new JSONObject();
-	
-		try
-		{
-			JSONArray keyJarr = new JSONArray();
-			for(File f: keyClips)
-			{
-				keyJarr.put(f.getName());
-			}
-	
-			JSONArray guiJarr = new JSONArray();
-			for(File f: guiClips)
-			{
-				guiJarr.put(f.getName());
-			}
-	
-			JSONObject usage = new JSONObject();
-			JSONObject toolJson = new JSONObject();
-			toolJson.put("gui", countStruct.guiToolCount);
-			toolJson.put("keyboard", countStruct.keyboardCount);
-			usage.put(toolName, toolJson);
-	
-			// Testing data
-			keyJarr.put("Eclipse16274d13-bebb-3196-832c-70313e08cdaaK");
-			keyJarr.put("Eclipsea3aabc7a-d2dc-33d1-84a7-066372cb4d73K");
-			guiJarr.put("Eclipse16141cfc-87cb-32dc-bc30-fedcad3b7598G");
-			guiJarr.put("Eclipse29bf2b83-2e3d-3855-9286-ee7f69db64c1G");
-			guiJarr.put("Eclipse13d5a993-e46f-3b7f-862a-bfefa5831901G");
-	
-	
-			clips.put("keyclips",keyJarr);
-			clips.put("guiclips",guiJarr);
-			clips.put("usage", usage);
-	
-			response.setContentType("application/json");
-			clips.write(response.getWriter());
-		}
-		catch (JSONException e)
-		{
-			logger.error("Problem compiling clip names and writing them out "+clips,e);
-		}
-	}
-
-	private void handleGetClipInfo(String applicationName, String toolName, HttpServletResponse response) throws IOException
-	{
-		List<File> clips = databaseLink.getBestExamplesOfTool(applicationName, toolName, true);
-		clips.addAll(databaseLink.getBestExamplesOfTool(applicationName, toolName, false));
-		
-		//XXX REMOVE TEST DATA
-		//clips.add(new File("Eclipse21e0149b-f0e7-31ee-85bf-6abb88ddc5c2G"));
-		
-		JSONArray jarr = new JSONArray();
-		for(File clip: clips) {
-			JSONArray fileNamesArr = makeFrameList(clip);
-			if (fileNamesArr == null) {
-				logger.info("Clip "+clip.getName()+" does not exist");
-				response.getWriter().println("Could not find clip "+clip.getName());
-				return;
-			}
-
-			JSONObject clipObject = new JSONObject();
-			try{	
-				clipObject.put("frames", fileNamesArr);
-				clipObject.put("name", clip.getName());
-				clipObject.put("app", applicationName);
-				clipObject.put("tool", toolName);
-				clipObject.put("creator", userManager.getUserEmail());		
-				
-				jarr.put(clipObject);
-			}
-			catch (JSONException e)
-			{
-				logger.error("Problem compiling clip names and writing them out "+clipObject,e);
-				response.getWriter().println("There was a problem compiling the clip details");
-				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			}
-		}
-		
-		response.setContentType("application/json");
-		try {
-			jarr.write(response.getWriter());
-		} catch (JSONException e) {	
-			response.getWriter().println("There was a problem compiling the clip details");
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			throw new IOException("Problem writing to response", e);
-		}
-		
-	
-		
-	}
-
-	public static JSONArray makeFrameList(File clipDir) 
-	{
-		JSONArray fileNamesArr = new JSONArray();
-
-		if (clipDir.exists() && clipDir.isDirectory())
-		{
-			String[] files = clipDir.list();
-			Arrays.sort(files);
-			for(String imageFile: files)
-			{
-				if (imageFile.startsWith("frame"))
-					fileNamesArr.put(imageFile);
-			}
-		}
-		else {
+			logger.error("Problem making a thumbnail " + clipId + " " + fileNamesArr);
 			return null;
 		}
-		return fileNamesArr;
-	}
-
-	private void handleImageRequest(String clipId, String fileName, HttpServletResponse response) throws IOException
-	{
-		response.sendRedirect("/"+clipId+"/"+fileName);
 	}
 
 }
