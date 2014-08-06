@@ -179,3 +179,45 @@
 .user-thumbnail > img {
     max-height: 50px;
 }
+
+/*---- stacked effect ----*/
+.tool-user {
+    position: relative;
+    z-index: 1;
+}
+
+.stacked {
+    border: 1px solid #bbb;
+    position: relative;
+}
+
+.stacked:after,
+.stacked:before {
+    background: #f6f6f6;
+    border: 1px solid #aaa;
+    bottom: -4px;
+    content: '';
+    height: 100%;
+    left: 2px;
+    position: absolute;
+    width: 102%;
+    z-index: -10;
+    -webkit-box-shadow: 0 0 3px rgba(0,0,0,.2);
+       -moz-box-shadow: 0 0 3px rgba(0,0,0,.2);
+            box-shadow: 0 0 3px rgba(0,0,0,.2);
+    -webkit-border-radius: 3px;
+       -moz-border-radius: 3px;
+            border-radius: 3px;
+}
+
+.stacked:before {
+    bottom: -7px;
+    left: 5px;
+    -webkit-border-radius: 3px;
+       -moz-border-radius: 3px;
+            border-radius: 3px;
+            
+    -webkit-box-shadow: 0 0 5px rgba(0,0,0,0.5);
+       -moz-box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
