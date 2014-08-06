@@ -168,3 +168,9 @@ slider span.bar {
     flex: 1 1 auto;
 }
 
+.thumbnail.selected {
+    border: 1px solid #aaa;
+    -webkit-box-shadow: 0 0 15px rgba(0,0,0,.2);
+       -moz-box-shadow: 0 0 15px rgba(0,0,0,.2);
+            box-shadow: 0 0 15px rgba(0,0,0,.2);
+}

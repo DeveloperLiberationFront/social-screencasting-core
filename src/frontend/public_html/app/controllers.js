@@ -321,6 +321,11 @@ define(['angular',
           || user.email == $scope.user.email;
       };
 
+      $scope.stacked = function(user) {
+        clips = _.where(_.where($scope.tool.clips, {user: user.email}), 'thumbnail');
+        return clips.length > 1;
+      };
+
       $scope.thumbnail = function(user) {
         clips = _.where(_.where($scope.tool.clips, {user: user.email}), 'thumbnail')
         if (clips.length > 0) {
@@ -349,6 +354,7 @@ define(['angular',
             tool: $scope.tool._id,
             application: $scope.tool.application
           });
+          
         }
       };
     }]);
