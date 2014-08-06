@@ -1,8 +1,12 @@
 <div class='tool-block'>
-  <div class='tool-header'>
-    <h4>{{tool.name}}</h4>
-    <div class='tool-statuses'>
-      <span class='label label-info' ng-if='tool.unused'>Unused</span>
+  <div class='tool-header'> 
+    <div>
+      <h4>{{tool.name}}</h4>
+      <img ng-src='{{icon(tool.application)}}'/>
+      <div class="application-name">{{tool.application}}</div>
+    </div>
+    <div class='tool-stauses'>
+      <span class='label label-info unused-label' ng-if='tool.unused'>Unused</span>
     </div>
   </div>
   <span>Used by:</span>

@@ -336,6 +336,12 @@ define(['angular',
         }
       };
 
+      $scope.icon =  function(application) {
+        var app = _.find($scope.applications.$object, {name:application});
+        if (app)
+          return Base64Img(app.icon);        
+      };
+
       $scope.getVideo = function(user) {
         var self = (user.email == $scope.user.email);
         var origin = (self ? 'local' : 'external');
