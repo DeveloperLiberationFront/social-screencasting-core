@@ -55,7 +55,7 @@ define(['angular',
             })
 
             .state('main.video', {
-              url: '/video?location&owner&tool_name&tool_id&clip_id&application',
+              url: '/video?location&owner&tool_name&tool_id&clip_id&application&user_name',
               onEnter: function($state, $stateParams, $modal, $rootScope, Hub, Local) {
                 var clips;
                 if ($stateParams.location == "external") {
@@ -65,6 +65,7 @@ define(['angular',
                       tool: $stateParams.tool_id, 
                       user: $stateParams.owner //restrict to clips by owner, if specified
                     },
+                    embedded: {user: 1}
                   });
                 } else {
                   clips = Local.all('clips').getList({
@@ -82,24 +83,24 @@ define(['angular',
                   _.each(clips, function(clip) {
                     clip.origin = $stateParams.location;
                   });
-                });
 
-                $modal.open({
-                  templateUrl: 'partials/modal-player.html',
-                  controller: 'ModalPlayer',
-                  scope: $rootScope,
-                  resolve: {
-                    clip_name: function(){
-                      return typeof clip_id == 'string' ? clip_id : false;
+                  $modal.open({
+                    templateUrl: 'partials/modal-player.html',
+                    controller: 'ModalPlayer',
+                    scope: $rootScope,
+                    resolve: {
+                      clip_name: function(){
+                        return typeof clip_id == 'string' ? clip_id : false;
+                      },
+                      clips: function() { return clips; },
+                      tool: function() { return $stateParams.tool_name;}
                     },
-                    clips: function() { return clips; },
-                    tool: function() { return $stateParams.tool_name;}
-                  },
-                  windowClass: (clips.length > 1 ? 'modal-multiclip-player'
-                                : 'modal-player'),
-                  size: 'lg'
-                }).result.finally(function(result) {
-                  return $state.transitionTo("main");
+                    windowClass: (clips.length > 1 ? 'modal-multiclip-player'
+                                  : 'modal-player'),
+                    size: 'lg'
+                  }).result.finally(function(result) {
+                    return $state.transitionTo("main");
+                  });
                 });
               }
             })

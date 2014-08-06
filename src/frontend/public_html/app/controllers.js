@@ -354,6 +354,7 @@ define(['angular',
             tool: $scope.tool._id,
             application: $scope.tool.application
           });
+          
         }
       };
     }]);

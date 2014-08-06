@@ -126,11 +126,10 @@ define(['angular',
         };
     }])
 
-  .controller('ModalPlayer', ['$scope', '$modalInstance', 'clips', 'clip_name', 'tool',
-    function($scope, $modalInstance, clips, clip_id, tool) {
-      $scope.title
+  .controller('ModalPlayer', ['$scope', '$modalInstance', 'Base64Img', 'clips', 'clip_name', 'tool',
+    function($scope, $modalInstance, Base64Img, clips, clip_id, tool) {
+      $scope.title = tool;
       $scope.clips = clips;
-      $scope.clip = (clip_id ? _.find(clips, {name: clip_name}) : clips[0]);
       $scope.$emit('instrumented', "Loaded ModalPlayer", $scope.clip);
 
       $scope.close = function () {
@@ -138,10 +137,20 @@ define(['angular',
         $scope.$emit('instrumented', "Closed ModalPlayer", $scope.clip);
       };
 
-      $scope.loadClip = function(clip) {
-        $scope.clip = clip;
-        $scope.$emit('instrumented', "Changing Clip", clip);
+      $scope.thumbnail = function(clip) {
+        return Base64Img(_.isObject(clip.thumbnail) ? clip.thumbnail.data : clip.thumbnail);
       };
+
+      $scope.loadClip = function(clip) {
+        $scope.selectedClip = $scope.clip = clip;
+        $scope.selectedClip = clip;
+        var user = _.find($scope.user_list, {email: clip.user});
+        $scope.thumbTitle = (user.name ? user.name : $scope.title);
+        $scope.$emit('instrumented', "Selected Clip", clip);
+      };
+      //select first clip
+      $scope.loadClip(clip_id ? _.find(clips, {name: clip_name}) : clips[0]);
+
     }])
 
   .controller('RatingCtrl', ['$scope',
