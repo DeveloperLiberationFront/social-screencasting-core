@@ -3,7 +3,7 @@
     <li 
     	ng-repeat='option in ordering.options' class='list-group-item'
     	ng-class='{"list-group-item-success" : (ordering.field == option.field) }'
-        ng-click='ordering.field=option.field; ordering.reverse = !ordering.reverse'>
+        ng-click='orderingFunc(option.field, tools.$object.length)'>
       {{option.name}}
       <span ng-class='{reverse: !ordering.reverse, caret : (ordering.field == option.field)}'
             ></span>

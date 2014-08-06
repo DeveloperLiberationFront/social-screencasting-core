@@ -2,9 +2,10 @@
   <div class="panel-heading">Tools</div>
   <ul class="list-group" when-scrolled='scroll()'>
     <li class="list-group-item" ng-repeat='tool in tools.$object | filter:filters.toolFilter
-        | orderBy:ordering.field:ordering.reverse | limitTo:limit'>
+        | orderFunct(ordering.field) | limitTo:limit'>
       <ng-include src="'partials/tool-block.html'" ng-controller='ToolBlockCtrl'>
       </ng-include>
+	  
     </li>
   </ul>
 </div>

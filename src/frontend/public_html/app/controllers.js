@@ -76,6 +76,29 @@ define(['angular',
 
   .controller('ToolListCtrl', ['$scope','Hub',
     function($scope, Hub) {
+	
+	
+	$scope.random = function(){
+		return Math.random();
+	}
+	$scope.orderingFunct=function(field){
+	
+	
+	
+	if (field == "random")
+	{
+	
+	 orderBy:random;
+	
+	}
+	else{
+	
+	 orderBy:field; 
+	}
+
+	}
+	
+	
       $scope.user.usages = Hub.all('usages').getList({
         'where': {'user': $scope.user.email},
       });
@@ -120,12 +143,19 @@ define(['angular',
 
   .controller('OrderCtrl', ['$scope',
     function($scope) {
+	$scope.orderingFunc=function(field, toolSize){
+	
+	$scope.ordering.field=field; $scope.ordering.reverse = !$scope.ordering.reverse;
+	
+	}
+	
       $scope.ordering.options = [
         {name: "Name", field:"name"},
         {name: "Usages", field:"usages"},
         {name: "Unused", field:"unused"}, 
         {name: "Recommended", field:""}, 
         {name: "Video", field: "video"},
+		{name: "Random", field: "random"},
       ];
     }])
 
