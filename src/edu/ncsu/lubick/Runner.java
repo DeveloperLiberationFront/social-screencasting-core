@@ -31,9 +31,8 @@ public class Runner
 	public static void main(String[] args) throws Exception
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
-		PopupMenu pm = setUpTrayIcon();
+		setUpTrayIcon();
 		localHub = LocalHub.startServerForUse("HF/Screencasting/", DEFAULT_DB_LOC);
-		localHub.setTrayIconMenu(pm);
 		Thread.sleep(1000);
 		Desktop.getDesktop().browse(buildStartingURI());
 	}

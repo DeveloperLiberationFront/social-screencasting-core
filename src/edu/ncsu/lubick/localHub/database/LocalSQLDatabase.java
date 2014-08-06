@@ -302,7 +302,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	}
 
 	@Override
-	public List<String> getNamesOfAllPlugins()
+	public List<String> getNamesOfAllApplications()
 	{
 		List<String> retVal = new ArrayList<String>();
 
@@ -381,14 +381,14 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		}
 	}
 
-	private class PluginNameStruct {
+	private class ApplicationNameStruct {
 
-		public String pluginName;
+		public String applicationName;
 		public String toolName;
 
-		public PluginNameStruct(String pluginName, String toolName)
+		public ApplicationNameStruct(String applicationName, String toolName)
 		{
-			this.pluginName = pluginName;
+			this.applicationName = applicationName;
 			this.toolName = toolName;
 		}
 
@@ -401,7 +401,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				"SELECT plugin_name,tool_name, COUNT(*) AS num_clips FROM RenderedClips Group by plugin_name, tool_name)" + 
 				"WHERE num_clips > ?";
 
-		List<PluginNameStruct> potentialPluginToolCombosToThin = new ArrayList<>();
+		List<ApplicationNameStruct> potentialPluginToolCombosToThin = new ArrayList<>();
 
 		try (PreparedStatement statement = makePreparedStatement(firstQuery);)
 		{
@@ -411,7 +411,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			{
 				while (results.next())
 				{
-					potentialPluginToolCombosToThin.add(new PluginNameStruct(results.getString(1),results.getString(2)));
+					potentialPluginToolCombosToThin.add(new ApplicationNameStruct(results.getString(1),results.getString(2)));
 				}
 			}
 		}
@@ -421,9 +421,9 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		}
 
 		List<String> extrasToDelete = new ArrayList<>();
-		for (PluginNameStruct pluginToolCombo : potentialPluginToolCombosToThin)
+		for (ApplicationNameStruct pluginToolCombo : potentialPluginToolCombosToThin)
 		{
-			findExcessiveClipsFrom(pluginToolCombo.pluginName, pluginToolCombo.toolName, extrasToDelete);
+			findExcessiveClipsFrom(pluginToolCombo.applicationName, pluginToolCombo.toolName, extrasToDelete);
 		}
 
 		return extrasToDelete;

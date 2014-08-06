@@ -7,15 +7,15 @@ import edu.ncsu.lubick.util.ToolCountStruct;
 
 public interface WebQueryInterface {
 
-	List<String> getNamesOfAllPlugins();
+	List<String> getNamesOfAllApplications();
 
-	List<File> getBestExamplesOfTool(String pluginName, String toolName, boolean isKeyboardHuh);
+	List<File> getBestExamplesOfTool(String applicationName, String toolName, boolean isKeyboardHuh);
 
 	void shareClipWithUser(String clipId, ClipOptions clipOptions);
 
-	List<ToolCountStruct> getAllToolAggregateForPlugin(String pluginName);
+	List<ToolCountStruct> getAllToolAggregateForApplication(String applicationName);
 	
 	ToolCountStruct getToolAggregate(String applicationName, String toolName);
 	
-	void userPause(boolean boolean1);
+	void userPause(boolean shouldPause);
 }

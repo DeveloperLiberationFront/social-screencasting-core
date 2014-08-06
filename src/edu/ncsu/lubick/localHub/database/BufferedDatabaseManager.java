@@ -223,14 +223,14 @@ public class BufferedDatabaseManager
 	}
 
 
-	public List<String> getNamesOfAllNonHiddenPlugins()
+	public List<String> getNamesOfAllNonHiddenApplications()
 	{
 		FutureTask<List<String> > future = new FutureTask<List<String>>(new Callable<List<String>>() {
 
 			@Override
 			public List<String> call() throws Exception
 			{
-				return localDB.getNamesOfAllPlugins();
+				return localDB.getNamesOfAllApplications();
 			}
 		});
 			

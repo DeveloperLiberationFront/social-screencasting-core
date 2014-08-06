@@ -17,7 +17,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.ncsu.lubick.localHub.NotificationManager;
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.database.BufferedDatabaseManager;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
@@ -39,14 +38,10 @@ public class RemoteToolReporter {
 
 	private Timer reportingTimer;
 
-	private NotificationManager notificationManager;
-
-
-	public RemoteToolReporter(BufferedDatabaseManager databaseManager, UserManager userManager, NotificationManager notificationManager)
+	public RemoteToolReporter(BufferedDatabaseManager databaseManager, UserManager userManager)
 	{
 		this.databaseManager = databaseManager;
 		this.userManager = userManager;
-		this.notificationManager = notificationManager;
 		
 		
 		beginReportingTools();
@@ -109,8 +104,6 @@ public class RemoteToolReporter {
 				if (responseBody.startsWith("<!DOCTYPE")) {
 					logger.error("Got html message back, probably an error ");
 					logger.debug(responseBody);
-				} else {
-					this.notificationManager.handlePossibleNotification(new JSONObject(responseBody));
 				}
 			}
 
@@ -145,7 +138,7 @@ public class RemoteToolReporter {
 	
 	private JSONArray makeAggregateForAllPlugins() throws NoToolDataException
 	{
-		List<String> plugins = databaseManager.getNamesOfAllNonHiddenPlugins(); 
+		List<String> plugins = databaseManager.getNamesOfAllNonHiddenApplications(); 
 		if (plugins.isEmpty()) 
 		{
 			throw new NoToolDataException();

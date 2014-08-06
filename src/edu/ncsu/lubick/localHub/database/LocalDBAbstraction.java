@@ -17,7 +17,7 @@ public abstract class LocalDBAbstraction
 
 	public abstract List<ToolUsage> getBestNInstancesOfToolUsage(int n, String pluginName, String toolName, boolean isKeyboardShortcutHuh);
 
-	public abstract List<String> getNamesOfAllPlugins();
+	public abstract List<String> getNamesOfAllApplications();
 
 	public abstract List<String> getExcesiveTools();
 
