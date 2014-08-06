@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
@@ -285,11 +284,9 @@ public class TestPostProductionHandler
 		IdealizedToolStream iToolStream = new IdealizedToolStream(TestingUtils.truncateTimeToMinute(toolUsageDate));
 		iToolStream.addToolUsage(toolUsageName, DEFAULT_TESTING_TOOL_CLASS, DEFAULT_TESTING_KEYPRESS, toolUsageDate, duration);
 
-		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
-		toolStream.setAssociatedPlugin(TEST_PLUGIN_NAME);
-		assertEquals(1, toolStream.getAsList().size());
+		iToolStream.setAssociatedApplication(TEST_PLUGIN_NAME);
 
-		return toolStream.getAsList().get(0);
+		return iToolStream.getActualToolUsage(0);
 	}
 
 
@@ -300,11 +297,9 @@ public class TestPostProductionHandler
 		IdealizedToolStream iToolStream = new IdealizedToolStream(TestingUtils.truncateTimeToMinute(toolUsageDate));
 		iToolStream.addToolUsage(toolUsageName, DEFAULT_TESTING_TOOL_CLASS, ToolUsage.MENU_KEY_PRESS, toolUsageDate, duration);
 
-		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
-		toolStream.setAssociatedPlugin(TEST_PLUGIN_NAME);
-		assertEquals(1, toolStream.getAsList().size());
+		iToolStream.setAssociatedApplication(TEST_PLUGIN_NAME);
 
-		return toolStream.getAsList().get(0);
+		return iToolStream.getActualToolUsage(0);
 	}
 
 }

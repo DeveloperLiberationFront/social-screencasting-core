@@ -29,7 +29,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import edu.ncsu.lubick.localHub.ClipOptions;
-import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
@@ -250,7 +249,7 @@ public class BrowserMediaPackageUploader {
 	{
 		JSONObject jobj = new JSONObject();
 		jobj.put("name", currentToolUsage.getToolName());
-		jobj.put("application", currentToolUsage.getPluginName());
+		jobj.put("application", currentToolUsage.getApplicationName());
 
 		URI getUri = new URIBuilder(HTTPUtils.buildExternalHttpURI("/tools")).addParameter("where",jobj.toString()).build();
 
@@ -417,10 +416,8 @@ public class BrowserMediaPackageUploader {
 		IdealizedToolStream iToolStream = new IdealizedToolStream(TestingUtils.truncateTimeToMinute(toolUsageDate));
 		iToolStream.addToolUsage("Save", "", "CTRL+5", toolUsageDate, 5500);
 
-		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
-		toolStream.setAssociatedPlugin("Eclipse");
-
-		ToolUsage testToolUsage = toolStream.getAsList().get(0); 
+		ToolUsage testToolUsage = iToolStream.getActualToolUsage(0);
+		testToolUsage.setApplicationName("Eclipse");
 		
 		logger.info(FileUtilities.makeLocalFolderNameForBrowserMediaPackage(testToolUsage, newManager.getUserEmail()));
 

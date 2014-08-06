@@ -12,7 +12,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.ncsu.lubick.localHub.LocalHub;
-import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
@@ -73,9 +72,9 @@ public class TestClipCreationLimits {
 		assertNotNull(server);
 		assertTrue(server.isRunning());
 
-		ToolStream toolStreamOfFourTools = makeToolStreamOfFour();
-		ToolStream toolStreamOfTwoTools = makeToolStreamOfMaxPlusOne();
-		ToolStream excellentExample = makeSuperiorExample();
+		List<ToolUsage> toolStreamOfFourTools = makeToolStreamOfFour();
+		List<ToolUsage>  toolStreamOfTwoTools = makeToolStreamOfMaxPlusOne();
+		List<ToolUsage>  excellentExample = makeSuperiorExample();
 
 
 		int presize = renderedVideos.list().length;
@@ -106,16 +105,16 @@ public class TestClipCreationLimits {
 		assertEquals(MAX_TOOL_USAGES, postSize - presize);
 
 		//the last one (the shortest duration) should get swapped for 
-		verifiedFiles.set(MAX_TOOL_USAGES-1, getFolderNameForToolUsage(excellentExample.getAsList().get(0)));
+		verifiedFiles.set(MAX_TOOL_USAGES-1, getFolderNameForToolUsage(excellentExample.get(0)));
 	}
 
 
-	private List<String> checkFileNamesForFirstFive(ToolStream toolStreamOfFourTools, ToolStream toolStreamOfTwoTools)
+	private List<String> checkFileNamesForFirstFive(List<ToolUsage> toolStreamOfFourTools, List<ToolUsage> toolStreamOfTwoTools)
 	{
 
 		List<String> expectedToolUsageFiles = new ArrayList<>();
 
-		for(ToolUsage tu : toolStreamOfFourTools.getAsList())
+		for(ToolUsage tu : toolStreamOfFourTools)
 		{
 			String truncatedName = getFolderNameForToolUsage(tu);
 			expectedToolUsageFiles.add(truncatedName);
@@ -123,7 +122,7 @@ public class TestClipCreationLimits {
 
 		for(int i = expectedToolUsageFiles.size();i<MAX_TOOL_USAGES;i++)
 		{
-			ToolUsage tu = toolStreamOfTwoTools.getAsList().get(i-4);
+			ToolUsage tu = toolStreamOfTwoTools.get(i-4);
 			String truncatedName = getFolderNameForToolUsage(tu);
 			expectedToolUsageFiles.add(truncatedName);
 		}
@@ -160,18 +159,17 @@ public class TestClipCreationLimits {
 	}
 
 
-	private ToolStream makeSuperiorExample()
+	private List<ToolUsage> makeSuperiorExample()
 	{
 		IdealizedToolStream iToolStream = new IdealizedToolStream(new Date(61_000L));
 		iToolStream.addToolUsage("WhomboTool #5", "", "Ctrl+5", new Date(64_000L + 2000*MAX_TOOL_USAGES), 2000);
 
-		ToolStream convertedToolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
-		convertedToolStream.setAssociatedPlugin(TestPostProductionHandler.TEST_PLUGIN_NAME);
-		return convertedToolStream;
+		iToolStream.setAssociatedApplication(TestPostProductionHandler.TEST_PLUGIN_NAME);
+		return iToolStream.getAsListOfActualToolUsages();
 	}
 
 
-	private ToolStream makeToolStreamOfMaxPlusOne()
+	private List<ToolUsage> makeToolStreamOfMaxPlusOne()
 	{
 		IdealizedToolStream iToolStream = new IdealizedToolStream(new Date(61_000L));
 		for(int i = 4; i< MAX_TOOL_USAGES+1; i++)
@@ -179,15 +177,14 @@ public class TestClipCreationLimits {
 			iToolStream.addToolUsage("WhomboTool #5", "", "Ctrl+5", new Date(62_000L + 2000*i), 1500 - i);
 		}
 
-		ToolStream convertedToolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
-		convertedToolStream.setAssociatedPlugin(TestPostProductionHandler.TEST_PLUGIN_NAME);
-		return convertedToolStream;
+		iToolStream.setAssociatedApplication(TestPostProductionHandler.TEST_PLUGIN_NAME);
+		return iToolStream.getAsListOfActualToolUsages();
 	}
 
 
 
 
-	private ToolStream makeToolStreamOfFour()
+	private List<ToolUsage>  makeToolStreamOfFour()
 	{
 		IdealizedToolStream iToolStream = new IdealizedToolStream(new Date(61_000L));
 		for(int i = 0; i< 4; i++)
@@ -195,9 +192,8 @@ public class TestClipCreationLimits {
 			iToolStream.addToolUsage("WhomboTool #5", "", "Ctrl+5", new Date(62_000L + 2000*i), 1500 - i);
 		}
 
-		ToolStream convertedToolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
-		convertedToolStream.setAssociatedPlugin(TestPostProductionHandler.TEST_PLUGIN_NAME);
-		return convertedToolStream;
+		iToolStream.setAssociatedApplication(TestPostProductionHandler.TEST_PLUGIN_NAME);
+		return iToolStream.getAsListOfActualToolUsages();
 	}
 
 

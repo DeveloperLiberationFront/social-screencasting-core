@@ -16,8 +16,6 @@ public interface WebQueryInterface {
 	List<ToolCountStruct> getAllToolAggregateForPlugin(String pluginName);
 	
 	ToolCountStruct getToolAggregate(String applicationName, String toolName);
-
-	void updateClipOptions(String folder, ClipOptions clipOptions, boolean upload);
 	
 	void userPause(boolean boolean1);
 }

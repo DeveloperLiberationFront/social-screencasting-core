@@ -4,7 +4,7 @@ import edu.ncsu.lubick.localHub.ToolUsage;
 
 public interface ExternalDBAbstraction {
 
-	void storeToolUsage(ToolUsage tu, String associatedPlugin);
+	void storeToolUsage(ToolUsage tu);
 
 	void connect();
 

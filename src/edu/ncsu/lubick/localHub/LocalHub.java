@@ -42,10 +42,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	{
 		logger = Logger.getLogger(LocalHub.class.getName());
 		singletonHub = new LocalHub();
-		// TODO Following line added for Debugging status page's recording button. The dummy plugin 
-		// lets userPause(boolean) to start the recording module even when there is no actual plugin 
-		// running 		
-		singletonHub.pluginsRecordingStatusMap.put("debug", true);
 	}
 	private boolean userOverridePause = false;
 	private boolean isRunning = false;
@@ -81,25 +77,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 		return startServer(screencastMonitorLocation, databaseLocation, wantHTTP, wantScreenRecording, wantRemoteToolReporting, true);
 	}
 	
-	@Override
-	public void userPause(boolean pauseButton) {
-		userOverridePause = pauseButton;
-		if (!pauseButton && singletonHub.screenRecordingModule != null) {
-			logger.info("Pausing Recording module");
-			screenRecordingModule.pauseRecording();
-		} else if (pauseButton) {			
-			boolean areAnyActive = false;
-			for (Entry<String, Boolean> status : pluginsRecordingStatusMap
-					.entrySet()) {
-				areAnyActive = areAnyActive || status.getValue();
-			}
-			if (areAnyActive) {
-				screenRecordingModule.unpauseRecording();
-				logger.info("Unpausing Recording module");
-			} else
-				logger.error("Can't unpause Recording module because there is no active plugin.");
-		}
-	}
 	public static LocalHubDebugAccess startServer(String screencastMonitorLocation, String databaseLocation, boolean wantHTTP, boolean wantScreenRecording,
 			boolean wantRemoteToolReporting, boolean isDebug)
 	{
@@ -304,12 +281,12 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	}
 
 	@Override
-	public void reportToolStream(ToolStream ts)	//requests coming in from the web (usually async)
+	public void reportToolStream(List<ToolUsage> ts)	//requests coming in from the web (usually async)
 	{
 		logger.debug("waiting in line at localHub");
 		synchronized (this)
 		{
-			logger.info("ToolStream Reported from Plugin: "+ts.getAssociatedPlugin());
+			logger.info("ToolStream Reported");
 			logger.debug(ts.toString());
 			
 			//report toolStreams
@@ -352,15 +329,16 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 		}
 	}
 
-	private void potentiallyMakeClipsFromToolStream(ToolStream ts)
+	private void potentiallyMakeClipsFromToolStream(List<ToolUsage> ts)
 	{
-		if (pluginIsHidden(ts.getAssociatedPlugin())) 
+		
+		if (ts.isEmpty() || pluginIsHidden(ts.get(0).getApplicationName())) 
 		{
-			logger.debug("Not making screencasts for "+ts.getAssociatedPlugin()+" because it is hidden");
+			logger.debug("Not making screencasts for "+ts.get(0).getApplicationName()+" because it is hidden");
 			return;
 		}
 		
-		for(ToolUsage tu : ts.getAsList())
+		for(ToolUsage tu : ts)
 		{
 			if (clipQualityManager.shouldMakeClipForUsage(tu))
 			{	
@@ -468,7 +446,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 		}
 		
 		@Override
-		public void reportToolStream(ToolStream ts)
+		public void reportToolStream(List<ToolUsage> ts)
 		{
 			hubToDebug.reportToolStream(ts);
 		}
@@ -494,8 +472,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 			this.clipUploader.uploadToolUsage(toolUsage, clipOptions);
 			this.databaseManager.setClipUploaded(clipId, true);
 		}
-		
-		updateClipOptions(PostProductionHandler.MEDIA_OUTPUT_FOLDER + clipId, clipOptions, false);
+		//TODO need to share with other people?
 	}
 
 	public void setTrayIconMenu(PopupMenu pm)
@@ -520,27 +497,18 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	}
 
 
-	@Override
-	public void updateClipOptions(String clipId, ClipOptions options, boolean upload)
-	{
-		//TODO fix or remove
-		//databaseManager.setStartEndFrame(folder, options.startFrame, options.endFrame);
-		
-//		if(databaseManager.isClipUploaded(folder) && upload)
-//		{
-//			clipUploader.uploadToolUsage(getToolUsageByFolder(folder), options);
-//		}
-	}
 
 	@Override
 	public void updateActivity(String pluginName, boolean isActive)
 	{
 		if (isActive) {
-			if (pausingTimerTask != null) {
-				pausingTimerTask.cancel();
+			if (!userOverridePause) {
+				if (pausingTimerTask != null) {
+					pausingTimerTask.cancel();
+				}
+				this.screenRecordingModule.unpauseRecording();
+				this.pluginsRecordingStatusMap.put(pluginName, Boolean.TRUE);
 			}
-			this.screenRecordingModule.unpauseRecording();
-			this.pluginsRecordingStatusMap.put(pluginName, Boolean.TRUE);
 		} else {
 			pluginsRecordingStatusMap.put(pluginName, Boolean.FALSE);
 			
@@ -553,6 +521,25 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 				pausingTimerTask = new PausingTimerTask();
 				pausingTimer.schedule(pausingTimerTask , 60_000);
 			}
+		}
+	}
+
+	@Override
+	public void userPause(boolean pauseButton) {
+		userOverridePause = pauseButton;
+		if (!pauseButton && singletonHub.screenRecordingModule != null) {
+			logger.info("Pausing Recording module");
+			screenRecordingModule.pauseRecording();
+		} else if (userOverridePause) {			
+			boolean areAnyActive = false;
+			for (Entry<String, Boolean> status : pluginsRecordingStatusMap.entrySet()) {
+				areAnyActive = areAnyActive || status.getValue();
+			}
+			if (areAnyActive) {
+				screenRecordingModule.unpauseRecording();
+				logger.info("Unpausing Recording module");
+			} else
+				logger.error("Can't unpause Recording module because there is no active plugin.");
 		}
 	}
 }

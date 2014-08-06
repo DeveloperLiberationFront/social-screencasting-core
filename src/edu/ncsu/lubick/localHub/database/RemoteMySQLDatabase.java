@@ -150,7 +150,7 @@ public class RemoteMySQLDatabase implements ExternalDBAbstraction {
 	}
 
 	@Override
-	public void storeToolUsage(ToolUsage tu, String associatedPlugin)
+	public void storeToolUsage(ToolUsage tu)
 	{
 		String sql ="INSERT INTO tool_info_by_user (user_id, plugin_name, " 
 				+"tool_name, usage_timestamp, tool_keypress, class_of_tool, "
@@ -160,7 +160,7 @@ public class RemoteMySQLDatabase implements ExternalDBAbstraction {
 		try (PreparedStatement statement = makePreparedStatement(sql);)
 		{
 			statement.setString(1, this.userManager.getUserEmail());
-			statement.setString(2, associatedPlugin);
+			statement.setString(2, tu.getApplicationName());
 			statement.setString(3, tu.getToolName());
 			statement.setLong(4, tu.getTimeStamp().getTime());
 			statement.setString(5, tu.getToolKeyPresses());

@@ -33,7 +33,7 @@ public class ExternalDBFactory {
 	static class DummyRemoteDatabase implements ExternalDBAbstraction {
 
 		@Override
-		public void storeToolUsage(ToolUsage tu, String associatedPlugin)
+		public void storeToolUsage(ToolUsage tu)
 		{
 			//This is a dummy implementation
 		}

@@ -11,7 +11,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolUsage;
 
 /**
@@ -32,6 +31,8 @@ public class IdealizedToolStream
 	private List<IdealizedToolUsage> listOfToolUsages;
 
 	private Date timestamp;
+
+	private String applicationName;
 	private static Random rand = new Random();
 
 	public IdealizedToolStream(Date timeStamp)
@@ -124,9 +125,8 @@ public class IdealizedToolStream
 	 * @param toolStream
 	 * @return
 	 */
-	public boolean isEquivalent(ToolStream toolStream)
+	public boolean isEquivalent(List<ToolUsage> otherList)
 	{
-		List<edu.ncsu.lubick.localHub.ToolUsage> otherList = toolStream.getAsList();
 		if (numberOfToolUses() != otherList.size())
 			return false;
 		for (int i = 0; i < numberOfToolUses(); i++)
@@ -182,6 +182,18 @@ public class IdealizedToolStream
 	public List<IdealizedToolUsage> getAsList()
 	{
 		return new ArrayList<>(this.listOfToolUsages);
+	}
+	
+	public ToolUsage getActualToolUsage(int index) {
+		try
+		{
+			return ToolUsage.buildFromJSONObject(this.listOfToolUsages.get(index).toJSONObject());
+		}
+		catch (JSONException e)
+		{
+			logger.fatal("Could not translate to actual object", e);
+		}
+		return null;
 	}
 
 	public static class IdealizedToolUsage {
@@ -246,6 +258,29 @@ public class IdealizedToolStream
 			return duration;
 		}
 
+	}
+
+	public void setAssociatedApplication(String application)
+	{
+		this.applicationName = application;
+	}
+
+	public List<ToolUsage> getAsListOfActualToolUsages()
+	{
+		List<ToolUsage> toolUsages = new ArrayList<>();
+		for(IdealizedToolUsage i : this.listOfToolUsages) {
+			try
+			{
+				ToolUsage tu = ToolUsage.buildFromJSONObject(i.toJSONObject());
+				toolUsages.add(tu);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		
+		return toolUsages;
 	}
 
 }

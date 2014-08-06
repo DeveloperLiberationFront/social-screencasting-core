@@ -18,7 +18,6 @@ import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ClipOptions;
 import edu.ncsu.lubick.localHub.LocalHub;
-import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.util.ToolCountStruct;
@@ -111,40 +110,24 @@ public class BufferedDatabaseManager
 		});
 	}
 
-	public void writeToolStreamToDatabase(final ToolStream ts)
+	public void writeToolStreamToDatabase(final List<ToolUsage> ts)
 	{
-		for (final ToolUsage tu : ts.getAsList())
+		for (final ToolUsage tu : ts)
 		{
-			logger.debug("Queueing up tool usage store to local");
-			localThreadPool.execute(new Runnable() {
-
-				@Override
-				public void run()
-				{
-					localDB.storeToolUsage(tu, ts.getAssociatedPlugin());
-				}
-			});
-			
-			remoteThreadPool.execute(new Runnable() {
-				@Override
-				public void run()
-				{
-					externalDB.storeToolUsage(tu, ts.getAssociatedPlugin());
-				}
-			});
-			
+			writeToolUsageToDatabase(tu);		
 		}
 
 	}
 
 	public void writeToolUsageToDatabase(final ToolUsage tu)
 	{
+		logger.debug("Queueing up tool usage store to local");
 		localThreadPool.execute(new Runnable() {
 
 			@Override
 			public void run()
 			{
-				localDB.storeToolUsage(tu, tu.getPluginName());
+				localDB.storeToolUsage(tu);
 			}
 		});
 		
@@ -152,7 +135,7 @@ public class BufferedDatabaseManager
 			@Override
 			public void run()
 			{
-				externalDB.storeToolUsage(tu, tu.getPluginName());
+				externalDB.storeToolUsage(tu);
 			}
 		});
 	}

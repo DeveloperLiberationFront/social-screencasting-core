@@ -18,7 +18,7 @@ public class ClipQualityManager {
 		//TODO needs to be a bit more complicated.  The tool will already be reported, so we have to see if it's in the
 		//top Max
 		boolean isGUI = ToolUsage.MENU_KEY_PRESS.equals(tu.getToolKeyPresses());
-		List<ToolUsage> best = this.databaseManager.getBestNInstancesOfToolUsage(LocalHub.MAX_TOOL_USAGES, tu.getPluginName(), tu.getToolName(), !isGUI);
+		List<ToolUsage> best = this.databaseManager.getBestNInstancesOfToolUsage(LocalHub.MAX_TOOL_USAGES, tu.getApplicationName(), tu.getToolName(), !isGUI);
 		
 		
 		return best.contains(tu);

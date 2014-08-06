@@ -237,7 +237,7 @@ public class EventForwarder extends Thread {
 		try (PreparedStatement statement = destConn.prepareStatement(sqlQuery);) {
 			statement.setString(1, tu.getUseID());
 			statement.setString(2, userID);
-			statement.setString(3, tu.getPluginName());
+			statement.setString(3, tu.getApplicationName());
 			statement.setTimestamp(4, new java.sql.Timestamp( tu.getTimeStamp().getTime()));
 			statement.setString(5, tu.getToolName());
 			statement.setString(6, tu.getToolKeyPresses());
@@ -246,7 +246,7 @@ public class EventForwarder extends Thread {
 			statement.setInt(9, tu.getUsageScore());
 			
 			logger.debug(String.format("INSERT INTO tool_usages ( use_id, userID, plugin_name, usage_timestamp, tool_name, tool_key_presses, class_of_tool, "+
-				"tool_use_duration, clip_score  ) VALUES (%s,%s,%s,%s,%s,%s,%s,%d,%d)",tu.getUseID(), userID, tu.getPluginName(), tu.getTimeStamp(), 
+				"tool_use_duration, clip_score  ) VALUES (%s,%s,%s,%s,%s,%s,%s,%d,%d)",tu.getUseID(), userID, tu.getApplicationName(), tu.getTimeStamp(), 
 				tu.getToolName(), tu.getToolKeyPresses(), tu.getToolClass(),tu.getDuration(), tu.getUsageScore()));
 	
 			int numRowsInserted = statement.executeUpdate();
@@ -528,7 +528,7 @@ public class EventForwarder extends Thread {
 		
 		JSONObject contentObject = new JSONObject();
 		contentObject.put("UserId", userID);
-		contentObject.put("AppName", toolUsage.getPluginName());
+		contentObject.put("AppName", toolUsage.getApplicationName());
 		contentObject.put("ProjId", "LAS/Recommender");
 		contentObject.put("ProjVer", "1.0");
 		contentObject.put("EvtTime", toolUsage.getTimeStamp().getTime());

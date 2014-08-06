@@ -92,7 +92,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	}
 	
 	@Override
-	public void storeToolUsage(ToolUsage tu, String associatedPlugin)
+	public void storeToolUsage(ToolUsage tu)
 	{
 		for (String tableName: TOOL_TABLE_NAMES) {
 			String sqlQuery = 		
@@ -106,7 +106,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			{
 				String uniqueId = tu.makeUniqueIdentifierForToolUsage(getUserEmail());
 				statement.setString(1, uniqueId);
-				statement.setString(2, associatedPlugin);
+				statement.setString(2, tu.getApplicationName());
 				statement.setLong(3, tu.getTimeStamp().getTime());
 				statement.setString(4, tu.getToolName());
 				statement.setString(5, tu.getToolKeyPresses());
@@ -116,7 +116,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				
 				getLogger().debug(String.format("INSERT INTO "+tableName+" ( use_id, plugin_name, usage_timestamp, tool_name, tool_key_presses, class_of_tool, "+
 					"tool_use_duration, clip_score  ) VALUES (%s,%s,%d,%s,%s,%s,%d,%d)",
-					uniqueId,associatedPlugin, tu.getTimeStamp().getTime(), tu.getToolName(), tu.getToolKeyPresses(), tu.getToolClass(), tu.getDuration(), tu.getUsageScore()));
+					uniqueId,tu.getApplicationName(), tu.getTimeStamp().getTime(), tu.getToolName(), tu.getToolKeyPresses(), tu.getToolClass(), tu.getDuration(), tu.getUsageScore()));
 				
 				executeStatementWithNoResults(statement);
 			}
@@ -345,14 +345,14 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				"folder_name, "+
 				"plugin_name, "+
 				"tool_name, "+
-				"clip_score, "+
+				"clip_score "+
 				") VALUES (?,?,?,?)";
 
 
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
 		{
 			statement.setString(1, clipID);
-			statement.setString(2, tu.getPluginName());
+			statement.setString(2, tu.getApplicationName());
 			statement.setString(3, tu.getToolName());
 			statement.setInt(4, tu.getUsageScore());
 			

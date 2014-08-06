@@ -11,7 +11,7 @@ public abstract class LocalDBAbstraction
 
 	public abstract List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName);
 
-	public abstract void storeToolUsage(ToolUsage tu, String associatedPlugin);
+	public abstract void storeToolUsage(ToolUsage tu);
 
 	public abstract void close();
 
