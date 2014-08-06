@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 

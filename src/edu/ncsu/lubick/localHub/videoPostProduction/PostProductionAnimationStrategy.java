@@ -2,7 +2,7 @@ package edu.ncsu.lubick.localHub.videoPostProduction;
 
 import java.io.IOException;
 
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.ToolUsage;
 
 public interface PostProductionAnimationStrategy {
 

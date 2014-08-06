@@ -2,7 +2,7 @@ package edu.ncsu.lubick.localHub.database;
 
 import org.apache.log4j.Logger;
 
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.UserManager;
 
 public class ExternalDBFactory {
@@ -33,7 +33,7 @@ public class ExternalDBFactory {
 	static class DummyRemoteDatabase implements ExternalDBAbstraction {
 
 		@Override
-		public void storeToolUsage(ToolUsage tu, String associatedPlugin)
+		public void storeToolUsage(ToolUsage tu)
 		{
 			//This is a dummy implementation
 		}

@@ -1,6 +1,8 @@
 package edu.ncsu.lubick.localHub.http;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -12,8 +14,10 @@ import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.util.component.LifeCycle;
+import org.json.JSONArray;
+import org.json.JSONException;
 
-import edu.ncsu.lubick.localHub.ToolStream;
+import edu.ncsu.lubick.localHub.ToolUsage;
 
 public class HTTPToolReportingHandler extends AbstractHandler  {
 
@@ -82,23 +86,35 @@ public class HTTPToolReportingHandler extends AbstractHandler  {
 	{
 		logger.debug("POST parameters received " + request.getParameterMap());
 		String pluginName = request.getParameter(POST_PROPERTY_PLUGIN_NAME);
-		String jsonArrayOfToolUsage = request.getParameter(POST_PROPERTY_JSON_ARRAY_TOOL_USAGES);
-		logger.debug(""+ pluginName+ " " +jsonArrayOfToolUsage);
+		String stringArrayOfToolUsage = request.getParameter(POST_PROPERTY_JSON_ARRAY_TOOL_USAGES);
+		logger.debug(""+ pluginName+ " " +stringArrayOfToolUsage);
 		
-		if (pluginName == null || jsonArrayOfToolUsage == null) {
+		if (pluginName == null || stringArrayOfToolUsage == null) {
 			logger.info("Bad parameters... not reporting");
 			return;
 		}
-		logger.info(jsonArrayOfToolUsage);
-		ToolStream ts = ToolStream.generateFromJSON(jsonArrayOfToolUsage);
-		ts.setAssociatedPlugin(pluginName);
+		logger.info(stringArrayOfToolUsage);
+		List<ToolUsage> toolUsages = new ArrayList<>();
+		
+		try {
+			JSONArray jarrOfToolUsages = new JSONArray(stringArrayOfToolUsage);
+
+			for(int i = 0;i<jarrOfToolUsages.length();i++) {
+				ToolUsage newobj = ToolUsage.buildFromJSONObject(jarrOfToolUsages.getJSONObject(i));
+				newobj.setApplicationName(pluginName);
+				toolUsages.add(newobj);
+			}
+		}
+		catch (JSONException e) {
+			logger.error("There was a problem converting the Json", e);
+		}
 		
 		
-		asyncReportToolStream(ts);
+		asyncReportToolStream(toolUsages);
 		
 	}
 
-	private void asyncReportToolStream(final ToolStream ts)
+	private void asyncReportToolStream(final List<ToolUsage> ts)
 	{
 		threadPool.execute(new Runnable() {
 			

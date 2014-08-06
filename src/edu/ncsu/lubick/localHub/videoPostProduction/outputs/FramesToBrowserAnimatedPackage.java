@@ -12,8 +12,7 @@ import javax.imageio.ImageIO;
 
 import org.apache.log4j.Logger;
 
-import edu.ncsu.lubick.localHub.ToolStream;
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.videoPostProduction.AbstractImagesToMediaOutput;
 import edu.ncsu.lubick.localHub.videoPostProduction.MediaEncodingException;
@@ -86,7 +85,7 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 
 	private void createAnimationImagesForToolStream(ToolUsage toolUsage) throws IOException
 	{
-		if (toolUsage == null || ToolStream.MENU_KEY_PRESS.equals(toolUsage.getToolKeyPresses()))
+		if (toolUsage == null || ToolUsage.MENU_KEY_PRESS.equals(toolUsage.getToolKeyPresses()))
 		{
 			return; // no animation for menus
 		}

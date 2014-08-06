@@ -17,16 +17,22 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 	private static final String DB_EXTENSION_NAME = ".sqlite";
 	private Connection connection;
 	private UserManager userManager;
+	private String path;
 
 	public LocalSQLiteDatabase(String databaseLocation, UserManager um)
 	{
 		this.userManager = um;
+		this.path = databaseLocation;
 		// check the filename has the right extension
 		if (databaseLocation.endsWith(DB_EXTENSION_NAME))
 		{
 			logger.debug("Creating database at location: " + databaseLocation);
 			// open a connection to a db so that this server can access the db
-			open(databaseLocation);
+			open();
+			
+			renameTablesIfNeeded();
+			// create the tables (if they do not already exist) 
+			createTables();
 		}
 		else
 			// incorrect file name
@@ -37,6 +43,47 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 		updateDatabaseToNewest();
 	}
 	
+	@SuppressWarnings("resource")		//Eclipse thinks firstStatement, secondStatement and so on need tryWithResources
+	private void renameTablesIfNeeded()
+	{
+		int dbVersion = getDbVersion();
+		if (dbVersion > 0 && dbVersion < 17)
+		{
+			String first =	"CREATE TABLE IF NOT EXISTS RenderedClips ( " +
+					"folder_name TEXT PRIMARY KEY, " +
+					"plugin_name TEXT, " +
+					"tool_name TEXT, " +
+					"clip_score INTEGER," +
+					"uploaded_date INTEGER);";
+
+
+			String second = "INSERT INTO RenderedClips SELECT folder_name,plugin_name,tool_name,"+
+					"clip_score,uploaded_date FROM Clips;";
+			String third = "DROP TABLE Clips;";
+
+			
+			try {
+				PreparedStatement firstStatement = makePreparedStatement(first);
+				executeStatementWithNoResults(firstStatement);
+				firstStatement.close();
+				PreparedStatement secondStatement = makePreparedStatement(second);
+				executeStatementWithNoResults(secondStatement);
+				secondStatement.close();
+				//Needed to prevent database locking problems
+				resetConnection();
+				
+				
+				PreparedStatement thirdStatement = makePreparedStatement(third);
+				executeStatementWithNoResults(thirdStatement);
+				thirdStatement.close();
+			}
+			catch (SQLException e) {
+				logger.error("Could not rename Clips table",e);
+			}
+		}
+		
+	}
+
 	private final void updateDatabaseToNewest()
 	{
 		int dbVersion = getDbVersion();
@@ -44,9 +91,9 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 		
 		updateTo1_5(dbVersion, 15);
 		updateTo1_6(dbVersion, 16);
+		updateTo1_7(dbVersion, 17);
 		
-		
-		storeDbVersion(dbVersion, 16);
+		storeDbVersion(dbVersion, 17);
 	}
 	
 	/**
@@ -99,6 +146,12 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 		}
 	}
 	
+	private void updateTo1_7(int currentVersion, int newVersion) {
+		if(currentVersion < newVersion) {
+			//nothing, we are renaming/moving/shrinking the database table.
+		}
+	}
+	
 	private void storeDbVersion(int currentVersion, int newVersion)
 	{	
 		if(currentVersion < newVersion)
@@ -121,19 +174,20 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 	
 	private int getDbVersion()
 	{
-		String sqlQuery = "SELECT db_version FROM Database_Info";
-		PreparedStatement statement = makePreparedStatement(sqlQuery);
-		ResultSet results = executeWithResults(statement);
-		
-		try {
+		try
+		{
+			String sqlQuery = "SELECT db_version FROM Database_Info";
+			PreparedStatement statement = makePreparedStatement(sqlQuery);
+			ResultSet results = executeWithResults(statement);
 			if(results.next())
 			{
 				return results.getInt("db_version");
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
+			}	
 		}
-		
+		catch (DBAbstractionException | SQLException e)
+		{
+			logger.error("Could not get database version", e);
+		}		
 		return 0;
 	}
 	
@@ -151,7 +205,7 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 		return true;
 	}
 
-	private final void open(String path)
+	private final void open()
 	{
 		try
 		{
@@ -160,10 +214,8 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 
 			// create a database connection, will open the sqlite db if it
 			// exists and create a new sqlite database if it does not exist
-			this.connection = DriverManager.getConnection("jdbc:sqlite:" + path);
+			this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.path);
 
-			// create the tables (if they do not already exist) 
-			createTables();
 		}
 		catch (ClassNotFoundException e)
 		{
@@ -246,6 +298,15 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 	protected String getUserEmail()
 	{
 		return userManager.getUserEmail();
+	}
+
+	private void resetConnection() throws SQLException
+	{
+		connection.setAutoCommit(false);
+		connection.commit();
+		connection.close();
+		
+		this.connection = DriverManager.getConnection("jdbc:sqlite:" + path);
 	}
 
 }

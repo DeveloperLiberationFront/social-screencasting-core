@@ -1,6 +1,6 @@
 package edu.ncsu.lubick.localHub.http;
 
-import static edu.ncsu.lubick.localHub.http.HTTPUtils.chopOffQueryString;
+import static edu.ncsu.lubick.localHub.http.HTTPUtils.*;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;

@@ -2,7 +2,6 @@ package edu.ncsu.lubick.localHub.http;
 
 import java.awt.Rectangle;
 import java.io.IOException;
-import java.util.Arrays;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

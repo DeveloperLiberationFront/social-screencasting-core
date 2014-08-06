@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 
 
@@ -237,17 +237,17 @@ public class EventForwarder extends Thread {
 		try (PreparedStatement statement = destConn.prepareStatement(sqlQuery);) {
 			statement.setString(1, tu.getUseID());
 			statement.setString(2, userID);
-			statement.setString(3, tu.getPluginName());
+			statement.setString(3, tu.getApplicationName());
 			statement.setTimestamp(4, new java.sql.Timestamp( tu.getTimeStamp().getTime()));
 			statement.setString(5, tu.getToolName());
 			statement.setString(6, tu.getToolKeyPresses());
 			statement.setString(7, tu.getToolClass());
 			statement.setInt(8, tu.getDuration());
-			statement.setInt(9, tu.getClipScore());
+			statement.setInt(9, tu.getUsageScore());
 			
 			logger.debug(String.format("INSERT INTO tool_usages ( use_id, userID, plugin_name, usage_timestamp, tool_name, tool_key_presses, class_of_tool, "+
-				"tool_use_duration, clip_score  ) VALUES (%s,%s,%s,%s,%s,%s,%s,%d,%d)",tu.getUseID(), userID, tu.getPluginName(), tu.getTimeStamp(), 
-				tu.getToolName(), tu.getToolKeyPresses(), tu.getToolClass(),tu.getDuration(), tu.getClipScore()));
+				"tool_use_duration, clip_score  ) VALUES (%s,%s,%s,%s,%s,%s,%s,%d,%d)",tu.getUseID(), userID, tu.getApplicationName(), tu.getTimeStamp(), 
+				tu.getToolName(), tu.getToolKeyPresses(), tu.getToolClass(),tu.getDuration(), tu.getUsageScore()));
 	
 			int numRowsInserted = statement.executeUpdate();
 			if (numRowsInserted == 1) { result = true; }
@@ -522,13 +522,13 @@ public class EventForwarder extends Thread {
 	public static JSONObject convertToolUsageToJSONObjectForSkylr(ToolUsage toolUsage, String userID) throws JSONException {
 		JSONObject appData = new JSONObject();
 		appData.put("rcdClassOfTool",toolUsage.getToolClass());
-		appData.put("rcdClipScore", toolUsage.getClipScore());
+		appData.put("rcdClipScore", toolUsage.getUsageScore());
 		appData.put("rcdOriginalID", toolUsage.getUseID());
 		
 		
 		JSONObject contentObject = new JSONObject();
 		contentObject.put("UserId", userID);
-		contentObject.put("AppName", toolUsage.getPluginName());
+		contentObject.put("AppName", toolUsage.getApplicationName());
 		contentObject.put("ProjId", "LAS/Recommender");
 		contentObject.put("ProjVer", "1.0");
 		contentObject.put("EvtTime", toolUsage.getTimeStamp().getTime());

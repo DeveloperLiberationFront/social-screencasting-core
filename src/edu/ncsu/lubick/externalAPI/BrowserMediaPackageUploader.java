@@ -4,7 +4,6 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -30,8 +29,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import edu.ncsu.lubick.localHub.ClipOptions;
-import edu.ncsu.lubick.localHub.ToolStream;
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
@@ -224,7 +222,7 @@ public class BrowserMediaPackageUploader {
 		JSONObject jobj = new JSONObject();
 		jobj.put("name", packageDirectory.getName());
 		jobj.put("tool", current_external_tool_id);
-		if (ToolStream.MENU_KEY_PRESS.equals(currentToolUsage.getToolKeyPresses())) {
+		if (ToolUsage.MENU_KEY_PRESS.equals(currentToolUsage.getToolKeyPresses())) {
 			jobj.put("type", "mouse");
 		} else {
 			jobj.put("type", "keyboard");
@@ -251,7 +249,7 @@ public class BrowserMediaPackageUploader {
 	{
 		JSONObject jobj = new JSONObject();
 		jobj.put("name", currentToolUsage.getToolName());
-		jobj.put("application", currentToolUsage.getPluginName());
+		jobj.put("application", currentToolUsage.getApplicationName());
 
 		URI getUri = new URIBuilder(HTTPUtils.buildExternalHttpURI("/tools")).addParameter("where",jobj.toString()).build();
 
@@ -409,7 +407,7 @@ public class BrowserMediaPackageUploader {
 
 	//For whitebox/end-to-end testing
 	@SuppressWarnings("unused")
-	public static void main(String[] args) throws Exception
+	private static void main(String[] args) throws Exception
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
 		UserManager newManager = new UnitTestUserManager("Kevin Test","kjlubick+test@ncsu.edu","221ed3d8-6a09-4967-91b6-482783ec5313");
@@ -418,10 +416,8 @@ public class BrowserMediaPackageUploader {
 		IdealizedToolStream iToolStream = new IdealizedToolStream(TestingUtils.truncateTimeToMinute(toolUsageDate));
 		iToolStream.addToolUsage("Save", "", "CTRL+5", toolUsageDate, 5500);
 
-		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
-		toolStream.setAssociatedPlugin("Eclipse");
-
-		ToolUsage testToolUsage = toolStream.getAsList().get(0); 
+		ToolUsage testToolUsage = iToolStream.getActualToolUsage(0);
+		testToolUsage.setApplicationName("Eclipse");
 		
 		logger.info(FileUtilities.makeLocalFolderNameForBrowserMediaPackage(testToolUsage, newManager.getUserEmail()));
 

@@ -18,8 +18,7 @@ import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ClipOptions;
 import edu.ncsu.lubick.localHub.LocalHub;
-import edu.ncsu.lubick.localHub.ToolStream;
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
@@ -111,40 +110,24 @@ public class BufferedDatabaseManager
 		});
 	}
 
-	public void writeToolStreamToDatabase(final ToolStream ts)
+	public void writeToolStreamToDatabase(final List<ToolUsage> ts)
 	{
-		for (final ToolUsage tu : ts.getAsList())
+		for (final ToolUsage tu : ts)
 		{
-			logger.debug("Queueing up tool usage store to local");
-			localThreadPool.execute(new Runnable() {
-
-				@Override
-				public void run()
-				{
-					localDB.storeToolUsage(tu, ts.getAssociatedPlugin());
-				}
-			});
-			
-			remoteThreadPool.execute(new Runnable() {
-				@Override
-				public void run()
-				{
-					externalDB.storeToolUsage(tu, ts.getAssociatedPlugin());
-				}
-			});
-			
+			writeToolUsageToDatabase(tu);		
 		}
 
 	}
 
 	public void writeToolUsageToDatabase(final ToolUsage tu)
 	{
+		logger.debug("Queueing up tool usage store to local");
 		localThreadPool.execute(new Runnable() {
 
 			@Override
 			public void run()
 			{
-				localDB.storeToolUsage(tu, tu.getPluginName());
+				localDB.storeToolUsage(tu);
 			}
 		});
 		
@@ -152,7 +135,7 @@ public class BufferedDatabaseManager
 			@Override
 			public void run()
 			{
-				externalDB.storeToolUsage(tu, tu.getPluginName());
+				externalDB.storeToolUsage(tu);
 			}
 		});
 	}
@@ -240,14 +223,14 @@ public class BufferedDatabaseManager
 	}
 
 
-	public List<String> getNamesOfAllNonHiddenPlugins()
+	public List<String> getNamesOfAllNonHiddenApplications()
 	{
 		FutureTask<List<String> > future = new FutureTask<List<String>>(new Callable<List<String>>() {
 
 			@Override
 			public List<String> call() throws Exception
 			{
-				return localDB.getNamesOfAllPlugins();
+				return localDB.getNamesOfAllApplications();
 			}
 		});
 			
@@ -288,7 +271,7 @@ public class BufferedDatabaseManager
 		for (ToolUsage tu : toolUsages)
 		{
 			
-			if (ToolStream.MENU_KEY_PRESS.equals(tu.getToolKeyPresses()))
+			if (ToolUsage.MENU_KEY_PRESS.equals(tu.getToolKeyPresses()))
 			{
 				Integer guiPreviousCount = guiToolCountsMap.get(tu.getToolName());
 				if (guiPreviousCount == null)
@@ -430,29 +413,6 @@ public class BufferedDatabaseManager
 				localDB.setClipUploaded(clipId, b);
 			}
 		});
-	}
-
-	public boolean setStartEndFrame(final String folder, final int startFrame, final int endFrame) 
-	{
-		FutureTask<Boolean> future = new FutureTask<Boolean>(new Callable<Boolean>() {
-		
-			@Override
-			public Boolean call()
-			{
-				return localDB.setStartEndFrame(folder, startFrame, endFrame);
-			}
-		});
-		this.localThreadPool.execute(future);
-		
-		try
-		{
-			return future.get();
-		}
-		catch(InterruptedException | ExecutionException e)
-		{
-			logger.error("Problem with query", e);
-			return false;
-		}
 	}
 
 }

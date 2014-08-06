@@ -16,7 +16,6 @@ import org.apache.log4j.Logger;
 import edu.ncsu.lubick.ScreenRecordingModule;
 import edu.ncsu.lubick.externalAPI.BrowserMediaPackageUploader;
 import edu.ncsu.lubick.externalAPI.RemoteToolReporter;
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.database.BufferedDatabaseManager;
 import edu.ncsu.lubick.localHub.database.LocalSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
@@ -28,7 +27,7 @@ import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.FileUtilities;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
-public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, NotificationListener {
+public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
 	public static final String LOGGING_FILE_PATH = "/etc/log4j.settings";
 	public static final int MAX_TOOL_USAGES = 5;
@@ -43,10 +42,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	{
 		logger = Logger.getLogger(LocalHub.class.getName());
 		singletonHub = new LocalHub();
-		// TODO Following line added for Debugging status page's recording button. The dummy plugin 
-		// lets userPause(boolean) to start the recording module even when there is no actual plugin 
-		// running 		
-		singletonHub.pluginsRecordingStatusMap.put("debug", true);
 	}
 	private boolean userOverridePause = false;
 	private boolean isRunning = false;
@@ -62,12 +57,11 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	private HTTPServer httpServer;
 	private UserManager userManager;
 	private RemoteToolReporter remoteToolReporter;
-	private NotificationManager notificationManager;
 	private boolean shouldReportToolsRemotely;
 	private ClipQualityManager clipQualityManager;
 	private BrowserMediaPackageUploader clipUploader;
 	
-	private Map<String, Boolean> pluginsRecordingStatusMap = new HashMap<>();
+	private Map<String, Boolean> applicationsRecordingStatusMap = new HashMap<>();
 	private Timer pausingTimer = new Timer(true);	//Daemon timer
 	private TimerTask pausingTimerTask = null;
 
@@ -82,24 +76,6 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 		return startServer(screencastMonitorLocation, databaseLocation, wantHTTP, wantScreenRecording, wantRemoteToolReporting, true);
 	}
 	
-	public void userPause(boolean pauseButton) {
-		userOverridePause = pauseButton;
-		if (!pauseButton && singletonHub.screenRecordingModule != null) {
-			logger.info("Pausing Recording module");
-			screenRecordingModule.pauseRecording();
-		} else if (pauseButton) {			
-			boolean areAnyActive = false;
-			for (Entry<String, Boolean> status : pluginsRecordingStatusMap
-					.entrySet()) {
-				areAnyActive = areAnyActive || status.getValue();
-			}
-			if (areAnyActive) {
-				screenRecordingModule.unpauseRecording();
-				logger.info("Unpausing Recording module");
-			} else
-				logger.error("Can't unpause Recording module because there is no active plugin.");
-		}
-	}
 	public static LocalHubDebugAccess startServer(String screencastMonitorLocation, String databaseLocation, boolean wantHTTP, boolean wantScreenRecording,
 			boolean wantRemoteToolReporting, boolean isDebug)
 	{
@@ -171,8 +147,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 		
 		if (shouldReportToolsRemotely)
 		{
-			this.notificationManager = new NotificationManager(this);
-			this.remoteToolReporter = new RemoteToolReporter(this.databaseManager, userManager, this.notificationManager);
+			this.remoteToolReporter = new RemoteToolReporter(this.databaseManager, userManager);
 		}
 	}
 
@@ -286,15 +261,15 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 
 
 	@Override
-	public List<String> getNamesOfAllPlugins()
+	public List<String> getNamesOfAllApplications()
 	{
-		return databaseManager.getNamesOfAllNonHiddenPlugins();
+		return databaseManager.getNamesOfAllNonHiddenApplications();
 	}
 	
 	@Override
-	public List<ToolCountStruct> getAllToolAggregateForPlugin(String pluginName)
+	public List<ToolCountStruct> getAllToolAggregateForApplication(String applicationName)
 	{
-		return databaseManager.getAllToolAggregateForPlugin(pluginName);
+		return databaseManager.getAllToolAggregateForPlugin(applicationName);
 	}
 
 	@Override
@@ -304,12 +279,12 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 	}
 
 	@Override
-	public void reportToolStream(ToolStream ts)	//requests coming in from the web (usually async)
+	public void reportToolStream(List<ToolUsage> ts)	//requests coming in from the web (usually async)
 	{
 		logger.debug("waiting in line at localHub");
 		synchronized (this)
 		{
-			logger.info("ToolStream Reported from Plugin: "+ts.getAssociatedPlugin());
+			logger.info("ToolStream Reported");
 			logger.debug(ts.toString());
 			
 			//report toolStreams
@@ -352,15 +327,16 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 		}
 	}
 
-	private void potentiallyMakeClipsFromToolStream(ToolStream ts)
+	private void potentiallyMakeClipsFromToolStream(List<ToolUsage> ts)
 	{
-		if (pluginIsHidden(ts.getAssociatedPlugin())) 
+		
+		if (ts.isEmpty() || pluginIsHidden(ts.get(0).getApplicationName())) 
 		{
-			logger.debug("Not making screencasts for "+ts.getAssociatedPlugin()+" because it is hidden");
+			logger.debug("Not making screencasts for "+ts.get(0).getApplicationName()+" because it is hidden");
 			return;
 		}
 		
-		for(ToolUsage tu : ts.getAsList())
+		for(ToolUsage tu : ts)
 		{
 			if (clipQualityManager.shouldMakeClipForUsage(tu))
 			{	
@@ -464,21 +440,14 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 		@Override
 		public List<String> getAllPluginNames()
 		{
-			return hubToDebug.getNamesOfAllPlugins();
+			return hubToDebug.getNamesOfAllApplications();
 		}
 		
 		@Override
-		public void reportToolStream(ToolStream ts)
+		public void reportToolStream(List<ToolUsage> ts)
 		{
 			hubToDebug.reportToolStream(ts);
-		}
-
-		@Override
-		public void setTrayIconMenu(PopupMenu pm)
-		{
-			hubToDebug.setTrayIconMenu(pm);
-		}
-	
+		}	
 
 	}
 
@@ -494,58 +463,28 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 			this.clipUploader.uploadToolUsage(toolUsage, clipOptions);
 			this.databaseManager.setClipUploaded(clipId, true);
 		}
-		
-		updateClipOptions(PostProductionHandler.MEDIA_OUTPUT_FOLDER + clipId, clipOptions, false);
-	}
-
-	public void setTrayIconMenu(PopupMenu pm)
-	{
-		this.notificationManager.setTrayIconMenu(pm);
-	}
-
-	@Override
-	public void notificationReceived(String notifications)
-	{
-		//Log notification for study
-		ToolUsage tu = new ToolUsage("Notification received", notifications, "[GUI]", "[ScreencastingHub]", new Date(), 10, 10);
-		reportToolUsage(tu);
-	}
-
-	@Override
-	public void notificationClickedOn(String notification)
-	{
-		//Log notification for study
-		ToolUsage tu = new ToolUsage("Respond to notification", notification, "[GUI]", "[ScreencastingHub]", new Date(), 10, 10);
-		reportToolUsage(tu);
+		//TODO need to share with other people?
 	}
 
 
-	@Override
-	public void updateClipOptions(String clipId, ClipOptions options, boolean upload)
-	{
-		//TODO fix or remove
-		//databaseManager.setStartEndFrame(folder, options.startFrame, options.endFrame);
-		
-//		if(databaseManager.isClipUploaded(folder) && upload)
-//		{
-//			clipUploader.uploadToolUsage(getToolUsageByFolder(folder), options);
-//		}
-	}
+
 
 	@Override
 	public void updateActivity(String pluginName, boolean isActive)
 	{
 		if (isActive) {
-			if (pausingTimerTask != null) {
-				pausingTimerTask.cancel();
+			if (!userOverridePause) {
+				if (pausingTimerTask != null) {
+					pausingTimerTask.cancel();
+				}
+				this.screenRecordingModule.unpauseRecording();
+				this.applicationsRecordingStatusMap.put(pluginName, Boolean.TRUE);
 			}
-			this.screenRecordingModule.unpauseRecording();
-			this.pluginsRecordingStatusMap.put(pluginName, Boolean.TRUE);
 		} else {
-			pluginsRecordingStatusMap.put(pluginName, Boolean.FALSE);
+			applicationsRecordingStatusMap.put(pluginName, Boolean.FALSE);
 			
 			boolean areAnyActive = false;
-			for(Entry<String, Boolean> status: pluginsRecordingStatusMap.entrySet()) {
+			for(Entry<String, Boolean> status: applicationsRecordingStatusMap.entrySet()) {
 				areAnyActive = areAnyActive || status.getValue();
 			}
 			
@@ -553,6 +492,25 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 				pausingTimerTask = new PausingTimerTask();
 				pausingTimer.schedule(pausingTimerTask , 60_000);
 			}
+		}
+	}
+
+	@Override
+	public void userPause(boolean pauseButton) {
+		userOverridePause = pauseButton;
+		if (!pauseButton && singletonHub.screenRecordingModule != null) {
+			logger.info("Pausing Recording module");
+			screenRecordingModule.pauseRecording();
+		} else if (userOverridePause) {			
+			boolean areAnyActive = false;
+			for (Entry<String, Boolean> status : applicationsRecordingStatusMap.entrySet()) {
+				areAnyActive = areAnyActive || status.getValue();
+			}
+			if (areAnyActive) {
+				screenRecordingModule.unpauseRecording();
+				logger.info("Unpausing Recording module");
+			} else
+				logger.error("Can't unpause Recording module because there is no active application.");
 		}
 	}
 }
