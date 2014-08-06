@@ -263,7 +263,7 @@ public class ToolStream {
 			this.pluginName = pluginName;
 		}
 
-		public int getClipScore()
+		public int getUsageScore()
 		{
 			return this.clipScore;
 		}

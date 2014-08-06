@@ -432,27 +432,4 @@ public class BufferedDatabaseManager
 		});
 	}
 
-	public boolean setStartEndFrame(final String folder, final int startFrame, final int endFrame) 
-	{
-		FutureTask<Boolean> future = new FutureTask<Boolean>(new Callable<Boolean>() {
-		
-			@Override
-			public Boolean call()
-			{
-				return localDB.setStartEndFrame(folder, startFrame, endFrame);
-			}
-		});
-		this.localThreadPool.execute(future);
-		
-		try
-		{
-			return future.get();
-		}
-		catch(InterruptedException | ExecutionException e)
-		{
-			logger.error("Problem with query", e);
-			return false;
-		}
-	}
-
 }

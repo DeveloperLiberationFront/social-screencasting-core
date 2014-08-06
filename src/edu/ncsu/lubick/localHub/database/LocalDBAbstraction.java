@@ -29,8 +29,6 @@ public abstract class LocalDBAbstraction
 
 	public abstract void setClipUploaded(String clipId, boolean b);
 
-	public abstract Boolean setStartEndFrame(String folder, int startFrame, int endFrame);
-
 	public abstract void createClipForToolUsage(String clipID, ToolUsage tu, ClipOptions clipOptions);
 
 	public abstract ToolCountStruct getToolAggregate(String applicationName, String toolName);

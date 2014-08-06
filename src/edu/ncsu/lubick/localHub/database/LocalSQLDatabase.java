@@ -13,7 +13,6 @@ import edu.ncsu.lubick.localHub.ClipOptions;
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolStream;
 import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
-import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
 /**
@@ -70,18 +69,12 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 
 	private void createClipTable()
 	{
-		String sqlTableQuery = 		"CREATE TABLE IF NOT EXISTS Clips ( " +
+		String sqlTableQuery = 		"CREATE TABLE IF NOT EXISTS RenderedClips ( " +
 				"folder_name TEXT PRIMARY KEY, " +
 				"plugin_name TEXT, " +
 				"tool_name TEXT, " +
 				"clip_score INTEGER," +
-				"uploaded_date INTEGER," +
-				"start_frame INTEGER," +
-				"end_frame INTEGER," +
-				"time_stamp LONG," +
-				"start_data TEXT," +
-				"end_data TEXT," +
-				"rating_data TEXT" +
+				"uploaded_date INTEGER" +
 				") ";
 
 		// execute the query
@@ -120,11 +113,11 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 				statement.setString(5, tu.getToolKeyPresses());
 				statement.setString(6, tu.getToolClass());
 				statement.setInt(7, tu.getDuration());
-				statement.setInt(8, tu.getClipScore());
+				statement.setInt(8, tu.getUsageScore());
 				
 				getLogger().debug(String.format("INSERT INTO "+tableName+" ( use_id, plugin_name, usage_timestamp, tool_name, tool_key_presses, class_of_tool, "+
 					"tool_use_duration, clip_score  ) VALUES (%s,%s,%d,%s,%s,%s,%d,%d)",
-					uniqueId,associatedPlugin, tu.getTimeStamp().getTime(), tu.getToolName(), tu.getToolKeyPresses(), tu.getToolClass(), tu.getDuration(), tu.getClipScore()));
+					uniqueId,associatedPlugin, tu.getTimeStamp().getTime(), tu.getToolName(), tu.getToolKeyPresses(), tu.getToolClass(), tu.getDuration(), tu.getUsageScore()));
 				
 				executeStatementWithNoResults(statement);
 			}
@@ -338,28 +331,23 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 
 
 	/*
-	 * "CREATE TABLE IF NOT EXISTS Clips ( " +
-				"folder_name PRIMARY KEY, " +
+	 "CREATE TABLE IF NOT EXISTS RenderedClips ( " +
+				"folder_name TEXT PRIMARY KEY, " +
 				"plugin_name TEXT, " +
 				"tool_name TEXT, " +
-				"clip_score INTEGER" +
-				") ";
+				"clip_score INTEGER," +
+				"uploaded_date INTEGER" +
+				") "
 	 */
 	@Override
 	public void createClipForToolUsage(String clipID, ToolUsage tu, ClipOptions clipOptions)
 	{
-		String sqlQuery = 		"INSERT INTO Clips ( "+
+		String sqlQuery = 		"INSERT INTO RenderedClips ( "+
 				"folder_name, "+
 				"plugin_name, "+
 				"tool_name, "+
 				"clip_score, "+
-				"start_frame, "+
-				"end_frame," +
-				"time_stamp," +
-				"start_data," +
-				"end_data," +
-				"rating_data" +
-				") VALUES (?,?,?,?,?,?,?,?,?,?)";
+				") VALUES (?,?,?,?)";
 
 
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
@@ -367,25 +355,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			statement.setString(1, clipID);
 			statement.setString(2, tu.getPluginName());
 			statement.setString(3, tu.getToolName());
-			statement.setInt(4, tu.getClipScore());
-			statement.setInt(5, clipOptions.startFrame);
-			statement.setInt(6, clipOptions.endFrame);
-			statement.setLong(7, tu.getTimeStamp().getTime());
-			
-			String startData = tu.getStartData();
-			if(startData == null)
-				startData = "";
-			String endData = tu.getEndData();
-			if(endData == null)
-				endData = "";
-			
-			String ratingData = tu.getRatingData();
-			if(ratingData == null)
-				ratingData = "";
-			
-			statement.setString(8, startData);
-			statement.setString(9, endData);
-			statement.setString(10, ratingData);
+			statement.setInt(4, tu.getUsageScore());
 			
 			executeStatementWithNoResults(statement);
 		}
@@ -398,7 +368,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	@Override
 	public void deleteClipForToolUsage(String clipID)
 	{
-		String sqlQuery = "DELETE FROM Clips where folder_name = ?";
+		String sqlQuery = "DELETE FROM RenderedClips where folder_name = ?";
 
 
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
@@ -429,7 +399,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	public List<String> getExcesiveTools()
 	{
 		String firstQuery = "SELECT plugin_name,tool_name from(" + 
-				"SELECT plugin_name,tool_name, COUNT(*) AS num_clips FROM Clips Group by plugin_name, tool_name)" + 
+				"SELECT plugin_name,tool_name, COUNT(*) AS num_clips FROM RenderedClips Group by plugin_name, tool_name)" + 
 				"WHERE num_clips > ?";
 
 		List<PluginNameStruct> potentialPluginToolCombosToThin = new ArrayList<>();
@@ -465,7 +435,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	}
 	private void findExcessiveClipsFrom(String pluginName, String toolName, List<String> listToAppendTo)
 	{
-		String sqlQuery = "SELECT folder_name FROM Clips where plugin_name = ? AND tool_name = ? order by clip_score desc";
+		String sqlQuery = "SELECT folder_name FROM RenderedClips where plugin_name = ? AND tool_name = ? order by clip_score desc";
 		
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
 		{
@@ -516,7 +486,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	@Override
 	public boolean isClipUploaded(String clipId)
 	{
-		String sqlQuery = "SELECT uploaded_date FROM Clips where folder_name LIKE ?";
+		String sqlQuery = "SELECT uploaded_date FROM RenderedClips where folder_name LIKE ?";
 		
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
 		{
@@ -543,7 +513,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	{
 		long uploadedDate = b ? new Date().getTime() : 0;
 		
-		String sqlQuery = "UPDATE Clips SET uploaded_date = ? where folder_name LIKE ?";
+		String sqlQuery = "UPDATE RenderedClips SET uploaded_date = ? where folder_name LIKE ?";
 		
 		
 		try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
@@ -557,24 +527,5 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			throw new DBAbstractionException("There was a problem marking clip as uploaded or not", e);
 		}
 	}
-	
-	@Override
-	public Boolean setStartEndFrame(String folder, int startFrame, int endFrame) {
-		String sqlQuery = "UPDATE Clips SET start_frame = ?, end_frame = ? WHERE folder_name = ?";
-		
-		try (PreparedStatement statement = makePreparedStatement(sqlQuery))
-		{
-			statement.setInt(1, startFrame);
-			statement.setInt(2, endFrame);
-			statement.setString(3, folder);
-			executeStatementWithNoResults(statement);
-			return Boolean.TRUE;		//prevents boxing
-		}
-		catch (SQLException e)
-		{
-			throw new DBAbstractionException("There was a problem changing the start or end frames", e);
-		}
-	}
-
 
 }

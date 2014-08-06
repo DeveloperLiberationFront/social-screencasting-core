@@ -409,7 +409,7 @@ public class BrowserMediaPackageUploader {
 
 	//For whitebox/end-to-end testing
 	@SuppressWarnings("unused")
-	public static void main(String[] args) throws Exception
+	private static void main(String[] args) throws Exception
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
 		UserManager newManager = new UnitTestUserManager("Kevin Test","kjlubick+test@ncsu.edu","221ed3d8-6a09-4967-91b6-482783ec5313");
