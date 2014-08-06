@@ -68,8 +68,8 @@ define(['angular',
     function($scope, Hub) {
       $scope.filters = {};
       $scope.ordering = {
-        field: "video",
-        reverse: true
+        field: "name",
+        reverse: false
       };
       $scope.tools = Hub.all('tools').getList();
     }])

@@ -126,9 +126,9 @@ define(['angular',
         };
     }])
 
-  .controller('ModalPlayer', ['$scope', '$modalInstance', 'Base64Img', 'clips', 'clip_name', 'tool',
-    function($scope, $modalInstance, Base64Img, clips, clip_id, tool) {
-      $scope.title = tool;
+  .controller('ModalPlayer', ['$scope', '$modalInstance', 'Base64Img', 'Hub',
+                              'clips', 'clip_name', 'tool',
+    function($scope, $modalInstance, Base64Img, Hub, clips, clip_id, tool) {
       $scope.clips = clips;
       $scope.$emit('instrumented', "Loaded ModalPlayer", $scope.clip);
 
@@ -141,11 +141,15 @@ define(['angular',
         return Base64Img(_.isObject(clip.thumbnail) ? clip.thumbnail.data : clip.thumbnail);
       };
 
+      var users = Hub.all('users').getList();
+        users.then(function(users) {
+          var user = _.find(users, {email: clip.user});
+          $scope.title = tool + " - " + (user.name ? user.name : $scope.title);
+        });
+
       $scope.loadClip = function(clip) {
         $scope.selectedClip = $scope.clip = clip;
         $scope.selectedClip = clip;
-        var user = _.find($scope.user_list, {email: clip.user});
-        $scope.thumbTitle = (user.name ? user.name : $scope.title);
         $scope.$emit('instrumented', "Selected Clip", clip);
       };
       //select first clip
