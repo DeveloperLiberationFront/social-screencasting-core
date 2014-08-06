@@ -19,7 +19,7 @@ import org.apache.log4j.Logger;
 import edu.ncsu.lubick.localHub.ClipOptions;
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolStream;
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
@@ -288,7 +288,7 @@ public class BufferedDatabaseManager
 		for (ToolUsage tu : toolUsages)
 		{
 			
-			if (ToolStream.MENU_KEY_PRESS.equals(tu.getToolKeyPresses()))
+			if (ToolUsage.MENU_KEY_PRESS.equals(tu.getToolKeyPresses()))
 			{
 				Integer guiPreviousCount = guiToolCountsMap.get(tu.getToolName());
 				if (guiPreviousCount == null)

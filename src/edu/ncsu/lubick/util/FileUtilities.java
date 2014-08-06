@@ -2,6 +2,7 @@ package edu.ncsu.lubick.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
@@ -12,8 +13,7 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ImproperlyEncodedDateException;
-import edu.ncsu.lubick.localHub.ToolStream;
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 
 public class FileUtilities
@@ -35,7 +35,7 @@ public class FileUtilities
 		try
 		{
 			bytes = Files.readAllBytes(fileToParse.toPath());
-			return new String(bytes, "UTF-8");
+			return new String(bytes, StandardCharsets.UTF_8);
 		}
 		catch (IOException e)
 		{
@@ -159,7 +159,7 @@ public class FileUtilities
 			logger.info("Got a null toolusage, recovering with empty string");
 			return "";
 		}
-		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + ToolStream.makeUniqueIdentifierForToolUsage(tu, userEmail);
+		return PostProductionHandler.MEDIA_OUTPUT_FOLDER + tu.makeUniqueIdentifierForToolUsage(userEmail);
 	}
 	
 

@@ -1,6 +1,6 @@
 package edu.ncsu.lubick.localHub.database;
 
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.ToolUsage;
 
 public interface ExternalDBAbstraction {
 

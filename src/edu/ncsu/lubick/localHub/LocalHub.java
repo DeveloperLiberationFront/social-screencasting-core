@@ -16,7 +16,6 @@ import org.apache.log4j.Logger;
 import edu.ncsu.lubick.ScreenRecordingModule;
 import edu.ncsu.lubick.externalAPI.BrowserMediaPackageUploader;
 import edu.ncsu.lubick.externalAPI.RemoteToolReporter;
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
 import edu.ncsu.lubick.localHub.database.BufferedDatabaseManager;
 import edu.ncsu.lubick.localHub.database.LocalSQLDatabaseFactory;
 import edu.ncsu.lubick.localHub.forTesting.LocalHubDebugAccess;
@@ -82,6 +81,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface, 
 		return startServer(screencastMonitorLocation, databaseLocation, wantHTTP, wantScreenRecording, wantRemoteToolReporting, true);
 	}
 	
+	@Override
 	public void userPause(boolean pauseButton) {
 		userOverridePause = pauseButton;
 		if (!pauseButton && singletonHub.screenRecordingModule != null) {

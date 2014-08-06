@@ -11,8 +11,7 @@ import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ClipOptions;
 import edu.ncsu.lubick.localHub.LocalHub;
-import edu.ncsu.lubick.localHub.ToolStream;
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
 /**
@@ -105,7 +104,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	
 			try (PreparedStatement statement = makePreparedStatement(sqlQuery);)
 			{
-				String uniqueId = ToolStream.makeUniqueIdentifierForToolUsage(tu, getUserEmail());
+				String uniqueId = tu.makeUniqueIdentifierForToolUsage(getUserEmail());
 				statement.setString(1, uniqueId);
 				statement.setString(2, associatedPlugin);
 				statement.setLong(3, tu.getTimeStamp().getTime());
@@ -267,7 +266,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		{
 			statement.setString(1, pluginName);
 			statement.setString(2, toolName);
-			statement.setString(3, ToolStream.MENU_KEY_PRESS);
+			statement.setString(3, ToolUsage.MENU_KEY_PRESS);
 		}
 		catch (SQLException e)
 		{

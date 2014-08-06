@@ -18,7 +18,7 @@ import java.util.Queue;
 
 import org.apache.log4j.Logger;
 
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.UserManager;
 
 public class RemoteMySQLDatabase implements ExternalDBAbstraction {

@@ -254,11 +254,6 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 			throw new DBAbstractionException("Problem compiling SQL to preparedStatement",e);
 		}
 	}
-	
-	private void executeLongSQLStatement(String sql) {
-		;
-		executeStatementWithNoResults(makePreparedStatement(sql));
-	}
 
 	@Override
 	protected void executeStatementWithNoResults(PreparedStatement statement)

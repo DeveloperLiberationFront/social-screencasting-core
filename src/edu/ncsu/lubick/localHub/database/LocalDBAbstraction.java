@@ -3,7 +3,7 @@ package edu.ncsu.lubick.localHub.database;
 import java.util.List;
 
 import edu.ncsu.lubick.localHub.ClipOptions;
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
 public abstract class LocalDBAbstraction

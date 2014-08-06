@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import edu.ncsu.lubick.localHub.ToolStream;
+import edu.ncsu.lubick.localHub.ToolUsage;
 
 /**
  * This is an idealized ToolStream producer, like a plugin. Plugins should model the information and the JSON output of this class.
@@ -125,13 +126,13 @@ public class IdealizedToolStream
 	 */
 	public boolean isEquivalent(ToolStream toolStream)
 	{
-		List<edu.ncsu.lubick.localHub.ToolStream.ToolUsage> otherList = toolStream.getAsList();
+		List<edu.ncsu.lubick.localHub.ToolUsage> otherList = toolStream.getAsList();
 		if (numberOfToolUses() != otherList.size())
 			return false;
 		for (int i = 0; i < numberOfToolUses(); i++)
 		{
 			IdealizedToolStream.IdealizedToolUsage thisToolUse = listOfToolUsages.get(i);
-			edu.ncsu.lubick.localHub.ToolStream.ToolUsage otherToolUse = otherList.get(i);
+			edu.ncsu.lubick.localHub.ToolUsage otherToolUse = otherList.get(i);
 			if (!thisToolUse.isEquivalent(otherToolUse))
 			{
 				return false;
@@ -202,16 +203,16 @@ public class IdealizedToolStream
 		{
 			JSONObject jobj = new JSONObject();
 
-			jobj.put(ToolStream.TOOL_NAME, toolName);
-			jobj.put(ToolStream.TOOL_CLASS, toolClass);
-			jobj.put(ToolStream.TOOL_KEY_PRESSES, keyPresses);
-			jobj.put(ToolStream.TOOL_TIMESTAMP, timeStamp.getTime());
-			jobj.put(ToolStream.TOOL_DURATION, duration);
+			jobj.put(ToolUsage.TOOL_NAME, toolName);
+			jobj.put(ToolUsage.TOOL_CLASS, toolClass);
+			jobj.put(ToolUsage.TOOL_KEY_PRESSES, keyPresses);
+			jobj.put(ToolUsage.TOOL_TIMESTAMP, timeStamp.getTime());
+			jobj.put(ToolUsage.TOOL_DURATION, duration);
 
 			return jobj;
 		}
 
-		public boolean isEquivalent(edu.ncsu.lubick.localHub.ToolStream.ToolUsage otherToolUse)
+		public boolean isEquivalent(edu.ncsu.lubick.localHub.ToolUsage otherToolUse)
 		{
 			return this.toolName.equals(otherToolUse.getToolName()) &&
 					this.toolClass.equals(otherToolUse.getToolClass()) &&

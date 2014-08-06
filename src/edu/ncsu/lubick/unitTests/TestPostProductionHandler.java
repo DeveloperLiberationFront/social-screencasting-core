@@ -14,7 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.ncsu.lubick.localHub.ToolStream;
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
@@ -298,7 +298,7 @@ public class TestPostProductionHandler
 	public static ToolUsage makeGUIToolUsage(Date toolUsageDate, String toolUsageName, int duration)
 	{
 		IdealizedToolStream iToolStream = new IdealizedToolStream(TestingUtils.truncateTimeToMinute(toolUsageDate));
-		iToolStream.addToolUsage(toolUsageName, DEFAULT_TESTING_TOOL_CLASS, ToolStream.MENU_KEY_PRESS, toolUsageDate, duration);
+		iToolStream.addToolUsage(toolUsageName, DEFAULT_TESTING_TOOL_CLASS, ToolUsage.MENU_KEY_PRESS, toolUsageDate, duration);
 
 		ToolStream toolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
 		toolStream.setAssociatedPlugin(TEST_PLUGIN_NAME);

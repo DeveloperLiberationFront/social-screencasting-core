@@ -11,6 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.ncsu.lubick.localHub.ToolStream;
+import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream.IdealizedToolUsage;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
@@ -61,7 +62,7 @@ public class TestToolStream {
 		assertTrue(iToolStream.isEquivalent(convertedToolStream));
 
 		{
-			List<ToolStream.ToolUsage> tools = convertedToolStream.getAsList();
+			List<ToolUsage> tools = convertedToolStream.getAsList();
 
 			assertEquals("ToolString", tools.get(0).getToolName());
 			assertEquals("ClassString", tools.get(0).getToolClass());
@@ -133,7 +134,7 @@ public class TestToolStream {
 
 		ToolStream convertedToolStream = ToolStream.generateFromJSON(iToolStream.toJSON());
 
-		List<edu.ncsu.lubick.localHub.ToolStream.ToolUsage> theRealTools = convertedToolStream.getAsList();
+		List<edu.ncsu.lubick.localHub.ToolUsage> theRealTools = convertedToolStream.getAsList();
 
 		assertEquals(iTools.size(), theRealTools.size());
 		assertEquals(iToolStream.numberOfToolUses(), theRealTools.size());
