@@ -72,18 +72,25 @@ define(['angular',
         reverse: false
       };
       $scope.tools = Hub.all('tools').getList();
+      $scope.rerandomize = function() {
+        var numTools = $scope.tools.$object.length;
+        _.each($scope.tools.$object, function(tool) {
+          tool.random = _.random(0,numTools);   //there will be some repeats, but the random spread should still be good enough
+        });
+      };
     }])
 
   .controller('ToolListCtrl', ['$scope','Hub','Local',
     function($scope, Hub, Local) {
-      $scope.user.usages = Hub.all('usages').getList({
+
+    $scope.user.usages = Hub.all('usages').getList({
         'where': {'user': $scope.user.email},
       });
 
       Promise.all([$scope.user.usages, $scope.tools]).spread(function(usages, tools) {
         _.each(tools, function(tool) {
           tool.unused = !_.find(usages, {tool: tool._id});
-        })
+        });
       });
 
       Promise.all([$scope.tools, $scope.user_list]).spread(function(tools, users) {
@@ -138,13 +145,23 @@ define(['angular',
 
   .controller('OrderCtrl', ['$scope',
     function($scope) {
-      $scope.ordering.options = [
-        {name: "Name", field:"name"},
-        {name: "Users", field:"usages.$object"},
-        {name: "Recommended", field:"total_uses"}, 
-        {name: "Video", field: "video"},
-      ];
-    }])
+     $scope.orderingFunc=function(field){
+      if (field ==="random") {
+        $scope.rerandomize();
+      }
+       $scope.ordering.field=field;
+       $scope.ordering.reverse = !$scope.ordering.reverse;
+
+     };
+
+     $scope.ordering.options = [
+     {name: "Name", field:"name"},
+     {name: "Users", field:"usages.$object"},
+     {name: "Recommended", field:"total_uses"}, 
+     {name: "Video", field: "video"},
+     {name: "Random", field: "random"}
+     ];
+   }])
 
   .controller('UserFilterCtrl', ['$scope','$state', '$stateParams',
     function($scope, $state, $stateParams) {

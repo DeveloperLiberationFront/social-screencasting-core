@@ -149,6 +149,7 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 	private void updateTo1_7(int currentVersion, int newVersion) {
 		if(currentVersion < newVersion) {
 			//nothing, we are renaming/moving/shrinking the database table.
+			logger.info("simple database update to 1.7");
 		}
 	}
 	

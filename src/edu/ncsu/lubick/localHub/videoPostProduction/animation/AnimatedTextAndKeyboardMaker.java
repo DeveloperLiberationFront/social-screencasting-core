@@ -37,6 +37,8 @@ public class AnimatedTextAndKeyboardMaker extends AbstractKeypressAnimationMaker
 		graphics.setColor(Color.white);
 		graphics.fillRect(0, 0, width, height + EXTRA_HEIGHT);
 		copyFromImageToGraphics(graphics, unActivatedKeyboard, 0, 0, width, height);
+		
+		graphics.dispose();
 		return img;
 	}
 
