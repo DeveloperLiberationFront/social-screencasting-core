@@ -234,3 +234,11 @@
 .unused-label {
     float: right;
 }
+
+.hide-by-default { /*meant to be overridden by force-show*/
+    display:none; 
+}
+
+.force-show {
+    display:initial!important; 
+}

@@ -41,6 +41,15 @@ define(['angular',
       //report interface usage to Local Hub
       $scope.queuedToolUsages = [];
 
+      $scope.numberUnreadNotifications = 0;
+
+      Hub.all("notifications").withHttpConfig({cache:false}).getList({
+        'embedded': {'recipient': 1, 'sender': 1, 'tool': 1} //pull in recipient details instead of just the sender
+      }).then(function(notifications) {
+       // $scope.notifications = notifications;
+        $scope.numberUnreadNotifications = _.where(notifications,{status:"new", recipient: {email: $scope.user.email}}).length;
+      });
+
       $scope.$on('instrumented', function(e, event, info) {
         info = info ? info : undefined;
         $scope.queuedToolUsages.push(new ToolUsage(event, "[GUI]")); 
@@ -413,24 +422,24 @@ define(['angular',
     function($scope, Hub, $interpolate) {
       $scope.$emit('instrumented', "View Status");
       
-      $scope.received = [{}];
-      $scope.sent = [{}];
+      $scope.receivedNotifications = [{}];
+      $scope.sentNotifications = [{}];
       
       Hub.all("notifications").withHttpConfig({cache:false}).getList({
         'embedded': {'recipient': 1, 'sender': 1, 'tool': 1} //pull in recipient details instead of j
       }).then(function(notifications) {
-        $scope.notifications = notifications;
-        $scope.sent = _.where(notifications, {sender: {email: $scope.user.email}})
-        $scope.received = _(notifications) //wraps for lodash chaining
+       // $scope.notifications = notifications;
+        $scope.sentNotifications = _.where(notifications, {sender: {email: $scope.user.email}});
+        $scope.receivedNotifications = _(notifications) //wraps for lodash chaining
           .where({recipient: {email: $scope.user.email}})
           .reject(function(item) { //user doesn't need to see requests they have responded to
             return item.type == "request_fulfilled";
           })
           .value();
         
-        prepareMessagesForSentRequests($scope.sent, $scope.user_list.$object);
+        prepareMessagesForSentRequests($scope.sentNotifications, $scope.user_list.$object);
         
-        _.each($scope.received, function(item) {
+        _.each($scope.receivedNotifications, function(item) {
           if (item.status == "new") {
             item.status = "seen";
             item.put($scope.auth);
@@ -439,7 +448,7 @@ define(['angular',
       });
       
       $scope.deleteRequest = function(request) {
-        $scope.sent = _.reject($scope.sent, function(item) {
+        $scope.sentNotifications = _.reject($scope.sentNotifications, function(item) {
           return item._id == request._id;
         });
         request.remove();

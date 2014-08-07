@@ -45,7 +45,7 @@
             <p class="navbar-text"><span ng-bind='user.name'></span></p>
           </ul>
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="#/status">View Status</a></li>
+            <li><a href="#/status">View Status<span class="badge hide-by-default {{numberUnreadNotifications !=0 ? 'force-show' : ''}}"><span ng-bind='numberUnreadNotifications'></span></span></a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
