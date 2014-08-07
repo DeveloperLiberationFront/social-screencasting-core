@@ -97,6 +97,11 @@ define(['angular',
           tool.usages = Hub.all('usages').getList({
             where: {tool: tool._id}
           });
+          tool.usages.then(function(usages) {
+            tool.total_uses = _.reduce(usages, function(acc,usage) {
+              return acc + usage.keyboard + usage.mouse;
+            }, 0);
+          });
 
           hub_clips = Hub.all('clips').getList({
             where: {tool: tool._id}
@@ -135,9 +140,9 @@ define(['angular',
     function($scope) {
       $scope.ordering.options = [
         {name: "Name", field:"name"},
-        {name: "Usages", field:"usages"},
+        {name: "Usages", field:"total_uses"},
         {name: "Unused", field:"unused"}, 
-        {name: "Recommended", field:""}, 
+        {name: "Recommended", field:"total_uses"}, 
         {name: "Video", field: "video"},
       ];
     }])
