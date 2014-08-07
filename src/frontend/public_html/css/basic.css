@@ -114,11 +114,15 @@
 .tool-header {
     display: flex;
     flex-flow: row nowrap;
-    
+    margin-bottom: 10px;
 }
 
 .tool-header > * {
     flex: 1 1 auto;
+}
+
+.tool-header h4 {
+    margin: 0px;
 }
 
 .tool-statuses {

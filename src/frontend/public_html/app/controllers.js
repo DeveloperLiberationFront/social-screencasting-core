@@ -140,7 +140,7 @@ define(['angular',
     function($scope) {
       $scope.ordering.options = [
         {name: "Name", field:"name"},
-        {name: "Usages", field:"total_uses"},
+        {name: "Usages", field:"usages"},
         {name: "Unused", field:"unused"}, 
         {name: "Recommended", field:"total_uses"}, 
         {name: "Video", field: "video"},
