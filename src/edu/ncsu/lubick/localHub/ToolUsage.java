@@ -63,10 +63,8 @@ public class ToolUsage {
 		int newToolDuration = jobj.optInt(TOOL_DURATION, 0);
 		int usageRating = jobj.optInt(TOOL_SCORE, newToolDuration);
 
-		ToolUsage tu = new ToolUsage(newToolName, newToolClass, newToolKeyPress, 
+		return new ToolUsage(newToolName, newToolClass, newToolKeyPress, 
 				newToolTimeStamp, newToolDuration, usageRating);
-		
-		return tu;
 	}
 
 	public String makeUniqueIdentifierForToolUsage(String userEmail)
