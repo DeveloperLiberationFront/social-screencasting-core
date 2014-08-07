@@ -33,6 +33,7 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="externalJars/HttpComponents/httpclient-cache-4.3.2.jar"/>
 	<classpathentry kind="lib" path="externalJars/HttpComponents/httpcore-4.3.1.jar"/>
+	<classpathentry kind="lib" path="externalJars/javax.mail-1.5.2.jar"/>
 	<classpathentry kind="lib" path="externalJars/HttpComponents/httpmime-4.3.2.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="http://hc.apache.org/httpcomponents-client-4.3.x/httpmime/apidocs/"/>
