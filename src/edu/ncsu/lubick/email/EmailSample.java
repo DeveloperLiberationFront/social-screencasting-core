@@ -1,6 +1,5 @@
 package edu.ncsu.lubick.email;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.Scanner;
@@ -16,34 +15,35 @@ import javax.mail.internet.MimeMessage;
 
 import org.apache.log4j.Logger;
 
+import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
+import edu.ncsu.lubick.localHub.forTesting.UnitTestUserManager;
 
 
 public class EmailSample {
 	private static final String EMAIL_PATH = "/etc/email.ini";
 	private static final Logger logger = Logger.getLogger(EmailSample.class);
 	
-	private String username;
-	private String password;
+	private String emailUsername;
+	private String emailPassword;
 	private boolean emailInitialized = false;
 	private Session session;
+	private UserManager userManager;
 
 	
-	public EmailSample()
+	public EmailSample(UserManager um)
 	{
+		this.userManager = um;
 		try(Scanner scanner = new Scanner(EmailSample.class.getResourceAsStream(EMAIL_PATH),
 				StandardCharsets.UTF_8.name())) {
-			username = scanner.nextLine();
-			password = scanner.nextLine();
+			emailUsername = scanner.nextLine();
+			emailPassword = scanner.nextLine();
 			emailInitialized = true;
 		} catch (Exception e) {
-			logger.fatal("Could not set up email");
-			username = "notInitialized";
-			password = "notInitialized";
+			logger.fatal("Could not set up email, contact Kevin for the credentials");
+			emailUsername = "notInitialized";
+			emailPassword = "notInitialized";
 		}
-		
-		logger.debug(username);
-		logger.debug(password);
 		setUpSession();
 		
 	}
@@ -60,7 +60,7 @@ public class EmailSample {
 		this.session = Session.getInstance(props, new Authenticator() {
 			@Override
 			protected PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(username, password);
+				return new PasswordAuthentication(emailUsername, emailPassword);
 			}
 		});
 	}
@@ -75,8 +75,8 @@ public class EmailSample {
 		try {
 
 			Message message = new MimeMessage(session);
-			message.setFrom(new InternetAddress(username));
-			message.setRecipients(Message.RecipientType.TO,	InternetAddress.parse("kjlubick@ncsu.edu"));
+			message.setFrom(new InternetAddress(emailUsername));
+			message.setRecipients(Message.RecipientType.TO,	InternetAddress.parse(userManager.getUserEmail()));
 			message.setSubject("Java Test email 2");
 			message.setText("Dear Kevin,\n\n Please check if you got this!");
 
@@ -86,10 +86,14 @@ public class EmailSample {
 		}
 	}
 
-
-	public static void main(String[] args) {
+	
+	@SuppressWarnings("unused")
+	private static void main(String[] args) {
 		TestingUtils.makeSureLoggingIsSetUp();
-		EmailSample emailSample = new EmailSample();
+		
+		UserManager um = new UnitTestUserManager("Kevins Test", "kjlubick@ncsu.edu", "221ed3d8-6a09-4967-91b6-482783ec5313");
+		
+		EmailSample emailSample = new EmailSample(um);
 		emailSample.sendSampleEmail();
 		
 		logger.info("Done");

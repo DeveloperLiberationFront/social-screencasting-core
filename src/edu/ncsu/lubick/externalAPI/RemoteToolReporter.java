@@ -132,9 +132,7 @@ public class RemoteToolReporter {
 			logger.fatal("Could not encode URI",e);
 			return null;
 		}
-
 	}
-
 	
 	private JSONArray makeAggregateForAllPlugins() throws NoToolDataException
 	{
@@ -186,8 +184,7 @@ public class RemoteToolReporter {
 	
 	
 	private class NoToolDataException extends Exception {
-		private static final long serialVersionUID = 1L;
-		
+		private static final long serialVersionUID = 1L;	
 	}
 	
 	
