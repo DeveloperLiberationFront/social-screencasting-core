@@ -117,6 +117,14 @@ define(['angular',
             tool.total_uses = _.reduce(usages, function(acc,usage) {
               return acc + usage.keyboard + usage.mouse;
             }, 0);
+
+            tool.total_keyboard = _.reduce(usages, function(acc,usage) {
+              return acc + usage.keyboard ;
+            }, 0);
+
+            tool.total_mouse = _.reduce(usages, function(acc,usage) {
+              return acc + usage.mouse ;
+            }, 0);
           });
 
           hub_clips = Hub.all('clips').getList({
@@ -364,6 +372,18 @@ define(['angular',
         } else {
           return 'images/no-video.jpg';
         }
+      };
+      //Aashish
+      $scope.keyboardIndicator = function(tool){
+        if (tool.total_keyboard>0){
+          return 'images/keyboard-icon.png';
+        } 
+      };
+      
+      $scope.mouseIndicator = function(tool){
+        if (tool.total_mouse>0){
+          return 'images/mouse-icon.png';
+        } 
       };
 
       $scope.icon =  function(application) {

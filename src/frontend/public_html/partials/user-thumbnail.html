@@ -1,4 +1,6 @@
 <div class='user-thumbnail thumbnail pointer' ng-class='{stacked: stacked(user)}' ng-click='getVideo(user)'>
-  {{user.name}}
+  {{user.name}} 
+  <img class= 'small-indicator' ng-src='{{keyboardIndicator(tool)}}'/>
+  <img class= 'small-indicator' ng-src='{{mouseIndicator(tool)}}'/>
   <img ng-src='{{thumbnail(user)}}'/>
 </div>
