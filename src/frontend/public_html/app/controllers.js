@@ -77,8 +77,8 @@ define(['angular',
     function($scope, Hub) {
       $scope.filters = {};
       $scope.ordering = {
-        field: "name",
-        reverse: false
+        field: "total_uses",
+        reverse: true
       };
       $scope.tools = Hub.all('tools').getList();
       $scope.rerandomize = function() {
