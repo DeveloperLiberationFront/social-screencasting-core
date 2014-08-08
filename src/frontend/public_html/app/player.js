@@ -142,15 +142,13 @@ define(['angular',
       };
 
       var users = Hub.all('users').getList();
-        users.then(function(users) {
-          var user = _.find(users, {email: clip.user});
-          $scope.title = tool + " - " + (user.name ? user.name : $scope.title);
-        });
-
       $scope.loadClip = function(clip) {
         $scope.selectedClip = $scope.clip = clip;
-        $scope.selectedClip = clip;
         $scope.$emit('instrumented', "Selected Clip", clip);
+        users.then(function(users) {
+          var user = _.find(users, {email: $scope.clip.user});
+          $scope.title = tool + " - " + (user.name ? user.name : $scope.title);
+        });
       };
       //select first clip
       $scope.loadClip(clip_id ? _.find(clips, {name: clip_name}) : clips[0]);
