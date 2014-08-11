@@ -141,13 +141,19 @@
 }
 
 .tool-statuses {
-    -webkit-flex: 0 1 80px; /*safari*/
-    flex: 0 1 80px;
+    -webkit-flex: 0 1 auto; /*safari*/
+    flex: 0 1 auto;
     display: -webkit-flex; /*safari*/
     display: flex;
-    flex-flow: column nowrap;
+    flex-flow: column nowrap;    
+    position: absolute;
+    right:10px;
+    top:10px;
 }
 
+.tool-statuses > div.label {
+    border-radius: 0;    
+}
 .tool-users {
     display: -webkit-flex; /*safari*/
     display: flex;
@@ -253,7 +259,9 @@
 }
 
 .unused-label {
-    float: right;
+    display: block;
+    margin-left: 500px;
+    border-radius: 0;    
 }
 
 .hide-by-default { /*meant to be overridden by force-show*/
@@ -279,4 +287,10 @@ div.user-thumbnail.thumbnail img.small-indicator{
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+}
+.meta-data{
+    display: -webkit-flex; /*safari*/
+    display: flex;
+    -webkit-flex-flow: row wrap; /*safari*/
+    flex-flow: row wrap;    
 }
