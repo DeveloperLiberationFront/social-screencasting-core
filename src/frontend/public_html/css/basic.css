@@ -265,11 +265,12 @@
 }
 
 div.user-thumbnail.thumbnail img.small-indicator{
-    display: inline;
+    display: inline-block;
     max-height: 13px;
+    vertical-align: 5px;
 }
 .user-thumbnail.thumbnail > img.small-indicator:nth-child(1){
-    margin-left: 15px;
+    margin-left: 15px;        
 }
 
 .user-name{
