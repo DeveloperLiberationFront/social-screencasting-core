@@ -271,3 +271,11 @@ div.user-thumbnail.thumbnail img.small-indicator{
 .user-thumbnail.thumbnail > img.small-indicator:nth-child(1){
     margin-left: 15px;
 }
+
+.user-name{
+    display: inline-block;
+    max-width: 90px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
