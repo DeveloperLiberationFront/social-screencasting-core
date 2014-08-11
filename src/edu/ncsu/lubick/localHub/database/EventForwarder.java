@@ -11,6 +11,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
 import java.util.Properties;
 
@@ -20,6 +21,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,7 +67,7 @@ import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
  * Posible future enhancements:
  * - The tool could query one of the remote systems for actions to take or configurations to change
  */
-public class EventForwarder extends Thread {
+public class EventForwarder implements Runnable {
 	private static final Logger logger = Logger.getLogger(EventForwarder.class);
 	
 	/** default name for the properties file to be loaded from the classpath */
@@ -90,6 +92,8 @@ public class EventForwarder extends Thread {
 		PROPERTY_DEST_JDBC_DRIVER,	PROPERTY_DEST_JDBC_URL, PROPERTY_DEST_SKYLR_ADD_URL, PROPERTY_DEST_SKYLR_QUERY_URL, PROPERTY_USER_ID};
 
 	private Properties eventForwarderProperties;
+
+	private CloseableHttpClient httpClient = HttpClients.createDefault();
 	
 	/**
 	 * Loads the properties file from the default location.  It also allows from an override location to be used.
@@ -271,7 +275,7 @@ public class EventForwarder extends Thread {
 	 * @param toolUsage
 	 * @return
 	 */
-	public boolean isToolUsageInSkylr(HttpClient httpClient, ToolUsage toolUsage) throws Exception {
+	public boolean isToolUsageInSkylr(ToolUsage toolUsage) throws Exception {
 		boolean result = false;
 		
 		HttpPost postRequest = new HttpPost(eventForwarderProperties.getProperty(PROPERTY_DEST_SKYLR_QUERY_URL));
@@ -327,7 +331,7 @@ public class EventForwarder extends Thread {
 	 * @param userID
 	 * @return
 	 */
-	public boolean insertToolUsageInSkylr(HttpClient httpClient, JSONObject joToolUsage, String userID) {
+	public boolean insertToolUsageInSkylr(JSONObject joToolUsage, String userID) {
 		boolean result = false;
 		
 		HttpPost postRequest = new HttpPost(eventForwarderProperties.getProperty(PROPERTY_DEST_SKYLR_ADD_URL));
@@ -380,15 +384,13 @@ public class EventForwarder extends Thread {
     	while (true) {
 			logger.debug("starting cycle");
 			
-			java.sql.Connection srcConn = null;
 			String[] destURLs = this.getDestinationURLs();
 			java.sql.Connection destConn[] = new java.sql.Connection[destURLs.length];
-			CloseableHttpClient  httpSkylrClient = null; 
-			
+
 			boolean skylrAvailable = true;
 			
-			try {
-				srcConn = DriverManager.getConnection(eventForwarderProperties.getProperty(PROPERTY_SRC_JDBC_URL));
+			try (Connection srcConn = DriverManager.getConnection(eventForwarderProperties.getProperty(PROPERTY_SRC_JDBC_URL));){
+				
 				java.util.List<ToolUsage> usages = this.getToolUsageInStaging(srcConn);
 				if (usages.size() > 0) {
 					String userID = eventForwarderProperties.getProperty(PROPERTY_USER_ID);
@@ -401,10 +403,7 @@ public class EventForwarder extends Thread {
 						catch (SQLException e) {
 							logger.warn("Unable to open dest connection to url #"+i);  // the URL has the username/password, so we can't print that in the log							
 						}
-					}
-					
-					httpSkylrClient = HttpClientBuilder.create().build();			
-					
+					}	
 					// copy over each record to all destinations
 					for (ToolUsage tu: usages) {
 						int destSuccessfulCount = 0;
@@ -423,9 +422,9 @@ public class EventForwarder extends Thread {
 						boolean skylrInsert = false;
 						try {
 							if (skylrAvailable) {
-								if (!isToolUsageInSkylr(httpSkylrClient,tu)) { 
+								if (!isToolUsageInSkylr(tu)) { 
 									JSONObject jsonTU = convertToolUsageToJSONObjectForSkylr(tu, userID);
-									skylrInsert = this.insertToolUsageInSkylr(httpSkylrClient, jsonTU, userID);
+									skylrInsert = this.insertToolUsageInSkylr(jsonTU, userID);
 								}
 								else {
 									skylrInsert = true;
@@ -454,14 +453,6 @@ public class EventForwarder extends Thread {
 				//TODO
 			}
 			finally {
-				if (srcConn != null) {
-					try {
-						srcConn.close();
-					}
-					catch (SQLException ex2) {
-						logger.warn("Unable to close source connection");
-					}
-				}
 				for (Connection conn: destConn) {
 					try {
 						if (conn != null) { conn.close(); }
@@ -469,15 +460,6 @@ public class EventForwarder extends Thread {
 					catch (SQLException ex2) {
 						logger.warn("Unable to close destination connection");
 					}					
-				}
-				
-				if (httpSkylrClient != null) {
-					try {
-						httpSkylrClient.close();
-					}
-					catch(IOException ioe) {
-						logger.warn("Unable to close skylr http client");
-					}
 				}
 			}
 
@@ -488,8 +470,8 @@ public class EventForwarder extends Thread {
     			logger.debug("sleeping time(ms): "+sleepTime);
     			Thread.sleep(sleepTime);
     		}
-    		catch (Exception e) {
-    			System.err.println(e);
+    		catch (InterruptedException e) {
+    			logger.info("Interrupted", e);
     		}
     	}
     }
@@ -507,7 +489,8 @@ public class EventForwarder extends Thread {
     		//System.out.println("----------------------------------------");
     		
     		ef.initializeDatabaseDrivers();	
-    		ef.start();
+    		Thread thread = new Thread(ef);
+    		thread.start();
     		
     	}
     	catch (Exception e) {

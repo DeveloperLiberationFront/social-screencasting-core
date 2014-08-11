@@ -35,7 +35,7 @@ import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
  * Possible future enhancements:
  * - Should use the build pattern to build up a query object, then apply the wrapper and send to skylr
  */
-public class SkylerQueryTool extends Thread {
+public class SkylerQueryTool{
 	private static final Logger logger = Logger.getLogger(SkylerQueryTool.class);
 	
 	/** default name for the properties file to be loaded from the classpath */
