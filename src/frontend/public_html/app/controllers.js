@@ -323,7 +323,13 @@ define(['angular',
         },
         { text: "Have a screencast",
           id:"yes_video"
-        },
+        },{
+          text: "Use keyboard",
+          id: "has_keyboard"
+        },{
+          text: "Use mouse",
+          id: "has_mouse"
+        }
         ],
         active_filters: {},
         templateUrl: ''
@@ -340,7 +346,11 @@ define(['angular',
           //or
           ($scope.filter.active_filters.not_used && !_.contains(tool.users, $scope.user.email)) ||
           //or
-          ($scope.filter.active_filters.yes_video && tool.video);
+          ($scope.filter.active_filters.yes_video && tool.video) ||
+          // or 
+          ($scope.filter.active_filters.has_keyboard && tool.total_keyboard>0) ||
+          // or 
+          ($scope.filter.active_filters.has_mouse && tool.total_mouse>0);
 
       });
 
@@ -373,7 +383,7 @@ define(['angular',
           return 'images/no-video.jpg';
         }
       };
-      //Aashish      
+      
       $scope.keyboard = function(user) {       
         var usg  = _.find($scope.tool.usages.$object, {user : user.email});
         if (usg){
