@@ -1,6 +1,7 @@
 package edu.ncsu.lubick.localHub.database;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Properties;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -87,7 +89,7 @@ public class EventForwarder extends Thread {
 	public static final String[] REQUIRED_PROPERTIES = {PROPERTY_SLEEP_TIME, PROPERTY_SRC_JDBC_DRIVER, PROPERTY_SRC_JDBC_URL,
 		PROPERTY_DEST_JDBC_DRIVER,	PROPERTY_DEST_JDBC_URL, PROPERTY_DEST_SKYLR_ADD_URL, PROPERTY_DEST_SKYLR_QUERY_URL, PROPERTY_USER_ID};
 
-	private java.util.Properties _efProperties;
+	private Properties eventForwarderProperties;
 	
 	/**
 	 * Loads the properties file from the default location.  It also allows from an override location to be used.
@@ -98,11 +100,11 @@ public class EventForwarder extends Thread {
 	 */
 	public void loadProperties() {
 
-		_efProperties = new java.util.Properties();
-		try {
-			InputStream propStream = EventForwarder.class.getResourceAsStream(DEFAULT_PROPERTIES_FILE);
+		eventForwarderProperties = new java.util.Properties();
+		try (InputStream propStream = EventForwarder.class.getResourceAsStream(DEFAULT_PROPERTIES_FILE);)
+		{	
 			if (propStream != null) {
-				_efProperties.load(propStream);
+				eventForwarderProperties.load(propStream);
 				logger.info("Loaded EventForwarder properties file from default location: "+DEFAULT_PROPERTIES_FILE);  
 			}
 			else {
@@ -112,7 +114,9 @@ public class EventForwarder extends Thread {
 			// now see if the configuration file should be overriden
 			String configFile = System.getProperty(SYSTEM_CONFIG_LOCATION_NAME);
 			if (configFile != null) {
-				_efProperties.load(new java.io.FileInputStream(configFile));
+				try (FileInputStream configFOS = new FileInputStream(configFile)){
+					eventForwarderProperties.load(configFOS);
+				}
 				logger.info("Loaded custom EventForwarder properties from system property location at " + configFile); 
 			}		
 		}
@@ -130,32 +134,29 @@ public class EventForwarder extends Thread {
 	public void validateProperties() {
 		java.util.ArrayList<String> missingProperties = new java.util.ArrayList<String>();
 		
-		if (_efProperties == null) {
-			logger.fatal("EventForwarder: validateProperties - loadProperties not yet called, exiting application");
-			System.exit(1);
+		if (eventForwarderProperties == null) {
+			throw new DBAbstractionException("EventForwarder: validateProperties - loadProperties not yet called, exiting application");
 		}
 		
 		for (String propName: REQUIRED_PROPERTIES) {
-			if (_efProperties.getProperty(propName) == null) { missingProperties.add(propName); 	}
+			if (eventForwarderProperties.getProperty(propName) == null) { missingProperties.add(propName); 	}
 		}
 		
 		if (missingProperties.size() > 0) {
 			for (String missingProperty: missingProperties) {
 				logger.fatal("EventForwarder: validatedProperties, missing property - "+ missingProperty);
 			}
-			logger.fatal("EventForwarder: validateProperties, not all required properties present, exiting");
-			System.exit(2);
+			throw new DBAbstractionException("EventForwarder: validateProperties, not all required properties present, exiting");
 		}
 		
-		if ( _efProperties.getProperty(PROPERTY_DEST_JDBC_DRIVER).split("\\|").length !=  _efProperties.getProperty(PROPERTY_DEST_JDBC_URL).split("\\|").length) {
-			logger.fatal("EventForwarder: validateProperties, destination JDBC driver and URL properties have different couts");
-			System.exit(2);			
+		if ( eventForwarderProperties.getProperty(PROPERTY_DEST_JDBC_DRIVER).split("\\|").length !=  eventForwarderProperties.getProperty(PROPERTY_DEST_JDBC_URL).split("\\|").length) {
+			throw new DBAbstractionException("EventForwarder: validateProperties, destination JDBC driver and URL properties have different couts");	
 		}
 	}
 	
 	
 	public void initializeDatabaseDrivers() throws ClassNotFoundException {
-		 Class.forName(_efProperties.getProperty(PROPERTY_SRC_JDBC_DRIVER));
+		 Class.forName(eventForwarderProperties.getProperty(PROPERTY_SRC_JDBC_DRIVER));
 		 
 		 String[] destinationDrivers = this.getDestinationDrivers();
 		 for (String driver: destinationDrivers) {
@@ -164,11 +165,11 @@ public class EventForwarder extends Thread {
 	}
 	
 	public String[] getDestinationDrivers() {
-		return _efProperties.getProperty(PROPERTY_DEST_JDBC_DRIVER).split("\\|");
+		return eventForwarderProperties.getProperty(PROPERTY_DEST_JDBC_DRIVER).split("\\|");
 	}
 	
 	public String[] getDestinationURLs() {
-		return _efProperties.getProperty(PROPERTY_DEST_JDBC_URL).split("\\|");
+		return eventForwarderProperties.getProperty(PROPERTY_DEST_JDBC_URL).split("\\|");
 	}
 
 	public java.util.List<ToolUsage> getToolUsageInStaging(java.sql.Connection srcConn)
@@ -179,8 +180,7 @@ public class EventForwarder extends Thread {
 	                      "        tool_key_presses, class_of_tool, tool_use_duration, clip_score "+
 				          "  FROM ToolUsagesStage";
 		
-		try {
-			PreparedStatement statement = srcConn.prepareStatement(sqlQuery);
+		try (PreparedStatement statement = srcConn.prepareStatement(sqlQuery);){
 			ResultSet rs = statement.executeQuery();
 			while (rs.next()) {
 				String useID = rs.getString("use_id");
@@ -274,7 +274,7 @@ public class EventForwarder extends Thread {
 	public boolean isToolUsageInSkylr(HttpClient httpClient, ToolUsage toolUsage) throws Exception {
 		boolean result = false;
 		
-		HttpPost postRequest = new HttpPost(_efProperties.getProperty(PROPERTY_DEST_SKYLR_QUERY_URL));
+		HttpPost postRequest = new HttpPost(eventForwarderProperties.getProperty(PROPERTY_DEST_SKYLR_QUERY_URL));
 		try {
 			StringEntity input = new StringEntity(createFindQueryForUseID(toolUsage).toString());
 			input.setContentType("application/json");
@@ -287,14 +287,16 @@ public class EventForwarder extends Thread {
 				logger.warn("Skylr - unable to find existing object - "+ response.getStatusLine().getStatusCode() +":  toolUsage use ID: "+toolUsage.getUseID());
 			}
 			else {
-				BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
-				
 				StringBuilder responseBody = new StringBuilder("{ 'results' : [");
-				String line;
-				while ((line = br.readLine()) != null) {
-					responseBody.append(line);
+				try(BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));)
+				{
+					String line;
+					while ((line = br.readLine()) != null) {
+						responseBody.append(line);
+					}
+					responseBody.append("] }");
 				}
-				responseBody.append("] }");
+
 				JSONObject responseObject = new JSONObject(responseBody.toString());
 				
 				if (responseObject.getJSONArray("results").length() >0) {
@@ -304,12 +306,15 @@ public class EventForwarder extends Thread {
 		}
 		catch (Exception e) {
 			if (e.getMessage().contains("Connection refused")) {
-				throw new Exception("skylr down", e);
+				throw new DBAbstractionException("skylr down", e);
 			}
 			logger.warn("Skylr - unable in find existing object - toolUsage use ID: "+toolUsage.getUseID(), e);
 			result = false;
 		}
-		postRequest.releaseConnection();
+		finally{
+			postRequest.releaseConnection();
+		}
+		
 		
 		return result; 
 	}
@@ -325,7 +330,7 @@ public class EventForwarder extends Thread {
 	public boolean insertToolUsageInSkylr(HttpClient httpClient, JSONObject joToolUsage, String userID) {
 		boolean result = false;
 		
-		HttpPost postRequest = new HttpPost(_efProperties.getProperty(PROPERTY_DEST_SKYLR_ADD_URL));
+		HttpPost postRequest = new HttpPost(eventForwarderProperties.getProperty(PROPERTY_DEST_SKYLR_ADD_URL));
 		try {
 			StringEntity input = new StringEntity(joToolUsage.toString());
 			input.setContentType("application/json");
@@ -383,10 +388,10 @@ public class EventForwarder extends Thread {
 			boolean skylrAvailable = true;
 			
 			try {
-				srcConn = DriverManager.getConnection(_efProperties.getProperty(PROPERTY_SRC_JDBC_URL));
+				srcConn = DriverManager.getConnection(eventForwarderProperties.getProperty(PROPERTY_SRC_JDBC_URL));
 				java.util.List<ToolUsage> usages = this.getToolUsageInStaging(srcConn);
 				if (usages.size() > 0) {
-					String userID = _efProperties.getProperty(PROPERTY_USER_ID);
+					String userID = eventForwarderProperties.getProperty(PROPERTY_USER_ID);
 					
 		    		//  open destination connections
 					for (int i=0;i < destURLs.length; i++) {
@@ -478,7 +483,7 @@ public class EventForwarder extends Thread {
 
 			// now sleep before the next
     		try {
-    			long sleepTime = Long.parseLong(_efProperties.getProperty(PROPERTY_SLEEP_TIME))  *1000; //need to convert seconds in property file to milliseconds
+    			long sleepTime = Long.parseLong(eventForwarderProperties.getProperty(PROPERTY_SLEEP_TIME))  *1000; //need to convert seconds in property file to milliseconds
     			logger.debug("ending cycle");
     			logger.debug("sleeping time(ms): "+sleepTime);
     			Thread.sleep(sleepTime);

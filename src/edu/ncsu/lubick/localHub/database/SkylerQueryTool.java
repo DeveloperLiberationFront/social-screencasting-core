@@ -92,8 +92,7 @@ public class SkylerQueryTool extends Thread {
 		java.util.ArrayList<String> missingProperties = new java.util.ArrayList<String>();
 		
 		if (_efProperties == null) {
-			logger.fatal("SkylerQueryTool: validateProperties - loadProperties not yet called, exiting application");
-			System.exit(1);
+			throw new DBAbstractionException("SkylerQueryTool: validateProperties - loadProperties not yet called, exiting application");
 		}
 		
 		for (String propName: REQUIRED_PROPERTIES) {
@@ -104,8 +103,7 @@ public class SkylerQueryTool extends Thread {
 			for (String missingProperty: missingProperties) {
 				logger.fatal("EventForwarder: validatedProperties, missing property - "+ missingProperty);
 			}
-			logger.fatal("EventForwarder: validateProperties, not all required properties present, exiting");
-			System.exit(2);
+			throw new DBAbstractionException("EventForwarder: validateProperties, not all required properties present, exiting");
 		}
 	}
 	
