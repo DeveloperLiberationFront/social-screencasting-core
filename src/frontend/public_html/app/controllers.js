@@ -77,8 +77,8 @@ define(['angular',
     function($scope, Hub) {
       $scope.filters = {};
       $scope.ordering = {
-        field: "name",
-        reverse: false
+        field: "total_uses",
+        reverse: true
       };
       $scope.tools = Hub.all('tools').getList();
       $scope.rerandomize = function() {
@@ -116,6 +116,14 @@ define(['angular',
           tool.usages.then(function(usages) {
             tool.total_uses = _.reduce(usages, function(acc,usage) {
               return acc + usage.keyboard + usage.mouse;
+            }, 0);
+
+            tool.total_keyboard = _.reduce(usages, function(acc,usage) {
+              return acc + usage.keyboard ;
+            }, 0);
+
+            tool.total_mouse = _.reduce(usages, function(acc,usage) {
+              return acc + usage.mouse ;
             }, 0);
           });
 
@@ -365,6 +373,20 @@ define(['angular',
           return 'images/no-video.jpg';
         }
       };
+      //Aashish      
+      $scope.keyboard = function(user) {       
+        var usg  = _.find($scope.tool.usages.$object, {user : user.email});
+        if (usg){
+          return usg.keyboard;
+        }
+      };
+      
+      $scope.mouse = function(user) {       
+        var usg  = _.find($scope.tool.usages.$object, {user : user.email});
+        if (usg){
+          return usg.mouse;
+        }
+      };
 
       $scope.icon =  function(application) {
         var app = _.find($scope.applications.$object, {name:application});
@@ -478,15 +500,12 @@ define(['angular',
   .controller('RecordingCtrl', ['$scope','Local',
     function($scope, Local){     
       Local.one('status','recording').get().then( function (st){ //st is restangular object        
-        $scope.recordingStatus = function(value){
-          console.log(st);
+        $scope.recordingStatus = function(value){          
           if (value==undefined){
-            return st.status;
-            console.log("undefined");
+            return st.status;            
           }
           else
-          {
-            console.log("value is "+value);
+          {            
             st.status=value;            
             st.put();
           }

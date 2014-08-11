@@ -20,28 +20,37 @@
 }
 
 #main {
+    display: -webkit-flex; /*safari*/
     display: flex;
+    -webkit-flex-flow: row wrap; /*safari*/
     flex-flow: row wrap;
+    -webkit-justify-content: center; /*safari*/
     justify-content: center;
 }
 
 #main > div {
+    -webkit-flex: 0 1 auto; /*safari*/
     flex: 0 1 auto;
     margin: 0 15px 15px 0;
 }
 
 #main > .center {
     max-width: 800px;
+    -webkit-flex: 1 1 250px; /*safari*/
     flex: 1 1 250px;
 }
 
 #tool-view {
+    display: -webkit-flex; /*safari*/
     display: flex;
+    -webkit-flex-flow: row wrap; /*safari*/
     flex-flow: row wrap;
+    -webkit-justify-content: center; /*safari*/
     justify-content: start;
 }
 
 #tool-view > div {
+    -webkit-flex: 0 1 auto; /*safari*/
     flex: 0 1 auto;
     margin: 0 15px 15px 0;
 }
@@ -103,21 +112,27 @@
 }
 
 .tool-block {
+    display: -webkit-flex; /*safari*/
     display: flex;
+    -webkit-flex-flow: column nowrap; /*safari*/
     flex-flow: column nowrap;
 }
 
 .tool-block > * {
+    -webkit-flex: 1 1 auto; /*safari*/
     flex: 1 1 auto;
 }
 
 .tool-header {
+    display: -webkit-flex; /*safari*/
     display: flex;
+    -webkit-flex-flow: row nowrap; /*safari*/
     flex-flow: row nowrap;
     margin-bottom: 10px;
 }
 
 .tool-header > * {
+    -webkit-flex: 1 1 auto; /*safari*/
     flex: 1 1 auto;
 }
 
@@ -126,21 +141,27 @@
 }
 
 .tool-statuses {
+    -webkit-flex: 0 1 80px; /*safari*/
     flex: 0 1 80px;
+    display: -webkit-flex; /*safari*/
     display: flex;
     flex-flow: column nowrap;
 }
 
 .tool-users {
+    display: -webkit-flex; /*safari*/
     display: flex;
+    -webkit-flex-flow: row wrap; /*safari*/
     flex-flow: row wrap;
 }
 
 .tool-users > ul {
+    -webkit-flex: 1 1 100px; /*safari*/
     flex: 1 1 100px;
 }
 
 .tool-users > span{
+    -webkit-flex: 0 1 65px; /*safari*/
     flex: 0 1 65px;
 }
 
@@ -241,4 +262,21 @@
 
 .force-show {
     display:initial!important; 
+}
+
+div.user-thumbnail.thumbnail img.small-indicator{
+    display: inline-block;
+    max-height: 13px;
+    vertical-align: 5px;
+}
+.user-thumbnail.thumbnail > img.small-indicator:nth-child(1){
+    margin-left: 15px;        
+}
+
+.user-name{
+    display: inline-block;
+    max-width: 90px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
