@@ -500,15 +500,12 @@ define(['angular',
   .controller('RecordingCtrl', ['$scope','Local',
     function($scope, Local){     
       Local.one('status','recording').get().then( function (st){ //st is restangular object        
-        $scope.recordingStatus = function(value){
-          console.log(st);
+        $scope.recordingStatus = function(value){          
           if (value==undefined){
-            return st.status;
-            console.log("undefined");
+            return st.status;            
           }
           else
-          {
-            console.log("value is "+value);
+          {            
             st.status=value;            
             st.put();
           }
