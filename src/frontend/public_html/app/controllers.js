@@ -373,17 +373,19 @@ define(['angular',
           return 'images/no-video.jpg';
         }
       };
-      //Aashish
-      $scope.keyboardIndicator = function(tool){
-        if (tool.total_keyboard>0){
-          return 'images/keyboard-icon.png';
-        } 
+      //Aashish      
+      $scope.keyboard = function(user) {       
+        var usg  = _.find($scope.tool.usages.$object, {user : user.email});
+        if (usg){
+          return usg.keyboard;
+        }
       };
       
-      $scope.mouseIndicator = function(tool){
-        if (tool.total_mouse>0){
-          return 'images/mouse-icon.png';
-        } 
+      $scope.mouse = function(user) {       
+        var usg  = _.find($scope.tool.usages.$object, {user : user.email});
+        if (usg){
+          return usg.mouse;
+        }
       };
 
       $scope.icon =  function(application) {
