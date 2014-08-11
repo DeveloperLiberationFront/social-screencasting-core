@@ -1,15 +1,15 @@
 package edu.ncsu.lubick.localHub.database;
 
-import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.Properties;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,6 +17,7 @@ import org.json.JSONObject;
 
 import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
+import edu.ncsu.lubick.localHub.http.HTTPUtils;
 
 
 /**
@@ -48,7 +49,8 @@ public class SkylerQueryTool{
 		
 	public static final String[] REQUIRED_PROPERTIES = { PROPERTY_DEST_SKYLR_QUERY_URL };
 
-	private java.util.Properties _efProperties;
+	private Properties queryProperties;
+	private CloseableHttpClient httpClient = HttpClients.createDefault();
 	
 	/**
 	 * Loads the properties file from the default location.  It also allows from an override location to be used.
@@ -59,11 +61,11 @@ public class SkylerQueryTool{
 	 */
 	public void loadProperties() {
 
-		_efProperties = new java.util.Properties();
-		try {
-			InputStream propStream = SkylerQueryTool.class.getResourceAsStream(DEFAULT_PROPERTIES_FILE);
+		queryProperties = new java.util.Properties();
+		try (InputStream propStream = SkylerQueryTool.class.getResourceAsStream(DEFAULT_PROPERTIES_FILE);)
+		{	
 			if (propStream != null) {
-				_efProperties.load(propStream);
+				queryProperties.load(propStream);
 				logger.info("Loaded SkylerQueryTool properties file from default location: "+DEFAULT_PROPERTIES_FILE);  
 			}
 			else {
@@ -73,7 +75,9 @@ public class SkylerQueryTool{
 			// now see if the configuration file should be overriden
 			String configFile = System.getProperty(SYSTEM_CONFIG_LOCATION_NAME);
 			if (configFile != null) {
-				_efProperties.load(new java.io.FileInputStream(configFile));
+				try (FileInputStream configFOS = new FileInputStream(configFile)){
+					queryProperties.load(configFOS);
+				}
 				logger.info("Loaded custom SkylerQueryTool properties from system property location at " + configFile); 
 			}		
 		}
@@ -91,12 +95,12 @@ public class SkylerQueryTool{
 	public void validateProperties() {
 		java.util.ArrayList<String> missingProperties = new java.util.ArrayList<String>();
 		
-		if (_efProperties == null) {
+		if (queryProperties == null) {
 			throw new DBAbstractionException("SkylerQueryTool: validateProperties - loadProperties not yet called, exiting application");
 		}
 		
 		for (String propName: REQUIRED_PROPERTIES) {
-			if (_efProperties.getProperty(propName) == null) { missingProperties.add(propName); 	}
+			if (queryProperties.getProperty(propName) == null) { missingProperties.add(propName); 	}
 		}
 		
 		if (missingProperties.size() > 0) {
@@ -125,16 +129,14 @@ public class SkylerQueryTool{
 	 */
 	private JSONObject querySkylr(JSONObject query) {
 		JSONObject result = new JSONObject();
-		CloseableHttpClient  httpSkylrClient = null;
-		httpSkylrClient = HttpClientBuilder.create().build();
 		
-		HttpPost postRequest = new HttpPost(_efProperties.getProperty(PROPERTY_DEST_SKYLR_QUERY_URL));
+		HttpPost postRequest = new HttpPost(queryProperties.getProperty(PROPERTY_DEST_SKYLR_QUERY_URL));
 		try {
 			StringEntity input = new StringEntity(query.toString());
 			input.setContentType("application/json");
 			postRequest.setEntity(input);
 			 
-			HttpResponse response = httpSkylrClient.execute(postRequest);
+			HttpResponse response = httpClient.execute(postRequest);
 			result.put("status", response.getStatusLine().getStatusCode());
 			result.put("query", query);
 			
@@ -142,15 +144,10 @@ public class SkylerQueryTool{
 				logger.warn("Skylr - unable to search - "+ response.getStatusLine().getStatusCode() +": query: "+query);
 			}
 			else {
-				BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
 				
-				StringBuilder responseBody = new StringBuilder(" [");
-				String line;
-				while ((line = br.readLine()) != null) {
-					responseBody.append(line);
-				}
-				responseBody.append("] ");
-				JSONArray responseObject = new JSONArray(responseBody.toString());
+				String responseBody = HTTPUtils.getResponseBody(response);
+	
+				JSONArray responseObject = new JSONArray("["+responseBody+"]");
 				
 				result.put("results", responseObject);
 			}
@@ -165,14 +162,6 @@ public class SkylerQueryTool{
 			logger.warn("Skylr - unable in find existing object  ("+ e.getMessage() +") - query: "+query);
 		}
 		finally {
-			if (httpSkylrClient != null) {
-				try {
-					httpSkylrClient.close();
-				}
-				catch(IOException ioe) {
-					logger.warn("Unable to close skylr http client");
-				}
-			}
 			postRequest.releaseConnection();
 		}
 

@@ -28,6 +28,7 @@ import org.json.JSONObject;
 
 import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
+import edu.ncsu.lubick.localHub.http.HTTPUtils;
 
 
 /**
@@ -291,17 +292,10 @@ public class EventForwarder implements Runnable {
 				logger.warn("Skylr - unable to find existing object - "+ response.getStatusLine().getStatusCode() +":  toolUsage use ID: "+toolUsage.getUseID());
 			}
 			else {
-				StringBuilder responseBody = new StringBuilder("{ 'results' : [");
-				try(BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));)
-				{
-					String line;
-					while ((line = br.readLine()) != null) {
-						responseBody.append(line);
-					}
-					responseBody.append("] }");
-				}
-
-				JSONObject responseObject = new JSONObject(responseBody.toString());
+				String responseBody = HTTPUtils.getResponseBody(response);
+				
+				JSONObject responseObject = new JSONObject();
+				responseObject.put("results", new JSONObject(responseBody));
 				
 				if (responseObject.getJSONArray("results").length() >0) {
 					result = true;
