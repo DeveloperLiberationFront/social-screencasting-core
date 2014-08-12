@@ -31,41 +31,23 @@ import edu.ncsu.lubick.util.ToolCountStruct;
  * @author Kevin Lubick
  * 
  */
-public class BufferedDatabaseManager
+public final class BufferedDatabaseManager
 {
 
 	
 	private LocalDBAbstraction localDB = null;
-	private ExternalDBAbstraction externalDB = null;
 	
 	private ExecutorService localThreadPool;
-	private ExecutorService remoteThreadPool;
 
 	private static BufferedDatabaseManager singletonBufferedDatabaseManager = null;
 
 	private static Logger logger = Logger.getLogger(BufferedDatabaseManager.class.getName());
 
-	private BufferedDatabaseManager(String databaseLocation, UserManager um, boolean isDebug)
+	private BufferedDatabaseManager(String databaseLocation, UserManager um)
 	{
 		this.localDB = DBAbstractionFactory.createAndInitializeLocalDatabase(databaseLocation, DBAbstractionFactory.SQL_IMPLEMENTATION, um);
-		this.externalDB = DBAbstractionFactory.createAndInitializeExternalDatabase(um, !isDebug);
-		
 		
 		startThreadPools();
-		
-		connectExternal();
-	}
-
-	private void connectExternal()
-	{
-		remoteThreadPool.execute(new Runnable() {
-			
-			@Override
-			public void run()
-			{
-				externalDB.connect();
-			}
-		});
 	}
 
 	// This is synchronized to appease FindBugs. I doubt this will ever be
@@ -78,8 +60,10 @@ public class BufferedDatabaseManager
 		{
 			return singletonBufferedDatabaseManager;
 		}
+		
+		logger.trace("Is debug mode? "+isDebug);
 
-		singletonBufferedDatabaseManager = new BufferedDatabaseManager(localDatabaseLocation, um, isDebug);
+		singletonBufferedDatabaseManager = new BufferedDatabaseManager(localDatabaseLocation, um);
 
 		return singletonBufferedDatabaseManager;
 	}
@@ -131,32 +115,20 @@ public class BufferedDatabaseManager
 				localDB.storeToolUsage(tu);
 			}
 		});
-		
-		remoteThreadPool.execute(new Runnable() {
-			@Override
-			public void run()
-			{
-				externalDB.storeToolUsage(tu);
-			}
-		});
 	}
 
 	private void startThreadPools()
 	{
 		if (localThreadPool == null)
 			this.localThreadPool = Executors.newSingleThreadExecutor();
-		if (remoteThreadPool == null)
-			this.remoteThreadPool = Executors.newSingleThreadExecutor();
 	}
 
 	public void shutDown()
 	{
 		localThreadPool.shutdown();
-		remoteThreadPool.shutdown();
 		try
 		{
 			localThreadPool.awaitTermination(10, TimeUnit.SECONDS);
-			remoteThreadPool.awaitTermination(10, TimeUnit.SECONDS);
 		}
 		catch (InterruptedException e)
 		{
@@ -355,6 +327,12 @@ public class BufferedDatabaseManager
 		}
 	}
 
+	public void deleteToolUsageInStaging(ToolUsage tu, String stagingTableName)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
 	public List<String> getExcesiveClipNames()
 	{
 		FutureTask<List<String> > future = new FutureTask<List<String>>(new Callable<List<String>>() {
@@ -445,12 +423,6 @@ public class BufferedDatabaseManager
 		UserManager um = UnitTestUserManager.quickAndDirtyUser();
 		
 		return createBufferedDatabasemanager("./toolstreams.sqlite", um, true);
-	}
-
-	public void deleteToolUsageInStaging(ToolUsage tu, String stagingTableName)
-	{
-		// TODO Auto-generated method stub
-		
 	}
 
 }
