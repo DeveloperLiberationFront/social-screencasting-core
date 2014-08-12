@@ -139,8 +139,6 @@ public class RemoteToolReporter {
 
 	private URI preparePostURL()
 	{
-		StringBuilder pathBuilder = new StringBuilder("/api/");
-		pathBuilder.append(userManager.getUserEmail());
 		try
 		{
 			return HTTPUtils.buildExternalHttpURI("/report-usage");

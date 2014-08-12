@@ -87,9 +87,11 @@ public class EventForwarder implements Runnable {
 
 	private void setUpEndpoints()
 	{
+		customEndPoints.add(new RecommendationToolReporter(this.userManager));
 		customEndPoints.add(new SkylerEndpoint(eventForwarderProperties));
 		customEndPoints.add(new ExternalSQLEndpoint(eventForwarderProperties));
-
+		
+				
 		for (Iterator<ExternalToolUsageReporter> iterator = customEndPoints.iterator(); iterator.hasNext();)
 		{
 			ExternalToolUsageReporter endpoint = (ExternalToolUsageReporter) iterator.next();
@@ -183,7 +185,11 @@ public class EventForwarder implements Runnable {
 					if (endpoint.shouldSend()) 
 					{
 						logger.debug("Sending "+tu);
-						endpoint.reportTool(tu, userManager.getUserEmail());
+						if (endpoint.reportTool(tu, userManager.getUserEmail())){
+							localDatabase.deleteToolUsageInStaging(tu, endpoint.getStagingName());
+						} else {
+							logger.info("Could not report tool "+tu+" to "+endpoint);
+						}
 					}
 				}
 				logger.debug("Done");

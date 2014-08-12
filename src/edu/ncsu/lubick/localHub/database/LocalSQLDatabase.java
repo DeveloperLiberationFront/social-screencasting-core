@@ -33,7 +33,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	protected abstract ResultSet executeWithResults(PreparedStatement statement);
 
 	private static final String[] TOOL_TABLE_NAMES = { "ToolUsages",SkylerEndpoint.SKYLER_STAGING_TABLE_NAME,
-		ExternalSQLEndpoint.EXTERNAL_SQL_STAGING_TABLE_NAME};
+		ExternalSQLEndpoint.EXTERNAL_SQL_STAGING_TABLE_NAME, RecommendationToolReporter.RECOMMENDER_STAGING_TABLE_NAME};
 	
 	protected void createTables()
 	{
@@ -249,7 +249,7 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 			return;
 		}
 		
-		String sqlQuery = "DELETE * FROM "+stagingTableName+" WHERE plugin_name=? AND tool_name=? AND usage_timestamp=?";
+		String sqlQuery = "DELETE FROM "+stagingTableName+" WHERE plugin_name=? AND tool_name=? AND usage_timestamp=?";
 	
 		try (PreparedStatement statement = this.makePreparedStatement(sqlQuery);){
 			statement.setString(1, tu.getApplicationName());

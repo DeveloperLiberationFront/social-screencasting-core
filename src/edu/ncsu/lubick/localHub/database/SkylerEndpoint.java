@@ -106,8 +106,13 @@ public class SkylerEndpoint implements ExternalToolUsageReporter {
 		catch (Exception e) {
 			logger.warn("Skylr - unable in insert event ("+ e.getMessage() +") - toolUsage object: "+joToolUsage);
 			result = false;
+			skylerAvailable = false;
 		}
-		postRequest.releaseConnection();
+		finally
+		{
+			postRequest.releaseConnection();
+		}
+		
 		
 		return result; 
 	}
