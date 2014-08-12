@@ -22,7 +22,7 @@
     "requirejs": "*",
     "requirejs-text": "~2.0.12",
     "angular-bootstrap": "~0.11.0",
-    "ng-grid": "~2.0.11",
+    "ng-grid": "2.0.11",
     "angular-resource": "~1.2.18",
     "ng-fullscreen": "*",
     "venturocket-angular-slider": "~0.3.2",
