@@ -63,8 +63,6 @@ public class EventForwarder implements Runnable {
 	public static final String SYSTEM_CONFIG_LOCATION_NAME = "efConfig";
 
 	public static final String PROPERTY_SLEEP_TIME      = "sleepTimeSeconds";
-	public static final String PROPERTY_SRC_JDBC_DRIVER = "sourceJDBCDriver";
-	public static final String PROPERTY_SRC_JDBC_URL    = "sourceJDBCURL";
 
 	public static final String PROPERTY_DEST_JDBC_DRIVER = "destJDBCDriver";
 	public static final String PROPERTY_DEST_JDBC_URL    = "destJDBCURL";
@@ -72,15 +70,13 @@ public class EventForwarder implements Runnable {
 	public static final String PROPERTY_DEST_SKYLR_ADD_URL   = "skylrDestAddURL";
 	public static final String PROPERTY_DEST_SKYLR_QUERY_URL = "skylrDestQueryURL";
 
-	public static final String[] REQUIRED_PROPERTIES = {PROPERTY_SLEEP_TIME, PROPERTY_SRC_JDBC_DRIVER, PROPERTY_SRC_JDBC_URL,
+	public static final String[] REQUIRED_PROPERTIES = {PROPERTY_SLEEP_TIME,
 		PROPERTY_DEST_JDBC_DRIVER,	PROPERTY_DEST_JDBC_URL, PROPERTY_DEST_SKYLR_ADD_URL, PROPERTY_DEST_SKYLR_QUERY_URL};
 
 	private Properties eventForwarderProperties;
 	private BufferedDatabaseManager localDatabase;
 
 	private UserManager userManager;
-
-	//private boolean skylrAvailable;
 
 	List<ExternalToolUsageReporter> customEndPoints = new ArrayList<>();
 
@@ -195,7 +191,7 @@ public class EventForwarder implements Runnable {
 
 			// now sleep before the next
 			try {
-				long sleepTime = Long.parseLong(eventForwarderProperties.getProperty(PROPERTY_SLEEP_TIME))  *1000; //need to convert seconds in property file to milliseconds
+				long sleepTime = Long.parseLong(eventForwarderProperties.getProperty(PROPERTY_SLEEP_TIME))  * 1000; //need to convert seconds in property file to milliseconds
 				logger.debug("ending cycle");
 				logger.debug("sleeping time(ms): "+sleepTime);
 				Thread.sleep(sleepTime);

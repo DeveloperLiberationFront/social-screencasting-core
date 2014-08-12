@@ -71,8 +71,6 @@ public class ExternalSQLEndpoint implements ExternalToolUsageReporter {
 	}
 	
 	public void initializeDatabaseDrivers() throws ClassNotFoundException {
-		 Class.forName(eventForwarderProperties.getProperty(PROPERTY_SRC_JDBC_DRIVER));
-		 
 		 String[] destinationDrivers = this.getDestinationDrivers();
 		 for (String driver: destinationDrivers) {
 			 Class.forName(driver);
