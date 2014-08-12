@@ -288,9 +288,17 @@ div.user-thumbnail.thumbnail img.small-indicator{
     text-overflow: ellipsis;
     overflow: hidden;
 }
+
 .meta-data{
     display: -webkit-flex; /*safari*/
     display: flex;
     -webkit-flex-flow: row wrap; /*safari*/
     flex-flow: row wrap;    
+}
+
+.meta-data-header{
+    margin-top: 3px;
+    margin-bottom: 2px;
+    font-size: 14px;
+    color:#777;
 }
