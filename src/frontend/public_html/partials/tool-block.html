@@ -1,12 +1,23 @@
 <div class='tool-block'>
-  <div class='tool-header'> 
-    <div>
-      <h4>{{tool.name}}</h4>
-      <img ng-src='{{icon(tool.application)}}'/>
-      <div class="application-name">{{tool.application}}</div>
+  <div class ="meta-data">
+    <div class='tool-header'> 
+      <div>
+        <h4>{{tool.name}}</h4>
+        <img ng-src='{{icon(tool.application)}}'/>
+        <div class="application-name">{{tool.application}}</div>
+      </div>    
     </div>
-    <div class='tool-stauses'>
-      <span class='label label-info unused-label' ng-if='tool.unused'>Unused</span>
+    <div class='tool-statuses'>
+      <div class='label label-default' ng-if='tool.unused'>Unused</div>
+      <div class="meta-data-header">Screencast Details:</div>
+      <span>
+      <div class='badge pull-left'>{{tool.total_keyboard}}</div> 
+      <div class="pull-right">Keyboard</div>
+    </span>
+      <span>
+      <div class='badge pull-left'>{{tool.total_mouse}}</div> 
+      <div class="pull-right"> Mouse</div>
+    </span>
     </div>
   </div>
   <span>Used by:</span>
