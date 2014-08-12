@@ -28,10 +28,12 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	protected abstract String getUserEmail();
 
 	protected abstract PreparedStatement makePreparedStatement(String statementQuery);
+	/**Should execute the prepared statement and close it */
 	protected abstract void executeStatementWithNoResults(PreparedStatement statement);
 	protected abstract ResultSet executeWithResults(PreparedStatement statement);
 
-	protected static final String[] TOOL_TABLE_NAMES = { "ToolUsages", "ToolUsagesStage" };
+	private static final String[] TOOL_TABLE_NAMES = { "ToolUsages",SkylerEndpoint.SKYLER_STAGING_TABLE_NAME,
+		ExternalSQLEndpoint.EXTERNAL_SQL_STAGING_TABLE_NAME};
 	
 	protected void createTables()
 	{
@@ -237,6 +239,30 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		}
 
 		return results;
+	}
+	
+	@Override
+	public void deleteToolUsageInStaging(ToolUsage tu, String stagingTableName)
+	{
+		if ("ToolUsages".equals(stagingTableName)){
+			getLogger().warn("Should not be trying to delete usages from "+stagingTableName + " table");
+			return;
+		}
+		
+		String sqlQuery = "DELETE * FROM "+stagingTableName+" WHERE plugin_name=? AND tool_name=? AND usage_timestamp=?";
+	
+		try (PreparedStatement statement = this.makePreparedStatement(sqlQuery);){
+			statement.setString(1, tu.getApplicationName());
+			statement.setString(2, tu.getToolName());
+			statement.setLong(3, tu.getTimeStamp().getTime());
+			
+			executeStatementWithNoResults(statement);
+		}
+		catch (SQLException e)
+		{
+			throw new DBAbstractionException(e);
+		}
+	
 	}
 
 	@Override

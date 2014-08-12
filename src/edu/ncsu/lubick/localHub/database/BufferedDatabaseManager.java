@@ -327,10 +327,17 @@ public final class BufferedDatabaseManager
 		}
 	}
 
-	public void deleteToolUsageInStaging(ToolUsage tu, String stagingTableName)
+	public void deleteToolUsageInStaging(final ToolUsage tu, final String stagingTableName)
 	{
 		// TODO Auto-generated method stub
-		
+		localThreadPool.execute(new Runnable() {
+
+			@Override
+			public void run()
+			{
+				localDB.deleteToolUsageInStaging(tu, stagingTableName);
+			}
+		});
 	}
 
 	public List<String> getExcesiveClipNames()
