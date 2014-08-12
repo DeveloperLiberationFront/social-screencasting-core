@@ -1,4 +1,4 @@
-<h3>{{clip.tool}}</h3>
+<h3>{{title}}</h3>
 <div ng-switch="player.status">
   <div ng-switch-default>
     <ng-include src="'partials/loading.html'"></ng-include>
@@ -11,9 +11,9 @@
         </div>
         <img id='keyboardOverlay' ng-if='kbdOverlay.enabled'
              ng-hide='player.editMode || kbdOverlay.mode == 3 || player.isCropping'
-             ng-src="{{ imagePath(kbdOverlay.images[kbdOverlay.status][kbdOverlay.mode % 3]) }}"/>
+             ng-src="{{ getImage(kbdOverlay.images[kbdOverlay.status][kbdOverlay.mode % 3], 'png') }}"/>
         <div class="img-container">
-          <img id="frameLoc" class='img-responsive' ng-src="{{ imagePath(clip.frames[player.pos]) }}"/>
+          <img id="frameLoc" class='img-responsive' ng-src="{{ getImage(clip.frames[player.pos]) }}"/>
         </div>
       </div>
       <div id="controlPanel" ng-class="{fullscreen: player.isFullscreen}">
@@ -35,7 +35,7 @@
           <div ng-switch-when='false'>
             <div id='overlayMode' ng-if='kbdOverlay.enabled'
                  tooltip="{{kbdOverlay.tooltip[kbdOverlay.mode]}}" tooltip-placement='right'>
-              <img class='img-responsive' ng-src="{{'images/' + kbdOverlay.images['active'][kbdOverlay.mode]}}" ng-click='kbdOverlay.mode = (kbdOverlay.mode + 1) % 4'/>
+              <img class='img-responsive' ng-src="{{'images/' + kbdOverlay.images['active'][kbdOverlay.mode] + '.png'}}" ng-click='kbdOverlay.mode = (kbdOverlay.mode + 1) % 4'/>
             </div>
           </div>
 
@@ -44,7 +44,7 @@
           </button>
         </div>
       </div>
-      <div ng-controller='RatingCtrl' id='rating' ng-show='!player.editMode'>
+      <div ng-controller='RatingCtrl' id='rating' ng-show='!player.editMode && clip.origin == "external"'>
         <rating ng-model='score'></rating>
       </div>
     </div>    

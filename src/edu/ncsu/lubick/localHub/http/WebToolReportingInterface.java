@@ -1,11 +1,13 @@
 package edu.ncsu.lubick.localHub.http;
 
-import edu.ncsu.lubick.localHub.ToolStream;
+import java.util.List;
+
+import edu.ncsu.lubick.localHub.ToolUsage;
 
 public interface WebToolReportingInterface {
 
-	void reportToolStream(ToolStream ts);
-
 	void updateActivity(String pluginName, boolean isActive);
+
+	void reportToolStream(List<ToolUsage> ts);
 
 }

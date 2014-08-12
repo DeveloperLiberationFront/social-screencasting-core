@@ -8,13 +8,14 @@ define(['angular',
         'restangular'],
         function (ng, $, _) {
   /* Video player */
+
   return ng.module('player',
                    ['ui.bootstrap',
                     'socasterServices',
                     'restangular'])
 
-  .controller('PlayerCtrl', ['$scope', '$interval', '$q',
-    function($scope, $interval, $q) {
+  .controller('PlayerCtrl', ['$scope', '$interval', '$q', 'Base64Img',
+    function($scope, $interval, $q, Base64Img) {
 
         $scope.player = {
             pos: 0,
@@ -40,37 +41,35 @@ define(['angular',
             enabled: $scope.clip.name.substr(-1) == 'K', //only clips ending in 'k' have keyboard info
             status: 'inactive',
             images: {
-                'active': [ 'image_text.png', 'image.png', 'text.png', 'none.png' ],
-                'inactive': [ 'image_text_un.png', 'image_un.png', 'text_un.png', 'none.png']
+                'active': [ 'image_text', 'image', 'text', 'none' ],
+                'inactive': [ 'image_text_un', 'image_un', 'text_un', 'none']
             },
             tooltip: ["Image and text", "Image only", "Text only", "No overlay"]
         };
 
-        $scope.imagePath = function(image) {
-            return $scope.clip.getRestangularUrl() + '/' + image + '?'+ $.param($scope.auth);
-        };
-
         //load all images, and then set the status to ready
-        function loadClip(clip) {
-          $scope.player.status = 'loading';
+      function loadClip(clip) {
+        images = clip.all('images').getList()
+        
+        $scope.player.status = 'loading';
+        
+        images.then(function(images) {
+          clip.images = images;
           _.extend(clip, {
             start: 0,
             end: clip.frames.length-1,
           });
-          $q.all(
-            clip.frames.map(function(frame){
-              var deferred = $q.defer()
-              var img = new Image();
-              $(img)
-                .load(function(){ deferred.resolve(img); })
-                .prop('src', $scope.imagePath(frame));
-              return deferred.promise;
-            })).then(function() {
-              $scope.player.status = 'ready';
-              $scope.$broadcast('refreshSlider');
-            })
-        }
+          $scope.player.status = 'ready';
+          $scope.$broadcast('refreshSlider');
+        });
+      }
         loadClip($scope.clip);
+
+        $scope.getImage = function(name, type) {
+          image = _.find($scope.clip.images, {name: name})
+          if (image)
+            return Base64Img(image.data,type);
+        };
 
         $scope.$watch('clip', function(newValue) {
             $scope.player.pos = 0;
@@ -127,36 +126,33 @@ define(['angular',
         };
     }])
 
-  .controller('ModalPlayer', ['$scope', '$modalInstance', 'clips', 'clip_id',
-    function($scope, $modalInstance, clips, clip_id) {
-      //tool is a restangular object
-
-
+  .controller('ModalPlayer', ['$scope', '$modalInstance', 'Base64Img', 'Hub',
+                              'clips', 'clip_name', 'tool',
+    function($scope, $modalInstance, Base64Img, Hub, clips, clip_id, tool) {
       $scope.clips = clips;
-      $scope.clip = (clip_id ? _.find(clips, {name: clip_id}) : clips[0]);
-
       $scope.$emit('instrumented', "Loaded ModalPlayer", $scope.clip);
 
       $scope.close = function () {
         $modalInstance.close(true);
         $scope.$emit('instrumented', "Closed ModalPlayer", $scope.clip);
       };
-      
-      _.each(clips, function(clip) {
-        clip.event_frames = [25]; //temporary
-        _.extend(clip, {
-          frame: function(name){
-            return clip.getRestangularUrl() + '/' + name + '?'+ $.param($scope.auth);
-          },
-          thumbnail: clip.frames[Math.min(clip.event_frames[0],
-                                          clip.frames.length-1)]
-        });
-      });
 
-      $scope.loadClip = function(clip) {
-        $scope.clip = clip;
-        $scope.$emit('instrumented', "Changing Clip", clip);
+      $scope.thumbnail = function(clip) {
+        return Base64Img(_.isObject(clip.thumbnail) ? clip.thumbnail.data : clip.thumbnail);
       };
+
+      var users = Hub.all('users').getList();
+      $scope.loadClip = function(clip) {
+        $scope.selectedClip = $scope.clip = clip;
+        $scope.$emit('instrumented', "Selected Clip", clip);
+        users.then(function(users) {
+          var user = _.find(users, {email: $scope.clip.user});
+          $scope.title = tool + " - " + (user.name ? user.name : $scope.title);
+        });
+      };
+      //select first clip
+      $scope.loadClip(clip_id ? _.find(clips, {name: clip_name}) : clips[0]);
+
     }])
 
   .controller('RatingCtrl', ['$scope',

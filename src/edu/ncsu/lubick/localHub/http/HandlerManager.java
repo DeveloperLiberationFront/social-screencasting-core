@@ -2,7 +2,6 @@ package edu.ncsu.lubick.localHub.http;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 
@@ -37,23 +36,14 @@ public class HandlerManager
 	{
 		HandlerCollection h = new HandlerList();
 
-		try {
+		h.addHandler(new IndexHandler());
+		h.addHandler(new HTTPAPIHandler(wqi));
+		h.addHandler(new VersionHandler("/version"));
 
-			h.addHandler(new IndexHandler());
-			h.addHandler(new HTTPAPIHandler(wqi));
-			h.addHandler(new VersionHandler("/version"));
-			
-			h.addHandler(new HTTPToolReportingHandler((WebToolReportingInterface)wqi ));
+		h.addHandler(new HTTPToolReportingHandler((WebToolReportingInterface)wqi ));
 
-			makeAndAddHandlersForClipSharing(h, wqi);
-
-		}
-		catch (IOException | URISyntaxException e) {
-			logger.error("Problem setting up handlers",e);
-		}
 
 		Resource[] staticWebResources = setUpWebResources(h.getClass());
-		
 
 		Resource[] allWebResources = setUpLocalMediaAssets(staticWebResources);
 
@@ -63,35 +53,6 @@ public class HandlerManager
 
 		logger.debug("logger for HTTP Handlers set up with "+h.getChildHandlers().length+" handlers");
 		return h;
-	}
-		
-	private static void makeAndAddHandlersForAPI(HandlerCollection h, WebQueryInterface wqi)
-	{
-		h.addHandler(new HTTPAPIHandler(wqi));
-	}
-
-	private static void makeAndAddHandlersForClipSharing(HandlerCollection h, WebQueryInterface wqi) throws IOException, URISyntaxException
-	{
-		h.addHandler(new HTTPClipSharer(wqi));	
-		h.addHandler(new HTTPShareRequester("/shareRequest", wqi));
-		h.addHandler(new HTTPUpdateClip("/updateClip", wqi));
-	}
-
-	private static void makeAndAddHandlersForBrowsing(HandlerCollection h, WebQueryInterface wqi) throws IOException, URISyntaxException
-	{
-
-		h.addHandler(new IndexHandler());
-
-	}
-
-
-	private static void makeAndAddHandlersForWebReporting(HandlerCollection h, WebQueryInterface wqi)
-	{
-		if (wqi instanceof WebToolReportingInterface)
-		{
-			h.addHandler(new HTTPToolReportingHandler((WebToolReportingInterface)wqi ));
-		}
-		h.addHandler(new VersionHandler("/version"));
 	}
 
 	private static Resource[] setUpWebResources(Class<?> classForJarResources)	//this will work whether running from Eclipse

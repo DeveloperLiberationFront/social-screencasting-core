@@ -14,14 +14,4 @@ public class DBAbstractionFactory {
 		}
 		return null;
 	}
-
-	public static ExternalDBAbstraction createAndInitializeExternalDatabase(UserManager um, boolean shouldActuallyConnect)
-	{
-		if (shouldActuallyConnect)
-		{
-			return ExternalDBFactory.createDatabase(um, ExternalDBFactory.MYSQL_IMPLEMENTATION);
-		}
-		return ExternalDBFactory.createDatabase(um, ExternalDBFactory.DUMMY_IMPLEMENTATION);
-	}
-
 }

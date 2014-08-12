@@ -1,31 +1,22 @@
 
 <div>
-    
     <div ng-controller="RecordingCtrl">
-
-    <h2>Recording Status</h2>
-        
-     <button class="btn no-outline {{recordingStatus() ? 'btn-danger' : 'btn-default'}}" ng-model="recordingStatus" btn-checkbox ng-model-options="{getterSetter:true}">
-    {{recordingStatus() ? "Stop": "Start"}} Recording
-    </button>
+        <h2>Recording Status</h2>       
+        <button class="btn no-outline {{recordingStatus() ? 'btn-danger' : 'btn-default'}}" ng-model="recordingStatus" btn-checkbox ng-model-options="{getterSetter:true}">
+            {{recordingStatus() ? "Stop": "Start"}} Recording
+        </button>
+    </div> 
     
-    <!-- <button class="btn btn-primary" ng-model="recordingStatus" btn-checkbox>
-    {{recordingStatus() ? "Stop": "Start"}} Recording
-    </button>
-
-    <button class="btn btn-primary" ng-click="stopRecording()" > Stop Recording </button>
-{{recordingStatus()}}
-    </div> -->
+    {{recordingStatus()}}
 
      <h2>Requests you have made</h2>
      <ul id="requestList" class="list-group">
         <li ng-repeat="request in sent" ng-attr-title="Created: {{request.created | date : 'medium'}} Last updated: {{request.updated | date : 'medium'}}" class="list-group-item">
         <span class="badge deleteNotification" ng-click="deleteRequest(request)">Delete</span>
-            <span ng-if="getBadgeText(request) !== undefined" class="badge">{{getBadgeText(request)}}</span>
+            <span ng-if="getBadgeText(request) !== undefined" class="badge">
+              {{getBadgeText(request)}}
+            </span>
             {{request.message}}
-            
-
-
             <ul ng-show="request.shared_videos.length > 0">
             <li ng-repeat="shared_video in request.shared_videos track by $index">
                 <a ng-href="{{shared_video}}">{{"Example " +($index +1)}}</a>
@@ -44,5 +35,4 @@
         <a ng-if="getShareLink(request) !== undefined" ng-href="{{getShareLink(request)}}">Respond</a>
         </li>
      </ul>
-
 </div>

@@ -1,0 +1,11 @@
+<li class="list-group-item group-heading">
+  Applications
+</li>
+<li class="list-group-item ordering">
+  <ul class='list-group unselectable pointer'>
+    <li ng-repeat='app in filter.source' class='list-group-item' ng-click="filter.apps[app] = !filter.apps[app]">
+      <input type="checkbox" ng-model="filter.apps[app]" ng-change='updateFilters()'/>
+      {{app}}
+    </li>
+  </ul>
+</li>

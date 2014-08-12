@@ -18,9 +18,9 @@ import org.apache.log4j.Logger;
 
 import edu.ncsu.lubick.localHub.ClipOptions;
 import edu.ncsu.lubick.localHub.LocalHub;
-import edu.ncsu.lubick.localHub.ToolStream;
-import edu.ncsu.lubick.localHub.ToolStream.ToolUsage;
+import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.UserManager;
+import edu.ncsu.lubick.localHub.forTesting.UnitTestUserManager;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
 /**
@@ -31,41 +31,23 @@ import edu.ncsu.lubick.util.ToolCountStruct;
  * @author Kevin Lubick
  * 
  */
-public class BufferedDatabaseManager
+public final class BufferedDatabaseManager
 {
 
 	
 	private LocalDBAbstraction localDB = null;
-	private ExternalDBAbstraction externalDB = null;
 	
 	private ExecutorService localThreadPool;
-	private ExecutorService remoteThreadPool;
 
 	private static BufferedDatabaseManager singletonBufferedDatabaseManager = null;
 
 	private static Logger logger = Logger.getLogger(BufferedDatabaseManager.class.getName());
 
-	private BufferedDatabaseManager(String databaseLocation, UserManager um, boolean isDebug)
+	private BufferedDatabaseManager(String databaseLocation, UserManager um)
 	{
 		this.localDB = DBAbstractionFactory.createAndInitializeLocalDatabase(databaseLocation, DBAbstractionFactory.SQL_IMPLEMENTATION, um);
-		this.externalDB = DBAbstractionFactory.createAndInitializeExternalDatabase(um, !isDebug);
-		
 		
 		startThreadPools();
-		
-		connectExternal();
-	}
-
-	private void connectExternal()
-	{
-		remoteThreadPool.execute(new Runnable() {
-			
-			@Override
-			public void run()
-			{
-				externalDB.connect();
-			}
-		});
 	}
 
 	// This is synchronized to appease FindBugs. I doubt this will ever be
@@ -78,8 +60,10 @@ public class BufferedDatabaseManager
 		{
 			return singletonBufferedDatabaseManager;
 		}
+		
+		logger.trace("Is debug mode? "+isDebug);
 
-		singletonBufferedDatabaseManager = new BufferedDatabaseManager(localDatabaseLocation, um, isDebug);
+		singletonBufferedDatabaseManager = new BufferedDatabaseManager(localDatabaseLocation, um);
 
 		return singletonBufferedDatabaseManager;
 	}
@@ -111,48 +95,24 @@ public class BufferedDatabaseManager
 		});
 	}
 
-	public void writeToolStreamToDatabase(final ToolStream ts)
+	public void writeToolStreamToDatabase(final List<ToolUsage> ts)
 	{
-		for (final ToolUsage tu : ts.getAsList())
+		for (final ToolUsage tu : ts)
 		{
-			logger.debug("Queueing up tool usage store to local");
-			localThreadPool.execute(new Runnable() {
-
-				@Override
-				public void run()
-				{
-					localDB.storeToolUsage(tu, ts.getAssociatedPlugin());
-				}
-			});
-			
-			remoteThreadPool.execute(new Runnable() {
-				@Override
-				public void run()
-				{
-					externalDB.storeToolUsage(tu, ts.getAssociatedPlugin());
-				}
-			});
-			
+			writeToolUsageToDatabase(tu);		
 		}
 
 	}
 
 	public void writeToolUsageToDatabase(final ToolUsage tu)
 	{
+		logger.debug("Queueing up tool usage store to local");
 		localThreadPool.execute(new Runnable() {
 
 			@Override
 			public void run()
 			{
-				localDB.storeToolUsage(tu, tu.getPluginName());
-			}
-		});
-		
-		remoteThreadPool.execute(new Runnable() {
-			@Override
-			public void run()
-			{
-				externalDB.storeToolUsage(tu, tu.getPluginName());
+				localDB.storeToolUsage(tu);
 			}
 		});
 	}
@@ -161,18 +121,14 @@ public class BufferedDatabaseManager
 	{
 		if (localThreadPool == null)
 			this.localThreadPool = Executors.newSingleThreadExecutor();
-		if (remoteThreadPool == null)
-			this.remoteThreadPool = Executors.newSingleThreadExecutor();
 	}
 
 	public void shutDown()
 	{
 		localThreadPool.shutdown();
-		remoteThreadPool.shutdown();
 		try
 		{
 			localThreadPool.awaitTermination(10, TimeUnit.SECONDS);
-			remoteThreadPool.awaitTermination(10, TimeUnit.SECONDS);
 		}
 		catch (InterruptedException e)
 		{
@@ -240,14 +196,14 @@ public class BufferedDatabaseManager
 	}
 
 
-	public List<String> getNamesOfAllNonHiddenPlugins()
+	public List<String> getNamesOfAllNonHiddenApplications()
 	{
 		FutureTask<List<String> > future = new FutureTask<List<String>>(new Callable<List<String>>() {
 
 			@Override
 			public List<String> call() throws Exception
 			{
-				return localDB.getNamesOfAllPlugins();
+				return localDB.getNamesOfAllApplications();
 			}
 		});
 			
@@ -288,7 +244,7 @@ public class BufferedDatabaseManager
 		for (ToolUsage tu : toolUsages)
 		{
 			
-			if (ToolStream.MENU_KEY_PRESS.equals(tu.getToolKeyPresses()))
+			if (ToolUsage.MENU_KEY_PRESS.equals(tu.getToolKeyPresses()))
 			{
 				Integer guiPreviousCount = guiToolCountsMap.get(tu.getToolName());
 				if (guiPreviousCount == null)
@@ -325,7 +281,7 @@ public class BufferedDatabaseManager
 
 	public ToolCountStruct getToolAggregate(final String applicationName, final String toolName)
 	{
-		FutureTask<ToolCountStruct > future = new FutureTask<ToolCountStruct>(new Callable<ToolCountStruct>() {
+		FutureTask<ToolCountStruct> future = new FutureTask<ToolCountStruct>(new Callable<ToolCountStruct>() {
 
 			@Override
 			public ToolCountStruct call() throws Exception
@@ -347,7 +303,44 @@ public class BufferedDatabaseManager
 		}
 	}
 
-	public List<String> getExcesiveTools()
+	public List<ToolUsage> getToolUsageInStaging(final String stagingTableName)
+	{
+		FutureTask<List<ToolUsage>> future = new FutureTask<List<ToolUsage>>(new Callable<List<ToolUsage>>() {
+
+			@Override
+			public List<ToolUsage> call() throws Exception
+			{
+				return localDB.getToolUsagesInStagingTable(stagingTableName);
+			}
+		});
+		
+		this.localThreadPool.execute(future);
+		
+		try
+		{
+			return future.get();
+		}
+		catch (InterruptedException | ExecutionException e)
+		{
+			logger.error("Problem with query", e);
+			return Collections.emptyList();
+		}
+	}
+
+	public void deleteToolUsageInStaging(final ToolUsage tu, final String stagingTableName)
+	{
+		// TODO Auto-generated method stub
+		localThreadPool.execute(new Runnable() {
+
+			@Override
+			public void run()
+			{
+				localDB.deleteToolUsageInStaging(tu, stagingTableName);
+			}
+		});
+	}
+
+	public List<String> getExcesiveClipNames()
 	{
 		FutureTask<List<String> > future = new FutureTask<List<String>>(new Callable<List<String>>() {
 
@@ -432,27 +425,11 @@ public class BufferedDatabaseManager
 		});
 	}
 
-	public boolean setStartEndFrame(final String folder, final int startFrame, final int endFrame) 
+	public static BufferedDatabaseManager quickAndDirtyDatabase()
 	{
-		FutureTask<Boolean> future = new FutureTask<Boolean>(new Callable<Boolean>() {
+		UserManager um = UnitTestUserManager.quickAndDirtyUser();
 		
-			@Override
-			public Boolean call()
-			{
-				return localDB.setStartEndFrame(folder, startFrame, endFrame);
-			}
-		});
-		this.localThreadPool.execute(future);
-		
-		try
-		{
-			return future.get();
-		}
-		catch(InterruptedException | ExecutionException e)
-		{
-			logger.error("Problem with query", e);
-			return false;
-		}
+		return createBufferedDatabasemanager("./toolstreams.sqlite", um, true);
 	}
 
 }

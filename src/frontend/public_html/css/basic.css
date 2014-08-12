@@ -20,28 +20,37 @@
 }
 
 #main {
+    display: -webkit-flex; /*safari*/
     display: flex;
+    -webkit-flex-flow: row wrap; /*safari*/
     flex-flow: row wrap;
+    -webkit-justify-content: center; /*safari*/
     justify-content: center;
 }
 
 #main > div {
+    -webkit-flex: 0 1 auto; /*safari*/
     flex: 0 1 auto;
     margin: 0 15px 15px 0;
 }
 
 #main > .center {
     max-width: 800px;
+    -webkit-flex: 1 1 250px; /*safari*/
     flex: 1 1 250px;
 }
 
 #tool-view {
+    display: -webkit-flex; /*safari*/
     display: flex;
+    -webkit-flex-flow: row wrap; /*safari*/
     flex-flow: row wrap;
+    -webkit-justify-content: center; /*safari*/
     justify-content: start;
 }
 
 #tool-view > div {
+    -webkit-flex: 0 1 auto; /*safari*/
     flex: 0 1 auto;
     margin: 0 15px 15px 0;
 }
@@ -103,40 +112,62 @@
 }
 
 .tool-block {
+    display: -webkit-flex; /*safari*/
     display: flex;
+    -webkit-flex-flow: column nowrap; /*safari*/
     flex-flow: column nowrap;
 }
 
 .tool-block > * {
+    -webkit-flex: 1 1 auto; /*safari*/
     flex: 1 1 auto;
 }
 
 .tool-header {
+    display: -webkit-flex; /*safari*/
     display: flex;
+    -webkit-flex-flow: row nowrap; /*safari*/
     flex-flow: row nowrap;
-    
+    margin-bottom: 10px;
 }
 
 .tool-header > * {
+    -webkit-flex: 1 1 auto; /*safari*/
     flex: 1 1 auto;
 }
 
-.tool-statuses {
-    flex: 0 1 80px;
-    display: flex;
-    flex-flow: column nowrap;
+.tool-header h4 {
+    margin: 0px;
 }
 
-.tool-users {
+.tool-statuses {
+    -webkit-flex: 0 1 auto; /*safari*/
+    flex: 0 1 auto;
+    display: -webkit-flex; /*safari*/
     display: flex;
+    flex-flow: column nowrap;    
+    position: absolute;
+    right:10px;
+    top:10px;
+}
+
+.tool-statuses > div.label {
+    border-radius: 0;    
+}
+.tool-users {
+    display: -webkit-flex; /*safari*/
+    display: flex;
+    -webkit-flex-flow: row wrap; /*safari*/
     flex-flow: row wrap;
 }
 
 .tool-users > ul {
+    -webkit-flex: 1 1 100px; /*safari*/
     flex: 1 1 100px;
 }
 
 .tool-users > span{
+    -webkit-flex: 0 1 65px; /*safari*/
     flex: 0 1 65px;
 }
 
@@ -170,4 +201,104 @@
 .no-outline:focus,
 .no-outline.active:focus {
     outline: 0;
+}
+
+.user-thumbnail {
+    margin-bottom: 4px;
+}
+
+.user-thumbnail > img {
+    max-height: 50px;
+}
+
+/*---- stacked effect ----*/
+.tool-user {
+    position: relative;
+    z-index: 1;
+}
+
+.stacked {
+    border: 1px solid #bbb;
+    position: relative;
+}
+
+.stacked:after,
+.stacked:before {
+    background: #f6f6f6;
+    border: 1px solid #aaa;
+    bottom: -4px;
+    content: '';
+    height: 100%;
+    left: 2px;
+    position: absolute;
+    width: 102%;
+    z-index: -10;
+    -webkit-box-shadow: 0 0 3px rgba(0,0,0,.2);
+       -moz-box-shadow: 0 0 3px rgba(0,0,0,.2);
+            box-shadow: 0 0 3px rgba(0,0,0,.2);
+    -webkit-border-radius: 4px;
+       -moz-border-radius: 4px;
+            border-radius: 4px;
+}
+
+.stacked:before {
+    bottom: -7px;
+    left: 5px;
+    -webkit-border-radius: 4px;
+       -moz-border-radius: 4px;
+            border-radius: 4px;
+            
+    -webkit-box-shadow: 0 0 5px rgba(0,0,0,0.5);
+       -moz-box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+.application-name {
+    display: inline-block;
+    color: #777;
+}
+
+.unused-label {
+    display: block;
+    margin-left: 500px;
+    border-radius: 0;    
+}
+
+.hide-by-default { /*meant to be overridden by force-show*/
+    display:none; 
+}
+
+.force-show {
+    display:initial!important; 
+}
+
+div.user-thumbnail.thumbnail img.small-indicator{
+    display: inline-block;
+    max-height: 13px;
+    vertical-align: 5px;
+}
+.user-thumbnail.thumbnail > img.small-indicator:nth-child(1){
+    margin-left: 15px;        
+}
+
+.user-name{
+    display: inline-block;
+    max-width: 90px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.meta-data{
+    display: -webkit-flex; /*safari*/
+    display: flex;
+    -webkit-flex-flow: row wrap; /*safari*/
+    flex-flow: row wrap;    
+}
+
+.meta-data-header{
+    margin-top: 3px;
+    margin-bottom: 2px;
+    font-size: 14px;
+    color:#777;
 }

@@ -2,7 +2,6 @@ package edu.ncsu.lubick.localHub.http;
 
 import java.awt.Rectangle;
 import java.io.IOException;
-import java.util.Arrays;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -38,10 +37,6 @@ public class HTTPClipSharer extends AbstractHandler {
 	@Override
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
-		if (!"/shareClip".equals(target))
-		{
-			return;
-		}
 		
 		baseRequest.setHandled(true);
 		//response.setContentType("application/json");
@@ -92,7 +87,7 @@ public class HTTPClipSharer extends AbstractHandler {
 		}
 		
 		
-		this.databaseLink.shareClipWithUser(clipId, recipient, new ClipOptions(startFrame, endFrame, cropRect));
+		this.databaseLink.shareClipWithUser(clipId, new ClipOptions(recipient, startFrame, endFrame, cropRect));
 	}
 
 

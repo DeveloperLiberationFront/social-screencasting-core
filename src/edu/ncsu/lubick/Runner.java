@@ -10,6 +10,7 @@ import java.awt.Toolkit;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -31,9 +32,8 @@ public class Runner
 	public static void main(String[] args) throws Exception
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
-		PopupMenu pm = setUpTrayIcon();
+		setUpTrayIcon();
 		localHub = LocalHub.startServerForUse("HF/Screencasting/", DEFAULT_DB_LOC);
-		localHub.setTrayIconMenu(pm);
 		Thread.sleep(1000);
 		Desktop.getDesktop().browse(buildStartingURI());
 	}
@@ -55,6 +55,23 @@ public class Runner
 		trayIcon.setToolTip("Social Screencasting running on port 4443");
 
 		PopupMenu pm = new PopupMenu("Social Screencasting");
+		MenuItem showUi = new MenuItem("Show UI");
+		showUi.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0)
+			{
+				try
+				{
+					Desktop.getDesktop().browse(buildStartingURI());
+				}
+				catch (IOException|URISyntaxException e)
+				{
+					Logger.getRootLogger().error("problem spawning desktop", e);
+				}
+			}
+		});
+		
 		MenuItem exitItem = new MenuItem("Exit");
 		exitItem.addActionListener(new ActionListener() {
 
@@ -64,7 +81,12 @@ public class Runner
 				shutDown();
 			}
 		});
+		
+		pm.add(showUi);
+		pm.insertSeparator(1);
 		pm.add(exitItem);
+		
+		
 		trayIcon.setPopupMenu(pm);
 
 
@@ -77,10 +99,6 @@ public class Runner
 	{
 		localHub.shutDown();
 		cleanUpSystemTray();
-	}
-	
-	public static boolean isRunning(){
-		return localHub.isRunning();
 	}
 
 	private static void cleanUpSystemTray()
@@ -124,4 +142,9 @@ public class Runner
 	public static void setTrayIcon(TrayIcon addedTrayIcon) {
 		Runner.addedTrayIcon = addedTrayIcon;
 	}
+
+	public static boolean isRunning(){
+		return localHub.isRunning();
+	}
+
 }
