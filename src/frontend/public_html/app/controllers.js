@@ -508,19 +508,19 @@ define(['angular',
 
  // To handle requests made by status page's recording button
   .controller('RecordingCtrl', ['$scope','Local',
-    function($scope, Local){     
-      Local.one('status','recording').get().then( function (st){ //st is restangular object        
-        $scope.recordingStatus = function(value){          
+    function($scope, Local){
+      Local.one('status','recording').get().then( function (st){ //st is restangular object
+        $scope.recordingStatus = function(value){
           if (value==undefined){
-            return st.status;            
+            return st.status;
           }
           else
-          {            
-            st.status=value;            
+          {
+            st.status=value;
             st.put();
           }
-        };            
-      }); 
+        };
+      });
     }])
 
 .controller('RequestCtrl', ['$scope', '$modalInstance', '$stateParams', 'Hub',
