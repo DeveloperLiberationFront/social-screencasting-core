@@ -299,6 +299,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	 * Meant for internal reporting
 	 * @param tu
 	 */
+	@SuppressWarnings("unused")
 	private void reportToolUsage(ToolUsage tu) {
 		logger.debug("Internal tool usage reported" + tu);
 		this.databaseManager.writeToolUsageToDatabase(tu);
@@ -462,7 +463,8 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			this.clipUploader.uploadToolUsage(toolUsage, clipOptions);
 			this.databaseManager.setClipUploaded(clipId, true);
 		}
-		//TODO need to share with other people?
+		//TODO If we ever need to share with other people, should we keep the clip on hand so we don't need to 
+		//upload it again?
 	}
 
 

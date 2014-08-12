@@ -19,6 +19,7 @@ import org.json.JSONObject;
 
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.database.BufferedDatabaseManager;
+import edu.ncsu.lubick.localHub.database.EventForwarder;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 import edu.ncsu.lubick.localHub.forTesting.UnitTestUserManager;
 import edu.ncsu.lubick.localHub.http.HTTPUtils;
@@ -38,18 +39,35 @@ public class RemoteToolReporter {
 
 	private Timer reportingTimer;
 
+	private EventForwarder eventForwarder;
+
 	public RemoteToolReporter(BufferedDatabaseManager databaseManager, UserManager userManager)
 	{
 		this.databaseManager = databaseManager;
 		this.userManager = userManager;
 		
 		
-		beginReportingTools();
-		
+		beginBulkReportingTools();
+		try {
+			beginEventForwarding();
+		}
+		catch (Exception e) {
+			logger.warn("Could not get event forwarding setup",e);
+		}
 	}
 	
 	
-	private void beginReportingTools()
+	private void beginEventForwarding()
+	{
+		this.eventForwarder = new EventForwarder(userManager, databaseManager);
+		Thread thread = new Thread(eventForwarder, "Event Forwarding");
+		thread.setDaemon(true);
+		
+		thread.start();
+	}
+
+
+	private void beginBulkReportingTools()
 	{
 		logger.info("Starting the reporting of tools.  Expect the first to happen in 10 seconds");
 		TimerTask reportingTask = new TimerTask() {

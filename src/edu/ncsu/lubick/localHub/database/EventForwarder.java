@@ -20,7 +20,7 @@ import edu.ncsu.lubick.localHub.forTesting.UnitTestUserManager;
  * EventForwawrder is a simple java service that replicates/forwards event from
  * a local data repository to remote repositories.
  * 
- * The service runs in its own thread.
+ * The service is meant to be run in its own thread
  * 
  * The process first reads a properties file.  By default, this is assumed to
  * be a properties file named eventforwarder.properties in the default package
@@ -33,17 +33,13 @@ import edu.ncsu.lubick.localHub.forTesting.UnitTestUserManager;
  * 
  * Properties required to be in the file:
  *  sleepTimeSeconds    How many seconds should the application sleep before checking for new events (tool usages)
- * 	sourceJDBCDriver	What JDBC driver is used to the read the local data repository
- * 	sourceJDBCURL		What is the JDBC URL used to access the local data repository
  * 
  *  destJDBCDriver		What is the list (separated by "|") of the destination JDBC locations?
  *  destJDBCURL			What is the list (separated by "|") of the destination JDBC URLs?
  *  
  *  skylrDestAddURL		What is the URL to use when sending data to skylr?
  *  skylrDestQueryURL	What is the URL to use when querying skylr?
- *  
- *  userID				What user executed the tool usages?
- *  
+
  * Optional properties:
  * 
  * @author John
@@ -57,7 +53,7 @@ public class EventForwarder implements Runnable {
 	private static final Logger logger = Logger.getLogger(EventForwarder.class);
 
 	/** default name for the properties file to be loaded from the classpath */
-	public static final String DEFAULT_PROPERTIES_FILE = "/EventForwarder.properties";
+	public static final String DEFAULT_PROPERTIES_FILE = "/etc/EventForwarder.properties";
 
 	/** system property name to be used to override the default config file */
 	public static final String SYSTEM_CONFIG_LOCATION_NAME = "efConfig";
@@ -131,7 +127,10 @@ public class EventForwarder implements Runnable {
 					eventForwarderProperties.load(configFOS);
 				}
 				logger.info("Loaded custom EventForwarder properties from system property location at " + configFile); 
-			}		
+			}
+			else if (propStream == null){
+				throw new DBAbstractionException("Could not find config file in default location nor overriden location");
+			}
 		}
 		catch (IOException e) {  
 			logger.error("EventForwarder: loadProperties - IOException: "+e);
@@ -146,7 +145,7 @@ public class EventForwarder implements Runnable {
 	 * If load properties has not been called, then the application will halt.
 	 */
 	private void validateProperties() {
-		java.util.ArrayList<String> missingProperties = new java.util.ArrayList<String>();
+		List<String> missingProperties = new ArrayList<String>();
 
 		if (eventForwarderProperties == null) {
 			throw new DBAbstractionException("EventForwarder: validateProperties - loadProperties not yet called, exiting application");
@@ -172,20 +171,22 @@ public class EventForwarder implements Runnable {
 	public void run() {
 
 		while (true) {
-			logger.debug("starting cycle");
+			logger.info("starting cycle");
 
 			for (ExternalToolUsageReporter endpoint: customEndPoints) {
+				logger.debug(endpoint);
 				endpoint.setUpForReporting();
 
 				List<ToolUsage> usages = localDatabase.getToolUsageInStaging(endpoint.getStagingName());
-
+				logger.debug(usages);
 				for(ToolUsage tu: usages) {
 					if (endpoint.shouldSend()) 
 					{
+						logger.debug("Sending "+tu);
 						endpoint.reportTool(tu, userManager.getUserEmail());
 					}
 				}
-
+				logger.debug("Done");
 				endpoint.finishReporting();
 			}
 

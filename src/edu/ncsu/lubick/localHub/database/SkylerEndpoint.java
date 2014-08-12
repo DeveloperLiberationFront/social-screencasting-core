@@ -60,12 +60,10 @@ public class SkylerEndpoint implements ExternalToolUsageReporter {
 	public boolean reportTool(ToolUsage tu, String userID)
 	{
 		try {
-			if (!isToolUsageInSkylr(tu)) { 
-				JSONObject jsonTU = convertToolUsageToJSONObjectForSkylr(tu, userID);
-				return this.insertToolUsageInSkylr(jsonTU, userID);
-			}
-			return true;
-	
+			JSONObject jsonTU = convertToolUsageToJSONObjectForSkylr(tu, userID);
+			return this.insertToolUsageInSkylr(jsonTU, userID);
+
+
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -75,54 +73,6 @@ public class SkylerEndpoint implements ExternalToolUsageReporter {
 			skylerAvailable = false;
 		}
 		return false;
-	}
-	
-	/**
-	 * Checks if the current tool usage is in the remote destination or not.
-	 * Since we don't delete or track destinations sent success, we need to prevent 
-	 * duplicates from being sent. 
-	 * @param toolUsage
-	 * @return
-	 */
-	private boolean isToolUsageInSkylr(ToolUsage toolUsage) throws Exception {
-		boolean result = false;
-		
-		HttpPost postRequest = new HttpPost(skylerProperties.getProperty(PROPERTY_DEST_SKYLR_QUERY_URL));
-		try {
-			StringEntity input = new StringEntity(createFindQueryForUseID(toolUsage).toString());
-			input.setContentType("application/json");
-			postRequest.setEntity(input);
-			 
-			HttpResponse response = httpClient.execute(postRequest);
-			 
-			if (response.getStatusLine().getStatusCode() >= 400) {
-				result = false;
-				logger.warn("Skylr - unable to find existing object - "+ response.getStatusLine().getStatusCode() +":  toolUsage use ID: "+toolUsage.getUseID());
-			}
-			else {
-				String responseBody = HTTPUtils.getResponseBody(response);
-				
-				JSONObject responseObject = new JSONObject();
-				responseObject.put("results", new JSONObject(responseBody));
-				
-				if (responseObject.getJSONArray("results").length() >0) {
-					result = true;
-				}
-			}
-		}
-		catch (Exception e) {
-			if (e.getMessage().contains("Connection refused")) {
-				throw new DBAbstractionException("skylr down", e);
-			}
-			logger.warn("Skylr - unable in find existing object - toolUsage use ID: "+toolUsage.getUseID(), e);
-			result = false;
-		}
-		finally{
-			postRequest.releaseConnection();
-		}
-		
-		
-		return result; 
 	}
 	
 	/**
