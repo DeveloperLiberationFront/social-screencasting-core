@@ -167,8 +167,15 @@ define(['angular',
         $scope.rerandomize();
       }
        $scope.ordering.field=field;
-       $scope.ordering.reverse = !$scope.ordering.reverse;
+       console.log('clicked '+field);               
+     };
 
+     $scope.sortOrder= function(value){
+      if (value==undefined){
+        return $scope.ordering.reverse;
+      }else {
+        $scope.ordering.reverse = !$scope.ordering.reverse;
+      }
      };
 
      $scope.ordering.options = [
