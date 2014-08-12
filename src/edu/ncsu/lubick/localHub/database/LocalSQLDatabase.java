@@ -205,6 +205,39 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		
 		return new ToolCountStruct(toolName, guiCount, totalCount-guiCount);
 	}
+	
+	@Override
+	public List<ToolUsage> getToolUsagesInStagingTable(String stagingTableName){
+		List<ToolUsage> results = new ArrayList<ToolUsage>();
+		
+		String sqlQuery = "SELECT  use_id, plugin_name, usage_timestamp, tool_name, " +
+	                      "        tool_key_presses, class_of_tool, tool_use_duration, clip_score "+
+				          "  FROM "+stagingTableName;
+		
+		try (PreparedStatement statement = this.makePreparedStatement(sqlQuery);){
+			ResultSet rs = statement.executeQuery();
+			while (rs.next()) {
+				String useID = rs.getString("use_id");
+				String toolName = rs.getString("tool_name");
+				String pluginName = rs.getString("plugin_name");
+				Date timestamp = new Date(rs.getLong("usage_timestamp"));
+				String toolClass = rs.getString("class_of_tool");
+
+				String keyPresses = rs.getString("tool_key_presses");
+				int duration = rs.getInt("tool_use_duration");
+				int clipScore = rs.getInt("clip_score");
+					
+
+				results.add(new ToolUsage (useID, toolName, toolClass, keyPresses,
+						pluginName, timestamp, duration, clipScore));
+			}
+		}
+		catch (SQLException ex) {
+			throw new DBAbstractionException(ex);
+		}
+
+		return results;
+	}
 
 	@Override
 	public List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName)

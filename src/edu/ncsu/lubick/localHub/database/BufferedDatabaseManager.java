@@ -20,6 +20,7 @@ import edu.ncsu.lubick.localHub.ClipOptions;
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.UserManager;
+import edu.ncsu.lubick.localHub.forTesting.UnitTestUserManager;
 import edu.ncsu.lubick.util.ToolCountStruct;
 
 /**
@@ -308,7 +309,7 @@ public class BufferedDatabaseManager
 
 	public ToolCountStruct getToolAggregate(final String applicationName, final String toolName)
 	{
-		FutureTask<ToolCountStruct > future = new FutureTask<ToolCountStruct>(new Callable<ToolCountStruct>() {
+		FutureTask<ToolCountStruct> future = new FutureTask<ToolCountStruct>(new Callable<ToolCountStruct>() {
 
 			@Override
 			public ToolCountStruct call() throws Exception
@@ -330,7 +331,31 @@ public class BufferedDatabaseManager
 		}
 	}
 
-	public List<String> getExcesiveTools()
+	public List<ToolUsage> getToolUsageInStaging(final String stagingTableName)
+	{
+		FutureTask<List<ToolUsage>> future = new FutureTask<List<ToolUsage>>(new Callable<List<ToolUsage>>() {
+
+			@Override
+			public List<ToolUsage> call() throws Exception
+			{
+				return localDB.getToolUsagesInStagingTable(stagingTableName);
+			}
+		});
+		
+		this.localThreadPool.execute(future);
+		
+		try
+		{
+			return future.get();
+		}
+		catch (InterruptedException | ExecutionException e)
+		{
+			logger.error("Problem with query", e);
+			return Collections.emptyList();
+		}
+	}
+
+	public List<String> getExcesiveClipNames()
 	{
 		FutureTask<List<String> > future = new FutureTask<List<String>>(new Callable<List<String>>() {
 
@@ -413,6 +438,19 @@ public class BufferedDatabaseManager
 				localDB.setClipUploaded(clipId, b);
 			}
 		});
+	}
+
+	public static BufferedDatabaseManager quickAndDirtyDatabase()
+	{
+		UserManager um = UnitTestUserManager.quickAndDirtyUser();
+		
+		return createBufferedDatabasemanager("./toolstreams.sqlite", um, true);
+	}
+
+	public void deleteToolUsageInStaging(ToolUsage tu, String stagingTableName)
+	{
+		// TODO Auto-generated method stub
+		
 	}
 
 }

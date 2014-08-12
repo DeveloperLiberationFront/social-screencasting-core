@@ -32,4 +32,6 @@ public abstract class LocalDBAbstraction
 	public abstract void createClipForToolUsage(String clipID, ToolUsage tu, ClipOptions clipOptions);
 
 	public abstract ToolCountStruct getToolAggregate(String applicationName, String toolName);
+
+	public abstract List<ToolUsage> getToolUsagesInStagingTable(String stagingTableName);
 }

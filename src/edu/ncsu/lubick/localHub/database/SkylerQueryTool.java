@@ -61,7 +61,7 @@ public class SkylerQueryTool{
 	 */
 	public void loadProperties() {
 
-		queryProperties = new java.util.Properties();
+		queryProperties = new Properties();
 		try (InputStream propStream = SkylerQueryTool.class.getResourceAsStream(DEFAULT_PROPERTIES_FILE);)
 		{	
 			if (propStream != null) {
@@ -157,9 +157,9 @@ public class SkylerQueryTool{
 				result.put("exception", e.getMessage());
 			}
 			catch (JSONException je) {
-				logger.warn("Skylr - unable to store exception message in JSON Object");
+				logger.warn("Skylr - unable to store exception message in JSON Object", je);
 			}
-			logger.warn("Skylr - unable in find existing object  ("+ e.getMessage() +") - query: "+query);
+			logger.warn("Skylr - unable in find existing object  - query: "+query, e);
 		}
 		finally {
 			postRequest.releaseConnection();
