@@ -6,9 +6,7 @@
             {{recordingStatus() ? "Stop": "Start"}} Recording
         </button>
     </div> 
-    
-    {{recordingStatus()}}
-
+      
      <h2>Requests you have made</h2>
      <ul id="requestList" class="list-group">
         <li ng-repeat="request in sentNotifications" ng-attr-title="Created: {{request.created | date : 'medium'}} Last updated: {{request.updated | date : 'medium'}}" class="list-group-item">

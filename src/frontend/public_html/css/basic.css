@@ -302,3 +302,11 @@ div.user-thumbnail.thumbnail img.small-indicator{
     font-size: 14px;
     color:#777;
 }
+.sort-button{    
+    display:inline;
+
+}
+.sort-button-group.btn-group{
+    float:right;
+    margin: -7px -10px 0 4px;
+}
