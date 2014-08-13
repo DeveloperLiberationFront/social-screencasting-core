@@ -318,5 +318,10 @@ div.user-thumbnail.thumbnail img.small-indicator{
     display: table;
     margin:auto;
     max-width: 80px;   
-    text-align: center; 
+    text-align: center;
+    color: grey; 
+}
+
+.lowercase{
+    text-transform:lowercase;
 }
