@@ -166,8 +166,7 @@ define(['angular',
       if (field ==="random") {
         $scope.rerandomize();
       }
-       $scope.ordering.field=field;
-       console.log('clicked '+field);               
+       $scope.ordering.field=field;                      
      };
 
      $scope.sortOrder= function(value){
@@ -177,7 +176,9 @@ define(['angular',
         $scope.ordering.reverse = !$scope.ordering.reverse;
       }
      };
-
+     $scope.getName=function(field){
+      return _.find($scope.ordering.options,{field:field}).name;
+     }
      $scope.ordering.options = [
      {name: "Name", field:"name"},
      {name: "Users", field:"usages.$object"},
