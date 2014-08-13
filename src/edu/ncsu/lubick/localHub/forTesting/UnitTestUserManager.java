@@ -49,4 +49,9 @@ public class UnitTestUserManager extends UserManager {
 		return needsUserInfo;
 	}
 
+	public static UserManager quickAndDirtyUser()
+	{
+		return new UnitTestUserManager("Test User","test@mailinator.com","123");
+	}
+
 }

@@ -18,3 +18,5 @@ If you will be interacting with the front end, you'll need to do a bit more setu
 4.  Navigate the shell to your folder from the earlier step 2 (screencasting) and then cd ../src/frontend/public_html.  
 5.  Execute `bower install`.  This will download all the dependencies from the bower.json file.  This may take a while.
 6.  Refresh your ScreencastingLocalHub project in Eclipse.  If you already have a server running, it should be smart enough to get the new files.  Otherwise, open up chrome dev tools and enable Settings>Disable cache when DevTools is open, then hit Ctrl+F5 to force a full refresh.
+
+**Bower is not run automatically, so if you are getting an error about not being able to find a library/resource, it's probably because someone else added a new dependency.  Try re-running steps 4-6.**

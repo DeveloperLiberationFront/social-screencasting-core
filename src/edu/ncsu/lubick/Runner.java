@@ -101,7 +101,6 @@ public class Runner
 		cleanUpSystemTray();
 	}
 
-
 	private static void cleanUpSystemTray()
 	{
 		if (getTrayIcon() != null)

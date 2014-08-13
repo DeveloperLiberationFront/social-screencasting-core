@@ -1,6 +1,5 @@
 package edu.ncsu.lubick.localHub;
 
-import java.awt.PopupMenu;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -300,6 +299,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	 * Meant for internal reporting
 	 * @param tu
 	 */
+	@SuppressWarnings("unused")
 	private void reportToolUsage(ToolUsage tu) {
 		logger.debug("Internal tool usage reported" + tu);
 		this.databaseManager.writeToolUsageToDatabase(tu);
@@ -308,7 +308,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	private void cleanUpObsoleteClips()
 	{
 		// Query database for clips made and update the database with those that don't exist
-		List<String> pathsToDelete = this.databaseManager.getExcesiveTools();
+		List<String> pathsToDelete = this.databaseManager.getExcesiveClipNames();
 		
 		for (String path: pathsToDelete)
 		{
@@ -463,7 +463,8 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			this.clipUploader.uploadToolUsage(toolUsage, clipOptions);
 			this.databaseManager.setClipUploaded(clipId, true);
 		}
-		//TODO need to share with other people?
+		//TODO If we ever need to share with other people, should we keep the clip on hand so we don't need to 
+		//upload it again?
 	}
 
 

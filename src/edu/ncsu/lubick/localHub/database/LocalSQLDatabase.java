@@ -28,10 +28,12 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 	protected abstract String getUserEmail();
 
 	protected abstract PreparedStatement makePreparedStatement(String statementQuery);
+	/**Should execute the prepared statement and close it */
 	protected abstract void executeStatementWithNoResults(PreparedStatement statement);
 	protected abstract ResultSet executeWithResults(PreparedStatement statement);
 
-	protected static final String[] TOOL_TABLE_NAMES = { "ToolUsages", "ToolUsagesStage" };
+	private static final String[] TOOL_TABLE_NAMES = { "ToolUsages",SkylerEndpoint.SKYLER_STAGING_TABLE_NAME,
+		ExternalSQLEndpoint.EXTERNAL_SQL_STAGING_TABLE_NAME, RecommendationToolReporter.RECOMMENDER_STAGING_TABLE_NAME};
 	
 	protected void createTables()
 	{
@@ -204,6 +206,63 @@ public abstract class LocalSQLDatabase extends LocalDBAbstraction {
 		}
 		
 		return new ToolCountStruct(toolName, guiCount, totalCount-guiCount);
+	}
+	
+	@Override
+	public List<ToolUsage> getToolUsagesInStagingTable(String stagingTableName){
+		List<ToolUsage> results = new ArrayList<ToolUsage>();
+		
+		String sqlQuery = "SELECT  use_id, plugin_name, usage_timestamp, tool_name, " +
+	                      "        tool_key_presses, class_of_tool, tool_use_duration, clip_score "+
+				          "  FROM "+stagingTableName;
+		
+		try (PreparedStatement statement = this.makePreparedStatement(sqlQuery);){
+			ResultSet rs = statement.executeQuery();
+			while (rs.next()) {
+				String useID = rs.getString("use_id");
+				String toolName = rs.getString("tool_name");
+				String pluginName = rs.getString("plugin_name");
+				Date timestamp = new Date(rs.getLong("usage_timestamp"));
+				String toolClass = rs.getString("class_of_tool");
+
+				String keyPresses = rs.getString("tool_key_presses");
+				int duration = rs.getInt("tool_use_duration");
+				int clipScore = rs.getInt("clip_score");
+					
+
+				results.add(new ToolUsage (useID, toolName, toolClass, keyPresses,
+						pluginName, timestamp, duration, clipScore));
+			}
+		}
+		catch (SQLException ex) {
+			throw new DBAbstractionException(ex);
+		}
+
+		return results;
+	}
+	
+	@Override
+	public void deleteToolUsageInStaging(ToolUsage tu, String stagingTableName)
+	{
+		if ("ToolUsages".equals(stagingTableName)){
+			getLogger().warn("Should not be trying to delete usages from "+stagingTableName + " table");
+			return;
+		}
+		
+		String sqlQuery = "DELETE FROM "+stagingTableName+" WHERE plugin_name=? AND tool_name=? AND usage_timestamp=?";
+	
+		try (PreparedStatement statement = this.makePreparedStatement(sqlQuery);){
+			statement.setString(1, tu.getApplicationName());
+			statement.setString(2, tu.getToolName());
+			statement.setLong(3, tu.getTimeStamp().getTime());
+			
+			executeStatementWithNoResults(statement);
+		}
+		catch (SQLException e)
+		{
+			throw new DBAbstractionException(e);
+		}
+	
 	}
 
 	@Override

@@ -8,7 +8,6 @@ import edu.ncsu.lubick.util.ToolCountStruct;
 
 public abstract class LocalDBAbstraction
 {
-
 	public abstract List<ToolUsage> getAllToolUsageHistoriesForPlugin(String currentPluginName);
 
 	public abstract void storeToolUsage(ToolUsage tu);
@@ -32,4 +31,9 @@ public abstract class LocalDBAbstraction
 	public abstract void createClipForToolUsage(String clipID, ToolUsage tu, ClipOptions clipOptions);
 
 	public abstract ToolCountStruct getToolAggregate(String applicationName, String toolName);
+
+	public abstract List<ToolUsage> getToolUsagesInStagingTable(String stagingTableName);
+
+	public abstract void deleteToolUsageInStaging(ToolUsage tu, String stagingTableName);
+	
 }
