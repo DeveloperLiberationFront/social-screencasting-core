@@ -141,10 +141,9 @@
 }
 
 .tool-statuses {
-    -webkit-flex: 0 1 auto; /*safari*/
-    flex: 0 1 auto;
-    display: -webkit-flex; /*safari*/
     display: flex;
+    -webkit-flex: 0 1 auto; /*safari*/
+    flex: 0 1 auto;    
     flex-flow: column nowrap;    
     position: absolute;
     right:10px;
