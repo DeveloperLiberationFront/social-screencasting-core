@@ -166,11 +166,19 @@ define(['angular',
       if (field ==="random") {
         $scope.rerandomize();
       }
-       $scope.ordering.field=field;
-       $scope.ordering.reverse = !$scope.ordering.reverse;
-
+       $scope.ordering.field=field;                      
      };
 
+     $scope.sortOrder= function(value){
+      if (value==undefined){
+        return $scope.ordering.reverse;
+      }else {
+        $scope.ordering.reverse = !$scope.ordering.reverse;
+      }
+     };
+     $scope.getName=function(field){
+      return _.find($scope.ordering.options,{field:field}).name;
+     }
      $scope.ordering.options = [
      {name: "Name", field:"name"},
      {name: "Users", field:"usages.$object"},
@@ -379,9 +387,7 @@ define(['angular',
         if (clips.length > 0) {
           c = clips[0]; //should be something like _.max(clips, 'rating');
           return Base64Img(_.isObject(c.thumbnail) ? c.thumbnail.data : c.thumbnail);
-        } else {
-          return 'images/no-video.jpg';
-        }
+        } 
       };
       
       $scope.keyboard = function(user) {       
@@ -508,19 +514,19 @@ define(['angular',
 
  // To handle requests made by status page's recording button
   .controller('RecordingCtrl', ['$scope','Local',
-    function($scope, Local){     
-      Local.one('status','recording').get().then( function (st){ //st is restangular object        
-        $scope.recordingStatus = function(value){          
+    function($scope, Local){
+      Local.one('status','recording').get().then( function (st){ //st is restangular object
+        $scope.recordingStatus = function(value){
           if (value==undefined){
-            return st.status;            
+            return st.status;
           }
           else
-          {            
-            st.status=value;            
+          {
+            st.status=value;
             st.put();
           }
-        };            
-      }); 
+        };
+      });
     }])
 
 .controller('RequestCtrl', ['$scope', '$modalInstance', '$stateParams', 'Hub',

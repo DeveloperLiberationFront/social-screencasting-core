@@ -6,12 +6,10 @@
             {{recordingStatus() ? "Stop": "Start"}} Recording
         </button>
     </div> 
-    
-    {{recordingStatus()}}
-
+      
      <h2>Requests you have made</h2>
      <ul id="requestList" class="list-group">
-        <li ng-repeat="request in sent" ng-attr-title="Created: {{request.created | date : 'medium'}} Last updated: {{request.updated | date : 'medium'}}" class="list-group-item">
+        <li ng-repeat="request in sentNotifications" ng-attr-title="Created: {{request.created | date : 'medium'}} Last updated: {{request.updated | date : 'medium'}}" class="list-group-item">
         <span class="badge deleteNotification" ng-click="deleteRequest(request)">Delete</span>
             <span ng-if="getBadgeText(request) !== undefined" class="badge">
               {{getBadgeText(request)}}
@@ -28,7 +26,7 @@
 
      <h2>Notifications for you</h2>
      <ul id="notificationList" class="list-group">
-        <li ng-repeat="request in received" ng-attr-title="Created: {{request.created | date : 'medium'}} Last updated: {{request.updated | date : 'medium'}}" class="list-group-item">
+        <li ng-repeat="request in receivedNotifications" ng-attr-title="Created: {{request.created | date : 'medium'}} Last updated: {{request.updated | date : 'medium'}}" class="list-group-item">
         <span ng-if="getBadgeText(request) !== undefined" class="badge">{{getBadgeText(request)}}</span>
         {{request.message}}
 

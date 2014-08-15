@@ -141,10 +141,9 @@
 }
 
 .tool-statuses {
-    -webkit-flex: 0 1 auto; /*safari*/
-    flex: 0 1 auto;
-    display: -webkit-flex; /*safari*/
     display: flex;
+    -webkit-flex: 0 1 auto; /*safari*/
+    flex: 0 1 auto;    
     flex-flow: column nowrap;    
     position: absolute;
     right:10px;
@@ -207,7 +206,7 @@
     margin-bottom: 4px;
 }
 
-.user-thumbnail > img {
+.user-thumbnail >img {
     max-height: 50px;
 }
 
@@ -301,4 +300,27 @@ div.user-thumbnail.thumbnail img.small-indicator{
     margin-bottom: 2px;
     font-size: 14px;
     color:#777;
+}
+
+.sort-button{    
+    display:inline;
+
+}
+
+.sort-button-group.btn-group{
+    float:right;
+    margin: -7px -10px 0 4px;
+}
+
+.no-image-label{    
+    height:50px;
+    display: table;
+    margin:auto;
+    max-width: 80px;   
+    text-align: center;
+    color: grey; 
+}
+
+.lowercase{
+    text-transform:lowercase;
 }
