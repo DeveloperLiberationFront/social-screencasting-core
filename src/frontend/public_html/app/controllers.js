@@ -82,7 +82,7 @@ define(['angular',
         field: "total_uses",
         reverse: true
       };
-      $scope.tools = Hub.all('tools').getList();
+      $scope.tools = Hub.all('user_tools').getList();
       $scope.rerandomize = function() {
         var numTools = $scope.tools.$object.length;
         _.each($scope.tools.$object, function(tool) {
@@ -100,7 +100,7 @@ define(['angular',
 
       Promise.all([$scope.user.usages, $scope.tools]).spread(function(usages, tools) {
         _.each(tools, function(tool) {
-          tool.unused = !_.find(usages, {tool: tool._id});
+          tool.unused = !_.find(usages, {tool: tool.tool_id});
         });
       });
 
@@ -113,7 +113,7 @@ define(['angular',
           });
 
           tool.usages = Hub.all('usages').getList({
-            where: {tool: tool._id}
+            where: {tool: tool.tool_id}
           });
           tool.usages.then(function(usages) {
             tool.total_uses = _.reduce(usages, function(acc,usage) {
@@ -130,7 +130,7 @@ define(['angular',
           });
 
           hub_clips = Hub.all('clips').getList({
-            where: {tool: tool._id}
+            where: {tool: tool.tool_id}
           });
 
           local_clips = Local.all('clips').getList({
@@ -430,13 +430,13 @@ define(['angular',
             owner: user.email,
             application: $scope.tool.application,
             tool_name: $scope.tool.name,
-            tool_id: $scope.tool._id,
+            tool_id: $scope.tool.tool_id,
           });
         } else {
           $state.go('main.request', {
             location: origin,
             owner: user._id,
-            tool: $scope.tool._id,
+            tool: $scope.tool.tool_id,
             application: $scope.tool.application
           });
           
@@ -522,7 +522,7 @@ define(['angular',
       $scope.getShareLink = function(request) {
         if ("share_request" == request.type) {
           return $interpolate(
-            "#/share/{{application}}/{{tool}}"
+            "#/share/{{application}}/{{tool.name}}"
               + "?share_with_name={{sender.name}}"
               + "&share_with_email={{sender.email}}"
               + "&request_id={{_id}}"

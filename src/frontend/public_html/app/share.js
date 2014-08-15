@@ -1,4 +1,6 @@
 define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
+  _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
+
   function shareClip($scope, Local, shareWithAll) {
     var post = Local.one("shareClip");
     post.data = {
@@ -35,46 +37,58 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
 
   function cancelSharing($scope, Hub) {
     var reasonText = $("#no-share-reason").val();
-    note = Hub.one("notifications",$scope.respondingToNotification);
-    _.assign(note, {
-      status:"responded",
-      type:"request_denied",
-      message: $interpolate(
-        "Your request to {{share_with_name}} for {{application}}/{{tool}} was not fulfilled. "
-          + reasonText)($scope.displayInfo)
+    Hub.one("notifications",$scope.respondingToNotification).get()
+      .then(function(note){
+        _.assign(note, {
+          status:"responded",
+          type:"request_denied",
+          message: _.template(
+            "Your request to {{share_with_name}} for {{application}}/{{tool}} was not fulfilled. " + reasonText,
+            $scope.displayInfo)
+        });
+        note.put();
     });
-    note.put();
 
     $scope.dropDownStatus.isopen = false;
     $scope.cancelled = true;
-    $("h2").text($interpolate(
-      "Decided not to share {{application}}/{{tool}} with {{share_with_name}}"
-    )($scope.displayInfo));
+    $("h2").text(_.template(
+      "Decided not to share {{application}}/{{tool}} with {{share_with_name}}",
+      $scope.displayInfo));
   };
 
   Controllers.controller('ShareCtrl', [
-    '$scope', '$stateParams', 'Local', 'Hub', '$interpolate',
-    function($scope, $routeParams, Local, Hub, $interpolate) {
-      $scope.displayInfo = $routeParams;
-      $scope.respondingToNotification = $routeParams.request_id;
+    '$scope', '$stateParams', 'Local', 'Hub',
+    function($scope, $stateParams, Local, Hub) {
+      $scope.displayInfo = $stateParams;
+      $scope.respondingToNotification = $stateParams.request_id;
       $scope.editMode = true;
       $scope.cropData = {cropData:{}};    //make cropData updateable by child scope (player)
       $scope.clips = [];
       $scope.isFirst = true;
       $scope.selection = [];
       $scope.ready = false;
+      $scope.cancelled = false;
+      $scope.hasShared = false;
 
       $scope.dropDownStatus = {
         isopen:false
       };
+      
+      $stateParams.app = $stateParams.application;
 
       //Go fetch all the clips
-      Local.getList("clips").then(function(tool) {
-        _.each(tool.keyclips, function(clip, i) {
-          $scope.clips.push({clipId: clip, toDisplay: "Example "+(+i+1)+" using Keyboard" });
-        });
-        _.each(tool.guiclips, function(clip, i) {
-          $scope.clips.push({clipId: clip, toDisplay: "Example "+(+i+1)+" using GUI"});
+      Local.all("clips").getList($stateParams).then(function(clips) {
+        _.each(clips, function(clip, i) {
+          var type;
+          if (clip.name.slice(-1) == 'K') {
+            type = "Keyboard";
+          } else {
+            type = "GUI";
+          }
+          $scope.clips.push({
+            clipId: clip,
+            toDisplay: "Example "+(+i+1)+" using " + type
+          });
         });
       });
 
