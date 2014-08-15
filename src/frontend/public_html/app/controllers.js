@@ -50,9 +50,9 @@ define(['angular',
         $scope.numberUnreadNotifications = _.where(notifications,{status:"new", recipient: {email: $scope.user.email}}).length;
       });
 
-      $scope.$on('instrumented', function(e, event, info) {
+      $scope.$on('instrumented', function(e, event, info) {   //can be invoked by $scope.$emit('instrumented', [event name], [info]);
         info = info ? info : undefined;
-        $scope.queuedToolUsages.push(new ToolUsage(event, "[GUI]")); 
+        $scope.queuedToolUsages.push(new ToolUsage(event, "[GUI]", info)); 
 
         var toReport = JSON.stringify($scope.queuedToolUsages);
         var oldUsages = [];
@@ -75,6 +75,8 @@ define(['angular',
 
   .controller('MainCtrl', ['$scope', 'Hub',
     function($scope, Hub) {
+    $scope.$emit('instrumented', "Loaded Interface");
+
       $scope.filters = {};
       $scope.ordering = {
         field: "total_uses",
@@ -166,19 +168,22 @@ define(['angular',
       if (field ==="random") {
         $scope.rerandomize();
       }
-       $scope.ordering.field=field;                      
+       $scope.ordering.field=field;
+       $scope.ordering.reverse = !$scope.ordering.reverse;
+
      };
 
      $scope.sortOrder= function(value){
-      if (value==undefined){
+      if (value===undefined){
         return $scope.ordering.reverse;
       }else {
         $scope.ordering.reverse = !$scope.ordering.reverse;
       }
      };
-     $scope.getName=function(field){
-      return _.find($scope.ordering.options,{field:field}).name;
-     }
+      $scope.getName=function(field){
+        return _.find($scope.ordering.options,{field:field}).name;
+      };
+
      $scope.ordering.options = [
      {name: "Name", field:"name"},
      {name: "Users", field:"usages.$object"},
@@ -222,6 +227,7 @@ define(['angular',
       });
 
       $scope.removeFilter = function(filter) {
+        $scope.$emit('instrumented', "Removed User Filter",filter);
         $state.go('main', {
           user_filter: _.without($state.params.user_filter.split(','), filter.email)
         });
@@ -229,6 +235,7 @@ define(['angular',
 
       $scope.addFilter = function(input){
         if (!input) return;
+        $scope.$emit('instrumented', "Added User Filter",filter);
         var user_filter = ($stateParams.user_filter ?
                            _.union($stateParams.user_filter.split(','), [input.email])
                            : [input.email]);
@@ -270,6 +277,7 @@ define(['angular',
       });
 
       $scope.removeFilter = function(filter) {
+        $scope.$emit('instrumented', "Removed Tool Filter",filter);
         $state.go('main', {
           tool_filter: _.without($state.params.tool_filter.split(','), filter.name, "")
         });
@@ -277,6 +285,7 @@ define(['angular',
 
       $scope.addFilter = function(input){
         if (!input) return;
+        $scope.$emit('instrumented', "Added Tool Filter",filter);
         var tool_filter = ($stateParams.tool_filter ?
                            _.union($stateParams.tool_filter.split(','), [input.name])
                            : [input.name]);
@@ -313,6 +322,7 @@ define(['angular',
       });
 
       $scope.updateFilters = function() {
+        $scope.$emit('instrumented', "Application Filter changed",$scope.filter.apps);
         $state.go('main', {
           app_filter: _.keys(_.pick($scope.filter.apps, function(v){return v;}))
         });
@@ -363,6 +373,7 @@ define(['angular',
       });
 
       $scope.updateFilters = function() {
+        $scope.$emit('instrumented', "Misc Filter changed",$scope.filter.apps);
         $state.go('main', {
           misc_filter: _.keys(_.pick($scope.filter.active_filters, function(v){return v;}))
         });
@@ -378,16 +389,18 @@ define(['angular',
       };
 
       $scope.stacked = function(user) {
-        clips = _.where(_.where($scope.tool.clips, {user: user.email}), 'thumbnail');
+        var clips = _.where(_.where($scope.tool.clips, {user: user.email}), 'thumbnail');
         return clips.length > 1;
       };
 
       $scope.thumbnail = function(user) {
-        clips = _.where(_.where($scope.tool.clips, {user: user.email}), 'thumbnail')
+        var clips = _.where(_.where($scope.tool.clips, {user: user.email}), 'thumbnail');
         if (clips.length > 0) {
-          c = clips[0]; //should be something like _.max(clips, 'rating');
+          var c = clips[0]; //should be something like _.max(clips, 'rating');
           return Base64Img(_.isObject(c.thumbnail) ? c.thumbnail.data : c.thumbnail);
-        } 
+        } else {
+          return 'images/no-video.jpg';
+        }
       };
       
       $scope.keyboard = function(user) {       
@@ -523,19 +536,19 @@ define(['angular',
 
  // To handle requests made by status page's recording button
   .controller('RecordingCtrl', ['$scope','Local',
-    function($scope, Local){
-      Local.one('status','recording').get().then( function (st){ //st is restangular object
-        $scope.recordingStatus = function(value){
+    function($scope, Local){     
+      Local.one('status','recording').get().then( function (st){ //st is restangular object        
+        $scope.recordingStatus = function(value){          
           if (value==undefined){
-            return st.status;
+            return st.status;            
           }
           else
-          {
-            st.status=value;
+          {            
+            st.status=value;            
             st.put();
           }
-        };
-      });
+        };            
+      }); 
     }])
 
 .controller('RequestCtrl', ['$scope', '$modalInstance', '$stateParams', 'Hub',

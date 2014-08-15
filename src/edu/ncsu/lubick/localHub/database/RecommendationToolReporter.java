@@ -1,7 +1,5 @@
 package edu.ncsu.lubick.localHub.database;
 
-import static edu.ncsu.lubick.localHub.database.EventForwarder.*;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -123,7 +121,7 @@ public class RecommendationToolReporter implements ExternalToolUsageReporter {
 		jobj.put("application", tu.getApplicationName());
 		jobj.put("tool", tu.getToolName());
 		jobj.put("time", tu.getTimeStamp().getTime());
-		jobj.put("bindingUsed", ToolUsage.MENU_KEY_PRESS.equals(tu.getToolKeyPresses()));
+		jobj.put("bindingUsed", !ToolUsage.MENU_KEY_PRESS.equals(tu.getToolKeyPresses()));
 		
 		return jobj;
 	}
