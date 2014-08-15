@@ -14,6 +14,14 @@ define(['angular',
 
   _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
+  function recommendation(tool) {
+    var rec = _.find(tool.recommendations, {algorithm_type: 'USER_BASED_CF'});
+    if (rec) {
+      return 100000000 - rec.rank; //to switch asc/desc ordering
+    }
+    return 0;
+  }
+
   function ToolUsage(toolName, keypress, otherInfo) {
     //all the this.names are the same as on the server ToolStream.java
     this.Tool_Name = toolName;
@@ -79,7 +87,7 @@ define(['angular',
 
       $scope.filters = {};
       $scope.ordering = {
-        field: "total_uses",
+        field: recommendation,
         reverse: true
       };
       $scope.tools = Hub.all('user_tools').getList();
@@ -187,7 +195,7 @@ define(['angular',
      $scope.ordering.options = [
      {name: "Name", field:"name"},
      {name: "Users", field:"usages.$object"},
-     {name: "Recommended", field:"total_uses"}, 
+     {name: "Recommended", field:recommendation}, 
      {name: "Video", field: "video"},
      {name: "Random", field: "random"}
      ];
