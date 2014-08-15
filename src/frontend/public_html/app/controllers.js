@@ -437,6 +437,7 @@ define(['angular',
     _.each(sent, function(sentItem) {
       if (sentItem.type == "request_fulfilled") {
         var json = JSON.parse(sentItem.status);
+        console.log(json);
         sentItem.shared_videos = _.map(json.video_id, function(id){
           return _.template(
             "#/video/external/{{recipient.email}}/"
@@ -455,6 +456,12 @@ define(['angular',
     });
   }
 
+  function prepareMessagesForReceivedRequests(request){
+    _.each(request, function(requestItem){
+      requestItem.message = _.template("{{sender.name}} has requested access to {{application}}/{{tool.name}}",requestItem);
+    }); 
+  }
+
   Controllers
   .controller('StatusCtrl', ['$scope', 'Hub', '$interpolate',
     function($scope, Hub, $interpolate) {
@@ -467,7 +474,9 @@ define(['angular',
         'embedded': {'recipient': 1, 'sender': 1, 'tool': 1} //pull in recipient details instead of j
       }).then(function(notifications) {
        // $scope.notifications = notifications;
+
         $scope.sentNotifications = _.where(notifications, {sender: {email: $scope.user.email}});
+       console.log($scope.sentNotifications);
         $scope.receivedNotifications = _(notifications) //wraps for lodash chaining
           .where({recipient: {email: $scope.user.email}})
           .reject(function(item) { //user doesn't need to see requests they have responded to
@@ -476,7 +485,7 @@ define(['angular',
           .value();
         
         prepareMessagesForSentRequests($scope.sentNotifications, $scope.user_list.$object);
-        
+        prepareMessagesForReceivedRequests($scope.receivedNotifications);
         _.each($scope.receivedNotifications, function(item) {
           if (item.status == "new") {
             item.status = "seen";
@@ -536,7 +545,8 @@ define(['angular',
         application: $stateParams.application,
         tool: $stateParams.tool,
         recipient: $stateParams.owner,
-        type: "share_request"
+        type: "share_request",
+        message: "message"
       });
       $modalInstance.close();
     };

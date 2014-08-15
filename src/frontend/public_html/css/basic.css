@@ -324,3 +324,8 @@ div.user-thumbnail.thumbnail img.small-indicator{
 .lowercase{
     text-transform:lowercase;
 }
+
+#sort-button-dropdown{
+    left:47px;
+    padding: 2px 6px;
+}
