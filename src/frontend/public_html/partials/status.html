@@ -10,7 +10,7 @@
      <h2>Requests you have made</h2>
      <ul id="requestList" class="list-group">
         <li ng-repeat="request in sentNotifications" ng-attr-title="Created: {{request.created | date : 'medium'}} Last updated: {{request.updated | date : 'medium'}}" class="list-group-item">
-        <span class="badge deleteNotification" ng-click="deleteRequest(request)">Delete</span>
+        <button class="badge btn btn-danger" ng-click="deleteRequest(request)">Delete</button>
             <span ng-if="getBadgeText(request) !== undefined" class="badge">
               {{getBadgeText(request)}}
             </span>
@@ -24,13 +24,13 @@
         </li>
      </ul>
 
-     <h2>Notifications for you</h2>
+     <h2>Notifications for you</h2>     
      <ul id="notificationList" class="list-group">
         <li ng-repeat="request in receivedNotifications" ng-attr-title="Created: {{request.created | date : 'medium'}} Last updated: {{request.updated | date : 'medium'}}" class="list-group-item">
         <span ng-if="getBadgeText(request) !== undefined" class="badge">{{getBadgeText(request)}}</span>
         {{request.message}}
 
-        <a ng-if="getShareLink(request) !== undefined" ng-href="{{getShareLink(request)}}">Respond</a>
+        <a class="badge btn-primary" ng-if="getShareLink(request) !== undefined" ng-href="{{getShareLink(request)}}">Respond</a>
         </li>
      </ul>
 </div>
