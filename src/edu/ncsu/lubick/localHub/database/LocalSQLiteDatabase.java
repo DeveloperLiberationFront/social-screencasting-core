@@ -47,8 +47,10 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 	private void renameTablesIfNeeded()
 	{
 		int dbVersion = getDbVersion();
+		logger.debug("Database version "+dbVersion);
 		if (dbVersion > 0 && dbVersion < 17)
 		{
+			logger.debug("Renaming tables");
 			String first =	"CREATE TABLE IF NOT EXISTS RenderedClips ( " +
 					"folder_name TEXT PRIMARY KEY, " +
 					"plugin_name TEXT, " +
@@ -89,8 +91,12 @@ public class LocalSQLiteDatabase extends LocalSQLDatabase
 		int dbVersion = getDbVersion();
 		logger.debug("Database version: " + dbVersion);
 		
-		updateTo1_5(dbVersion, 15);
-		updateTo1_6(dbVersion, 16);
+		if (dbVersion != 0) {
+			//legacy updates if the database existed, otherwise, we'll do a fresh start on the latest
+			updateTo1_5(dbVersion, 15);
+			updateTo1_6(dbVersion, 16);
+		}
+		
 		updateTo1_7(dbVersion, 17);
 		
 		storeDbVersion(dbVersion, 17);
