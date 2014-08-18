@@ -17,7 +17,7 @@
         </div>
       </div>
       <div id="controlPanel" ng-class="{fullscreen: player.isFullscreen}">
-        <button id='playBtn' ng-click="player.playing = !player.playing">
+        <button id='playBtn' ng-click="togglePlaying()">
           <span class='glyphicon' ng-class="{'glyphicon-play': !player.playing, 'glyphicon-pause': player.playing}"></span>
         </button>
         <div id='sliders'>
@@ -35,7 +35,7 @@
           <div ng-switch-when='false'>
             <div id='overlayMode' ng-if='kbdOverlay.enabled'
                  tooltip="{{kbdOverlay.tooltip[kbdOverlay.mode]}}" tooltip-placement='right'>
-              <img class='img-responsive' ng-src="{{'images/' + kbdOverlay.images['active'][kbdOverlay.mode] + '.png'}}" ng-click='kbdOverlay.mode = (kbdOverlay.mode + 1) % 4'/>
+              <img class='img-responsive' ng-src="{{'images/' + kbdOverlay.images['active'][kbdOverlay.mode] + '.png'}}" ng-click='toggleKeyboardOverlay()'/>
             </div>
           </div>
 

@@ -1,7 +1,10 @@
+/*global define*/
+
 define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
   _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
-  function shareClip($scope, Local, shareWithAll) {
+  function shareClip($scope, Local, Hub, shareWithAll) {
+
     var post = Local.one("shareClip");
     post.data = {
       clip_id : $scope.selection[0].clipId,
@@ -10,11 +13,13 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
       end_frame: $scope.clip.end,
       crop_rect: JSON.stringify($scope.cropData.cropData)
     };
+
+    $scope.$emit('instrumented', "Sharing a Clip", post.data);
     post.post();
 
     $scope.hasShared = true;
 
-    note = Hub.one("notifications",$scope.respondingToNotification).get();
+    var note = Hub.one("notifications",$scope.respondingToNotification).get();
 
     note.then(function(notification){
       if (notification.type == "request_fulfilled") {
@@ -33,10 +38,13 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
         notification.put();
       }
     });
-  };
+  }
 
   function cancelSharing($scope, Hub) {
     var reasonText = $("#no-share-reason").val();
+
+    $scope.$emit('instrumented', "NOT Sharing a Clip", reasonText);
+
     Hub.one("notifications",$scope.respondingToNotification).get()
       .then(function(note){
         _.assign(note, {
@@ -54,7 +62,7 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
     $("h2").text(_.template(
       "Decided not to share {{application}}/{{tool}} with {{share_with_name}}",
       $scope.displayInfo));
-  };
+  }
 
   Controllers.controller('ShareCtrl', [
     '$scope', '$stateParams', 'Local', 'Hub',
@@ -69,6 +77,8 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
       $scope.ready = false;
       $scope.cancelled = false;
       $scope.hasShared = false;
+
+      $scope.$emit('instrumented', "Share Clip UI Opened", {toolInfo:$scope.displayInfo, respondingToNotification: $stateParams.request_id});
 
       $scope.dropDownStatus = {
         isopen:false
@@ -103,7 +113,7 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
 
           if (c.length > 0) {
             var clipId = c[0].clipId;
-            toolEnd.one(clipId).get().then(function(clip){      //TODO fix for updated local API
+            Local.one(clipId).get().then(function(clip){      //TODO fix for updated local API
               $scope.clip = clip;
               $scope.ready = true;
               $scope.$broadcast('refreshSlider');
@@ -112,7 +122,7 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
         }
       };
 
-      $scope.shareClip = _.curry(shareClip)($scope, Local);
+      $scope.shareClip = _.curry(shareClip)($scope, Local, Hub);
       $scope.cancelSharing = _.curry(cancelSharing)($scope, Hub);
     }]);//end ShareCtrl
 });//end define()

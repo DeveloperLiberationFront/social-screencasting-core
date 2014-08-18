@@ -29,9 +29,18 @@ define(['angular',
         $scope.toggleFullscreen = function() {
           var player = $scope.player;
           if (!player.isCropping) {
+            $scope.$emit('instrumented', "Toggling Fullscreen", !player.isFullscreen);
             player.isFullscreen = !player.isFullscreen;
           }
         };
+        $scope.togglePlaying = function() {
+          var player = $scope.player;
+          player.playing = !player.playing;
+          $scope.$emit('instrumented', player.playing ? "Playing Clip" : "Pausing Clip", $scope.clip);
+          
+        };
+        
+
         $scope.playBtnImages = {
             true: 'images/playback/pause.svg',
             false:'images/playback/play.svg'
@@ -47,9 +56,18 @@ define(['angular',
             tooltip: ["Image and text", "Image only", "Text only", "No overlay"]
         };
 
+        $scope.toggleKeyboardOverlay = function() {
+          var kbdOverlay = $scope.kbdOverlay;
+
+          kbdOverlay.mode = (kbdOverlay.mode + 1) % 4;
+          $scope.$emit('instrumented', "Changing Keyboard Overlay", kbdOverlay.tooltip[kbdOverlay]);
+        };
+
+        
+
         //load all images, and then set the status to ready
       function loadClip(clip) {
-        images = clip.all('images').getList()
+        var images = clip.all('images').getList();
         
         $scope.player.status = 'loading';
         
@@ -66,7 +84,7 @@ define(['angular',
         loadClip($scope.clip);
 
         $scope.getImage = function(name, type) {
-          image = _.find($scope.clip.images, {name: name})
+          var image = _.find($scope.clip.images, {name: name});
           if (image)
             return Base64Img(image.data,type);
         };
@@ -111,6 +129,7 @@ define(['angular',
 
         $scope.crop = function() {
             if (!$scope.player.isCropping) {
+                $scope.$emit('instrumented', "Entering Crop Mode");
                 $scope.player.isCropping = true;
                 $("#frameLoc").cropper({
                     aspectRatio: "auto",
@@ -122,6 +141,7 @@ define(['angular',
                 $scope.player.isCropping = false;
                 $("#frameLoc").cropper("disable");
                 $scope.cropData.cropData = {};
+                $scope.$emit('instrumented', "Exiting Crop Mode");
             }
         };
     }])

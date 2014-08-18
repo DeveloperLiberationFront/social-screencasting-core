@@ -173,18 +173,18 @@ define(['angular',
   .controller('OrderCtrl', ['$scope',
     function($scope) {
      $scope.orderingFunc=function(field){
+      $scope.$emit('instrumented', "Ordering Tool List", field);
       if (field ==="random") {
         $scope.rerandomize();
       }
        $scope.ordering.field=field;
-       $scope.ordering.reverse = !$scope.ordering.reverse;
-
      };
 
      $scope.sortOrder= function(value){
       if (value===undefined){
         return $scope.ordering.reverse;
       }else {
+        $scope.$emit('instrumented', "Toggling Sort Order", !$scope.ordering.reverse);
         $scope.ordering.reverse = !$scope.ordering.reverse;
       }
      };
@@ -514,6 +514,7 @@ define(['angular',
       });
       
       $scope.deleteRequest = function(request) {
+        $scope.$emit('instrumented', "Deleted request", request);
         $scope.sentNotifications = _.reject($scope.sentNotifications, function(item) {
           return item._id == request._id;
         });
@@ -559,7 +560,11 @@ define(['angular',
 
 .controller('RequestCtrl', ['$scope', '$modalInstance', '$stateParams', 'Hub',
   function($scope, $modalInstance, $stateParams, Hub) {
+    $scope.$emit('instrumented', "Opened Request Clip Dialog", {application: $stateParams.application, 
+        tool: $stateParams.tool, recipient: $stateParams.owner});
     $scope.request = function() {
+      $scope.$emit('instrumented', "Requesting Clip", {application: $stateParams.application, 
+        tool: $stateParams.tool, recipient: $stateParams.owner});
       Hub.all('notifications').post({
         application: $stateParams.application,
         tool: $stateParams.tool,
@@ -570,7 +575,10 @@ define(['angular',
       $modalInstance.close();
     };
 
-    $scope.cancel = $modalInstance.close;
+    $scope.cancel = function() {
+    $scope.$emit('instrumented', "Closed Request Clip Dialog");
+      $modalInstance.close();
+    };
   }])
 
   .controller('ShareDropDownCtrl', ['$scope',
@@ -586,6 +594,8 @@ define(['angular',
         $event.preventDefault();
         $event.stopPropagation();
         $scope.dropDownStatus.isopen = !$scope.dropDownStatus.isopen;
+
+        $scope.$emit('instrumented', "No Share Reason Dropdown toggled", $scope.dropDownStatus.isopen);
       };
     }]);
 
