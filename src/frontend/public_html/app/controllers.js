@@ -1,4 +1,4 @@
-/*global define, angular */
+/*global define */
 
 define(['angular',
         'jquery',
@@ -57,6 +57,10 @@ define(['angular',
        // $scope.notifications = notifications;
         $scope.numberUnreadNotifications = _.where(notifications,{status:"new", recipient: {email: $scope.user.email}}).length;
       });
+
+      $scope.focus = function(bool) {
+        console.log("focus "+bool);
+      };
 
       $scope.$on('instrumented', function(e, event, info) {   //can be invoked by $scope.$emit('instrumented', [event name], [info]);
         info = info ? info : undefined;
@@ -137,11 +141,11 @@ define(['angular',
             }, 0);
           });
 
-          hub_clips = Hub.all('clips').getList({
+          var hub_clips = Hub.all('clips').getList({
             where: {tool: tool.tool_id}
           });
 
-          local_clips = Local.all('clips').getList({
+          var local_clips = Local.all('clips').getList({
             app: tool.application,
             tool: tool.name
           });
@@ -430,6 +434,8 @@ define(['angular',
       };
 
       $scope.getVideo = function(user) {
+        $scope.$emit('instrumented', "Clicked to View/request screencast", {"user":user,application: $scope.tool.application,
+            tool_name: $scope.tool.name});
         var self = (user.email == $scope.user.email);
         var origin = (self ? 'local' : 'external');
         if ($scope.hasVideo(user) || self) {
@@ -546,7 +552,7 @@ define(['angular',
     function($scope, Local){     
       Local.one('status','recording').get().then( function (st){ //st is restangular object        
         $scope.recordingStatus = function(value){          
-          if (value==undefined){
+          if (value===undefined){
             return st.status;            
           }
           else
