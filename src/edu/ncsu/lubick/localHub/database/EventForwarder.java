@@ -10,6 +10,7 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
+import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
@@ -185,7 +186,8 @@ public class EventForwarder implements Runnable {
 					if (endpoint.shouldSend()) 
 					{
 						logger.debug("Sending "+tu);
-						if (endpoint.reportTool(tu, userManager.getUserEmail())){
+						//the short-circuit here prevents hidden tools from being forwarded
+						if (LocalHub.applicationIsHidden(tu.getApplicationName()) || endpoint.reportTool(tu, userManager.getUserEmail())){
 							localDatabase.deleteToolUsageInStaging(tu, endpoint.getStagingName());
 						} else {
 							logger.info("Could not report tool "+tu+" to "+endpoint);

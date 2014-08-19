@@ -330,7 +330,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	private void potentiallyMakeClipsFromToolStream(List<ToolUsage> ts)
 	{
 		
-		if (ts.isEmpty() || pluginIsHidden(ts.get(0).getApplicationName())) 
+		if (ts.isEmpty() || applicationIsHidden(ts.get(0).getApplicationName())) 
 		{
 			logger.debug("Not making screencasts for "+ts.get(0).getApplicationName()+" because it is hidden");
 			return;
@@ -364,7 +364,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		}
 	}
 
-	private boolean pluginIsHidden(String pluginName)
+	public static boolean applicationIsHidden(String pluginName)
 	{
 		return pluginName.startsWith(HIDDEN_PLUGIN_PREFIX);
 	}
