@@ -40,11 +40,11 @@ define(['angular',
                                'player',
                               ]);
   Controllers
-  .controller('RootCtrl', ['$scope', '$filter', 'Hub', 'User',
-    function($scope, $filter, Hub, User) {
+  .controller('RootCtrl', function($scope, $filter, Hub, User, $window) {
       $scope.user = User;
       $scope.applications = Hub.all('applications').getList();
       $scope.user_list = Hub.all('users').getList();
+      $window.Hub = Hub;
 
       //report interface usage to Local Hub
       $scope.queuedToolUsages = [];
@@ -83,7 +83,7 @@ define(['angular',
           }
         });
       });
-    }])
+    })
 
   .controller('MainCtrl', ['$scope', 'Hub',
     function($scope, Hub) {
