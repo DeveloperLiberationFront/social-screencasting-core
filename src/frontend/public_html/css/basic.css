@@ -204,6 +204,7 @@
 
 .user-thumbnail {
     margin-bottom: 4px;
+    min-height:95px;
 }
 
 .user-thumbnail >img {
@@ -219,6 +220,7 @@
 .stacked {
     border: 1px solid #bbb;
     position: relative;
+    margin-right:5px;
 }
 
 .stacked:after,
@@ -282,7 +284,7 @@ div.user-thumbnail.thumbnail img.small-indicator{
 
 .user-name{
     display: inline-block;
-    max-width: 90px;
+    width: 90px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
