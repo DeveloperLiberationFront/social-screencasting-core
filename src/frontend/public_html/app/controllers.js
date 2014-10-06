@@ -320,6 +320,7 @@ define(['angular',
 
       $scope.applications.then(function(apps) {
         apps = _.pluck(apps,'name');
+        //hide hidden applications from the user
         _.remove(apps, function(name){
             return name.indexOf("[") === 0;
         });
