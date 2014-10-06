@@ -186,8 +186,9 @@ public class EventForwarder implements Runnable {
 					if (endpoint.shouldSend()) 
 					{
 						logger.debug("Sending "+tu);
-						//the short-circuit here prevents hidden tools from being forwarded
-						if (LocalHub.applicationIsHidden(tu.getApplicationName()) || endpoint.reportTool(tu, userManager.getUserEmail())){
+						// we no longer restrict sending the hidden tools because
+						// we want to monitor things like the heartbeat is psuedorealtime(TM)
+						if (endpoint.reportTool(tu, userManager.getUserEmail())){
 							localDatabase.deleteToolUsageInStaging(tu, endpoint.getStagingName());
 						} else {
 							logger.info("Could not report tool "+tu+" to "+endpoint);

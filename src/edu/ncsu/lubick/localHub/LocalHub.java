@@ -148,6 +148,22 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		{
 			this.remoteToolReporter = new RemoteToolReporter(this.databaseManager, userManager);
 		}
+		
+		startHeartbeat();
+	}
+
+	private void startHeartbeat()
+	{
+		TimerTask heartBeat = new TimerTask() {
+			
+			@Override
+			public void run()
+			{
+				ToolUsage tu = new ToolUsage("heartbeat", "", ToolUsage.MENU_KEY_PRESS, "[ScreencastingHub]",
+						new Date(), 1000, 0);
+				reportToolUsage(tu);
+			}
+		};
 	}
 
 	private void setUpUserManager()
@@ -299,7 +315,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	 * Meant for internal reporting
 	 * @param tu
 	 */
-	@SuppressWarnings("unused")
+
 	private void reportToolUsage(ToolUsage tu) {
 		logger.debug("Internal tool usage reported" + tu);
 		this.databaseManager.writeToolUsageToDatabase(tu);
