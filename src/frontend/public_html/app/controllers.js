@@ -297,7 +297,7 @@ define(['angular',
 
       $scope.addFilter = function(input){
         if (!input) return;
-        $scope.$emit('instrumented', "Added Tool Filter",filter);
+        $scope.$emit('instrumented', "Added Tool Filter",input);
         var tool_filter = ($stateParams.tool_filter ?
                            _.union($stateParams.tool_filter.split(','), [input.name])
                            : [input.name]);
@@ -319,7 +319,11 @@ define(['angular',
       };
 
       $scope.applications.then(function(apps) {
-        $scope.filter.source = _.pluck(apps, 'name');
+        apps = _.pluck(apps,'name');
+        _.remove(apps, function(name){
+            return name.indexOf("[") === 0;
+        });
+        $scope.filter.source = apps;
       });
 
       if ($state.params.app_filter) {
