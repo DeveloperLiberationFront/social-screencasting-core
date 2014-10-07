@@ -551,6 +551,12 @@ define(['angular',
         return "#";
       };
   }])
+  
+  .controller('SettingsCtrl', function($scope) {
+      console.log("Hello settings");
+
+  })
+
 
  // To handle requests made by status page's recording button
   .controller('RecordingCtrl', ['$scope','Local',

@@ -13,7 +13,7 @@ define(['angular',
         'player',
         'directives',
         'lib/breadcrumb',
-       ], function (ng, Promise) {
+       ], function (ng) {
   'use strict';
 
   /* App Module */
@@ -71,8 +71,8 @@ define(['angular',
                   clips.then(function(clips) {
                     _.each(clips, function(clip) {
                       clip.id = clip.name; //add id so restangular can find images
-                    })
-                  })
+                    });
+                  });
                 }
 
                 clips.then(function(clips) {
@@ -118,6 +118,12 @@ define(['angular',
                 templateUrl: 'partials/status.html',
                 controller: 'StatusCtrl',
                 breadcrumb: { title: 'Status' }
+            })
+            .state('settings', {
+                url: '/settings',
+                templateUrl: 'partials/settings.html',
+                controller: 'SettingsCtrl',
+                breadcrumb: { title: 'Settings' }
             })
             .state('share', {
                 url: '/share/:application/:tool?share_with_name&share_with_email&request_id',
