@@ -31,8 +31,7 @@
     "restangular": "~1.4.0",
     "angular-ui-router": "~0.2.10",
     "angular-deferred-bootstrap": "~0.1.1",
-    "bluebird": "~2.2.2",
-	"jquery-tipr": "*"
+    "bluebird": "~2.2.2"
   },
   "resolutions": {
     "jquery": "2.1.1"

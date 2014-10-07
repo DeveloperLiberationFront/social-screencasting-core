@@ -34,10 +34,11 @@ define(['angular',
   var Controllers = ng.module('socasterControllers',
                               ['ui.bootstrap',
                                'ui.format',
+                               //'ui.tooltip',
                                'ngGrid',
                                'restangular',
                                'socasterServices',
-                               'player',
+                               'player'
                               ]);
   Controllers
   .controller('RootCtrl', function($scope, $filter, Hub, User, $window) {
@@ -553,8 +554,13 @@ define(['angular',
   }])
   
   .controller('SettingsCtrl', function($scope) {
-      console.log("Hello settings");
-
+    console.log("Hello settings");
+    $scope.algorithms = [
+     {
+      name:"Foo",
+      description:'This algorithm recommend the most commonly "learned" or "discovered" commands that a user is not using. Really, it\'s just the topmost popular commands beyond people\'s knowledge base'
+    }
+    ];
   })
 
 

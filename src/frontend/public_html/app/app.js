@@ -152,3 +152,4 @@ define(['angular',
                                          + User.token)});
   }])
 });
+
