@@ -22,7 +22,7 @@ requirejs.config({
         'lodash': '../lib/bower/lodash/dist/lodash',
         'deferredBootstrapper': '../lib/bower/angular-deferred-bootstrap/angular-deferred-bootstrap',
         'bluebird': '../lib/bower/bluebird/js/browser/bluebird',
-
+        'LocalStorageModule' : '../lib/bower/angular-local-storage/dist/angular-local-storage',
         'tablesorter': '../lib/bower/jquery.tablesorter/js',
         'jquery.metadata': '../lib/bower/jquery.metadata/jquery.metadata',
         'jquery.cropper': '../lib/cropper/cropper'
@@ -47,6 +47,7 @@ requirejs.config({
         'restangular': ['angular'],
         'bootstrap': ['jquery'],
         'jquery-ui': ['jquery'],
+        'LocalStorageModule': ['angular'],
         'jquery.cropper':['jquery'],
         'tablesorter': ['jquery'],
         'jquery.metadata': ['jquery'],
@@ -68,6 +69,7 @@ requirejs([
     'bootstrap',
     'controllers',
     'services',
+    'LocalStorageModule'
 ], function(angular, app, boot) {
   boot.bootstrap({
     element: document,

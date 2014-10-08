@@ -8,6 +8,7 @@ define(['angular',
         'ng-grid',
         'ng-ui-utils',
         'restangular',
+        'LocalStorageModule',
         'services',
         'player'], function (ng, $, _, Promise) {
   /* Controllers */

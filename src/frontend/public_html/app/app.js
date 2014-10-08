@@ -150,6 +150,6 @@ define(['angular',
         'Authorization': 'Basic ' + btoa(User.email + '|'
                                          + User.name + ':'
                                          + User.token)});
-  }])
+  }]);
 });
 
