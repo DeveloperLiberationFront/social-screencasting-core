@@ -557,9 +557,45 @@ define(['angular',
     console.log("Hello settings");
     $scope.algorithms = [
      {
-      name:"Foo",
-      description:'This algorithm recommend the most commonly "learned" or "discovered" commands that a user is not using. Really, it\'s just the topmost popular commands beyond people\'s knowledge base'
-    }
+      name:"Most Widely Used",
+      description:'Tools are ranked by how many users use them.',
+      value:100
+      },
+      {
+      name:"Most Frequenly Used",
+      description:'Tools are ranked by how many times they are invoked.',
+      value:0
+      },
+      {
+      name:"Item-based CF",
+      description:'Uses Collaborative Filtering to rank similarity between tools. ',
+      value:0
+      },
+      {
+      name:"User-based CF",
+      description:'Uses Collaborative Filtering to find similar users and recommend tools from them. ',
+      value:0
+      },
+      {
+      name:"Latent Matrix Factorization",
+      description:'Use Apache Mahout\'s <a href="https://mahout.apache.org/users/basics/svd---singular-value-decomposition.html">Singular Value Decomposition algorithm</a>',
+      value:0
+      },
+      {
+      name:"Most Popular Learning Rule",
+      description:'This algorithm recommends the most commonly "learned" or "discovered" tools that a user is not using.',
+      value:0
+      },
+      {
+      name:"Advanced Learning Rule",
+      description:"Recommends the most popular discoveries that a user has the prerequisites for. For example, if we have A->C, C->D, A->C, A->B as our discovery pattern and Person1 only used A, then we would recommend C first and then B but we won't recommend D because the user does not know C yet.",
+      value:0
+      },
+      {
+      name:"Most Prerequisite Learning Rule",
+      description:"Sorts tools based on the number of prerequisite commands a user needs for learning a unknown tool.",
+      value:0
+      }
     ];
   })
 

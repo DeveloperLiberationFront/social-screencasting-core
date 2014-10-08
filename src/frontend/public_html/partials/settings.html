@@ -1,5 +1,9 @@
 <div class="recommendation-sliders">
 	<div ng-repeat="algo in algorithms" class="algo-row">
-		<div class="algo-desc" tooltip-placement="right" tooltip="{{algo.description}}">{{algo.name}}</div>
+		<div class="algo-desc label label-primary" tooltip-append-to-body="false" tooltip-placement="right" tooltip-html-unsafe="{{algo.description}}">{{algo.name}}</div>
+		<div class="algo-slider">
+		<!--https://github.com/Venturocket/angular-slider -->
+		<slider ng-model="algo.value" floor="0" ceiling="100", step="1"></slider>
+		</div>
 	</div>
 </div>
