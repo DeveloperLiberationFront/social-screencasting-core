@@ -554,8 +554,9 @@ define(['angular',
       };
   }])
   
-  .controller('SettingsCtrl', function($scope) {
+  .controller('SettingsCtrl', function($scope, localStorageService) {
     console.log("Hello settings");
+    console.log(localStorageService);
     $scope.algorithms = [
      {
       name:"Most Widely Used",

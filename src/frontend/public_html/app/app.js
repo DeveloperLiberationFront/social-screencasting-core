@@ -28,6 +28,7 @@ define(['angular',
     'vr.directives.slider',
     'restangular',
     'breadcrumb',
+    'LocalStorageModule',
     'directives'
   ])
   
@@ -150,6 +151,10 @@ define(['angular',
         'Authorization': 'Basic ' + btoa(User.email + '|'
                                          + User.name + ':'
                                          + User.token)});
-  }]);
+  }])
+  .config(['localStorageServiceProvider', function(localStorageServiceProvider){
+    localStorageServiceProvider.setPrefix('socaster');
+  }])
+  ;
 });
 
