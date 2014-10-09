@@ -557,6 +557,7 @@ define(['angular',
   .controller('SettingsCtrl', function($scope, localStorageService) {
     console.log("Hello settings");
     console.log(localStorageService);
+
     $scope.algorithms = [
      {
       name:"Most Widely Used",
@@ -599,6 +600,10 @@ define(['angular',
       value:0
       }
     ];
+
+
+    //$scope.algorithms = [];
+    localStorageService.bind($scope, 'algorithms', $scope.algorithms, "reco_algorithm_settings", true);
   })
 
 
