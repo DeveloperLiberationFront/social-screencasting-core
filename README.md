@@ -21,3 +21,12 @@ If you will be interacting with the front end, you'll need to do a bit more setu
 6.  Refresh your ScreencastingLocalHub project in Eclipse.  If you already have a server running, it should be smart enough to get the new files.  Otherwise, open up chrome dev tools and enable Settings>Disable cache when DevTools is open, then hit Ctrl+F5 to force a full refresh.
 
 **Bower is not run automatically, so if you are getting an error about not being able to find a library/resource, it's probably because someone else added a new dependency.  Try re-running steps 4-6.**
+
+###Adding a new dependency:###
+1.  Add an entry to bower.json - this will be the name of the git repository.  If you aren't sure, try running `bower search [whatever]` in the command line to find the right package.
+2. Execute `bower install` to download the package.
+3. We need to tell require.js about the package.  Navigate to main.js and add an entry of `[moduleName] : '../lib/bower/path/to/executable'`.  leave off the .js, but include everything else.
+4.  Add a shim entry where you have `module: [dependencies]` (still in main.js)
+5. In controllers.js (or whereever, add an entry to the define at the top of the module name (the same thing you typed in main.js)
+6. Go ahead and inject the services you need (which may or may not be the same name as the module name)
+7. Not working?  Try adding an entry to the requirejs call at the bottom of main.js  (it's still a bit magic at this point)
