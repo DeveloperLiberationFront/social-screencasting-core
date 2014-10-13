@@ -98,7 +98,7 @@ define(['angular',
     })
 
   .controller('MainCtrl', function($scope, Hub, localStorageService) {
-    $scope.$emit('instrumented', "Loaded Interface");
+    $scope.$emit('instrumented', "Loaded Interface", {"algorithmWeights": $scope.algorithms});
 
      var defaultRecoAlgorithms = [
      {
@@ -631,12 +631,12 @@ define(['angular',
   }])
   
   .controller('SettingsCtrl', function($scope, localStorageService) {
-    console.log("Hello settings");
-    console.log(localStorageService);
-
+    $scope.$emit('instrumented', "Opened Settings");
     $scope.algorithms = [];
 
     localStorageService.bind($scope, 'algorithms', undefined, "reco_algorithm_settings", true);
+    
+    
   })
 
 

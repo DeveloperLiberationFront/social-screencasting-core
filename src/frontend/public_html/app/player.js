@@ -1,3 +1,5 @@
+/*global define*/
+
 define(['angular',
         'jquery',
         'lodash',
@@ -113,7 +115,7 @@ define(['angular',
 
         var active = _.any($scope.clip.event_frames, function(frame) {
           //show overlay after event, for 7 or 8 frames
-          diff = $scope.pos - frame;
+          var diff = $scope.pos - frame;
           return 0 < diff && diff < _.sample([7,8]); //Randomly choose between 7 or 8 frames. -Kevin
         });
         $scope.kbdOverlay.status = (active ? 'active' : 'inactive');
@@ -171,13 +173,13 @@ define(['angular',
         });
       };
       //select first clip
-      $scope.loadClip(clip_id ? _.find(clips, {name: clip_name}) : clips[0]);
+      $scope.loadClip(clip_id ? _.find(clips, {id: clip_id}) : clips[0]);
 
     }])
 
-  .controller('RatingCtrl', ['$scope',
-    function($scope) {
-    }])
+  .controller('RatingCtrl', function($scope) {
+
+    })
 
   .controller('FullscreenCtrl', ['$scope',
     function($scope) {
@@ -186,11 +188,11 @@ define(['angular',
         }
     }])
 
-  .controller('ClipThumbnailCtrl', ['$scope',
-    function($scope) {
-    }])
+  .controller('ClipThumbnailCtrl', function($scope) {
 
-  .controller('EditSliderCtrl', ['$scope',
-    function($scope) {
-    }]);
+    })
+
+  .controller('EditSliderCtrl', function($scope) {
+
+    });
 });
