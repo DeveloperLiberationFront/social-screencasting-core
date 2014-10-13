@@ -244,6 +244,9 @@ define(['angular',
     }])
 
   .controller('OrderCtrl', function($scope, localStorageService) {
+
+      $scope.weights = [];
+
       localStorageService.bind($scope, "weights", undefined, "reco_algorithm_settings");
 
      $scope.orderingFunc=function(field, weights){
@@ -630,6 +633,8 @@ define(['angular',
   .controller('SettingsCtrl', function($scope, localStorageService) {
     console.log("Hello settings");
     console.log(localStorageService);
+
+    $scope.algorithms = [];
 
     localStorageService.bind($scope, 'algorithms', undefined, "reco_algorithm_settings", true);
   })
