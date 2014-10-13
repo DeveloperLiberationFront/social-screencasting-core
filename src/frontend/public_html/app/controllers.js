@@ -1,5 +1,7 @@
 /*global define */
 
+var recoWeights = [];   //global because otherwise OrderingCtrl can't pass it to recommendation
+
 define(['angular',
         'jquery',
         'lodash',
@@ -15,12 +17,20 @@ define(['angular',
 
   _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
-  function recommendation(tool) {
-    var rec = _.find(tool.recommendations, {algorithm_type: 'USER_BASED_CF'});
-    if (rec) {
-      return 100000000 - rec.rank; //to switch asc/desc ordering
-    }
-    return 0;
+  function weightRecommendation(tool) {
+    //TODO memomize this?
+    return _.reduce(tool.recommendations, function(sum, reco) {
+        var weight = _.find(recoWeights, {id: reco.algorithm_type});
+        if (weight) {
+          return sum + weight.value/reco.rank;    //Weights the ranks.
+        }
+        return sum;
+    }, 0);
+    // var rec = _.find(tool.recommendations, {algorithm_type: 'USER_BASED_CF'});
+    // if (rec) {
+    //   return 100000000 - rec.rank; //to switch asc/desc ordering
+    // }
+    // return 0;
   }
 
   function ToolUsage(toolName, keypress, otherInfo) {
@@ -87,13 +97,70 @@ define(['angular',
       });
     })
 
-  .controller('MainCtrl', ['$scope', 'Hub',
-    function($scope, Hub) {
+  .controller('MainCtrl', function($scope, Hub, localStorageService) {
     $scope.$emit('instrumented', "Loaded Interface");
+
+     var defaultRecoAlgorithms = [
+     {
+      id: "MOST_WIDELY_USED",
+      name:"Most Widely Used",
+      description:'Tools are ranked by how many users use them.',
+      value:100
+      },
+      {
+      id: "MOST_FREQUENTLY_USED",
+      name:"Most Frequenly Used",
+      description:'Tools are ranked by how many times they are invoked.',
+      value:0
+      },
+      {
+      id: "ITEM_BASED_CF",
+      name:"Item-based CF",
+      description:'Uses Collaborative Filtering to rank similarity between tools. ',
+      value:0
+      },
+      {
+      id: "USER_BASED_CF",
+      name:"User-based CF",
+      description:'Uses Collaborative Filtering to find similar users and recommend tools from them. ',
+      value:0
+      },
+      {
+      id:"LATENT_MODEL_BASED_CF",
+      name:"Latent Matrix Factorization",
+      description:'Use Apache Mahout\'s <a href="https://mahout.apache.org/users/basics/svd---singular-value-decomposition.html">Singular Value Decomposition algorithm</a>',
+      value:0
+      },
+      {
+      id:"MOST_POPULAR_LEARNING_RULE",
+      name:"Most Popular Learning Rule",
+      description:'This algorithm recommends the most commonly "learned" or "discovered" tools that a user is not using.',
+      value:0
+      },
+      {
+      id:"LEARNING_RULE",
+      name:"Advanced Learning Rule",
+      description:"Recommends the most popular discoveries that a user has the prerequisites for. For example, if we have A->C, C->D, A->C, A->B as our discovery pattern and Person1 only used A, then we would recommend C first and then B but we won't recommend D because the user does not know C yet.",
+      value:0
+      },
+      {
+      id:"MOST_PREREQ_LEARNING_RULE",
+      name:"Most Prerequisite Learning Rule",
+      description:"Sorts tools based on the number of prerequisite commands a user needs for learning a unknown tool.",
+      value:0
+      }
+    ];
+
+    recoWeights = localStorageService.get("reco_algorithm_settings");
+
+    if (recoWeights === null) {
+        recoWeights = defaultRecoAlgorithms;
+        localStorageService.set("reco_algorithm_settings",defaultRecoAlgorithms);
+    }
 
       $scope.filters = {};
       $scope.ordering = {
-        field: recommendation,
+        field: weightRecommendation, //recommendation is a function defined at the top of this file
         reverse: true
       };
       $scope.tools = Hub.all('user_tools').getList();
@@ -103,7 +170,7 @@ define(['angular',
           tool.random = _.random(0,numTools);   //there will be some repeats, but the random spread should still be good enough
         });
       };
-    }])
+    })
 
   .controller('ToolListCtrl', ['$scope','Hub','Local',
     function($scope, Hub, Local) {
@@ -176,9 +243,13 @@ define(['angular',
       };
     }])
 
-  .controller('OrderCtrl', ['$scope',
-    function($scope) {
-     $scope.orderingFunc=function(field){
+  .controller('OrderCtrl', function($scope, localStorageService) {
+      localStorageService.bind($scope, "weights", undefined, "reco_algorithm_settings");
+
+     $scope.orderingFunc=function(field, weights){
+
+      recoWeights = weights;
+
       $scope.$emit('instrumented', "Ordering Tool List", field);
       if (field ==="random") {
         $scope.rerandomize();
@@ -198,14 +269,16 @@ define(['angular',
         return _.find($scope.ordering.options,{field:field}).name;
       };
 
+
+
      $scope.ordering.options = [
      {name: "Name", field:"name"},
      {name: "Users", field:"usages.$object"},
-     {name: "Recommended", field:recommendation}, 
+     {name: "Recommended", field:weightRecommendation},   //weightRecommendation is a function defined at the top of this file
      {name: "Video", field: "video"},
      {name: "Random", field: "random"}
      ];
-   }])
+   })
 
   .controller('UserFilterCtrl', ['$scope','$state', '$stateParams',
     function($scope, $state, $stateParams) {
@@ -558,52 +631,7 @@ define(['angular',
     console.log("Hello settings");
     console.log(localStorageService);
 
-    $scope.algorithms = [
-     {
-      name:"Most Widely Used",
-      description:'Tools are ranked by how many users use them.',
-      value:100
-      },
-      {
-      name:"Most Frequenly Used",
-      description:'Tools are ranked by how many times they are invoked.',
-      value:0
-      },
-      {
-      name:"Item-based CF",
-      description:'Uses Collaborative Filtering to rank similarity between tools. ',
-      value:0
-      },
-      {
-      name:"User-based CF",
-      description:'Uses Collaborative Filtering to find similar users and recommend tools from them. ',
-      value:0
-      },
-      {
-      name:"Latent Matrix Factorization",
-      description:'Use Apache Mahout\'s <a href="https://mahout.apache.org/users/basics/svd---singular-value-decomposition.html">Singular Value Decomposition algorithm</a>',
-      value:0
-      },
-      {
-      name:"Most Popular Learning Rule",
-      description:'This algorithm recommends the most commonly "learned" or "discovered" tools that a user is not using.',
-      value:0
-      },
-      {
-      name:"Advanced Learning Rule",
-      description:"Recommends the most popular discoveries that a user has the prerequisites for. For example, if we have A->C, C->D, A->C, A->B as our discovery pattern and Person1 only used A, then we would recommend C first and then B but we won't recommend D because the user does not know C yet.",
-      value:0
-      },
-      {
-      name:"Most Prerequisite Learning Rule",
-      description:"Sorts tools based on the number of prerequisite commands a user needs for learning a unknown tool.",
-      value:0
-      }
-    ];
-
-
-    //$scope.algorithms = [];
-    localStorageService.bind($scope, 'algorithms', $scope.algorithms, "reco_algorithm_settings", true);
+    localStorageService.bind($scope, 'algorithms', undefined, "reco_algorithm_settings", true);
   })
 
 
