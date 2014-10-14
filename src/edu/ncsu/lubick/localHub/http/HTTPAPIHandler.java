@@ -28,7 +28,6 @@ import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.ClipUtils;
-import edu.ncsu.lubick.util.FileUtilities;
 
 public class HTTPAPIHandler extends AbstractHandler {
 
@@ -174,28 +173,36 @@ public class HTTPAPIHandler extends AbstractHandler {
 		
 		String clipId = pieces[3];
 		
+		replyWithAllImagesForClip(response, clipId);
+		
+	}
+
+	/*
+	 * Returns all images, animation frames or otherwise, for a given clip
+	 */
+	private void replyWithAllImagesForClip(HttpServletResponse response, String clipId) throws IOException
+	{
 		File clipDir = new File("renderedVideos",clipId);
-		JSONArray frameList = ClipUtils.makeFrameListForClip(clipDir);
-		frameList = ClipUtils.extendFrameListWithAnimations(frameList, clipDir);
 		try
 		{
 			JSONArray returnArray = new JSONArray();
+			File[] images = clipDir.listFiles();
 			
-			for(int i = 0;i< frameList.length(); i++) {
-				String imageName = frameList.getString(i);
-				File file;
-				if (!imageName.endsWith(PostProductionHandler.FULLSCREEN_IMAGE_FORMAT)) {
-					file = new File("renderedVideos/"+clipId, imageName + '.'+ PostProductionHandler.ANIMATION_FORMAT);
-					logger.info(file.getAbsolutePath());
-					BufferedImage img = ImageIO.read(file);
+			for(int i = 0;i< images.length; i++) {
+				File file = images[i];
 
+				logger.info(file.getAbsolutePath());
+				BufferedImage img = ImageIO.read(file);
+				
+				String name = file.getName();
+				if (!name.endsWith(PostProductionHandler.FULLSCREEN_IMAGE_FORMAT)) {
 					ImageIO.write(img, PostProductionHandler.ANIMATION_FORMAT, byteBufferForImage);
+					
+					//animation frames need to be reported without an ending
+					if (name.contains("."))
+						name = name.substring(0, name.indexOf('.'));
 				}
 				else {
-					file = new File("renderedVideos/"+clipId, imageName);
-					logger.info(file.getAbsolutePath());
-					BufferedImage img = ImageIO.read(file);
-
 					ImageIO.write(img, PostProductionHandler.FULLSCREEN_IMAGE_FORMAT, byteBufferForImage);
 				}
 				
@@ -204,7 +211,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 				
 				
 				JSONObject jobj = new JSONObject();
-				jobj.put("name", imageName);
+				jobj.put("name", name);
 				jobj.put("data", Base64.encodeBase64String(imageAsBytes));
 
 
@@ -220,7 +227,6 @@ public class HTTPAPIHandler extends AbstractHandler {
 		finally {
 			byteBufferForImage.reset();
 		}
-		
 	}
 
 	private void handleGetClipsForTool(HttpServletResponse response) throws IOException

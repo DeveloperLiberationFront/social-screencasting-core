@@ -115,6 +115,7 @@ public class BrowserMediaPackageUploader {
 			}
 
 			File[] allFiles = packageDirectory.listFiles();
+			//we upload all frames and animation images here.  
 			return uploadAllFiles(allFiles, clipOptions);
 		}
 		catch (Exception e) {
@@ -133,10 +134,8 @@ public class BrowserMediaPackageUploader {
 			return null;
 		}
 		
-		JSONArray framesAndAnimations = ClipUtils.makeFrameListForClip(packageDirectory, clipOptions.startFrame, clipOptions.endFrame);
-		framesAndAnimations = ClipUtils.extendFrameListWithAnimations(framesAndAnimations, packageDirectory);
-		
-		jobj.put("frames", framesAndAnimations);
+		// we only report the frames here.  Animation data will be uploaded later
+		jobj.put("frames", ClipUtils.makeFrameListForClip(packageDirectory, clipOptions.startFrame, clipOptions.endFrame));
 		
 		//we have to do this in two steps, because the server doesn't handle lists well in conjunction with Multipart entities
 		JSONObject thumbnailUpdateObj = reportThumbnail(packageDirectory, jobj);
@@ -245,7 +244,6 @@ public class BrowserMediaPackageUploader {
 			jobj.put("type", "mouse");
 		} else {
 			jobj.put("type", "keyboard");
-			frameList = ClipUtils.extendFrameListWithAnimations(frameList, packageDirectory);
 		}
 		
 		
