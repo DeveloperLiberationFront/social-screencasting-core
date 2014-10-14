@@ -174,24 +174,37 @@ public class HTTPAPIHandler extends AbstractHandler {
 		
 		String clipId = pieces[3];
 		
-		JSONArray frameList = ClipUtils.makeFrameListForClip(new File("renderedVideos",clipId));
-		
+		File clipDir = new File("renderedVideos",clipId);
+		JSONArray frameList = ClipUtils.makeFrameListForClip(clipDir);
+		frameList = ClipUtils.extendFrameListWithAnimations(frameList, clipDir);
 		try
 		{
 			JSONArray returnArray = new JSONArray();
 			
 			for(int i = 0;i< frameList.length(); i++) {
-				File file = new File("renderedVideos/"+clipId, frameList.getString(i));
-				logger.info(file.getAbsolutePath());
-				BufferedImage img = ImageIO.read(file);
+				String imageName = frameList.getString(i);
+				File file;
+				if (!imageName.endsWith(PostProductionHandler.FULLSCREEN_IMAGE_FORMAT)) {
+					file = new File("renderedVideos/"+clipId, imageName + '.'+ PostProductionHandler.ANIMATION_FORMAT);
+					logger.info(file.getAbsolutePath());
+					BufferedImage img = ImageIO.read(file);
 
-				ImageIO.write(img, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, byteBufferForImage);
+					ImageIO.write(img, PostProductionHandler.ANIMATION_FORMAT, byteBufferForImage);
+				}
+				else {
+					file = new File("renderedVideos/"+clipId, imageName);
+					logger.info(file.getAbsolutePath());
+					BufferedImage img = ImageIO.read(file);
+
+					ImageIO.write(img, PostProductionHandler.FULLSCREEN_IMAGE_FORMAT, byteBufferForImage);
+				}
+				
 
 				byte[] imageAsBytes = byteBufferForImage.toByteArray();
 				
 				
 				JSONObject jobj = new JSONObject();
-				jobj.put("name", "frame"+FileUtilities.padIntTo4Digits(i)+".jpg");
+				jobj.put("name", imageName);
 				jobj.put("data", Base64.encodeBase64String(imageAsBytes));
 
 

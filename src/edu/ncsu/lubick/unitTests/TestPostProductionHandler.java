@@ -271,7 +271,7 @@ public class TestPostProductionHandler
 		Collections.sort(listOfFileNames);
 		for(int i = 0;i<expectedFrames;i++)
 		{
-			assertEquals("frame"+FileUtilities.padIntTo4Digits(i)+"."+PostProductionHandler.INTERMEDIATE_FILE_FORMAT, listOfFileNames.get(i));
+			assertEquals("frame"+FileUtilities.padIntTo4Digits(i)+"."+PostProductionHandler.FULLSCREEN_IMAGE_FORMAT, listOfFileNames.get(i));
 		}
 		
 	}

@@ -22,7 +22,7 @@
         </button>
         <div id='sliders'>
           <div ng-mousedown="player.playing = false">
-            <slider floor='0' ceiling='{{clip.frames.length -1}}' step='1' ng-model='player.pos' ng-change='posChange()'>
+            <slider floor='0' ceiling='{{clip.end}}' step='1' ng-model='player.pos' ng-change='posChange()'>
             </slider>
           </div>
           <div ng-controller='EditSliderCtrl' ng-if='player.editMode'>

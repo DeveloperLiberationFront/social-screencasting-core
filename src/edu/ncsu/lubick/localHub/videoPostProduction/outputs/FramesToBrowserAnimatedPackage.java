@@ -119,7 +119,7 @@ public class FramesToBrowserAnimatedPackage extends AbstractImagesToMediaOutput 
 		{
 			File originalImageFile = sortedFrameFiles[i];
 			
-			String destinationFileNumberAndExtension = FileUtilities.padIntTo4Digits(frameIndex) + "."+PostProductionHandler.INTERMEDIATE_FILE_FORMAT;
+			String destinationFileNumberAndExtension = FileUtilities.padIntTo4Digits(frameIndex) + "."+PostProductionHandler.FULLSCREEN_IMAGE_FORMAT;
 			String destinationFileName = "frame" + destinationFileNumberAndExtension;
 			File destination = new File(browserPackageRootDir, destinationFileName);
 			Files.copy(originalImageFile.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);

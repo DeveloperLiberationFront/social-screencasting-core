@@ -74,18 +74,11 @@ define(['angular',
         $scope.player.status = 'loading';
         
         images.then(function(images) {
-          clip.images = images;
-
-          var nonScreencastFrames = _.reduce(images, function(sum, image) {
-            if (image.name.indexOf("frame") == -1) {
-              return sum + 1;
-            }
-            return sum;
-          }, 0);
+          clip.images = images; //these include frames and animation images.
 
           _.extend(clip, {
             start: 0,
-            end: clip.frames.length-1 - nonScreencastFrames,
+            end: clip.frames.length-1,
           });
           $scope.player.status = 'ready';
           $scope.$broadcast('refreshSlider');

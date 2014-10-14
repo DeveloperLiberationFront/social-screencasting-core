@@ -107,7 +107,7 @@ public class BrowserMediaPackageUploader {
 				return false;
 			}
 
-			this.current_external_clip_id = makeExternalClip(packageDirectory, clipOptions);
+			this.current_external_clip_id = makeAndUploadExternalClip(packageDirectory, clipOptions);
 
 			logger.info("Made clip id "+current_external_clip_id);
 			if (current_external_clip_id == null) {
@@ -123,7 +123,7 @@ public class BrowserMediaPackageUploader {
 	}
 
 
-	private String makeExternalClip(File packageDirectory, ClipOptions clipOptions) throws JSONException, URISyntaxException, IOException
+	private String makeAndUploadExternalClip(File packageDirectory, ClipOptions clipOptions) throws JSONException, URISyntaxException, IOException
 	{
 		JSONObject jobj = prepareClipObject(packageDirectory, clipOptions);
 		 JSONObject postObj = postClipObject(jobj);
@@ -133,7 +133,11 @@ public class BrowserMediaPackageUploader {
 			return null;
 		}
 		
-		jobj.put("frames", ClipUtils.makeFrameListForClip(packageDirectory, clipOptions.startFrame, clipOptions.endFrame));
+		JSONArray framesAndAnimations = ClipUtils.makeFrameListForClip(packageDirectory, clipOptions.startFrame, clipOptions.endFrame);
+		framesAndAnimations = ClipUtils.extendFrameListWithAnimations(framesAndAnimations, packageDirectory);
+		
+		jobj.put("frames", framesAndAnimations);
+		
 		//we have to do this in two steps, because the server doesn't handle lists well in conjunction with Multipart entities
 		JSONObject thumbnailUpdateObj = reportThumbnail(packageDirectory, jobj);
 		
@@ -333,17 +337,20 @@ public class BrowserMediaPackageUploader {
 			BufferedImage image = ImageIO.read(imageFile);
 			BufferedImage croppedImage = (rect == null? image: image.getSubimage(rect.x, rect.y, rect.width, rect.height));
 
+			//png has an alpha channel, which gets wonky with the conversion to jpg
+			//This coerces it to be rbg
 			BufferedImage rbgImage = new BufferedImage(croppedImage.getWidth(), croppedImage.getHeight(), BufferedImage.TYPE_INT_RGB);
 			
 			rbgImage.createGraphics().drawImage(croppedImage, null, null);
 			
-			ImageIO.write(rbgImage, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, byteBufferForImage);
+			ImageIO.write(rbgImage, PostProductionHandler.FULLSCREEN_IMAGE_FORMAT, byteBufferForImage);
 
 			byte[] croppedJPGForTransfer = byteBufferForImage.toByteArray();
 
 			String fileName = imageFile.getName();
 			
-			this.reportImageByteArray(croppedJPGForTransfer, fileName.substring(0, fileName.indexOf('.')));
+			String truncatedFileName = fileName.contains(".") ? fileName.substring(0, fileName.indexOf('.')) : fileName;
+			this.reportImageByteArray(croppedJPGForTransfer, truncatedFileName);
 		}
 		finally 
 		{

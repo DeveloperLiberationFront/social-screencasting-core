@@ -16,13 +16,15 @@ import edu.ncsu.lubick.util.FileUtilities;
 public class PostProductionHandler
 {
 	public static final String MEDIA_OUTPUT_FOLDER = "renderedVideos"+File.separator;
-	public static final String INTERMEDIATE_FILE_FORMAT = "jpg";
+	public static final String FULLSCREEN_IMAGE_FORMAT = "jpg";
+	public static final String ANIMATION_FORMAT = "png";
 	public static final int FRAME_RATE = 5;
 	public static final boolean DELETE_IMAGES_AFTER_USE = false;
 
 	private static Logger logger = Logger.getLogger(PostProductionHandler.class.getName());
 
 	private static final int RUN_UP_TIME = 5;
+	
 
 	private FramesToBrowserAnimatedPackage browserMediaMaker = null;
 	
@@ -106,7 +108,7 @@ public class PostProductionHandler
 			@Override
 			public boolean accept(File pathname)
 			{
-				return pathname.getName().endsWith(PostProductionHandler.INTERMEDIATE_FILE_FORMAT);
+				return pathname.getName().endsWith(PostProductionHandler.FULLSCREEN_IMAGE_FORMAT);
 			}
 		});
 		Arrays.sort(allFrames);

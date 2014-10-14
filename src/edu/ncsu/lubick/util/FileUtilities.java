@@ -140,7 +140,7 @@ public class FileUtilities
 	{
 		synchronized (formatterForFrames)
 		{
-			return "frame."+formatterForFrames.format(date)+"."+PostProductionHandler.INTERMEDIATE_FILE_FORMAT;	
+			return "frame."+formatterForFrames.format(date)+"."+PostProductionHandler.FULLSCREEN_IMAGE_FORMAT;	
 		}
 	}
 

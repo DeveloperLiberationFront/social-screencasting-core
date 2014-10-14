@@ -103,7 +103,7 @@ public class ClipUtils {
 		synchronized (byteBufferForImage)
 		{
 			byteBufferForImage.reset();
-			ImageIO.write(scaledImage, PostProductionHandler.INTERMEDIATE_FILE_FORMAT, byteBufferForImage);
+			ImageIO.write(scaledImage, PostProductionHandler.FULLSCREEN_IMAGE_FORMAT, byteBufferForImage);
 			scaledImageData = byteBufferForImage.toByteArray();
 		}
 
