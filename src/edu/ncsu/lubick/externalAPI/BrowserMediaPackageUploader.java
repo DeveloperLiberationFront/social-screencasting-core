@@ -222,11 +222,7 @@ public class BrowserMediaPackageUploader {
 		JSONObject jobj = new JSONObject();
 		jobj.put("name", packageDirectory.getName());
 		jobj.put("tool", current_external_tool_id);
-		if (ToolUsage.MENU_KEY_PRESS.equals(currentToolUsage.getToolKeyPresses())) {
-			jobj.put("type", "mouse");
-		} else {
-			jobj.put("type", "keyboard");
-		}
+		
 		JSONArray emailJarr = new JSONArray();
 		emailJarr.put(clipOptions.shareWithEmail);
 		
@@ -240,6 +236,15 @@ public class BrowserMediaPackageUploader {
 		jobj.put("share", emailJarr);
 		
 		JSONArray frameList = ClipUtils.makeFrameListForClipNoExtensions(packageDirectory, clipOptions.startFrame, clipOptions.endFrame);
+		
+		if (ToolUsage.MENU_KEY_PRESS.equals(currentToolUsage.getToolKeyPresses())) {
+			jobj.put("type", "mouse");
+		} else {
+			jobj.put("type", "keyboard");
+			frameList = ClipUtils.extendFrameListWithAnimations(frameList, packageDirectory);
+		}
+		
+		
 		jobj.put("frames", frameList);
 		return jobj;
 	}

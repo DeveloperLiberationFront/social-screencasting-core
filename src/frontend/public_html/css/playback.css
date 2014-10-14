@@ -103,6 +103,10 @@
     bottom: 20px;
     left: 20px;
     width: 40%;
+    background-color:rgba(255,255,255,0.5);
+    border: 1px solid rgba(0,0,0,.3);
+    border-radius: 1px;
+    -webkit-border-radius: 1px;
 }
 
 #controlPanel > div {

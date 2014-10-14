@@ -109,4 +109,21 @@ public class ClipUtils {
 
 		return scaledImageData;
 	}
+
+	public static JSONArray extendFrameListWithAnimations(JSONArray frameList, File clipDir)
+	{
+		if (clipDir.exists() && clipDir.isDirectory())
+		{
+			String[] files = clipDir.list();
+			Arrays.sort(files);
+			
+			for(String imageFile: files)
+			{
+				if (!imageFile.startsWith("frame")) {
+					frameList.put(imageFile.substring(0, imageFile.indexOf('.')));
+				}	
+			}
+		}
+		return frameList;
+	}
 }

@@ -75,20 +75,31 @@ define(['angular',
         
         images.then(function(images) {
           clip.images = images;
+
+          var nonScreencastFrames = _.reduce(images, function(sum, image) {
+            if (image.name.indexOf("frame") == -1) {
+              return sum + 1;
+            }
+            return sum;
+          }, 0);
+
           _.extend(clip, {
             start: 0,
-            end: clip.frames.length-1,
+            end: clip.frames.length-1 - nonScreencastFrames,
           });
           $scope.player.status = 'ready';
           $scope.$broadcast('refreshSlider');
-        });
+        }, function(stuff)  { console.log(stuff);}, function(stuff)  { console.log(stuff);});
       }
         loadClip($scope.clip);
 
         $scope.getImage = function(name, type) {
           var image = _.find($scope.clip.images, {name: name});
-          if (image)
+          if (image) {
             return Base64Img(image.data,type);
+          } else {
+            console.log("Couldn't find "+name);
+          }
         };
 
         $scope.$watch('clip', function(newValue) {
@@ -116,7 +127,7 @@ define(['angular',
         var active = _.any($scope.clip.event_frames, function(frame) {
           //show overlay after event, for 7 or 8 frames
           var diff = $scope.pos - frame;
-          return 0 < diff && diff < _.sample([7,8]); //Randomly choose between 7 or 8 frames. -Kevin
+          return 0 < diff && diff < 8;
         });
         $scope.kbdOverlay.status = (active ? 'active' : 'inactive');
       };
@@ -181,12 +192,11 @@ define(['angular',
 
     })
 
-  .controller('FullscreenCtrl', ['$scope',
-    function($scope) {
+  .controller('FullscreenCtrl', function($scope) {
         if (!$scope.isCropping) {
             $scope.isFullscreen = !$scope.isFullscreen;
         }
-    }])
+    })
 
   .controller('ClipThumbnailCtrl', function($scope) {
 
