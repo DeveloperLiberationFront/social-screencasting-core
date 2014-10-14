@@ -119,7 +119,7 @@ define(['angular',
 
         var active = _.any($scope.clip.event_frames, function(frame) {
           //show overlay after event, for 7 or 8 frames
-          var diff = $scope.pos - frame;
+          var diff = $scope.player.pos - frame;
           return 0 < diff && diff < 8;
         });
         $scope.kbdOverlay.status = (active ? 'active' : 'inactive');
