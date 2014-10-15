@@ -24,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import edu.ncsu.lubick.Runner;
+import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
@@ -333,7 +334,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 	private JSONObject makeRecordingObj() throws JSONException {
 		JSONObject status = new JSONObject();
 		status.put("id", "recording");
-		status.put("status", Runner.isRunning());
+		status.put("status", LocalHub.isRunning());
 		return status;
 	}
 		

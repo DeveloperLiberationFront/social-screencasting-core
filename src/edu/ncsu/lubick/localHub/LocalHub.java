@@ -250,9 +250,9 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
 	}
 
-	public boolean isRunning()
+	public static boolean isRunning()
 	{
-		return this.isRunning;
+		return singletonHub.isRunning;
 	}
 
 
@@ -527,7 +527,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 				screenRecordingModule.unpauseRecording();
 				logger.info("Unpausing Recording module");
 			} else
-				logger.error("Can't unpause Recording module because there is no active application.");
+				logger.info("Not unpausing Recording module because there is no active application.");
 		}
 	}
 }
