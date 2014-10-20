@@ -28,10 +28,16 @@ define(['angular', 'lodash', 'ng-resource', 'restangular'], function (ng, _) {
       });
     }])
 
+    .factory('Yammer', ['Restangular', function(Restangular) {
+      return Restangular.withConfig(function(RestangularConfigurer) {
+        RestangularConfigurer.setBaseUrl('/api');
+      });
+    }])
+
     .factory('Base64Img', function() {
       return function(data, type) {
         type = _.isUndefined(type) ? 'jpg' : type; 
         return 'data:image/' + type + ';base64,' + data;
       };
-    })
+    });
 });
