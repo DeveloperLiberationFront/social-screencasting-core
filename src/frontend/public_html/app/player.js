@@ -181,21 +181,15 @@ define(['angular',
 
     }])
 
-  .controller('RatingCtrl', function($scope) {
+  .controller('RatingCtrl', function() {
 
     })
 
-  .controller('FullscreenCtrl', function($scope) {
-        if (!$scope.isCropping) {
-            $scope.isFullscreen = !$scope.isFullscreen;
-        }
-    })
-
-  .controller('ClipThumbnailCtrl', function($scope) {
+  .controller('ClipThumbnailCtrl', function() {
 
     })
 
-  .controller('EditSliderCtrl', function($scope) {
+  .controller('EditSliderCtrl', function() {
 
     });
 });

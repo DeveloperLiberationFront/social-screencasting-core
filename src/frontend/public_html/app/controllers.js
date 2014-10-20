@@ -696,7 +696,11 @@ define(['angular',
 
         $scope.$emit('instrumented', "No Share Reason Dropdown toggled", $scope.dropDownStatus.isopen);
       };
-    }]);
+    }])
+
+  .controller('TrustCtrl', function($rootScope, Yammer, localStorageService) {
+    
+  });
 
     return Controllers;
  });
