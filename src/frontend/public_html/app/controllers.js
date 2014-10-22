@@ -699,8 +699,14 @@ define(['angular',
     }])
 
   .controller('TrustCtrl', function($rootScope, Yammer, localStorageService) {
-    window.Yammer = Yammer;
-    console.log(Yammer.all("messages").getList()); //doesn't work because of Access-control-allow-origin headers
+    //window.Yammer = Yammer;
+    //console.log(Yammer.all("messages").getList()); //doesn't work because of Access-control-allow-origin headers
+    Yammer.connect.loginButton('#yammer-login', function (resp) {
+     if (resp.authResponse) {
+      document.getElementById('yammer-login').innerHTML = 'Welcome to Yammer!'; 
+    } 
+  });
+
   });
 
     return Controllers;

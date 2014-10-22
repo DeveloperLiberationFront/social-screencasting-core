@@ -28,11 +28,9 @@ define(['angular', 'lodash', 'ng-resource', 'restangular'], function (ng, _) {
       });
     }])
 
-    .factory('Yammer', ['Restangular', function(Restangular) {
-      return Restangular.withConfig(function(RestangularConfigurer) {
-        RestangularConfigurer.setBaseUrl('https://www.yammer.com/api/v1');
-      });
-    }])
+    .factory('Yammer', function() {
+      return window.yam;
+    })
 
     .factory('Base64Img', function() {
       return function(data, type) {

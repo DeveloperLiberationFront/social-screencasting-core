@@ -1,4 +1,20 @@
-//Not really sure the right way to do this, unfortunately...
+/*global requirejs */
+
+//overriding create node hook so we can add our appid to the yammer script tag
+requirejs.createNode = function (config, moduleName) {
+        var node = config.xhtml ?
+                document.createElementNS('http://www.w3.org/1999/xhtml', 'html:script') :
+                document.createElement('script');
+        node.type = config.scriptType || 'text/javascript';
+        node.charset = 'utf-8';
+        node.async = true;
+
+        if (moduleName == "yammer") {
+            node.setAttribute("data-app-id", "RpxgqAwYTcYmtE6IHpsA");
+        }
+
+        return node;
+    };
 
 requirejs.config({
     baseUrl: 'app',
@@ -25,7 +41,8 @@ requirejs.config({
         'LocalStorageModule' : '../lib/bower/angular-local-storage/dist/angular-local-storage',
         'tablesorter': '../lib/bower/jquery.tablesorter/js',
         'jquery.metadata': '../lib/bower/jquery.metadata/jquery.metadata',
-        'jquery.cropper': '../lib/cropper/cropper'
+        'jquery.cropper': '../lib/cropper/cropper',
+        'yammer' : 'https://c64.assets-yammer.com/assets/platform_js_sdk'
     },
     map: {
         '*': {
@@ -51,7 +68,8 @@ requirejs.config({
         'jquery.cropper':['jquery'],
         'tablesorter': ['jquery'],
         'jquery.metadata': ['jquery'],
-        'lib/jquery.fullscreen': ['jquery']
+        'lib/jquery.fullscreen': ['jquery'],
+        'yammer' : ['jquery', 'lodash']
     },
 	priority: [
         "angular", "jquery"
@@ -69,7 +87,8 @@ requirejs([
     'bootstrap',
     'controllers',
     'services',
-    'LocalStorageModule'
+    'LocalStorageModule',
+    'yammer'
 ], function(angular, app, boot) {
   boot.bootstrap({
     element: document,

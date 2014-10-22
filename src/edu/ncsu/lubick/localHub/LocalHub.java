@@ -34,6 +34,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	public static final String HIDDEN_PLUGIN_PREFIX = "[";
 	
 	private static final LocalHub singletonHub;
+	private static final long HEART_BEAT_PERIOD = 60_000; //once a minute
 	private static Logger logger;
 
 	// Static initializer to get the logging path set up and create the hub
@@ -61,7 +62,10 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	private BrowserMediaPackageUploader clipUploader;
 	
 	private Map<String, Boolean> applicationsRecordingStatusMap = new HashMap<>();
-	private Timer pausingTimer = new Timer(true);	//Daemon timer
+	
+	private Timer heartBeatTimer = new Timer(true);//Daemon timer, won't hold up termination
+	
+	private Timer pausingTimer = new Timer(true);	//Daemon timer, won't hold up termination
 	private TimerTask pausingTimerTask = null;
 
 	public static LocalHubDebugAccess startTESTINGServerAndReturnDebugAccess(String screencastMonitorLocation)
@@ -78,7 +82,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	public static LocalHubDebugAccess startServer(String screencastMonitorLocation, String databaseLocation, boolean wantHTTP, boolean wantScreenRecording,
 			boolean wantRemoteToolReporting, boolean isDebug)
 	{
-		if (!singletonHub.isRunning())
+		if (!LocalHub.isRunning())
 		{
 			singletonHub.isDebug = isDebug;
 			singletonHub.enableHTTPServer(wantHTTP);
@@ -164,6 +168,8 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 				reportToolUsage(tu);
 			}
 		};
+		
+		heartBeatTimer.schedule(heartBeat, new Date(), HEART_BEAT_PERIOD);
 	}
 
 	private void setUpUserManager()
@@ -441,7 +447,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 		@Override
 		public boolean isRunning()
 		{
-			return hubToDebug.isRunning();
+			return LocalHub.isRunning();
 		}
 	
 	
