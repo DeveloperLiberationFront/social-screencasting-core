@@ -33,6 +33,12 @@ define(['angular',
     // return 0;
   }
 
+  function calculateTrust(Yammer, userInfo) {
+    //TODO
+
+    //can access likes with https://www.yammer.com/api/v1/messages/liked_by/current.json
+  }
+
   function ToolUsage(toolName, keypress, otherInfo) {
     //all the this.names are the same as on the server ToolStream.java
     this.Tool_Name = toolName;
@@ -699,13 +705,20 @@ define(['angular',
     }])
 
   .controller('TrustCtrl', function($rootScope, Yammer, localStorageService) {
-    //window.Yammer = Yammer;
-    //console.log(Yammer.all("messages").getList()); //doesn't work because of Access-control-allow-origin headers
-    Yammer.connect.loginButton('#yammer-login', function (resp) {
-     if (resp.authResponse) {
-      document.getElementById('yammer-login').innerHTML = 'Welcome to Yammer!'; 
-    } 
-  });
+    Yammer.getLoginStatus(
+      function(response) {
+        if (response.authResponse) {
+          calculateTrust(Yammer,response);
+        }
+        else {
+          Yammer.platform.login(function (response) { //prompt user to login and authorize your app, as necessary
+            if (response.authResponse) {
+              calculateTrust(Yammer,response);
+            }
+          });
+        }
+      }
+  );
 
   });
 
