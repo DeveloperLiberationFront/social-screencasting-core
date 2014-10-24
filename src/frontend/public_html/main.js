@@ -51,6 +51,7 @@ requirejs.config({
     },
     shim: {
 	    'angular' : {'exports' : 'angular'},
+        'lodash' : {'exports':['_','lodash']},
         'ng-route': ['angular'],
         'ng-bootstrap': ['angular'],
         'ng-resource': ['angular'],

@@ -33,8 +33,50 @@ define(['angular',
     // return 0;
   }
 
-  function calculateTrust(Yammer, userInfo) {
-    //TODO
+  function calculateTrust(Yammer, userInfo, localStorageService) {
+    var myUserId = userInfo.access_token.user_id;
+    // Check to see if we have pulled the like info recently
+
+    // Pull the like info, if ours is stale.  Put into a table of id: likes
+
+    var likeMap = {};
+
+    Yammer.platform.request({
+        url: "messages/liked_by/current.json",   
+        method: "GET",
+        success: function (likes) { 
+          console.dir(likes);
+          _.forEach(likes.messages, function(message) {
+            var authorID = message.sender_id;
+            if (authorID !== undefined) {
+              // this will be an array
+              var containsUser = _.where(message.liked_by.names, {"user_id": myUserId});
+              
+              if (containsUser.length > 0) {
+                if (likeMap[authorID] === undefined) {
+                  likeMap[authorID] = 1;
+                } else {
+                  likeMap[authorID] = likeMap[authorID] + 1;
+                }
+              }
+              
+            } 
+          });
+          console.log(likeMap);
+          
+        },
+        error: function (error) {
+          console.error(error);
+        }
+      });
+
+
+    // Check to see if id is in our stored table of ids : emails, if not, look it up and add to the list
+
+    // Update email:trust table with like information
+
+    // TODO repeat with messages?
+
 
     //can access likes with https://www.yammer.com/api/v1/messages/liked_by/current.json
   }
@@ -708,12 +750,16 @@ define(['angular',
     Yammer.getLoginStatus(
       function(response) {
         if (response.authResponse) {
-          calculateTrust(Yammer,response);
+          console.log("Logged into Yammer");
+          calculateTrust(Yammer, response, localStorageService);
         }
         else {
           Yammer.platform.login(function (response) { //prompt user to login and authorize your app, as necessary
             if (response.authResponse) {
-              calculateTrust(Yammer,response);
+              console.log("Yammer login");
+              calculateTrust(Yammer, response, localStorageService);
+            } else {
+              console.log("Could not log into Yammer");
             }
           });
         }
