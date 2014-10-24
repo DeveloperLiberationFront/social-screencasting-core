@@ -33,6 +33,42 @@ define(['angular',
     // return 0;
   }
 
+
+function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
+    var idsToEmailMap = localStorageService.get("idsToEmailMap");
+
+    if (idsToEmailMap === null) {
+      idsToEmailMap = {};
+      Yammer.platform.request({
+        url: "users.json",   
+        method: "GET",
+        success: function (users) { 
+          console.dir(users);
+          _.each(users, function(value) {
+            var id = value.id;
+            var emails = value.contact.email_addresses;
+
+            idsToEmailMap[id] = _.pluck(emails, "address");
+          });
+
+          localStorageService.set("idsToEmailMap", idsToEmailMap);
+
+          updateTrustWithLikes(likeMap, Yammer, localStorageService); 
+        },
+        error: function (error) {
+          console.error(error);
+        }
+      });
+      return; //the recursive call in yammer would have handled it - or we failed and cant do anything
+    }
+
+    console.log(idsToEmailMap);
+
+    
+
+}
+
+
   function calculateTrust(Yammer, userInfo, localStorageService) {
     var myUserId = userInfo.access_token.user_id;
     // Check to see if we have pulled the like info recently
@@ -62,6 +98,8 @@ define(['angular',
               
             } 
           });
+
+          updateTrustWithLikes(likeMap, Yammer, localStorageService);
           console.log(likeMap);
           
         },
