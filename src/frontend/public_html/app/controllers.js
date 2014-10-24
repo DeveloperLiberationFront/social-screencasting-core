@@ -33,38 +33,69 @@ define(['angular',
     // return 0;
   }
 
+  function wait(condition, callback) {
+    if (condition()) {
+      setTimeout(function() {
+        wait(condition, callback);
+      }, 1000);
+    } else {
+      callback();
+    }
+    
+  }
+
 
 function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
     var idsToEmailMap = localStorageService.get("idsToEmailMap");
+    var emailToLikeMap = {};
 
     if (idsToEmailMap === null) {
       idsToEmailMap = {};
-      Yammer.platform.request({
-        url: "users.json",   
-        method: "GET",
-        success: function (users) { 
-          console.dir(users);
-          _.each(users, function(value) {
-            var id = value.id;
-            var emails = value.contact.email_addresses;
-
-            idsToEmailMap[id] = _.pluck(emails, "address");
-          });
-
-          localStorageService.set("idsToEmailMap", idsToEmailMap);
-
-          updateTrustWithLikes(likeMap, Yammer, localStorageService); 
-        },
-        error: function (error) {
-          console.error(error);
-        }
-      });
-      return; //the recursive call in yammer would have handled it - or we failed and cant do anything
     }
 
-    console.log(idsToEmailMap);
+    var yammerRequestCounts = 0;
+    var waitingOnYammer = [];
+    _.each(likeMap, function(likeCount, user_id) {
 
-    
+        if (idsToEmailMap[user_id] !== undefined) {
+          _.each(idsToEmailMap[user_id], function(email) {
+            emailToLikeMap[email] = likeCount;
+          });
+        } else {
+          waitingOnYammer[yammerRequestCounts] = true;
+          _.delay(function(index) {
+            Yammer.platform.request({
+              url: "users/"+user_id+".json",   
+              method: "GET",
+              success: function (user) { 
+                var emailArray = _.pluck(user.contact.email_addresses, "address");
+                idsToEmailMap[user_id] = emailArray;
+                _.each(emailArray, function(email) {
+                  emailToLikeMap[email] = likeCount;
+                });
+                waitingOnYammer[index] = false;
+              },
+              error: function (error) {
+                console.error(error);
+                waitingOnYammer[index] = false;
+              }
+            });
+          },
+        //this is to avoid having more than 10 requests in 10 seconds
+         yammerRequestCounts * 1000, yammerRequestCounts);  
+
+          yammerRequestCounts++;
+        }
+      }); 
+
+    wait(function() {
+      return _.some(waitingOnYammer);   //wait until all flags are cleared.
+    }, function() {
+      localStorageService.set("idsToEmailMap", idsToEmailMap);
+      localStorageService.set("emailToLikes", emailToLikeMap);
+      console.log("Done");
+      console.log(emailToLikeMap);
+    });
 
 }
 
