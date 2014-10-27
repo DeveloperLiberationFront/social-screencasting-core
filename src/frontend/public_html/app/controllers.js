@@ -24,7 +24,7 @@ define(['angular',
 
   function trustForUserEmail(email) {
     if (trustWeights[email] === undefined) {
-      return .1;
+      return 0.1;
     }
     return 1/(Math.pow(Math.E, (log_mean - trustWeights[email])/log_scale) + 1);
   }
