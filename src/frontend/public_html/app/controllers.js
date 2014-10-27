@@ -1,6 +1,10 @@
 /*global define */
 
-var recoWeights = [];   //global because otherwise OrderingCtrl can't pass it to recommendation
+var recoWeights = [];   //global because otherwise OrderingCtrl can't pass 
+var trustWeights = {};  // them to weightRecommendation
+
+var log_mean = 3;       //logistic trust constants
+var log_scale = 1.365359;   //3/ln(9)
 
 define(['angular',
         'jquery',
@@ -17,20 +21,38 @@ define(['angular',
 
   _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
+
+  function trustForUserEmail(email) {
+    if (trustWeights[email] === undefined) {
+      return .1;
+    }
+    return 1/(Math.pow(Math.E, (log_mean - trustWeights[email])/log_scale) + 1);
+  }
+
   function weightRecommendation(tool) {
     //TODO memomize this?
-    return _.reduce(tool.recommendations, function(sum, reco) {
+    var baseWeight = _.reduce(tool.recommendations, function(sum, reco) {
         var weight = _.find(recoWeights, {id: reco.algorithm_type});
         if (weight) {
           return sum + weight.value/reco.rank;    //Weights the ranks.
         }
         return sum;
     }, 0);
-    // var rec = _.find(tool.recommendations, {algorithm_type: 'USER_BASED_CF'});
-    // if (rec) {
-    //   return 100000000 - rec.rank; //to switch asc/desc ordering
-    // }
-    // return 0;
+
+
+    var weight = _.find(recoWeights, {id: "TRUSTED_USERS_FIRST"}).value;
+    if (weight > 0) {
+      if (baseWeight === 0) {   //this should be blended with other weights
+        baseWeight = 100;     //but this is a fallback for if it'ts not
+      }
+       var sum = _.reduce(tool.users, function(sum, user) {
+          return sum + trustForUserEmail(user) * trustForUserEmail(user);   //sum of squared trusts
+       }, 0 );
+
+       baseWeight = baseWeight * weight * sum;
+    }
+
+    return baseWeight; 
   }
 
   function wait(condition, callback) {
@@ -92,7 +114,10 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
       return _.some(waitingOnYammer);   //wait until all flags are cleared.
     }, function() {
       localStorageService.set("idsToEmailMap", idsToEmailMap);
-      localStorageService.set("emailToLikes", emailToLikeMap);
+
+
+      //could add in other interaction metrics here.
+      localStorageService.set("emailToInteractions", emailToLikeMap);
       console.log("Done");
       console.log(emailToLikeMap);
     });
@@ -265,19 +290,31 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
       name:"Most Prerequisite Learning Rule",
       description:"Sorts tools based on the number of prerequisite commands a user needs for learning a unknown tool.",
       value:0
+      },
+      {
+      id:"TRUSTED_USERS_FIRST",
+      name:"Trusted Users First",
+      description:"Sorts tools based on their interactions on Yammer, which is a proxy for trust.  <span id='yammer-login'></span> to activate.",
+      value:0
       }
     ];
 
+    //global vars
     recoWeights = localStorageService.get("reco_algorithm_settings");
+    trustWeights = localStorageService.get("emailToInteractions");
 
     if (recoWeights === null) {
         recoWeights = defaultRecoAlgorithms;
         localStorageService.set("reco_algorithm_settings",defaultRecoAlgorithms);
     }
 
+    if (trustWeights === null) {
+      trustWeights = {};
+    }
+
       $scope.filters = {};
       $scope.ordering = {
-        field: weightRecommendation, //recommendation is a function defined at the top of this file
+        field: weightRecommendation, //weightRecommendation is a function defined at the top of this file
         reverse: true
       };
       $scope.tools = Hub.all('user_tools').getList();
