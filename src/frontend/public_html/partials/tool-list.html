@@ -3,6 +3,7 @@
 	<ng-include src="'partials/ordering.html'" ng-controller='OrderCtrl'>
       </ng-include>
   </div>
+  <div ng-if="enabled()">
   <ul class="list-group" when-scrolled='scroll()'>
     <li class="list-group-item" ng-repeat='tool in tools.$object | filter:filters.toolFilter
         | orderBy:ordering.field:ordering.reverse | limitTo:limit'>
@@ -11,4 +12,8 @@
 	  
     </li>
   </ul>
+  </div>
+  <div ng-if="!enabled()">
+  {{getText()}}
+  </div>
 </div>

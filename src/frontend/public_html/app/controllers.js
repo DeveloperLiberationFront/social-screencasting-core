@@ -294,7 +294,7 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
       {
       id:"TRUSTED_USERS_FIRST",
       name:"Trusted Users First",
-      description:"Sorts tools based on their interactions on Yammer, which is a proxy for trust.  <span id='yammer-login'></span> to activate.",
+      description:"Sorts tools based on their interactions on Yammer, which is a proxy for trust.  If you see a yammer login button below, click it to activate.",
       value:0
       }
     ];
@@ -328,6 +328,16 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
 
   .controller('ToolListCtrl', ['$scope','Hub','Local',
     function($scope, Hub, Local) {
+
+    $scope.enabled = function() {
+      var enableDate = new Date(2014,11,10);
+      return $scope.tools.$object.length > 0 &&
+        Date.now() > enableDate.getTime();
+    }
+
+    $scope.getText = function() {
+      return "We haven't collected enough data to make recommendations yet.  Check in after 11/10/14 or, if you just joined, in 24 hours.";
+    }
 
     $scope.user.usages = Hub.all('usages').getList({
         'where': {'user': $scope.user.email},
@@ -860,14 +870,21 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
           calculateTrust(Yammer, response, localStorageService);
         }
         else {
-          Yammer.platform.login(function (response) { //prompt user to login and authorize your app, as necessary
-            if (response.authResponse) {
-              console.log("Yammer login");
-              calculateTrust(Yammer, response, localStorageService);
-            } else {
-              console.log("Could not log into Yammer");
-            }
-          });
+          Yammer.connect.loginButton('#yammer-login', function (resp) {
+           if (resp.authResponse) {
+            calculateTrust(Yammer, response, localStorageService);
+            document.getElementById('yammer-login').innerHTML = 'Logged in!'; 
+         } 
+       });
+
+          // Yammer.platform.login(function (response) { //prompt user to login and authorize your app, as necessary
+          //   if (response.authResponse) {
+          //     console.log("Yammer login");
+          //     calculateTrust(Yammer, response, localStorageService);
+          //   } else {
+          //     console.log("Could not log into Yammer");
+          //   }
+          // });
         }
       }
   );
