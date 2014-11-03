@@ -495,45 +495,50 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	@Override
 	public void updateActivity(String pluginName, boolean isActive)
 	{
-		if (isActive) {
-			if (!userOverridePause) {
-				if (pausingTimerTask != null) {
-					pausingTimerTask.cancel();
-				}
-				this.screenRecordingModule.unpauseRecording();
-				this.applicationsRecordingStatusMap.put(pluginName, Boolean.TRUE);
-			}
-		} else {
-			applicationsRecordingStatusMap.put(pluginName, Boolean.FALSE);
-			
-			boolean areAnyActive = false;
-			for(Entry<String, Boolean> status: applicationsRecordingStatusMap.entrySet()) {
-				areAnyActive = areAnyActive || status.getValue();
-			}
-			
-			if (!areAnyActive && pausingTimerTask == null) {	//don't schedule the task twice
-				pausingTimerTask = new PausingTimerTask();
-				pausingTimer.schedule(pausingTimerTask , 60_000);
-			}
-		}
+//		if (isActive) {
+//			if (!userOverridePause) {
+//				if (pausingTimerTask != null) {
+//					pausingTimerTask.cancel();
+//				}
+//				this.screenRecordingModule.unpauseRecording();
+//				this.applicationsRecordingStatusMap.put(pluginName, Boolean.TRUE);
+//			}
+//		} else {
+//			applicationsRecordingStatusMap.put(pluginName, Boolean.FALSE);
+//			
+//			boolean areAnyActive = false;
+//			for(Entry<String, Boolean> status: applicationsRecordingStatusMap.entrySet()) {
+//				areAnyActive = areAnyActive || status.getValue();
+//			}
+//			
+//			if (!areAnyActive && pausingTimerTask == null) {	//don't schedule the task twice
+//				pausingTimerTask = new PausingTimerTask();
+//				pausingTimer.schedule(pausingTimerTask , 60_000);
+//			}
+//		}
 	}
 
 	@Override
-	public void userPause(boolean pauseButton) {
+	public void userPause(boolean pauseButton)
+	{
 		userOverridePause = pauseButton;
-		if (!pauseButton && singletonHub.screenRecordingModule != null) {
+		if (!pauseButton && singletonHub.screenRecordingModule != null)
+		{
 			logger.info("Pausing Recording module");
 			screenRecordingModule.pauseRecording();
-		} else if (userOverridePause) {			
-			boolean areAnyActive = false;
-			for (Entry<String, Boolean> status : applicationsRecordingStatusMap.entrySet()) {
-				areAnyActive = areAnyActive || status.getValue();
-			}
-			if (areAnyActive) {
-				screenRecordingModule.unpauseRecording();
-				logger.info("Unpausing Recording module");
-			} else
-				logger.info("Not unpausing Recording module because there is no active application.");
+		}
+		else if (userOverridePause)
+		{
+			// boolean areAnyActive = false;
+			// for (Entry<String, Boolean> status : applicationsRecordingStatusMap.entrySet()) {
+			// areAnyActive = areAnyActive || status.getValue();
+			// }
+			// if (areAnyActive) {
+			screenRecordingModule.unpauseRecording();
+			logger.info("Unpausing Recording module");
+			// } else {
+			// logger.info("Not unpausing Recording module because there is no active application.");
+			// }
 		}
 	}
 }

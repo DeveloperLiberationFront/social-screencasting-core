@@ -172,9 +172,21 @@ public class EventForwarder implements Runnable {
 
 	@Override
 	public void run() {
+		
+		try
+		{
+			Thread.sleep(30000); // The MongoDB requires that the tools exist before
+			// being reported, so thidbs granular reporting needs to wait until after the general
+			// reporting
+		}
+		catch (InterruptedException e1)
+		{
+			logger.debug("Interrupted",e1);
+		}
 
 		while (true) {
 			logger.info("starting cycle");
+			
 
 			for (ExternalToolUsageReporter endpoint: customEndPoints) {
 				logger.debug(endpoint);

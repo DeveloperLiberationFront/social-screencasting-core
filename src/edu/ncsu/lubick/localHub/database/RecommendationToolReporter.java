@@ -1,7 +1,9 @@
 package edu.ncsu.lubick.localHub.database;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Date;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -14,6 +16,8 @@ import org.json.JSONObject;
 
 import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.UserManager;
+import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
+import edu.ncsu.lubick.localHub.forTesting.UnitTestUserManager;
 import edu.ncsu.lubick.localHub.http.HTTPUtils;
 
 /**
@@ -130,6 +134,17 @@ public class RecommendationToolReporter implements ExternalToolUsageReporter {
 	public void finishReporting()
 	{
 		//no cleanup
+	}
+	
+	@SuppressWarnings("unused")
+	private static void main(String[] args)
+	{
+		TestingUtils.makeSureLoggingIsSetUp();
+		ToolUsage tu = new ToolUsage("fakeTool", "", "[GUI]", "[ScreencastingHub]", new Date(), 10, 10);
+		
+		UserManager um = new UnitTestUserManager(new File("."));
+		RecommendationToolReporter rec = new RecommendationToolReporter(um);
+		rec.reportTool(tu, "");
 	}
 
 }
