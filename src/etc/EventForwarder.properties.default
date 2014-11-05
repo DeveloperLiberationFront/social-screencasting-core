@@ -3,5 +3,5 @@ sleepTimeSeconds = 30
 destJDBCDriver   = org.postgresql.Driver
 destJDBCURL      = jdbc:postgresql://recommender.oscar.ncsu.edu:7878/recommend?user=rs_user&password=kl2014sc
 
-skylrDestAddURL     = http://192.168.56.101:3000/api/data/document/add
-skylrDestQueryURL   = http://192.168.56.101:3000/api/data/document/query
+skylrDestAddURL     = https://skylr.renci.org/api/data/document/add
+skylrDestQueryURL   = https://skylr.renci.org/api/data/document/query
