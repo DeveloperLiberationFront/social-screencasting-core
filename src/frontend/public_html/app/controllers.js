@@ -330,7 +330,7 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
     function($scope, Hub, Local) {
 
     $scope.enabled = function() {
-      var enableDate = new Date(2014,11,10);
+      var enableDate = new Date(2014,10,10);      // the month has an OBO error.  WHY?
       return $scope.tools.$object.length > 0 &&
         Date.now() > enableDate.getTime();
     }
@@ -401,6 +401,9 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
       $scope.filterSet = { filters: [] }; //list of (tool) -> bool
 
       $scope.filters.toolFilter = function(tool) {
+        if (tool.application.indexOf("[") == 0) {
+          return;     
+        }
         return _.reduce($scope.filterSet.filters, function(accum, fn) {
           return accum && fn(tool);
         }, true);
