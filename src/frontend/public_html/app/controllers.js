@@ -331,8 +331,7 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
 
     $scope.enabled = function() {
       var enableDate = new Date(2014,10,10);      // the month has an OBO error.  WHY?
-      return $scope.tools.$object.length > 0 &&
-        Date.now() > enableDate.getTime();
+      return true;
     }
 
     $scope.getText = function() {
@@ -351,6 +350,10 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
 
       Promise.all([$scope.tools, $scope.user_list]).spread(function(tools, users) {
         _.each(tools, function(tool) {
+          if (tool.name === undefined || tool.application === undefined) {
+            return;
+          }
+
           tool.video = false;
           tool.userObjects = _.where(users, function(u) {
             //overwrite user list with more detailed user objects
@@ -401,7 +404,9 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
       $scope.filterSet = { filters: [] }; //list of (tool) -> bool
 
       $scope.filters.toolFilter = function(tool) {
-        if (tool.application.indexOf("[") == 0) {
+        if (tool.application === undefined || tool.name === undefined ||
+           tool.application.indexOf("[") == 0 
+          ) {
           return;     
         }
         return _.reduce($scope.filterSet.filters, function(accum, fn) {
