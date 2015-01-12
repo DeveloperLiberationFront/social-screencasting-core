@@ -483,8 +483,8 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
       $scope.filterSet.filters.push(function(tool) {
         return $scope.filter.filters.length === 0 //all tools if no users selected
               || tool.users && _.every($scope.filter.filters, function(user){ //or only tools with all selected users
-                return _.find(tool.users, function(tool) {
-                  return user.email === tool;
+                return _.find(tool.users, function(email) {
+                  return user.email === email;
                 });
               });
       });
