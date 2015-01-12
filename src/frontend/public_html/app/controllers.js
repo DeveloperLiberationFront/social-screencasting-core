@@ -484,7 +484,9 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
       $scope.filterSet.filters.push(function(tool) {
         return $scope.filter.filters.length === 0 //all tools if no users selected
               || tool.users && _.every($scope.filter.filters, function(user){ //or only tools with all selected users
-                  return _.find(tool.users, {email: user.email}); 
+                return _.find(tool.users, function(tool) {
+                  return user.email === tool;
+                });
               });
       });
 
@@ -497,7 +499,7 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
 
       $scope.addFilter = function(input){
         if (!input) return;
-        $scope.$emit('instrumented', "Added User Filter",filter);
+        $scope.$emit('instrumented', "Added User Filter",input);
         var user_filter = ($stateParams.user_filter ?
                            _.union($stateParams.user_filter.split(','), [input.email])
                            : [input.email]);
