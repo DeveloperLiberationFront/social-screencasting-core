@@ -469,9 +469,8 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
         $scope.filter.source = ng.copy(user_list);
 
         if ($stateParams.user_filter) {
-          //ui-router does not turn &tool=foo&tool=bar into [foo,bar] as you might expect, but
-          //treats it as if the query params were &tool=foo,bar
-          var users = $stateParams.user_filter.split(",");
+          //ui-router turns &tool=foo&tool=bar into [foo,bar]
+          var users = $stateParams.user_filter.push ? $stateParams.user_filter : [$stateParams.user_filter];
           _.each(users, function(email) {
             if (email) {
               var name = _.find(user_list, {email: email}).name;
@@ -492,17 +491,18 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
 
       $scope.removeFilter = function(filter) {
         $scope.$emit('instrumented', "Removed User Filter",filter);
+        var users = $state.params.user_filter.push ? $state.params.user_filter : [$state.params.user_filter];
         $state.go('main', {
-          user_filter: _.without($state.params.user_filter.split(','), filter.email)
+          user_filter: _.without(users, filter.email)
         });
       };
 
       $scope.addFilter = function(input){
         if (!input) return;
         $scope.$emit('instrumented', "Added User Filter",input);
-        var user_filter = ($stateParams.user_filter ?
-                           _.union($stateParams.user_filter.split(','), [input.email])
-                           : [input.email]);
+        var users = $stateParams.user_filter ? $stateParams.user_filter : [];
+        users = users.push ? users : [users];
+        var user_filter = _.union(users, [input.email]);
         $state.go('main', {
           user_filter: user_filter
         });
@@ -525,9 +525,8 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
       };
       
       if ($stateParams.tool_filter) {
-        //ui-router does not turn &tool=foo&tool=bar into [foo,bar] as you might expect, but
-        //treats it as if the query params were &tool=foo,bar
-        var tools = $stateParams.tool_filter.split(",");
+        //ui-router turns &tool=foo&tool=bar into [foo,bar]
+        var tools = $stateParams.tool_filter.push ? $stateParams.tool_filter: [$stateParams.tool_filter];
         _.each(tools, function(tool) {
           if (tool) {
             $scope.filter.filters.push({name: tool});
@@ -542,17 +541,18 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
 
       $scope.removeFilter = function(filter) {
         $scope.$emit('instrumented', "Removed Tool Filter",filter);
+        var tool_filters = $state.params.tool_filter.push ? $state.params.tool_filter : [$state.params.tool_filter];
         $state.go('main', {
-          tool_filter: _.without($state.params.tool_filter.split(','), filter.name, "")
+          tool_filter: _.without(tool_filters, filter.name)
         });
       };
 
       $scope.addFilter = function(input){
         if (!input) return;
         $scope.$emit('instrumented', "Added Tool Filter",input);
-        var tool_filter = ($stateParams.tool_filter ?
-                           _.union($stateParams.tool_filter.split(','), [input.name])
-                           : [input.name]);
+        var tool_filter = $stateParams.tool_filter ? $stateParams.tool_filter : [];
+        tool_filter = tool_filter.push ? tool_filter : [tool_filter];
+        tool_filter = _.union(tool_filter, [input.name]);
         $state.go('main', {
           tool_filter: tool_filter
         });
