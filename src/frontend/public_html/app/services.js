@@ -6,7 +6,23 @@ define(['angular', 'lodash', 'ng-resource', 'restangular'], function (ng, _) {
         RestangularConfigurer.setBaseUrl('/api'); //relative to top level (which is already localhost:4443)
       });
     }])
-
+    
+    .config(['$httpProvider', function ($httpProvider) {
+      if(window.location.origin.indexOf("http://localhost") !== -1) {
+          $httpProvider.interceptors.push(function () {
+            return {
+                "request": function (config) {
+                  if(config.url.indexOf("/api/v2/clips") !== -1) {
+                    config.url = config.url.replace("http://recommender.oscar.ncsu.edu", "");
+                    config.url = config.url.replace("/api/v2/clips", "/mock/clips");
+                  }
+                  return config;
+                }
+            };
+        });
+      }
+    }])
+    
     .factory('Hub', ['Restangular', function(Restangular) {
       return Restangular.withConfig(function(RestangularConfigurer) {
           var rc = RestangularConfigurer;
