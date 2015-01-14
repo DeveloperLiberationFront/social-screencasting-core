@@ -16,6 +16,10 @@ define(['angular', 'lodash', 'ng-resource', 'restangular'], function (ng, _) {
                     config.url = config.url.replace("http://recommender.oscar.ncsu.edu", "");
                     config.url = config.url.replace("/api/v2/clips", "/mock/clips");
                   }
+                  if(config.url.indexOf("/api/v2/user_tools") !== -1) {
+                    config.url = config.url.replace("http://recommender.oscar.ncsu.edu", "");
+                    config.url = config.url.replace("/api/v2/user_tools", "/mock/user_tools");
+                  }
                   return config;
                 }
             };

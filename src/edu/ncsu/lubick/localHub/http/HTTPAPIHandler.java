@@ -104,6 +104,13 @@ public class HTTPAPIHandler extends AbstractHandler {
 				response.getWriter().write(FileUtilities.readAllFromFile(mock));
 				response.getWriter().close();
 			}
+			if("user_tools".equals(pieces[2])) {
+				response.setContentType("application/json");
+				response.setStatus(200);
+				File mock = new File("mocks/user_tools.json");
+				response.getWriter().write(FileUtilities.readAllFromFile(mock));
+				response.getWriter().close();
+			}
 		}
 	}
 
@@ -279,7 +286,6 @@ public class HTTPAPIHandler extends AbstractHandler {
 	{
 		List<File> clips = databaseLink.getBestExamplesOfTool(applicationName, toolName, true);
 		clips.addAll(databaseLink.getBestExamplesOfTool(applicationName, toolName, false));
-		clips.add(new File("renderedVideos/Eclipse0b908585-f6b0-3c4b-8361-eb40f2eebcc6K"));
 		
 //		//XXX sample data
 //		clips.add(new File("renderedVideos/Eclipse16141cfc-87cb-32dc-bc30-fedcad3b7598G"));
