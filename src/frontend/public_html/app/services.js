@@ -8,7 +8,7 @@ define(['angular', 'lodash', 'ng-resource', 'restangular'], function (ng, _) {
     }])
     
     .config(['$httpProvider', function ($httpProvider) {
-      if(window.location.origin.indexOf("http://localhost") !== -1) {
+      if(window.location.href.indexOf("http://localhost") !== -1 && window.location.href.indexOf("noMock=true") === -1) {
           $httpProvider.interceptors.push(function () {
             return {
                 "request": function (config) {
