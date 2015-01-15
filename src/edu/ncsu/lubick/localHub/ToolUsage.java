@@ -73,7 +73,8 @@ public class ToolUsage {
 			strToolTimeStamp = strToolTimeStamp.substring(0, strToolTimeStamp.indexOf("-UTC"));
 			
 			TimeZone tz = TimeZone.getDefault();
-			timeInMillis = Long.parseLong(strToolTimeStamp) - tz.getRawOffset();
+			timeInMillis = Long.parseLong(strToolTimeStamp);
+			timeInMillis -= tz.getOffset(timeInMillis);
 			logger.debug("corrected datetime: "+ new Date(timeInMillis));
 		}
 		else {
