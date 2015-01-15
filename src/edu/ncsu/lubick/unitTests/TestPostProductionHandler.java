@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.unitTests;
 
+import static edu.ncsu.lubick.util.FileUtilities.nonNull;
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -176,7 +177,7 @@ public class TestPostProductionHandler
 		if (timeAssociatedWithScreencasting == null)
 		{
 			logger.info("Checking to see if we need to re-unzip the screencasts");
-			File[] files = TEST_SCREENCAST_FOLDER.listFiles();
+			File[] files = nonNull(TEST_SCREENCAST_FOLDER.listFiles());
 			Arrays.sort(files);
 			if (files.length < 300 || !files[0].getName().equals(FileUtilities.encodeMediaFrameName(screencastBeginDate)))
 			{
@@ -198,7 +199,7 @@ public class TestPostProductionHandler
 		
 		timeAssociatedWithScreencasting = new Date(screencastBeginDate.getTime());	//clone this date as the param will be used below
 		
-		File[] files = TEST_SCREENCAST_FOLDER.listFiles();
+		File[] files = nonNull(TEST_SCREENCAST_FOLDER.listFiles());
 		assertTrue(files.length >= 300);
 		Arrays.sort(files);
 		for(File f:files)
@@ -243,7 +244,7 @@ public class TestPostProductionHandler
 	private void verifyBrowserMediaCreatedCorrectlyKeyboard(File expectedOutputDir, File folderContainingBrowserPackage, int expectedNumFrames)
 	{
 		verifyBrowserMediaCreatedCorrectlyGUI(expectedOutputDir, folderContainingBrowserPackage, expectedNumFrames);
-		List<String> listOfFileNames = Arrays.asList(expectedOutputDir.list());
+		List<String> listOfFileNames = Arrays.asList(nonNull(expectedOutputDir.list()));
 		assertTrue(listOfFileNames.contains("image.png"));
 		assertTrue(listOfFileNames.contains("image_un.png"));
 		assertTrue(listOfFileNames.contains("image_text.png"));
@@ -258,7 +259,7 @@ public class TestPostProductionHandler
 		assertNotNull(folderContainingBrowserPackage);
 		assertTrue(folderContainingBrowserPackage.exists());
 		assertTrue(folderContainingBrowserPackage.isDirectory());
-		List<String> listOfFileNames = Arrays.asList(expectedOutputDir.list());
+		List<String> listOfFileNames = Arrays.asList(nonNull(expectedOutputDir.list()));
 		assertEquals(expectedNumFrames, listOfFileNames.size()); 
 		assertTrue(listOfFileNames.contains("frame0000.jpg"));
 		verifyFrameNameIntegrity(listOfFileNames, listOfFileNames.size() - NUMBER_KEYBOARD_ANIMATIONS);

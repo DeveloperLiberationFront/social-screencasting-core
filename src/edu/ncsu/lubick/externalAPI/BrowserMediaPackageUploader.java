@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.externalAPI;
 
+import static edu.ncsu.lubick.util.FileUtilities.nonNull;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -114,7 +115,7 @@ public class BrowserMediaPackageUploader {
 				return false;
 			}
 
-			File[] allFiles = packageDirectory.listFiles();
+			File[] allFiles = nonNull(packageDirectory.listFiles());
 			//we upload all frames and animation images here.  
 			return uploadAllFiles(allFiles, clipOptions);
 		}

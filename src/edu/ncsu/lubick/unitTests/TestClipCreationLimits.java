@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.unitTests;
 
+import static edu.ncsu.lubick.util.FileUtilities.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -44,7 +45,7 @@ public class TestClipCreationLimits {
 
 	private static void clearOutAllTestingMedia()
 	{
-		String[] list = renderedVideos.list();
+		String[] list = nonNull(renderedVideos.list());
 		for(String packageName : list)
 		{
 			if (packageName.startsWith(TestPostProductionHandler.TEST_PLUGIN_NAME))
@@ -77,18 +78,18 @@ public class TestClipCreationLimits {
 		List<ToolUsage>  excellentExample = makeSuperiorExample();
 
 
-		int presize = renderedVideos.list().length;
+		int presize = nonNull(renderedVideos.list()).length;
 
 		server.reportToolStream(toolStreamOfFourTools);
 
-		int midSize = renderedVideos.list().length;
+		int midSize = nonNull(renderedVideos.list()).length;
 
 		assertEquals(4, midSize - presize);
 		//fail();
 
 		server.reportToolStream(toolStreamOfTwoTools);
 
-		int postSize = renderedVideos.list().length;
+		int postSize = nonNull(renderedVideos.list()).length;
 
 		assertEquals(MAX_TOOL_USAGES, postSize - presize);
 
@@ -99,7 +100,7 @@ public class TestClipCreationLimits {
 
 		server.reportToolStream(excellentExample);
 
-		String[] postList = renderedVideos.list();
+		String[] postList = nonNull(renderedVideos.list());
 		postSize = postList.length;
 
 		assertEquals(MAX_TOOL_USAGES, postSize - presize);
@@ -136,7 +137,7 @@ public class TestClipCreationLimits {
 	private void checkRenderedFilesForExistanceOfNames(List<String> expectedNames)
 	{
 		int numHits = 0;
-		String[] postList = renderedVideos.list();
+		String[] postList = nonNull(renderedVideos.list());
 		for(String fileName: postList)
 		{
 			if (fileName.startsWith(TestPostProductionHandler.TEST_PLUGIN_NAME))
