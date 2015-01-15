@@ -47,20 +47,17 @@ public class PostProductionHandler
 		int startIndex = findFrameBelongingToDate(startTimeToLookFor, allFrames);
 		if (allFrames.length == 0)
 		{
-			logger.error("Could not extract tool usage because the screencasting folder is empty");
-			return null;
+			throw new MediaEncodingException("Could not extract tool usage because the screencasting folder is empty");
 		}
 		if (startIndex >= allFrames.length)
 		{
-			logger.info("This tool use appears to be in the future ("+startTimeToLookFor +"), or at least later than "+allFrames[allFrames.length-1]);
-			return null;
+			throw new MediaEncodingException("This tool use appears to be in the future ("+startTimeToLookFor +"), or at least later than "+allFrames[allFrames.length-1]);
 		}
-		if (startIndex == 0)
+		if (startIndex <= 0)
 		{
 			if (checkForTooEarlyToolUsage(specificToolUse.getTimeStamp(),allFrames[0]))
 			{
-				logger.info("Tool usage was not extracted because it happens before the screencasting was recorded");
-				return null;
+				throw new MediaEncodingException("Tool usage was not extracted because it happens before the screencasting was recorded");
 			}
 		}
 		
@@ -111,7 +108,11 @@ public class PostProductionHandler
 				return pathname.getName().endsWith(PostProductionHandler.FULLSCREEN_IMAGE_FORMAT);
 			}
 		});
-		Arrays.sort(allFrames);
+		if (allFrames != null) {
+			Arrays.sort(allFrames);
+		} else {
+			allFrames = new File[0];
+		}
 		return allFrames;
 	}
 
