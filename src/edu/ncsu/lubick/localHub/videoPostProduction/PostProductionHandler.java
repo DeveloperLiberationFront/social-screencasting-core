@@ -52,7 +52,7 @@ public class PostProductionHandler
 		}
 		if (startIndex >= allFrames.length)
 		{
-			logger.info("This tool use appears to be in the future, or at least later than "+allFrames[allFrames.length-1]);
+			logger.info("This tool use appears to be in the future ("+startTimeToLookFor +"), or at least later than "+allFrames[allFrames.length-1]);
 			return null;
 		}
 		if (startIndex == 0)

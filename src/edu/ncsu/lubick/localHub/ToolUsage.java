@@ -2,8 +2,10 @@ package edu.ncsu.lubick.localHub;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.UUID;
 
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 public class ToolUsage {
@@ -26,6 +28,8 @@ public class ToolUsage {
 	private int duration;
 	private String applicationName;
 	private int usageScore;
+	
+	private static Logger logger = Logger.getLogger(ToolUsage.class.getName());
 
 	private ToolUsage(String toolName, String toolClass, String keyPresses, Date timeStamp, int duration, int usageScore)
 	{
@@ -59,7 +63,24 @@ public class ToolUsage {
 		String newToolName = jobj.optString(TOOL_NAME, "[No Name]");
 		String newToolClass = jobj.optString(TOOL_CLASS, "");
 		String newToolKeyPress = jobj.optString(TOOL_KEY_PRESSES, MENU_KEY_PRESS);
-		Date newToolTimeStamp = new Date(jobj.optLong(TOOL_TIMESTAMP, 0));
+		
+		long timeInMillis = 0;
+		String strToolTimeStamp = jobj.optString(TOOL_TIMESTAMP,"");
+		if (strToolTimeStamp.equals("")) {
+			timeInMillis = System.currentTimeMillis(); // if no time, default to the present.
+		}
+		else if (strToolTimeStamp.endsWith("-UTC")) {
+			strToolTimeStamp = strToolTimeStamp.substring(0, strToolTimeStamp.indexOf("-UTC"));
+			
+			TimeZone tz = TimeZone.getDefault();
+			timeInMillis = Long.parseLong(strToolTimeStamp) - tz.getRawOffset();
+			logger.debug("corrected datetime: "+ new Date(timeInMillis));
+		}
+		else {
+			timeInMillis = Long.parseLong(strToolTimeStamp);
+		}
+		
+		Date newToolTimeStamp = new Date(timeInMillis);
 		int newToolDuration = jobj.optInt(TOOL_DURATION, 0);
 		int usageRating = jobj.optInt(TOOL_SCORE, newToolDuration);
 
