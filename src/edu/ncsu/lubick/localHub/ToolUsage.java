@@ -66,7 +66,7 @@ public class ToolUsage {
 		
 		long timeInMillis = 0;
 		String strToolTimeStamp = jobj.optString(TOOL_TIMESTAMP,"");
-		if (strToolTimeStamp.equals("")) {
+		if (strToolTimeStamp.isEmpty()) {
 			timeInMillis = System.currentTimeMillis(); // if no time, default to the present.
 		}
 		else if (strToolTimeStamp.endsWith("-UTC")) {
