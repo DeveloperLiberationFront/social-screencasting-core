@@ -23,8 +23,8 @@ public class PostProductionHandler
 
 	private static Logger logger = Logger.getLogger(PostProductionHandler.class.getName());
 
-	private static final int RUN_UP_TIME = 5;
-	
+	private static final int RUN_UP_TIME = 5000;
+	private static final int MINIMUM_VID_TIME = 2000;
 
 	private FramesToBrowserAnimatedPackage browserMediaMaker = null;
 	
@@ -90,12 +90,12 @@ public class PostProductionHandler
 
 	private Date getEndTime(ToolUsage specificToolUse)
 	{
-		return new Date(specificToolUse.getTimeStamp().getTime() + specificToolUse.getDuration());
+		return new Date(specificToolUse.getTimeStamp().getTime() + Math.min(MINIMUM_VID_TIME, specificToolUse.getDuration()));
 	}
 
 	private Date getStartingTime(ToolUsage specificToolUse)
 	{
-		return new Date(specificToolUse.getTimeStamp().getTime() - 1000 * RUN_UP_TIME);
+		return new Date(specificToolUse.getTimeStamp().getTime() - RUN_UP_TIME);
 	}
 
 	private File[] getSortedFrameFiles()
