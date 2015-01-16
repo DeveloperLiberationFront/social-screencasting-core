@@ -88,7 +88,7 @@ public class EventForwarder implements Runnable {
 
 	private void setUpEndpoints()
 	{
-		//customEndPoints.add(new RecommendationToolReporter(this.userManager));
+		customEndPoints.add(new RecommendationToolReporter(this.userManager));
 		customEndPoints.add(new SkylerEndpoint(eventForwarderProperties));
 		//customEndPoints.add(new ExternalSQLEndpoint(eventForwarderProperties));
 		

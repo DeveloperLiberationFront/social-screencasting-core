@@ -10,13 +10,21 @@ import java.awt.Toolkit;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
+import edu.ncsu.las.net.ssl.KeystoreProvider;
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.LocalHubProcess;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
@@ -31,6 +39,9 @@ public class Runner
 
 	public static void main(String[] args) throws Exception
 	{
+		//System.setProperty("javax.net.debug", "all");
+		KeystoreProvider.loadAsResource("edu/ncsu/las/net/ssl/client.ks", "edu/ncsu/las/net/ssl/client.ts", "changeit");
+
 		TestingUtils.makeSureLoggingIsSetUp();
 		setUpTrayIcon();
 		localHub = LocalHub.startServerForUse("HF/Screencasting/", DEFAULT_DB_LOC);
