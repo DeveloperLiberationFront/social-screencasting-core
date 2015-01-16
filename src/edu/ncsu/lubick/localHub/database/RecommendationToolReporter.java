@@ -126,6 +126,7 @@ public class RecommendationToolReporter implements ExternalToolUsageReporter {
 		jobj.put("tool", tu.getToolName());
 		jobj.put("time", tu.getTimeStamp().getTime());
 		jobj.put("bindingUsed", !ToolUsage.MENU_KEY_PRESS.equals(tu.getToolKeyPresses()));
+		jobj.put("other", tu.getToolClass());
 		
 		return jobj;
 	}
