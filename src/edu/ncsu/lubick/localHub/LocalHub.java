@@ -164,6 +164,15 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			@Override
 			public void run()
 			{
+				StringBuilder extraInfo = countUpScreencastsByApplication();
+				extraInfo.append(VERSION);
+				ToolUsage tu = new ToolUsage("heartbeat", extraInfo.toString(), ToolUsage.MENU_KEY_PRESS, "[ScreencastingHub]",
+						new Date(), 1000, 0);
+				reportToolUsage(tu);
+			}
+
+			private StringBuilder countUpScreencastsByApplication()
+			{
 				StringBuilder extraInfo = new StringBuilder();
 				File f = new File(PostProductionHandler.MEDIA_OUTPUT_FOLDER);
 				String[] generatedScreencastNames = f.list();
@@ -188,10 +197,7 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 						extraInfo.append(entry.getKey() +" : "+entry.getValue()+',');
 					}
 				}
-				extraInfo.append(VERSION);
-				ToolUsage tu = new ToolUsage("heartbeat", extraInfo.toString(), ToolUsage.MENU_KEY_PRESS, "[ScreencastingHub]",
-						new Date(), 1000, 0);
-				reportToolUsage(tu);
+				return extraInfo;
 			}
 		};
 		

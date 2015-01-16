@@ -88,9 +88,9 @@ public class EventForwarder implements Runnable {
 
 	private void setUpEndpoints()
 	{
-		customEndPoints.add(new RecommendationToolReporter(this.userManager));
+		//customEndPoints.add(new RecommendationToolReporter(this.userManager));
 		customEndPoints.add(new SkylerEndpoint(eventForwarderProperties));
-		customEndPoints.add(new ExternalSQLEndpoint(eventForwarderProperties));
+		//customEndPoints.add(new ExternalSQLEndpoint(eventForwarderProperties));
 		
 				
 		for (Iterator<ExternalToolUsageReporter> iterator = customEndPoints.iterator(); iterator.hasNext();)
@@ -225,7 +225,7 @@ public class EventForwarder implements Runnable {
 	}
 
 	@SuppressWarnings("unused")
-	private static void main(String args[]) {
+	public static void main(String args[]) {
 		TestingUtils.makeSureLoggingIsSetUp();
 
 		EventForwarder ef = new EventForwarder(UnitTestUserManager.quickAndDirtyUser(), BufferedDatabaseManager.quickAndDirtyDatabase());

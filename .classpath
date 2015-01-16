@@ -39,5 +39,6 @@
 			<attribute name="javadoc_location" value="http://hc.apache.org/httpcomponents-client-4.3.x/httpmime/apidocs/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="externalJars/sslcerts.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

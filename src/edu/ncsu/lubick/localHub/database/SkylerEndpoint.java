@@ -7,9 +7,6 @@ import java.util.Properties;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContextBuilder;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -18,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.ncsu.las.net.ssl.KeystoreProvider;
 import edu.ncsu.lubick.localHub.ToolUsage;
 
 public class SkylerEndpoint implements ExternalToolUsageReporter {
@@ -34,14 +32,9 @@ public class SkylerEndpoint implements ExternalToolUsageReporter {
 	public SkylerEndpoint(Properties props) {
 		this.skylerProperties = props;
 		
-		// bypass SSL problems with Skyler (just like the changed Git certs)
-		// assume the certs are self signed, so don't check any parents
-		// TODO fix this the correct way
 		try {
-			 SSLContextBuilder builder = new SSLContextBuilder();
-			 builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
-			 SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
-			 httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+			KeystoreProvider.loadAsResource("edu/ncsu/las/net/ssl/client.ks", "edu/ncsu/las/net/ssl/client.ts", "changeit");
+			 httpClient = HttpClients.custom().build();
 		 }
 		 catch (Exception e) {
 			 logger.warn("Unable to create custom certificatoin policy for Skylr connection");
