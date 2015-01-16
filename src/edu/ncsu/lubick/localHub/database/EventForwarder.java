@@ -90,7 +90,7 @@ public class EventForwarder implements Runnable {
 	{
 		customEndPoints.add(new RecommendationToolReporter(this.userManager));
 		customEndPoints.add(new SkylerEndpoint(eventForwarderProperties));
-		//customEndPoints.add(new ExternalSQLEndpoint(eventForwarderProperties));
+		//customEndPoints.add(new ExternalSQLEndpoint(eventForwarderProperties));  XXX temporarily disabling
 		
 				
 		for (Iterator<ExternalToolUsageReporter> iterator = customEndPoints.iterator(); iterator.hasNext();)
