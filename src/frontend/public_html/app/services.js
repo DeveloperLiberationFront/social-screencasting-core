@@ -8,7 +8,7 @@ define(['angular', 'lodash', 'ng-resource', 'restangular'], function (ng, _) {
     }])
     
     .config(['$httpProvider', function ($httpProvider) {
-      if(window.location.href.indexOf("http://localhost") !== -1 && window.location.href.indexOf("noMock=true") === -1) {
+      if(window.location.href.indexOf("http://localhost") !== -1 && window.location.href.indexOf("mock=true") !== -1) {
           $httpProvider.interceptors.push(function () {
             return {
                 "request": function (config) {
@@ -19,6 +19,13 @@ define(['angular', 'lodash', 'ng-resource', 'restangular'], function (ng, _) {
                   if(config.url.indexOf("/api/v2/user_tools") !== -1) {
                     config.url = config.url.replace("http://recommender.oscar.ncsu.edu", "");
                     config.url = config.url.replace("/api/v2/user_tools", "/mock/user_tools");
+                  }
+                  if(config.url.indexOf("/api/v2/users") !== -1) {
+                    config.url = config.url.replace("http://recommender.oscar.ncsu.edu", "");
+                    config.url = config.url.replace("/api/v2/users", "/mock/users");
+                  }
+                  if(config.url.indexOf("/api/user") !== -1) {
+                    config.url = config.url.replace("/api/user", "/mock/user");
                   }
                   return config;
                 }
