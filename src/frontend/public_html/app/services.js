@@ -7,6 +7,7 @@ define(['angular', 'lodash', 'ng-resource', 'restangular'], function (ng, _) {
       });
     }])
     
+    //Http interceptor for mocking. To enable mocking in localhost, add url paramter mock=true
     .config(['$httpProvider', function ($httpProvider) {
       if(window.location.href.indexOf("http://localhost") !== -1 && window.location.href.indexOf("mock=true") !== -1) {
           $httpProvider.interceptors.push(function () {

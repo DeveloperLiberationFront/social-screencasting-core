@@ -87,6 +87,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 		}
 	}
 	
+	//Mocking API handler
 	private void handleMocks(String target, HttpServletResponse response) throws IOException {
 		String[] pieces = target.split("/");
 		if("mock".equals(pieces[1])) {
@@ -381,6 +382,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 		}
 	}
 	
+	//Get a mock file content. Mock files are stored in [project dir]/mocks folder. 
 	private void replyWithJSONMock(HttpServletResponse response, String filename) throws IOException {
 		response.setContentType("application/json");
 		response.setStatus(200);
