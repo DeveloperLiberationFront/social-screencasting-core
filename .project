@@ -3,6 +3,7 @@
 	<name>ScreenCastingLocalHub</name>
 	<comment></comment>
 	<projects>
+		<project>screencasting-module</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
