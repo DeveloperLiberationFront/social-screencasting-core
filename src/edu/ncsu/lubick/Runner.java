@@ -17,6 +17,7 @@ import java.net.URL;
 
 import org.apache.log4j.Logger;
 
+import edu.ncsu.las.net.ssl.KeystoreProvider;
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.LocalHubProcess;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
@@ -31,6 +32,8 @@ public class Runner
 
 	public static void main(String[] args) throws Exception
 	{
+		KeystoreProvider.loadAsResource("edu/ncsu/las/net/ssl/client.ks", "edu/ncsu/las/net/ssl/client.ts", "changeit");
+
 		TestingUtils.makeSureLoggingIsSetUp();
 		setUpTrayIcon();
 		localHub = LocalHub.startServerForUse("HF/Screencasting/", DEFAULT_DB_LOC);

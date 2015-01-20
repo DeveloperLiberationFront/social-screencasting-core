@@ -1,6 +1,7 @@
 package edu.ncsu.lubick.localHub.http;
 
 import static edu.ncsu.lubick.localHub.http.HTTPUtils.*;
+import static edu.ncsu.lubick.util.FileUtilities.*;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -23,7 +24,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.ncsu.lubick.Runner;
 import edu.ncsu.lubick.localHub.LocalHub;
 import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
@@ -215,7 +215,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 		try
 		{
 			JSONArray returnArray = new JSONArray();
-			File[] images = clipDir.listFiles();
+			File[] images = nonNull(clipDir.listFiles());
 			
 			for(int i = 0;i< images.length; i++) {
 				File file = images[i];

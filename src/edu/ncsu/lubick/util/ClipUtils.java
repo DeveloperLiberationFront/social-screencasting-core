@@ -1,5 +1,6 @@
 package edu.ncsu.lubick.util;
 
+import static edu.ncsu.lubick.util.FileUtilities.nonNull;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -36,7 +37,7 @@ public class ClipUtils {
 		
 		if (clipDir.exists() && clipDir.isDirectory())
 		{
-			String[] files = clipDir.list();
+			String[] files = nonNull(clipDir.list());
 			Arrays.sort(files);
 			
 			int frameCount = 0;
@@ -66,7 +67,7 @@ public class ClipUtils {
 		
 		if (clipDir.exists() && clipDir.isDirectory())
 		{
-			String[] files = clipDir.list();
+			String[] files = nonNull(clipDir.list());
 			Arrays.sort(files);
 			
 			int frameCount = 0;

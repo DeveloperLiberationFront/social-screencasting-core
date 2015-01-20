@@ -2,14 +2,16 @@ package edu.ncsu.lubick.localHub.database;
 
 import static edu.ncsu.lubick.localHub.database.EventForwarder.*;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContextBuilder;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -18,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import edu.ncsu.las.net.ssl.KeystoreProvider;
 import edu.ncsu.lubick.localHub.ToolUsage;
 
 public class SkylerEndpoint implements ExternalToolUsageReporter {
@@ -34,14 +37,10 @@ public class SkylerEndpoint implements ExternalToolUsageReporter {
 	public SkylerEndpoint(Properties props) {
 		this.skylerProperties = props;
 		
-		// bypass SSL problems with Skyler (just like the changed Git certs)
-		// assume the certs are self signed, so don't check any parents
-		// TODO fix this the correct way
 		try {
-			 SSLContextBuilder builder = new SSLContextBuilder();
-			 builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
-			 SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
-			 httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+			
+			// httpClient = HttpClients.custom().build();
+			httpClient = HttpClients.createSystem();
 		 }
 		 catch (Exception e) {
 			 logger.warn("Unable to create custom certificatoin policy for Skylr connection");
@@ -106,15 +105,17 @@ public class SkylerEndpoint implements ExternalToolUsageReporter {
 		
 		HttpPost postRequest = new HttpPost(skylerProperties.getProperty(PROPERTY_DEST_SKYLR_ADD_URL));
 		try {
+
 			StringEntity input = new StringEntity(joToolUsage.toString());
 			input.setContentType("application/json");
 			postRequest.setEntity(input);
 			 
 			HttpResponse response = httpClient.execute(postRequest);
-			 
 			if (response.getStatusLine().getStatusCode() >= 400) {
 				result = false;
 				logger.warn("Skylr - unable in insert event - "+ response.getStatusLine().getStatusCode() +":  toolUsage object: "+joToolUsage);
+				logger.warn(skylerProperties.getProperty(PROPERTY_DEST_SKYLR_ADD_URL));
+				logger.warn(getResponseBodyAsString(response));
 			}
 			else {
 				result = true;
@@ -135,6 +136,24 @@ public class SkylerEndpoint implements ExternalToolUsageReporter {
 		return result; 
 	}
 	
+	public static String getResponseBodyAsString(HttpResponse response) throws IOException, UnsupportedEncodingException
+	{
+		StringBuilder sb = new StringBuilder();
+		InputStream ips  = response.getEntity().getContent();
+		try(BufferedReader buf = new BufferedReader(new InputStreamReader(ips,"UTF-8"));)
+		{
+		    String s;
+			while(true )
+		    {
+		        s = buf.readLine();
+		        if(s==null || s.length()==0)
+		            break;
+		        sb.append(s);
+		    }
+		}
+		return sb.toString();
+	}
+
 	/**
 	 * Creates a JSONObject (manually so that the property names can be 
 	 * set appropriately for the Skylr destination 
@@ -153,6 +172,7 @@ public class SkylerEndpoint implements ExternalToolUsageReporter {
 		contentObject.put("UserId", userID);
 		contentObject.put("AppName", toolUsage.getApplicationName());
 		contentObject.put("ProjId", "LAS/Recommender");
+		contentObject.put("SysId", "Recommender");
 		contentObject.put("ProjVer", "1.0");
 		contentObject.put("EvtTime", toolUsage.getTimeStamp().getTime());
 		contentObject.put("EvtEndTime", toolUsage.getTimeStamp().getTime() + toolUsage.getDuration());

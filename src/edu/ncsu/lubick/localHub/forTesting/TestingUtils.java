@@ -1,7 +1,7 @@
 package edu.ncsu.lubick.localHub.forTesting;
 
 import static org.junit.Assert.*;
-
+import static edu.ncsu.lubick.util.FileUtilities.nonNull;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -123,7 +123,7 @@ public class TestingUtils {
 
 	public static boolean clearOutDirectory(File rootDirectory)
 	{
-		if (!rootDirectory.exists() || (rootDirectory.isDirectory() && rootDirectory.listFiles().length == 0))
+		if (!rootDirectory.exists() || (rootDirectory.isDirectory() && nonNull(rootDirectory.listFiles()).length == 0))
 		{
 			return true;
 		}
@@ -132,7 +132,7 @@ public class TestingUtils {
 
 	private static boolean recursivelyClearDirectory(File parentDirectory)
 	{
-		for (File f : parentDirectory.listFiles())
+		for (File f : nonNull(parentDirectory.listFiles()))
 		{
 			if (f.isDirectory())
 			{
@@ -144,7 +144,7 @@ public class TestingUtils {
 				return false;
 			}
 		}
-		return parentDirectory.listFiles().length == 0;
+		return nonNull(parentDirectory.listFiles()).length == 0;
 	}
 
 	public static Date truncateTimeToMinute(Date date)

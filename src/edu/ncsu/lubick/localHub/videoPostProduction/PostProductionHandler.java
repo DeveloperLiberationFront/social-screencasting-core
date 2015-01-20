@@ -23,8 +23,8 @@ public class PostProductionHandler
 
 	private static Logger logger = Logger.getLogger(PostProductionHandler.class.getName());
 
-	private static final int RUN_UP_TIME = 5;
-	
+	private static final int RUN_UP_TIME = 5000;
+	private static final int MINIMUM_VID_TIME = 2000;
 
 	private FramesToBrowserAnimatedPackage browserMediaMaker = null;
 	
@@ -47,20 +47,17 @@ public class PostProductionHandler
 		int startIndex = findFrameBelongingToDate(startTimeToLookFor, allFrames);
 		if (allFrames.length == 0)
 		{
-			logger.error("Could not extract tool usage because the screencasting folder is empty");
-			return null;
+			throw new MediaEncodingException("Could not extract tool usage because the screencasting folder is empty");
 		}
 		if (startIndex >= allFrames.length)
 		{
-			logger.info("This tool use appears to be in the future, or at least later than "+allFrames[allFrames.length-1]);
-			return null;
+			throw new MediaEncodingException("This tool use appears to be in the future ("+startTimeToLookFor +"), or at least later than "+allFrames[allFrames.length-1]);
 		}
-		if (startIndex == 0)
+		if (startIndex <= 0)
 		{
 			if (checkForTooEarlyToolUsage(specificToolUse.getTimeStamp(),allFrames[0]))
 			{
-				logger.info("Tool usage was not extracted because it happens before the screencasting was recorded");
-				return null;
+				throw new MediaEncodingException("Tool usage was not extracted because it happens before the screencasting was recorded");
 			}
 		}
 		
@@ -93,12 +90,12 @@ public class PostProductionHandler
 
 	private Date getEndTime(ToolUsage specificToolUse)
 	{
-		return new Date(specificToolUse.getTimeStamp().getTime() + specificToolUse.getDuration());
+		return new Date(specificToolUse.getTimeStamp().getTime() + Math.min(MINIMUM_VID_TIME, specificToolUse.getDuration()));
 	}
 
 	private Date getStartingTime(ToolUsage specificToolUse)
 	{
-		return new Date(specificToolUse.getTimeStamp().getTime() - 1000 * RUN_UP_TIME);
+		return new Date(specificToolUse.getTimeStamp().getTime() - RUN_UP_TIME);
 	}
 
 	private File[] getSortedFrameFiles()
@@ -111,7 +108,11 @@ public class PostProductionHandler
 				return pathname.getName().endsWith(PostProductionHandler.FULLSCREEN_IMAGE_FORMAT);
 			}
 		});
-		Arrays.sort(allFrames);
+		if (allFrames != null) {
+			Arrays.sort(allFrames);
+		} else {
+			allFrames = new File[0];
+		}
 		return allFrames;
 	}
 

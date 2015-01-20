@@ -180,5 +180,19 @@ public class FileUtilities
 		return Files.copy(sourceFile.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING).toFile();
 		
 	}
+	
+	public static File[] nonNull(File[] maybeNullFileArray) {
+		if (maybeNullFileArray == null) {
+			return new File[0];
+		}
+		return maybeNullFileArray;
+	}
+	
+	public static String[] nonNull(String[] maybeNullStringArray) {
+		if (maybeNullStringArray == null) {
+			return new String[0];
+		}
+		return maybeNullStringArray;
+	}
 
 }

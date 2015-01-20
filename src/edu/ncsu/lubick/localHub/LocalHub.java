@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -27,6 +28,7 @@ import edu.ncsu.lubick.util.ToolCountStruct;
 
 public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
+	public static final String VERSION = "v2.9.8";
 	public static final String LOGGING_FILE_PATH = "/etc/log4j.settings";
 	public static final int MAX_TOOL_USAGES = 5;
 	
@@ -162,9 +164,40 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 			@Override
 			public void run()
 			{
-				ToolUsage tu = new ToolUsage("heartbeat", "", ToolUsage.MENU_KEY_PRESS, "[ScreencastingHub]",
+				StringBuilder extraInfo = countUpScreencastsByApplication();
+				extraInfo.append(VERSION);
+				ToolUsage tu = new ToolUsage("heartbeat", extraInfo.toString(), ToolUsage.MENU_KEY_PRESS, "[ScreencastingHub]",
 						new Date(), 1000, 0);
 				reportToolUsage(tu);
+			}
+
+			private StringBuilder countUpScreencastsByApplication()
+			{
+				StringBuilder extraInfo = new StringBuilder();
+				File f = new File(PostProductionHandler.MEDIA_OUTPUT_FOLDER);
+				String[] generatedScreencastNames = f.list();
+				if (generatedScreencastNames != null) {
+					Map<String, Integer> nameMap = new HashMap<String, Integer>();
+					//XXX Hardcoded for now
+					nameMap.put("Excel", 0);
+					nameMap.put("Eclipse", 0);
+					nameMap.put("Gmail", 0);
+					
+					for(String s: generatedScreencastNames) {
+						for (Entry<String, Integer> entry : nameMap.entrySet())
+						{
+							if (s.startsWith(entry.getKey()))
+							{
+								nameMap.put(entry.getKey(), entry.getValue() + 1);
+							}
+						}
+					}
+					for (Entry<String, Integer> entry : nameMap.entrySet())
+					{
+						extraInfo.append(entry.getKey() +" : "+entry.getValue()+',');
+					}
+				}
+				return extraInfo;
 			}
 		};
 		
