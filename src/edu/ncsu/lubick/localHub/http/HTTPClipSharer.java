@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import edu.ncsu.lubick.localHub.ClipOptions;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
@@ -45,7 +47,15 @@ public class HTTPClipSharer extends AbstractHandler {
 		
 		if ("POST".equals(baseRequest.getMethod()))
 		{
-			handlePost(request);
+			try
+			{
+				handlePost(request);
+			}
+			catch (JSONException e)
+			{
+				response.getWriter().println("There was a problem");
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			}
 		}
 		else 
 		{
@@ -57,33 +67,43 @@ public class HTTPClipSharer extends AbstractHandler {
 
 
 
-	private void handlePost(HttpServletRequest request)
+	private void handlePost(HttpServletRequest request) throws JSONException
 	{
 		logger.debug(request.getParameterMap());
+		JSONObject jobj = HTTPUtils.getRequestJSON(request).getJSONObject("data");
+		logger.debug(jobj);
 		
-		String clipId = request.getParameter(PARAM_CLIP_ID);
-		String recipient = request.getParameter(PARAM_RECIPIENT);
+		if (jobj == null) {
+			logger.info("no data, so cancelling");
+			return;
+		}
 		
-		String paramStartFrame = request.getParameter(PARAM_START_FRAME);
-		int startFrame = Integer.parseInt(paramStartFrame == null? "0" : paramStartFrame);
-		String paramEndFrame = request.getParameter(PARAM_END_FRAME);
-		int endFrame = Integer.parseInt(paramEndFrame == null? "0" : paramEndFrame);
+		String clipId = jobj.optString(PARAM_CLIP_ID);
+		String recipient = jobj.optString(PARAM_RECIPIENT);
 		
-		String cropX = request.getParameter(PARAM_CROP_RECT+"[x1]");
-		String cropY = request.getParameter(PARAM_CROP_RECT+"[y1]");
-		String cropWidth = request.getParameter(PARAM_CROP_RECT+"[width]");
-		String cropHeight = request.getParameter(PARAM_CROP_RECT+"[height]");
+		int startFrame = jobj.optInt(PARAM_START_FRAME, 0);
+		int endFrame = jobj.optInt(PARAM_END_FRAME, 0);
 		
-		if (clipId == null || recipient == null)
+		if (clipId.isEmpty() || recipient.isEmpty())
 		{
 			logger.info("clipId = "+clipId +", recipient = "+recipient+", so cancelling");
 			return;
 		}
 		
+		JSONObject cropBox = null;
+		try
+		{
+			cropBox = new JSONObject(jobj.optString(PARAM_CROP_RECT, "{}"));
+		}
+		catch (JSONException e)
+		{
+			logger.warn("Problem with cropbox", e);
+		}
+		
 		Rectangle cropRect = null;
-		if (cropX != null && cropY != null && cropWidth != null && cropHeight != null) {
-			cropRect = new Rectangle(Integer.parseInt(cropX), Integer.parseInt(cropY),
-					Integer.parseInt(cropWidth), Integer.parseInt(cropHeight));
+		if (cropBox != null && cropBox.has("x1") && cropBox.has("y1") && cropBox.has("width") && cropBox.has("height") ) {
+			cropRect = new Rectangle(cropBox.getInt("x1"), cropBox.getInt("y1"),
+					cropBox.getInt("width"), cropBox.getInt("height"));
 		}
 		
 		

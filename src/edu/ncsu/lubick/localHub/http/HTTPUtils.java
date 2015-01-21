@@ -76,8 +76,23 @@ public class HTTPUtils {
 		return sb.toString();
 	}
 	
-	public static JSONObject getRequestJSON(HttpServletRequest request) throws JSONException, IOException{
-		String jsonString=getRequestBody(request);
+	/**
+	 * Gets the body of a POST or PULL request and parses it as a JSON object
+	 * @param request
+	 * @return
+	 * @throws JSONException
+	 * @throws IOException
+	 */
+	public static JSONObject getRequestJSON(HttpServletRequest request) throws JSONException {
+		String jsonString;
+		try
+		{
+			jsonString = getRequestBody(request);
+		}
+		catch (IOException e)
+		{
+			throw new JSONException(e);
+		}
 		return new JSONObject(jsonString);
 	}
 	

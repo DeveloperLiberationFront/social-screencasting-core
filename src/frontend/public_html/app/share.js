@@ -7,8 +7,8 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
 
     var post = Local.one("shareClip");
     post.data = {
-      clip_id : $scope.selection[0].clipId,
-      recipient : shareWithAll? "all" : $scope.shareWithEmail,
+      clip_id : $scope.selection[0].id,
+      recipient : shareWithAll? "all" : $scope.display.info.share_with_email,
       start_frame: $scope.clip.start,
       end_frame: $scope.clip.end,
       crop_rect: JSON.stringify($scope.cropData.cropData)
@@ -25,14 +25,14 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
       if (notification.type == "request_fulfilled") {
         //add this shared video to the list
         var json = JSON.parse(notification.status);
-        json.video_id.push($scope.selection[0].clipId);
+        json.video_id.push($scope.selection[0].id);
         notification.status = JSON.stringify(json);
         notification.put();
       }
       else {
         //mark this notification as responded, and make the status a hash with an array of clip ids
         _.assign(notification, {
-          status: JSON.stringify({video_id:[$scope.selection[0].clipId]}),
+          status: JSON.stringify({video_id:[$scope.selection[0].id]}),
           type: "request_fulfilled"
         });
         notification.put();
@@ -115,14 +115,8 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
 
           if (c.length > 0) {
             $scope.clip = c[0];
-            //var clipId = c[0].clipId.name;
             $scope.ready = true;
             $scope.$broadcast('refreshSlider');
-            // Local.one(clipId).get().then(function(clip){     
-            //   $scope.clip = clip;
-            //   $scope.ready = true;
-            //   $scope.$broadcast('refreshSlider');
-            // });
           }
         }
       };

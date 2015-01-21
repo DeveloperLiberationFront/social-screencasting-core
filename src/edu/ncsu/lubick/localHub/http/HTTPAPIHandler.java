@@ -68,11 +68,13 @@ public class HTTPAPIHandler extends AbstractHandler {
 			else {
 				logger.error("I don't know how to handle a POST like this " + target);
 				response.getWriter().println("Sorry, Nothing at this URL");
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			}
 		}
 		else if (target.length() < 5)			
 		{
 			response.getWriter().println("Sorry, Nothing at this URL");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 		}
 		else if ("GET".equals(type))
 		{
@@ -91,6 +93,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 			handlePUTStatus(pieces,request,response);
 		}else {	
 			response.getWriter().println("Sorry, Nothing at this URL");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 		}
 	}
 	private void handlePUTStatus(String[] pieces, HttpServletRequest request,
@@ -99,6 +102,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 			handlePUTRecording(request, response);
 		}else {
 			response.getWriter().println("Sorry, Nothing at this URL");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 		}
 	}
 	
