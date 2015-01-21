@@ -128,12 +128,8 @@ define(['angular',
             })
             .state('share', {
                 url: '/share/:application/:tool?share_with_name&share_with_email&request_id',
-                views: {
-                  'center': {
-                    templateUrl: 'partials/share.html',
-                    controller: 'ShareCtrl',
-                  },
-                },
+                templateUrl: 'partials/share.html',
+                controller: 'ShareCtrl',
                 breadcrumb: { title: 'Share' }
             });
     }])
