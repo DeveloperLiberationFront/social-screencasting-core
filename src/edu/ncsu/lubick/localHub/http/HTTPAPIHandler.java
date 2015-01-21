@@ -127,13 +127,13 @@ public class HTTPAPIHandler extends AbstractHandler {
 			response.getWriter().println("Sorry, Nothing at this URL");
 		} else if ("clips".equals(pieces[2])){ 
 			handleClipsAPI(pieces, response);
-
 		}else if("status".equals(pieces[2])){
 			handleGetStatus(pieces, response);
 		} else if (pieces.length == 3){		//api/user
 			handleGetUserInfo(chopOffQueryString(pieces[2]), response);
 		} else {
 			response.getWriter().println("Sorry, Nothing at this URL");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 		}
 	}
 	
@@ -143,6 +143,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 				handleGetRecording(response);
 			}else {
 				response.getWriter().println("Sorry, Nothing at this URL");
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			}
 	}
 	
@@ -169,6 +170,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 		//"return {name , data}"
 		if (pieces.length != 5) {
 			response.getWriter().println("Sorry, Nothing at this URL");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}
 		
@@ -256,8 +258,8 @@ public class HTTPAPIHandler extends AbstractHandler {
 		clips.addAll(databaseLink.getBestExamplesOfTool(applicationName, toolName, false));
 		
 //		//XXX sample data
-//		clips.add(new File("renderedVideos/Eclipse16141cfc-87cb-32dc-bc30-fedcad3b7598G"));
-//		clips.add(new File("renderedVideos/Eclipse1a46c017-a154-323b-824f-caa732caa84aG"));
+		clips.add(new File("renderedVideos/Eclipse24892622-0465-3076-a9f6-69ae5a1d7ce2K"));
+		clips.add(new File("renderedVideos/Eclipsed168819a-8755-3669-94c6-e40e1cef29e1G"));
 		
 		JSONArray jarr = new JSONArray();
 		for(File clip: clips) {
@@ -318,6 +320,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 		else 
 		{
 			response.getWriter().println("You can only query the local hub for information about you, "+ userManager.getUserName());
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 		}
 
 	}

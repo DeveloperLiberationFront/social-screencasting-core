@@ -41,6 +41,7 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
   }
 
   function cancelSharing($scope, Hub) {
+    console.log("Cancelling sharing");
     var reasonText = $("#no-share-reason").val();
 
     $scope.$emit('instrumented', "NOT Sharing a Clip", reasonText);
@@ -95,10 +96,11 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
           } else {
             type = "GUI";
           }
-          $scope.clips.push({
-            clipId: clip,
+          $scope.clips.push(_.assign(clip, {
+            id : clip.name,
             toDisplay: "Example "+(+i+1)+" using " + type
-          });
+          }
+          ));
         });
       });
 
@@ -112,12 +114,15 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
           var c = $scope.selection;
 
           if (c.length > 0) {
-            var clipId = c[0].clipId;
-            Local.one(clipId).get().then(function(clip){      //TODO fix for updated local API
-              $scope.clip = clip;
-              $scope.ready = true;
-              $scope.$broadcast('refreshSlider');
-            });
+            $scope.clip = c[0];
+            //var clipId = c[0].clipId.name;
+            $scope.ready = true;
+            $scope.$broadcast('refreshSlider');
+            // Local.one(clipId).get().then(function(clip){     
+            //   $scope.clip = clip;
+            //   $scope.ready = true;
+            //   $scope.$broadcast('refreshSlider');
+            // });
           }
         }
       };

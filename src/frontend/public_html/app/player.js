@@ -69,6 +69,11 @@ define(['angular',
 
         //load all images, and then set the status to ready
       function loadClip(clip) {
+        // if (clip.images !== undefined && clip.images.length !== undefined && clip.images.length > 0) {
+        //   $scope.player.status = 'ready';
+        //   $scope.$broadcast('refreshSlider');
+        //   return;   //we have already loaded the images
+        // }
         var images = clip.all('images').getList();
         
         $scope.player.status = 'loading';
@@ -82,7 +87,8 @@ define(['angular',
           });
           $scope.player.status = 'ready';
           $scope.$broadcast('refreshSlider');
-        }, function(stuff)  { console.log(stuff);}, function(stuff)  { console.log(stuff);});
+        }, //error handling
+        function(stuff)  { console.log(stuff);}, function(stuff)  { console.log(stuff);});
       }
         loadClip($scope.clip);
 
