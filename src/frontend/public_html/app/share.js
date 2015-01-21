@@ -40,7 +40,7 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
     });
   }
 
-  function cancelSharing($scope, Hub) {
+  function cancelSharing($scope, Hub) { 
     console.log("Cancelling sharing");
     var reasonText = $("#no-share-reason").val();
 
@@ -128,6 +128,6 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
       };
 
       $scope.shareClip = _.curry(shareClip)($scope, Local, Hub);
-      $scope.cancelSharing = _.curry(cancelSharing)($scope, Hub);
+      $scope.cancelSharing = _.partial(cancelSharing, $scope, Hub);
     }]);//end ShareCtrl
 });//end define()

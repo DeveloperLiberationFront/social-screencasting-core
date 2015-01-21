@@ -3,12 +3,12 @@
 
   <div class="shareGrid col-md-2" ng-grid="shareGridOptions" ng-show="!cancelled"></div>
 
-  <div id='share-player' class="col-md-8" ng-controller='PlayerCtrl'
+  <div id='share-player' class="col-md-8" ng-if="ready" ng-controller='PlayerCtrl'
   ng-include="'partials/player.html'" ng-show="!cancelled"></div>
 
   <div ng-show="ready && !cancelled" id="shareButtonsContainer" class="col-md-1" ng-controller="ShareDropDownCtrl">
     <button id="shareClip" class="shareClipButton btn btn-default" ng-click="shareClip(false)">
-      Share With {{shareWithName}}
+      Share With {{displayInfo.shareWithName}}
     </button>
     <br/>
     <button id="shareAll" class="shareClipButton btn btn-default" ng-click="shareClip(true)">
