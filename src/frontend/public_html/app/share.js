@@ -68,7 +68,7 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
   Controllers.controller('ShareCtrl', [
     '$scope', '$stateParams', 'Local', 'Hub',
     function($scope, $stateParams, Local, Hub) {
-      $scope.displayInfo = $stateParams;
+      $scope.display = {info: $stateParams};
       $scope.respondingToNotification = $stateParams.request_id;
       $scope.editMode = true;
       $scope.cropData = {cropData:{}};    //make cropData updateable by child scope (player)

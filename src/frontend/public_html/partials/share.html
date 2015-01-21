@@ -1,5 +1,5 @@
 <div>
-  <h2>Share {{displayInfo.application || 'nothing'}}/{{displayInfo.tool || 'nothing'}} with {{displayInfo.share_with_name}} [{{displayInfo.share_with_email}}]</h2>
+  <h2>Share {{display.info.application || 'nothing'}}/{{display.info.tool || 'nothing'}} with {{display.info.share_with_name}} [{{display.info.share_with_email}}]</h2>
 
   <div class="shareGrid col-md-2" ng-grid="shareGridOptions" ng-show="!cancelled"></div>
 
@@ -8,7 +8,7 @@
 
   <div ng-show="ready && !cancelled" id="shareButtonsContainer" class="col-md-1" ng-controller="ShareDropDownCtrl">
     <button id="shareClip" class="shareClipButton btn btn-default" ng-click="shareClip(false)">
-      Share With {{displayInfo.shareWithName}}
+      Share With {{display.info.share_with_name}}
     </button>
     <br/>
     <button id="shareAll" class="shareClipButton btn btn-default" ng-click="shareClip(true)">
