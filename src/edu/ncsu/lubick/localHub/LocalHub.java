@@ -28,7 +28,7 @@ import edu.ncsu.lubick.util.ToolCountStruct;
 
 public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
-	public static final String VERSION = "v2.9.8";
+	public static final String VERSION = "v2.9.9";
 	public static final String LOGGING_FILE_PATH = "/etc/log4j.settings";
 	public static final int MAX_TOOL_USAGES = 5;
 	
@@ -511,12 +511,12 @@ public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 	@Override
 	public void shareClipWithUser(String clipId, ClipOptions clipOptions)
 	{
-//		if (!this.databaseManager.isClipUploaded(clipId))
-//		{
-//			ToolUsage toolUsage = databaseManager.getToolUsageById(clipId);
-//			this.clipUploader.uploadToolUsage(toolUsage, clipOptions);
-//			this.databaseManager.setClipUploaded(clipId, true);
-//		}
+		if (!this.databaseManager.isClipUploaded(clipId))
+		{
+			ToolUsage toolUsage = databaseManager.getToolUsageById(clipId);
+			this.clipUploader.uploadToolUsage(toolUsage, clipOptions);
+			this.databaseManager.setClipUploaded(clipId, true);
+		}
 		//TODO If we ever need to share with other people, should we keep the clip on hand so we don't need to 
 		//upload it again?
 	}
