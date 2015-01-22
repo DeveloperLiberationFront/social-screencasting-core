@@ -22,19 +22,21 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
     var note = Hub.one("notifications",$scope.respondingToNotification).get();
 
     note.then(function(notification){
-      if (notification.type == "request_fulfilled") {
+      if (notification.notification_type == "request_fulfilled") {
         //add this shared video to the list
         var json = JSON.parse(notification.notification_status);
         json.video_id.push($scope.selection[0].id);
         notification.notification_status = JSON.stringify(json);
+
         notification.put();
       }
       else {
         //mark this notification as responded, and make the status a hash with an array of clip ids
         _.assign(notification, {
           notification_status: JSON.stringify({video_id:[$scope.selection[0].id]}),
-          type: "request_fulfilled"
+          notification_type: "request_fulfilled"
         });
+
         notification.put().then(function(e) {
           console.log("Object saved OK");
           console.log(e);
@@ -57,7 +59,7 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
       .then(function(note){
         _.assign(note, {
           notification_status:"responded",
-          type:"request_denied",
+          notification_type:"request_denied",
           message: _.template(
             "Your request to {{share_with_name}} for {{application}}/{{tool}} was not fulfilled. " + reasonText,
             $scope.displayInfo)

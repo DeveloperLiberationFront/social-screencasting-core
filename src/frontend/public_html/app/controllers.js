@@ -717,7 +717,7 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
 
   function prepareMessagesForSentRequests(sent) {
     _.each(sent, function(sentItem) {
-      if (sentItem.type == "request_fulfilled") {
+      if (sentItem.notification_type == "request_fulfilled") {
         var json = JSON.parse(sentItem.notification_status);
         console.log(json);
         sentItem.shared_videos = _.map(json.video_id, function(id){
@@ -762,7 +762,7 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
         $scope.receivedNotifications = _(notifications) //wraps for lodash chaining
           .where({recipient: {email: $scope.user.email}})
           .reject(function(item) { //user doesn't need to see requests they have responded to
-            return item.type == "request_fulfilled";
+            return item.notification_type == "request_fulfilled";
           })
           .value();
         
@@ -792,7 +792,7 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
       };
         
       $scope.getShareLink = function(request) {
-        if ("share_request" == request.type) {
+        if ("share_request" == request.notification_type) {
           return $interpolate(
             "#/share/{{application}}/{{tool.name}}"
               + "?share_with_name={{sender.name}}"
@@ -842,8 +842,9 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
         application: $stateParams.application,
         tool: $stateParams.tool,
         recipient: $stateParams.owner,
-        type: "share_request",
-        message: "message"
+        notification_type: "share_request",
+        message: "message",
+        notification_status: "new"
       });
       $modalInstance.close();
     };

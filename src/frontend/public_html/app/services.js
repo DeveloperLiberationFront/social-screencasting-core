@@ -25,6 +25,15 @@ define(['angular', 'lodash', 'ng-resource', 'restangular'], function (ng, _) {
               }
               return extractedData;
           });
+          rc.addRequestInterceptor(function(element, operation, route, url) {
+            if (element) {
+              element._id = undefined;
+              element._updated = undefined;
+              element._created = undefined;
+              element._links = undefined;
+            }
+          return element;
+          });
       });
     }])
 
