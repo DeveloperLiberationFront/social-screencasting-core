@@ -6,7 +6,35 @@ define(['angular', 'lodash', 'ng-resource', 'restangular'], function (ng, _) {
         RestangularConfigurer.setBaseUrl('/api'); //relative to top level (which is already localhost:4443)
       });
     }])
-
+    
+    //Http interceptor for mocking. To enable mocking in localhost, add url paramter mock=true
+    .config(['$httpProvider', function ($httpProvider) {
+      if(window.location.href.indexOf("http://localhost") !== -1 && window.location.href.indexOf("mock=true") !== -1) {
+          $httpProvider.interceptors.push(function () {
+            return {
+                "request": function (config) {
+                  if(config.url.indexOf("/api/v2/clips") !== -1) {
+                    config.url = config.url.replace("http://recommender.oscar.ncsu.edu", "");
+                    config.url = config.url.replace("/api/v2/clips", "/mock/clips");
+                  }
+                  if(config.url.indexOf("/api/v2/user_tools") !== -1) {
+                    config.url = config.url.replace("http://recommender.oscar.ncsu.edu", "");
+                    config.url = config.url.replace("/api/v2/user_tools", "/mock/user_tools");
+                  }
+                  if(config.url.indexOf("/api/v2/users") !== -1) {
+                    config.url = config.url.replace("http://recommender.oscar.ncsu.edu", "");
+                    config.url = config.url.replace("/api/v2/users", "/mock/users");
+                  }
+                  if(config.url.indexOf("/api/user") !== -1) {
+                    config.url = config.url.replace("/api/user", "/mock/user");
+                  }
+                  return config;
+                }
+            };
+        });
+      }
+    }])
+    
     .factory('Hub', ['Restangular', function(Restangular) {
       return Restangular.withConfig(function(RestangularConfigurer) {
           var rc = RestangularConfigurer;

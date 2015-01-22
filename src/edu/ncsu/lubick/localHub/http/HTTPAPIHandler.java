@@ -29,6 +29,7 @@ import edu.ncsu.lubick.localHub.UserManager;
 import edu.ncsu.lubick.localHub.WebQueryInterface;
 import edu.ncsu.lubick.localHub.videoPostProduction.PostProductionHandler;
 import edu.ncsu.lubick.util.ClipUtils;
+import edu.ncsu.lubick.util.FileUtilities;
 
 public class HTTPAPIHandler extends AbstractHandler {
 
@@ -49,6 +50,10 @@ public class HTTPAPIHandler extends AbstractHandler {
 	@Override
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
+		if(target.startsWith("/mock")) {
+			handleMocks(target, response);
+			return;
+		}
 		if (!(target.startsWith("/api"))) {
 			return;
 		}
@@ -84,6 +89,29 @@ public class HTTPAPIHandler extends AbstractHandler {
 		}
 	}
 	
+	//Mocking API handler
+	private void handleMocks(String target, HttpServletResponse response) throws IOException {
+		String[] pieces = target.split("/");
+		if("mock".equals(pieces[1])) {
+			if(pieces.length == 4) {
+				if("clips".equals(pieces[2]))
+					replyWithJSONMock(response, "images.json");
+			}
+			if("clips".equals(pieces[2])) {
+				replyWithJSONMock(response, "clips.json");
+			}
+			if("user_tools".equals(pieces[2])) {
+				replyWithJSONMock(response, "user_tools.json");
+			}
+			if("users".equals(pieces[2])) {
+				replyWithJSONMock(response, "users.json");
+			}
+			if("user".equals(pieces[2])) {
+				replyWithJSONMock(response, "user.json");
+			}
+		}
+	}
+
 	private void handlePUT(String target, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 
@@ -359,6 +387,15 @@ public class HTTPAPIHandler extends AbstractHandler {
 			logger.error("Problem making a thumbnail " + clipId + " " + fileNamesArr);
 			return null;
 		}
+	}
+	
+	//Get a mock file content. Mock files are stored in [project dir]/mocks folder. 
+	private void replyWithJSONMock(HttpServletResponse response, String filename) throws IOException {
+		response.setContentType("application/json");
+		response.setStatus(200);
+		File mock = new File("mocks/" + filename);
+		response.getWriter().write(FileUtilities.readAllFromFile(mock));
+		response.getWriter().close();
 	}
 
 }
