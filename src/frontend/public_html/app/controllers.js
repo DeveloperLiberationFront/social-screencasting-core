@@ -767,10 +767,16 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
           .value();
         
         prepareMessagesForSentRequests($scope.sentNotifications, $scope.user_list.$object);
+
         prepareMessagesForReceivedRequests($scope.receivedNotifications);
         _.each($scope.receivedNotifications, function(item) {
           if (item.notification_status == "new") {
             item.notification_status = "seen";
+            // since we asked for the expanded versions, we have to remove the
+            // fields or else eve gets confused
+            item.tool = undefined;
+            item.recipient = undefined;
+            item.sender = undefined;
             item.patch($scope.auth);
           }
         });
