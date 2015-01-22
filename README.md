@@ -30,3 +30,7 @@ If you will be interacting with the front end, you'll need to do a bit more setu
 5. In controllers.js (or whereever, add an entry to the define at the top of the module name (the same thing you typed in main.js)
 6. Go ahead and inject the services you need (which may or may not be the same name as the module name)
 7. Not working?  Try adding an entry to the requirejs call at the bottom of main.js  (it's still a bit magic at this point)
+
+
+###Updating versions###
+If things seem buggy, try updating the javascript libraries with `bower update`
