@@ -209,7 +209,7 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
         'embedded': {'recipient': 1, 'sender': 1, 'tool': 1} //pull in recipient details instead of just the sender
       }).then(function(notifications) {
        // $scope.notifications = notifications;
-        $scope.numberUnreadNotifications = _.where(notifications,{status:"new", recipient: {email: $scope.user.email}}).length;
+        $scope.numberUnreadNotifications = _.where(notifications,{notification_status:"new", recipient: {email: $scope.user.email}}).length;
       });
 
       $scope.focus = function(bool) {
@@ -718,7 +718,7 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
   function prepareMessagesForSentRequests(sent) {
     _.each(sent, function(sentItem) {
       if (sentItem.type == "request_fulfilled") {
-        var json = JSON.parse(sentItem.status);
+        var json = JSON.parse(sentItem.notification_status);
         console.log(json);
         sentItem.shared_videos = _.map(json.video_id, function(id){
           return _.template(
@@ -769,9 +769,9 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
         prepareMessagesForSentRequests($scope.sentNotifications, $scope.user_list.$object);
         prepareMessagesForReceivedRequests($scope.receivedNotifications);
         _.each($scope.receivedNotifications, function(item) {
-          if (item.status == "new") {
-            item.status = "seen";
-            item.put($scope.auth);
+          if (item.notification_status == "new") {
+            item.notification_status = "seen";
+            item.patch($scope.auth);
           }
         });
       });
@@ -785,8 +785,8 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
       };
       
       $scope.getBadgeText = function(request) {
-        if (_.contains(["new", "seen"], request.status)) {
-          return request.status;
+        if (_.contains(["new", "seen"], request.notification_status)) {
+          return request.notification_status;
         }
         return undefined;
       };
