@@ -8,7 +8,7 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
     var post = Local.one("shareClip");
     post.data = {
       clip_id : $scope.selection[0].id,
-      recipient : shareWithAll? "all" : $scope.display.info.share_with_email,
+      recipient : shareWithAll? "public" : $scope.display.info.share_with_email,
       start_frame: $scope.clip.start,
       end_frame: $scope.clip.end,
       crop_rect: JSON.stringify($scope.cropData.cropData)

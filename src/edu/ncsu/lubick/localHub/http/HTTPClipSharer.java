@@ -69,7 +69,6 @@ public class HTTPClipSharer extends AbstractHandler {
 
 	private void handlePost(HttpServletRequest request) throws JSONException
 	{
-		logger.debug(request.getParameterMap());
 		JSONObject jobj = HTTPUtils.getRequestJSON(request).getJSONObject("data");
 		logger.debug(jobj);
 		

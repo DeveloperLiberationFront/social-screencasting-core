@@ -1,6 +1,7 @@
 package edu.ncsu.lubick.externalAPI;
 
 import static edu.ncsu.lubick.util.FileUtilities.nonNull;
+
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -128,9 +129,9 @@ public class BrowserMediaPackageUploader {
 	private String makeAndUploadExternalClip(File packageDirectory, ClipOptions clipOptions) throws JSONException, URISyntaxException, IOException
 	{
 		JSONObject jobj = prepareClipObject(packageDirectory, clipOptions);
-		 JSONObject postObj = postClipObject(jobj);
-		
-		 current_external_clip_id = postObj.optString("_id",null);
+		JSONObject postObj = postClipObject(jobj);
+
+		current_external_clip_id = postObj.optString("_id", null);
 		if (current_external_clip_id == null) {
 			return null;
 		}
@@ -156,8 +157,13 @@ public class BrowserMediaPackageUploader {
 			HttpResponse response = client.execute(httpPatch);
 
 			String responseBody = HTTPUtils.getResponseBody(response);
-			logger.info("Reply: "+responseBody);
+			logger.info("Reply to making and uploading clip: "+responseBody);
 
+			JSONObject responseObject = new JSONObject(responseBody);
+			if ("ERR".equals(responseObject.optString("_status", "ERR")))
+			{ // optional makes it fail if there is no status
+				logger.warn("Got an error putting to uri " + putUri);
+			}
 		}
 		catch (IOException e)
 		{
@@ -176,7 +182,8 @@ public class BrowserMediaPackageUploader {
 		JSONArray frameList = jobj.getJSONArray("frames");
 		int eventFrame = jobj.getJSONArray("event_frames").getInt(0);
 		logger.debug("Uploading thumbnail");
-		String responseString = reportImageByteArray(ClipUtils.makeThumbnail(new File(packageDirectory, frameList.getString(eventFrame))),
+		String eventFileName = frameList.getString(eventFrame < frameList.length() ? eventFrame : 0);
+		String responseString = reportImageByteArray(ClipUtils.makeThumbnail(new File(packageDirectory, eventFileName)),
 		"thumbnail");		//no jpg needed
 		JSONObject responseObject = new JSONObject(responseString);
 		
@@ -202,12 +209,13 @@ public class BrowserMediaPackageUploader {
 			HttpResponse response = client.execute(httpPost);
 
 			String responseBody = HTTPUtils.getResponseBody(response);
-			logger.info("Reply: "+responseBody);
+			logger.info("Reply to posting clip object: "+responseBody);
 
 			JSONObject responseObj = new JSONObject(responseBody);
-			if (!"ERR".equals(responseObj.optString("_status","ERR"))) {
+			if (!"ERR".equals(responseObj.optString("_status","ERR"))) {	//optional makes it fail if there is no status
 				return responseObj;
-			}		
+			}
+			logger.warn("got error with body: " + jobj.toString(1));
 		}
 		catch (IOException e)
 		{
@@ -234,12 +242,14 @@ public class BrowserMediaPackageUploader {
 		//Cropping this 
 		int eventFrame = 5 * PostProductionHandler.FRAME_RATE - clipOptions.startFrame;
 		
-		
 		JSONArray eventFrames = new JSONArray().put(eventFrame);
 		jobj.put("event_frames", eventFrames);
 		jobj.put("share", emailJarr);
 		
 		JSONArray frameList = ClipUtils.makeFrameListForClipNoExtensions(packageDirectory, clipOptions.startFrame, clipOptions.endFrame);
+		
+		// sometimes this is too big, for whatever reason
+		eventFrame = eventFrame < frameList.length() ? eventFrame : 0;
 		
 		if (ToolUsage.MENU_KEY_PRESS.equals(currentToolUsage.getToolKeyPresses())) {
 			jobj.put("type", "mouse");
@@ -269,9 +279,14 @@ public class BrowserMediaPackageUploader {
 			HttpResponse response = client.execute(httpGet);
 
 			String responseBody = HTTPUtils.getResponseBody(response);
-			logger.info("Reply: "+responseBody);
+			logger.info("Reply to get external tool id: "+responseBody);
 
-			JSONArray responseArray = new JSONObject(responseBody).optJSONArray("_items");
+			
+			JSONObject responseObject = new JSONObject(responseBody);
+			if ("ERR".equals(responseObject.optString("_status","ERR"))) {	//optional makes it fail if there is no status
+				logger.warn("Got an error with request " + getUri);
+			}
+			JSONArray responseArray = responseObject.optJSONArray("_items");
 			if (responseArray != null && responseArray.length() > 0) {
 				toolid = responseArray.getJSONObject(0).optString("_id");
 			}
@@ -389,7 +404,22 @@ public class BrowserMediaPackageUploader {
 			CloseableHttpResponse response = client.execute(httpPost);
 
 			String responseBody = HTTPUtils.getResponseBody(response);
-			logger.info("Reply: "+responseBody);
+			
+			logger.info("Reply to report image array: "+responseBody);
+			JSONObject responseObject;
+			try
+			{
+				responseObject = new JSONObject(responseBody);
+				if ("ERR".equals(responseObject.optString("_status", "ERR")))
+				{ // optional makes it fail if there is no status
+					logger.warn("Got an error uploading " + fileName);
+				}
+			}
+			catch (JSONException e)
+			{
+				logger.warn("Invalid JSON in response", e);
+			}
+			
 			return responseBody;
 		}
 		finally 

@@ -13,7 +13,8 @@ public class ClipOptions {
 		this.startFrame = startFrame;
 		this.endFrame = endFrame;
 		this.cropRect = cropRect;
-		this.shareWithEmail = shareWithEmail;
+		//dummy check for "public" instead of "all" (happened in earlier version)
+		this.shareWithEmail = "all".equals(shareWithEmail) ? "public" : shareWithEmail;
 	}
 
 	public ClipOptions(String shareWithEmail, int startFrame, int endFrame)
