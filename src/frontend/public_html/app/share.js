@@ -5,6 +5,8 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
 
   function shareClip($scope, Local, Hub, shareWithAll) {
 
+    $scope.hasShared = true;
+    
     var post = Local.one("shareClip");
     post.data = {
       clip_id : $scope.selection[0].id,
@@ -17,7 +19,7 @@ define(['jquery', 'lodash', 'controllers'], function($, _, Controllers) {
     $scope.$emit('instrumented', "Sharing a Clip", post.data);
     post.post();
 
-    $scope.hasShared = true;
+    
 
     var note = Hub.one("notifications",$scope.respondingToNotification).get();
 

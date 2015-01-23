@@ -1,14 +1,14 @@
 <div>
   <h2>Share {{display.info.application || 'nothing'}}/{{display.info.tool || 'nothing'}} with {{display.info.share_with_name}} [{{display.info.share_with_email}}]</h2>
 
-  <div class="shareGrid col-md-2" ng-grid="shareGridOptions" ng-show="!cancelled"></div>
+  <div class="shareGrid col-md-2" ng-grid="shareGridOptions" ng-show="!cancelled && !hasShared"></div>
 
   <div id='share-player' class="col-md-8" ng-if="ready" ng-controller='PlayerCtrl'
-  ng-include="'partials/player.html'" ng-show="!cancelled"></div>
+  ng-include="'partials/player.html'" ng-show="!cancelled &&!hasShared"></div>
 
-  <div ng-show="ready && !cancelled" id="shareButtonsContainer" class="col-md-1" ng-controller="ShareDropDownCtrl">
+  <div ng-show="ready && !cancelled && !hasShared" id="shareButtonsContainer" class="col-md-1" ng-controller="ShareDropDownCtrl">
     <button id="shareClip" class="shareClipButton btn btn-default" ng-click="shareClip(false)">
-      Share With {{display.info.share_with_name}}
+      Share With Just {{display.info.share_with_name}}
     </button>
     <br/>
     <button id="shareAll" class="shareClipButton btn btn-default" ng-click="shareClip(true)">
@@ -26,6 +26,12 @@
     </div>
   </div>
 
+  <div ng-show="hasShared">
+    Your shared screencast is on its way!  Thanks for sharing.
+  </div>
 
+  <div ng-show="cancelled">
+    No screencasts have been sent.  Your message, if you gave one, will be delivered soon.
+  </div>
 
 </div>

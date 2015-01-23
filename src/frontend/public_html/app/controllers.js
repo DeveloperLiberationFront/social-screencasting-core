@@ -774,10 +774,18 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
             item.notification_status = "seen";
             // since we asked for the expanded versions, we have to remove the
             // fields or else eve gets confused
+            var tempTool = item.tool;
             item.tool = undefined;
+            var tempRecipient = item.recipient;
             item.recipient = undefined;
+            var tempSender = item.sender;
             item.sender = undefined;
             item.patch($scope.auth);
+
+            //pop those items off so we get valid messages
+            item.tool = tempTool;
+            item.recipient = tempRecipient;
+            item.sender = tempSender;
           }
         });
       });
