@@ -581,7 +581,7 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
       });
 
       if ($state.params.app_filter) {
-        var apps = $state.params.app_filter.split(',');
+        var apps = $state.params.app_filter.push ? $state.params.app_filter : [$state.params.app_filter];
         //creates an object like {active_app_1:true, active_app_2:true ...}
         $scope.filter.apps = _.zipObject(apps, _.times(apps.length, function(){return true;}));
         $scope.filter.all = false;
