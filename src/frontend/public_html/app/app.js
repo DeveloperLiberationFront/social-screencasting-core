@@ -52,7 +52,7 @@ define(['angular',
             })
 
             .state('main.video', {
-              url: '/video?location&owner&tool_name&tool_id&clip_id&application&user_name',
+              url: '^/video?location&owner&tool_name&tool_id&clip_id&application&user_name',
               onEnter: function($state, $stateParams, $modal, $rootScope, Hub, Local) {
                 var clips;
                 if ($stateParams.location == "external") {
