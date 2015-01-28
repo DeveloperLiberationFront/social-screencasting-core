@@ -567,7 +567,8 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
         input: null,
         source: [],
         apps: {},
-        templateUrl: ''
+        templateUrl: '',
+        all: true
       };
 
       $scope.applications.then(function(apps) {
@@ -580,13 +581,14 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
       });
 
       if ($state.params.app_filter) {
-        var apps = $state.params.app_filter.split(',');
+        var apps = $state.params.app_filter.push ? $state.params.app_filter : [$state.params.app_filter];
         //creates an object like {active_app_1:true, active_app_2:true ...}
         $scope.filter.apps = _.zipObject(apps, _.times(apps.length, function(){return true;}));
+        $scope.filter.all = false;
       }
 
       $scope.filterSet.filters.push(function(tool) {
-        return !_.any($scope.filter.apps) //unchecking all apps shows all tools
+        return $scope.filter.all //unchecking all apps shows all tools
           || $scope.filter.apps[tool.application];
       });
 
@@ -595,6 +597,12 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
         $state.go('main', {
           app_filter: _.keys(_.pick($scope.filter.apps, function(v){return v;}))
         });
+      };
+      
+      $scope.allFilters = function() {
+        if($scope.filter.all === true)
+          $scope.filter.apps = {};
+        $scope.updateFilters();
       };
     }])
 

@@ -7,5 +7,8 @@
       <input type="checkbox" ng-model="filter.apps[app]" ng-change='updateFilters()'/>
       {{app}}
     </li>
+    <li class="list-group-item">
+      <input type="checkbox" ng-model="filter.all" ng-change='allFilters()'/> Select All
+    </li>
   </ul>
 </li>
