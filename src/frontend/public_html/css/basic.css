@@ -212,6 +212,13 @@
     max-height: 50px;
 }
 
+.user-thumbnail >.watched {
+    position: absolute;
+    color: rgb(165, 103, 42);
+    font-size: 10px;
+    left: 30px;
+}
+
 /*---- stacked effect ----*/
 .tool-user {
     position: relative;

@@ -650,8 +650,8 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
 
     }])
 
-  .controller('ToolBlockCtrl', ['$scope', '$state', 'Local', 'Base64Img',
-    function($scope, $state, Local, Base64Img) {
+  .controller('ToolBlockCtrl', ['$scope', '$state', 'Local', 'Base64Img', 'localStorageService',
+    function($scope, $state, Local, Base64Img, localStorageService) {
       $scope.hasVideo = function(user) {
         return _.find($scope.tool.clips, {user: user.email})
           || user.email == $scope.user.email;
@@ -669,6 +669,19 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
           return Base64Img(_.isObject(c.thumbnail) ? c.thumbnail.data : c.thumbnail);
         } 
       };
+      
+      $scope.watched = function(user) {
+        var clips = _.where(_.where($scope.tool.clips, {user: user.email}), 'name');
+        if (clips.length > 0) {
+          var clip_name = clips[0].name;
+          var watched_clips = localStorageService.get("watched_clips");
+          watched_clips = watched_clips || {};
+          if(watched_clips[clip_name])
+            return true;
+          else
+            return false;
+        }
+      }
       
       $scope.keyboard = function(user) {       
         var usg  = _.find($scope.tool.usages.$object, {user : user.email});
@@ -703,6 +716,12 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
             tool_name: $scope.tool.name,
             tool_id: $scope.tool.tool_id,
           });
+          var watched_clips = localStorageService.get("watched_clips");
+          watched_clips = watched_clips || {};
+          var clip = _.where($scope.tool.clips, {"user": user.email})[0];
+          watched_clips[clip.name] = watched_clips[clip.name] || {};
+          watched_clips[clip.name]["watched_ts"] = (new Date()).valueOf();
+          localStorageService.set("watched_clips", watched_clips);
         } else {
           $state.go('main.request', {
             location: origin,

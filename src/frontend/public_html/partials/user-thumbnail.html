@@ -4,6 +4,7 @@
   </div>	
   <img class= 'small-indicator' src='images/mouse-icon.png' ng-if='mouse(user)>0'/>
   <img class= 'small-indicator' src='images/keyboard-icon.png' ng-if='keyboard(user)>0'/>  	
-	<img ng-src='{{thumbnail(user)}}' ng-if='thumbnail(user)'/>
+  <img ng-src='{{thumbnail(user)}}' ng-if='thumbnail(user)'/>
+  <div class="watched" ng-if='watched(user)'>WATCHED</div>
 	<div class="no-image-label" ng-if='!thumbnail(user)'>Click to request video</div>
 </div>
