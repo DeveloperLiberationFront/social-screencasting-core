@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import org.apache.http.HttpResponse;
@@ -140,7 +141,7 @@ public class SkylerEndpoint implements ExternalToolUsageReporter {
 	{
 		StringBuilder sb = new StringBuilder();
 		InputStream ips  = response.getEntity().getContent();
-		try(BufferedReader buf = new BufferedReader(new InputStreamReader(ips,"UTF-8"));)
+		try(BufferedReader buf = new BufferedReader(new InputStreamReader(ips, StandardCharsets.UTF_8));)
 		{
 		    String s;
 			while(true )

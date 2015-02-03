@@ -748,9 +748,7 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
         var json = JSON.parse(sentItem.notification_status);
         console.log(json);
         sentItem.shared_videos = _.map(json.video_id, function(id){
-          return _.template(
-            "#/video/external/{{recipient.email}}/"
-              + "{{application}}/{{tool}}/" + id,
+          return _.template("#/video?location=external&owner={{recipient.email}}&application={{application}}&tool_name={{tool.name}}&tool_id={{tool._id}}",
             sentItem);
         });
         sentItem.message = _.template(
