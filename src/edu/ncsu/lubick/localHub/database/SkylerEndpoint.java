@@ -21,7 +21,6 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.ncsu.las.net.ssl.KeystoreProvider;
 import edu.ncsu.lubick.localHub.ToolUsage;
 
 public class SkylerEndpoint implements ExternalToolUsageReporter {
@@ -30,8 +29,7 @@ public class SkylerEndpoint implements ExternalToolUsageReporter {
 	private static final Logger logger = Logger.getLogger(SkylerEndpoint.class);
 	private Properties skylerProperties;
 	
-	private CloseableHttpClient httpClient
-;
+	private CloseableHttpClient httpClient;
 	
 	private boolean skylerAvailable = false;		//available 
 	
@@ -105,6 +103,7 @@ public class SkylerEndpoint implements ExternalToolUsageReporter {
 		boolean result = false;
 		
 		HttpPost postRequest = new HttpPost(skylerProperties.getProperty(PROPERTY_DEST_SKYLR_ADD_URL));
+		postRequest.addHeader("authtoken",skylerProperties.getProperty(PROPERTY_DEST_SKYLR_AUTHENTICATION_TOKEN));
 		try {
 
 			StringEntity input = new StringEntity(joToolUsage.toString());
