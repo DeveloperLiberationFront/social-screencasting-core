@@ -105,7 +105,16 @@ public class RecommendationToolReporter implements ExternalToolUsageReporter {
 			 
 			HttpResponse response = httpClient.execute(postRequest);
 			 
-			logger.info(HTTPUtils.getResponseBody(response));
+			String responseString = HTTPUtils.getResponseBody(response);
+			logger.trace(responseString);
+			JSONObject responseObj = new JSONObject(responseString);
+			if (!"OK".equals(responseObj.getString("_status"))) {
+				logger.warn("There was a problem reporting toolusage event "+objForSending+" response: "+responseObj.toString(2));
+				return false;
+			}
+			
+			
+			
 		}
 		catch (Exception e) {
 			logger.warn("Unable to report event toolUsage object: "+objForSending, e);

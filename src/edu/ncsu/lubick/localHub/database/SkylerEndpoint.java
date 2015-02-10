@@ -81,8 +81,8 @@ public class SkylerEndpoint implements ExternalToolUsageReporter {
 
 
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn("Could not make JSON object for "+tu,e);
+			return false;
 		}
 		catch (Exception ex) { // this is only thrown right now if the connection fails in isToolUsageInSkylr can't connect
 			logger.warn("skylr unavailable (not able to connect) - skipping for this cycle"); 
@@ -119,7 +119,7 @@ public class SkylerEndpoint implements ExternalToolUsageReporter {
 			}
 			else {
 				result = true;
-				logger.trace("Skylr - inserted event - "+ response.getStatusLine().getStatusCode() +":  toolUsage object: "+joToolUsage);
+				logger.debug("Skylr - inserted event - "+ response.getStatusLine().getStatusCode() +":  toolUsage object: "+joToolUsage);
 			}
 		}
 		catch (Exception e) {
