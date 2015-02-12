@@ -66,9 +66,11 @@ public class EventForwarder implements Runnable {
 
 	public static final String PROPERTY_DEST_SKYLR_ADD_URL   = "skylrDestAddURL";
 	public static final String PROPERTY_DEST_SKYLR_QUERY_URL = "skylrDestQueryURL";
+	
+	public static final String PROPERTY_DEST_SKYLR_AUTHENTICATION_TOKEN  = "skylrDestAuthenticationToken";
 
 	public static final String[] REQUIRED_PROPERTIES = {PROPERTY_SLEEP_TIME,
-		PROPERTY_DEST_JDBC_DRIVER,	PROPERTY_DEST_JDBC_URL, PROPERTY_DEST_SKYLR_ADD_URL, PROPERTY_DEST_SKYLR_QUERY_URL};
+		PROPERTY_DEST_JDBC_DRIVER,	PROPERTY_DEST_JDBC_URL, PROPERTY_DEST_SKYLR_ADD_URL, PROPERTY_DEST_SKYLR_QUERY_URL, PROPERTY_DEST_SKYLR_AUTHENTICATION_TOKEN};
 
 	private Properties eventForwarderProperties;
 	private BufferedDatabaseManager localDatabase;

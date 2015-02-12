@@ -1,6 +1,6 @@
 log4j.settings
 EventForwarder.properties
-frontend/public_html/lib/bower
+src/frontend/public_html/lib/bower
 frontend/public_html/images/Eclipse0f989895-65a6-3af3-bf02-497cd0f4f35bK
 bin
 renderedVideos
