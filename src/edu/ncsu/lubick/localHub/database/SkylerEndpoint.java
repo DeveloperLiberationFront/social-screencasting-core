@@ -21,7 +21,6 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import edu.ncsu.las.net.ssl.KeystoreProvider;
 import edu.ncsu.lubick.localHub.ToolUsage;
 
 public class SkylerEndpoint implements ExternalToolUsageReporter {
@@ -30,8 +29,7 @@ public class SkylerEndpoint implements ExternalToolUsageReporter {
 	private static final Logger logger = Logger.getLogger(SkylerEndpoint.class);
 	private Properties skylerProperties;
 	
-	private CloseableHttpClient httpClient
-;
+	private CloseableHttpClient httpClient;
 	
 	private boolean skylerAvailable = false;		//available 
 	
@@ -83,8 +81,8 @@ public class SkylerEndpoint implements ExternalToolUsageReporter {
 
 
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn("Could not make JSON object for "+tu,e);
+			return false;
 		}
 		catch (Exception ex) { // this is only thrown right now if the connection fails in isToolUsageInSkylr can't connect
 			logger.warn("skylr unavailable (not able to connect) - skipping for this cycle"); 
@@ -105,6 +103,7 @@ public class SkylerEndpoint implements ExternalToolUsageReporter {
 		boolean result = false;
 		
 		HttpPost postRequest = new HttpPost(skylerProperties.getProperty(PROPERTY_DEST_SKYLR_ADD_URL));
+		postRequest.addHeader("authtoken",skylerProperties.getProperty(PROPERTY_DEST_SKYLR_AUTHENTICATION_TOKEN));
 		try {
 
 			StringEntity input = new StringEntity(joToolUsage.toString());
@@ -120,7 +119,7 @@ public class SkylerEndpoint implements ExternalToolUsageReporter {
 			}
 			else {
 				result = true;
-				logger.trace("Skylr - inserted event - "+ response.getStatusLine().getStatusCode() +":  toolUsage object: "+joToolUsage);
+				logger.debug("Skylr - inserted event - "+ response.getStatusLine().getStatusCode() +":  toolUsage object: "+joToolUsage);
 			}
 		}
 		catch (Exception e) {
