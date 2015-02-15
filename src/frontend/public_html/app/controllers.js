@@ -578,6 +578,8 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
             return name.indexOf("[") === 0;
         });
         $scope.filter.source = apps;
+        if($scope.filter.all)
+          $scope.filter.apps = _.zipObject($scope.filter.source, _.times($scope.filter.source.length, function(){return true;}));
       });
 
       if ($state.params.app_filter) {
@@ -600,9 +602,14 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
       };
       
       $scope.allFilters = function() {
-        if($scope.filter.all === true)
+        if($scope.filter.all === false)
           $scope.filter.apps = {};
-        $scope.updateFilters();
+        else
+          $scope.filter.apps = _.zipObject($scope.filter.source, _.times($scope.filter.source.length, function(){return true;}));
+        $state.go('main', {
+          app_filter: []
+        });
+        //$scope.updateFilters();
       };
     }])
 
