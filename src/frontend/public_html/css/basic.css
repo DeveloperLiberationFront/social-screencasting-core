@@ -35,6 +35,7 @@
 }
 
 #main > .center {
+    min-width: 800px;
     max-width: 800px;
     -webkit-flex: 1 1 250px; /*safari*/
     flex: 1 1 250px;

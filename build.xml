@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<project name="Socaster" basedir="." default="build-jar">
+	<property name="src.dir" value="src" />
+	<property name="src-module.dir" value="../screencasting-module/src">
+	</property>
+	<property name="external.dir" value="externalJars" />
+	<property name="build.dir" value="classes" />
+	<property name="dist.dir" value="dist">
+	</property>
+	<property name="name" value="fax" />
+
+	<path id="master-classpath">
+		<fileset dir="${external.dir}">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${external.dir}/HttpComponents">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement path="${build.dir}" />
+		<pathelement path="C:\Program Files\eclipse\plugins\org.junit_4.11.0.v201303080030\junit.jar" />
+	</path>
+
+	<target name="copy-task">
+		<mkdir dir="${dist.dir}/externalJars" />
+		<copy todir="${dist.dir}/externalJars">
+			<fileset dir="${external.dir}">
+				<include name="*.jar" />
+			</fileset>
+			<fileset dir="${external.dir}/HttpComponents">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+		<copy todir="${dist.dir}">
+			<fileset file="user.ini"></fileset>
+		</copy>
+	</target>
+
+	<target name="build-module" description="Compile source tree java files">
+		<mkdir dir="${build.dir}" />
+		<javac destdir="${build.dir}" source="1.7" target="1.7">
+			<src path="${src-module.dir}" />
+			<classpath refid="master-classpath" />
+		</javac>
+	</target>
+
+	<target name="build" description="Compile source tree java files" depends="build-module">
+		<mkdir dir="${build.dir}" />
+		<javac destdir="${build.dir}" source="1.7" target="1.7">
+			<src path="${src.dir}" />
+			<classpath refid="master-classpath" />
+		</javac>
+	</target>
+
+	<target name="build-jar" depends="build, copy-task">
+		<path id="jar.classpath">
+			<fileset dir="${dist.dir}/externalJars">
+				<include name="*.jar" />
+			</fileset>
+		</path>
+		<manifestclasspath property="lib.list" jarfile="${dist.dir}/socaster.jar">
+			<classpath refid="jar.classpath" />
+		</manifestclasspath>
+		<jar destfile="${dist.dir}/socaster.jar" basedir="${build.dir}">
+			<zipfileset dir="src/etc" prefix="etc"/>
+			<zipfileset dir="src/imageAssets" prefix="imageAssets"/>
+			<zipfileset dir="src/testAssets" prefix="testAssets"/>
+			<zipfileset dir="src/frontend/public_html" prefix="public_html"/>
+			<manifest>
+				<attribute name="Main-Class" value="edu.ncsu.lubick.RunnerNoScreencasting" />
+				<attribute name="Class-Path" value="${lib.list}" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="clean" description="Clean output directories">
+		<delete>
+			<fileset dir="${build.dir}">
+				<include name="**/*.class" />
+			</fileset>
+			<fileset dir="${dist.dir}">
+				<include name="**" />
+			</fileset>
+		</delete>
+	</target>
+</project>

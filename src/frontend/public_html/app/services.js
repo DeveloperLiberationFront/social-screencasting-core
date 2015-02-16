@@ -28,6 +28,14 @@ define(['angular', 'lodash', 'ng-resource', 'restangular'], function (ng, _) {
                   if(config.url.indexOf("/api/user") !== -1) {
                     config.url = config.url.replace("/api/user", "/mock/user");
                   }
+                  if(config.url.indexOf("/api/v2/applications") !== -1) {
+                    config.url = config.url.replace("http://recommender.oscar.ncsu.edu", "");
+                    config.url = config.url.replace("/api/v2/applications", "/mock/applications");
+                  }
+                  if(config.url.indexOf("/api/v2/notifications") !== -1) {
+                    config.url = config.url.replace("http://recommender.oscar.ncsu.edu", "");
+                    config.url = config.url.replace("/api/v2/notifications", "/mock/notifications");
+                  }
                   return config;
                 }
             };

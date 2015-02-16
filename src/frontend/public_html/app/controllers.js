@@ -578,6 +578,8 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
             return name.indexOf("[") === 0;
         });
         $scope.filter.source = apps;
+        if($scope.filter.all)
+          $scope.filter.apps = _.zipObject($scope.filter.source, _.times($scope.filter.source.length, function(){return true;}));
       });
 
       if ($state.params.app_filter) {
@@ -600,9 +602,14 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
       };
       
       $scope.allFilters = function() {
-        if($scope.filter.all === true)
+        if($scope.filter.all === false)
           $scope.filter.apps = {};
-        $scope.updateFilters();
+        else
+          $scope.filter.apps = _.zipObject($scope.filter.source, _.times($scope.filter.source.length, function(){return true;}));
+        $state.go('main', {
+          app_filter: []
+        });
+        //$scope.updateFilters();
       };
     }])
 
@@ -631,7 +638,7 @@ function updateTrustWithLikes(likeMap, Yammer, localStorageService) {
       };
 
       if ($state.params.misc_filter) {
-        var misc_filters = $state.params.misc_filter.split(',');
+        var misc_filters = $state.params.misc_filter.push ? $state.params.misc_filter : [$state.params.misc_filter];
         //creates an object like {active_app_1:true, active_app_2:true ...}
         $scope.filter.active_filters = _.zipObject(misc_filters, _.times(misc_filters.length, function(){return true;}));
       }

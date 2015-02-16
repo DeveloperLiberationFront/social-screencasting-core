@@ -109,6 +109,12 @@ public class HTTPAPIHandler extends AbstractHandler {
 			if("user".equals(pieces[2])) {
 				replyWithJSONMock(response, "user.json");
 			}
+			if("applications".equals(pieces[2])) {
+				replyWithJSONMock(response, "applications.json");
+			}
+			if("notifications".equals(pieces[2])) {
+				replyWithJSONMock(response, "notifications.json");
+			}
 		}
 	}
 
