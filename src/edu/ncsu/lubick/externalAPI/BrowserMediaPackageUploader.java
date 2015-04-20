@@ -467,7 +467,7 @@ public class BrowserMediaPackageUploader {
 		UserManager newManager = new UnitTestUserManager("Kevin Test","kjlubick+test@ncsu.edu","221ed3d8-6a09-4967-91b6-482783ec5313");
 		BrowserMediaPackageUploader uploader = new BrowserMediaPackageUploader(newManager);
 		
-		uploader.debugUploadClipDirectly("test2G",toolIdForExcelAVERAGE, new File("C:\\Users\\KevinLubick\\Downloads\\clips\\averageif"), new ClipOptions("kjlubick+test@ncsu.edu"));
+		uploader.debugUploadClipDirectly("test4G",toolIdForExcelAVERAGE, new File("C:\\Users\\KevinLubick\\Downloads\\clips\\averageif"), new ClipOptions("kjlubick+test@ncsu.edu"));
 		
 	}
 	
@@ -480,58 +480,15 @@ public class BrowserMediaPackageUploader {
 		if (current_external_clip_id == null) {
 			throw new RuntimeException("Clip was not created " + postObj.toString(2));
 		}
-		
-		debugPatchWithThumbnail(locationOfFrames, co, clipObj);
-		
+
 		File[] allFiles = nonNull(locationOfFrames.listFiles());
 		//we upload all frames and animation images here.  
 		System.out.println(uploadAllFiles(allFiles, co));
 	}
 
 
-	private String debugPatchWithThumbnail(File locationOfFrames, ClipOptions co, JSONObject postObj) throws JSONException, IOException, URISyntaxException
-	{
-		// we only report the frames here.  Animation data will be uploaded later
-		postObj.put("frames", ClipUtils.makeFrameListForClip(locationOfFrames, co.startFrame, co.endFrame));
-		
-		//we have to do this in two steps, because the server doesn't handle lists well in conjunction with Multipart entities
-		JSONObject thumbnailUpdateObj = reportThumbnailImage(locationOfFrames, postObj);
-		
-		URI putUri = HTTPUtils.buildExternalHttpURI("/clips/"+current_external_clip_id);
-
-		logger.info("Patching to include thumbnail " + thumbnailUpdateObj.toString(2));
-		HttpPatch httpPatch = new HttpPatch(putUri);	
-		HTTPUtils.addAuth(httpPatch, userManager);
-		httpPatch.addHeader("If-Match",postObj.optString("_etag",null));
-		try
-		{
-			StringEntity content = new StringEntity(thumbnailUpdateObj.toString());
-			content.setContentType("application/json");
-
-			httpPatch.setEntity(content);
-			HttpResponse response = client.execute(httpPatch);
-
-			String responseBody = HTTPUtils.getResponseBody(response);
-			logger.info("Reply to making and uploading clip: "+responseBody);
-
-			JSONObject responseObject = new JSONObject(responseBody);
-			if ("ERR".equals(responseObject.optString("_status", "ERR")))
-			{ // optional makes it fail if there is no status
-				logger.warn("Got an error putting to uri " + putUri);
-			}
-		}
-		catch (IOException e)
-		{
-			logger.error("Problem getting tool id",e);
-		}
-		finally {
-			httpPatch.reset();
-		}
-		
-		return current_external_clip_id;
-	}
 	
-	private JSONObject debugMakeClipJsonObject(String clipName, boolean isGUI, File packageDirectory, ClipOptions clipOptions) throws JSONException
+	private JSONObject debugMakeClipJsonObject(String clipName, boolean isGUI, File packageDirectory, ClipOptions clipOptions) throws JSONException, IOException
 	{
 		JSONObject jobj = new JSONObject();
 		jobj.put("name", clipName);
@@ -543,15 +500,17 @@ public class BrowserMediaPackageUploader {
 		//by default, the action happens 5 seconds after the beginning of the clip
 		//Cropping this 
 		int eventFrame = 5 * PostProductionHandler.FRAME_RATE - clipOptions.startFrame;
-		
-		JSONArray eventFrames = new JSONArray().put(eventFrame);
-		jobj.put("event_frames", eventFrames);
 		jobj.put("share", emailJarr);
 		
 		JSONArray frameList = ClipUtils.makeFrameListForClipNoExtensions(packageDirectory, clipOptions.startFrame, clipOptions.endFrame);
 		
 		// sometimes this is too big, for whatever reason
 		eventFrame = eventFrame < frameList.length() ? eventFrame : 0;
+		JSONArray eventFrames = new JSONArray().put(eventFrame);
+		jobj.put("event_frames", eventFrames);
+		
+
+		jobj.put("thumbnail", makeThumbnail(packageDirectory));
 		
 		if (isGUI) {
 			jobj.put("type", "mouse");
@@ -561,7 +520,16 @@ public class BrowserMediaPackageUploader {
 		
 		
 		jobj.put("frames", frameList);
+		logger.debug("created post object to make clip: \n"+jobj.toString(2));
 		return jobj;
+	}
+
+
+	private String makeThumbnail(File packageDirectory) throws IOException
+	{
+		File[] list = nonNull(packageDirectory.listFiles());
+		
+		return ClipUtils.makeBase64EncodedThumbnail(list[list.length/2]);
 	}
 
 
