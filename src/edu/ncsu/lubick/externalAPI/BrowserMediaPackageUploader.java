@@ -1,6 +1,6 @@
 package edu.ncsu.lubick.externalAPI;
 
-import static edu.ncsu.lubick.util.FileUtilities.nonNull;
+import static edu.ncsu.lubick.util.FileUtilities.*;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Date;
 
 import javax.imageio.ImageIO;
 
@@ -33,7 +32,6 @@ import org.json.JSONObject;
 import edu.ncsu.lubick.localHub.ClipOptions;
 import edu.ncsu.lubick.localHub.ToolUsage;
 import edu.ncsu.lubick.localHub.UserManager;
-import edu.ncsu.lubick.localHub.forTesting.IdealizedToolStream;
 import edu.ncsu.lubick.localHub.forTesting.TestingUtils;
 import edu.ncsu.lubick.localHub.forTesting.UnitTestUserManager;
 import edu.ncsu.lubick.localHub.http.HTTPUtils;
@@ -140,7 +138,7 @@ public class BrowserMediaPackageUploader {
 		jobj.put("frames", ClipUtils.makeFrameListForClip(packageDirectory, clipOptions.startFrame, clipOptions.endFrame));
 		
 		//we have to do this in two steps, because the server doesn't handle lists well in conjunction with Multipart entities
-		JSONObject thumbnailUpdateObj = reportThumbnail(packageDirectory, jobj);
+		JSONObject thumbnailUpdateObj = reportThumbnailImage(packageDirectory, jobj);
 		
 		URI putUri = HTTPUtils.buildExternalHttpURI("/clips/"+current_external_clip_id);
 
@@ -177,7 +175,7 @@ public class BrowserMediaPackageUploader {
 	}
 
 
-	private JSONObject reportThumbnail(File packageDirectory, JSONObject jobj) throws JSONException, IOException
+	private JSONObject reportThumbnailImage(File packageDirectory, JSONObject jobj) throws JSONException, IOException
 	{
 		JSONArray frameList = jobj.getJSONArray("frames");
 		int eventFrame = jobj.getJSONArray("event_frames").getInt(0);
@@ -448,23 +446,122 @@ public class BrowserMediaPackageUploader {
 
 	//For whitebox/end-to-end testing
 	@SuppressWarnings("unused")
-	private static void main(String[] args) throws Exception
+	public static void main(String[] args) throws Exception
 	{
 		TestingUtils.makeSureLoggingIsSetUp();
+//		UserManager newManager = new UnitTestUserManager("Kevin Test","kjlubick+test@ncsu.edu","221ed3d8-6a09-4967-91b6-482783ec5313");
+//		BrowserMediaPackageUploader uploader = new BrowserMediaPackageUploader(newManager);
+//		Date toolUsageDate = new Date(7500L);
+//		IdealizedToolStream iToolStream = new IdealizedToolStream(TestingUtils.truncateTimeToMinute(toolUsageDate));
+//		iToolStream.addToolUsage("Save", "", "CTRL+5", toolUsageDate, 5500);
+//
+//		ToolUsage testToolUsage = iToolStream.getActualToolUsage(0);
+//		testToolUsage.setApplicationName("Eclipse");
+//		
+//		logger.info(FileUtilities.makeLocalFolderNameForBrowserMediaPackage(testToolUsage, newManager.getUserEmail()));
+//
+//		logger.info(uploader.uploadToolUsage(testToolUsage, new ClipOptions("public", 2, 0)));
+
+
+		String toolIdForExcelAVERAGE = "545a56140d1ff13d518c3bee";
 		UserManager newManager = new UnitTestUserManager("Kevin Test","kjlubick+test@ncsu.edu","221ed3d8-6a09-4967-91b6-482783ec5313");
 		BrowserMediaPackageUploader uploader = new BrowserMediaPackageUploader(newManager);
-		Date toolUsageDate = new Date(7500L);
-		IdealizedToolStream iToolStream = new IdealizedToolStream(TestingUtils.truncateTimeToMinute(toolUsageDate));
-		iToolStream.addToolUsage("Save", "", "CTRL+5", toolUsageDate, 5500);
-
-		ToolUsage testToolUsage = iToolStream.getActualToolUsage(0);
-		testToolUsage.setApplicationName("Eclipse");
 		
-		logger.info(FileUtilities.makeLocalFolderNameForBrowserMediaPackage(testToolUsage, newManager.getUserEmail()));
+		uploader.debugUploadClipDirectly("test2G",toolIdForExcelAVERAGE, new File("C:\\Users\\KevinLubick\\Downloads\\clips\\averageif"), new ClipOptions("kjlubick+test@ncsu.edu"));
+		
+	}
+	
+	private void debugUploadClipDirectly(String clipName, String toolId, File locationOfFrames, ClipOptions co) throws Exception {
+		current_external_tool_id = toolId;
+		JSONObject clipObj = debugMakeClipJsonObject(clipName, true, locationOfFrames, co);
+		JSONObject postObj = postClipObject(clipObj);
+		
+		current_external_clip_id = postObj.optString("_id", null);
+		if (current_external_clip_id == null) {
+			throw new RuntimeException("Clip was not created " + postObj.toString(2));
+		}
+		
+		debugPatchWithThumbnail(locationOfFrames, co, clipObj);
+		
+		File[] allFiles = nonNull(locationOfFrames.listFiles());
+		//we upload all frames and animation images here.  
+		System.out.println(uploadAllFiles(allFiles, co));
+	}
 
-		logger.info(uploader.uploadToolUsage(testToolUsage, new ClipOptions("public", 2, 0)));
 
+	private String debugPatchWithThumbnail(File locationOfFrames, ClipOptions co, JSONObject postObj) throws JSONException, IOException, URISyntaxException
+	{
+		// we only report the frames here.  Animation data will be uploaded later
+		postObj.put("frames", ClipUtils.makeFrameListForClip(locationOfFrames, co.startFrame, co.endFrame));
+		
+		//we have to do this in two steps, because the server doesn't handle lists well in conjunction with Multipart entities
+		JSONObject thumbnailUpdateObj = reportThumbnailImage(locationOfFrames, postObj);
+		
+		URI putUri = HTTPUtils.buildExternalHttpURI("/clips/"+current_external_clip_id);
 
+		logger.info("Patching to include thumbnail " + thumbnailUpdateObj.toString(2));
+		HttpPatch httpPatch = new HttpPatch(putUri);	
+		HTTPUtils.addAuth(httpPatch, userManager);
+		httpPatch.addHeader("If-Match",postObj.optString("_etag",null));
+		try
+		{
+			StringEntity content = new StringEntity(thumbnailUpdateObj.toString());
+			content.setContentType("application/json");
+
+			httpPatch.setEntity(content);
+			HttpResponse response = client.execute(httpPatch);
+
+			String responseBody = HTTPUtils.getResponseBody(response);
+			logger.info("Reply to making and uploading clip: "+responseBody);
+
+			JSONObject responseObject = new JSONObject(responseBody);
+			if ("ERR".equals(responseObject.optString("_status", "ERR")))
+			{ // optional makes it fail if there is no status
+				logger.warn("Got an error putting to uri " + putUri);
+			}
+		}
+		catch (IOException e)
+		{
+			logger.error("Problem getting tool id",e);
+		}
+		finally {
+			httpPatch.reset();
+		}
+		
+		return current_external_clip_id;
+	}
+	
+	private JSONObject debugMakeClipJsonObject(String clipName, boolean isGUI, File packageDirectory, ClipOptions clipOptions) throws JSONException
+	{
+		JSONObject jobj = new JSONObject();
+		jobj.put("name", clipName);
+		jobj.put("tool", current_external_tool_id);
+		
+		JSONArray emailJarr = new JSONArray();
+		emailJarr.put(clipOptions.shareWithEmail);
+		
+		//by default, the action happens 5 seconds after the beginning of the clip
+		//Cropping this 
+		int eventFrame = 5 * PostProductionHandler.FRAME_RATE - clipOptions.startFrame;
+		
+		JSONArray eventFrames = new JSONArray().put(eventFrame);
+		jobj.put("event_frames", eventFrames);
+		jobj.put("share", emailJarr);
+		
+		JSONArray frameList = ClipUtils.makeFrameListForClipNoExtensions(packageDirectory, clipOptions.startFrame, clipOptions.endFrame);
+		
+		// sometimes this is too big, for whatever reason
+		eventFrame = eventFrame < frameList.length() ? eventFrame : 0;
+		
+		if (isGUI) {
+			jobj.put("type", "mouse");
+		} else {
+			jobj.put("type", "keyboard");
+		}
+		
+		
+		jobj.put("frames", frameList);
+		return jobj;
 	}
 
 
