@@ -93,12 +93,13 @@ public class ClipUtils {
 	}
 	
 	public static byte[] makeThumbnail(File image) throws IOException {
+		final int fixedHeight = 100;
 		BufferedImage img = ImageIO.read(image);
 
-		int newWidth = (img.getWidth() * 200) / img.getHeight();
-		BufferedImage scaledImage = new BufferedImage(newWidth, 200, BufferedImage.TYPE_INT_RGB);
+		int newWidth = (img.getWidth() * fixedHeight) / img.getHeight();
+		BufferedImage scaledImage = new BufferedImage(newWidth, fixedHeight, BufferedImage.TYPE_INT_RGB);
 
-		scaledImage.createGraphics().drawImage(img, 0, 0, newWidth, 200, 0, 0, img.getWidth(), img.getHeight(), null);
+		scaledImage.createGraphics().drawImage(img, 0, 0, newWidth, fixedHeight, 0, 0, img.getWidth(), img.getHeight(), null);
 
 		byte[] scaledImageData = null;
 		synchronized (byteBufferForImage)
