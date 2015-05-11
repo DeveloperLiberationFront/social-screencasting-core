@@ -419,11 +419,24 @@ public class BrowserMediaPackageUploader {
 //		logger.info(uploader.uploadToolUsage(testToolUsage, new ClipOptions("public", 2, 0)));
 
 
-		String toolIdForExcelAVERAGE = "545a56140d1ff13d518c3bee";
-		UserManager newManager = new UnitTestUserManager("Kevin Test","kjlubick+test@ncsu.edu","221ed3d8-6a09-4967-91b6-482783ec5313");
+		//String toolIdForExcelAVERAGE = "545a56140d1ff13d518c3bee";
+		//String toolIdForEclipseRename = "547de8130d1ff13d518c4c04";
+		String toolIDForExcelAVERAGEIF = "553e244536018dabe62a388f";
+		String toolIDForExcelCOUNTIF = "553e244536018dabe62a3890";
+		String toolIDForExcelT_Test = "553e244536018dabe62a3891";
+		String toolIDForExcelRemoveDuplicates = "553e244536018dabe62a3892";
+		String toolIDForExcelISNA = "553e244536018dabe62a3893";
+		
+		//UserManager newManager = new UnitTestUserManager("Kevin Test","kjlubick+test@ncsu.edu","221ed3d8-6a09-4967-91b6-482783ec5313");
+		UserManager newManager = new UnitTestUserManager("John Slankas","jbslanka@ncsu.edu","not my password");
+
 		BrowserMediaPackageUploader uploader = new BrowserMediaPackageUploader(newManager);
 		
-		uploader.debugUploadClipDirectly("test4G",toolIdForExcelAVERAGE, new File("C:\\Users\\KevinLubick\\Downloads\\clips\\averageif"), new ClipOptions("kjlubick+test@ncsu.edu"));
+		uploader.debugUploadClipDirectly("Average If",toolIDForExcelAVERAGEIF, new File("C:\\Users\\KevinLubick\\Downloads\\clips\\averageif"), new ClipOptions("public"));
+		uploader.debugUploadClipDirectly("Count If",toolIDForExcelCOUNTIF, new File("C:\\Users\\KevinLubick\\Downloads\\clips\\countif"), new ClipOptions("public"));
+		uploader.debugUploadClipDirectly("ISNA",toolIDForExcelISNA, new File("C:\\Users\\KevinLubick\\Downloads\\clips\\isna"), new ClipOptions("public"));
+		uploader.debugUploadClipDirectly("Remove Duplicates",toolIDForExcelRemoveDuplicates, new File("C:\\Users\\KevinLubick\\Downloads\\clips\\removeduplicates"), new ClipOptions("public"));
+		uploader.debugUploadClipDirectly("T-Test (real-world)",toolIDForExcelT_Test, new File("C:\\Users\\KevinLubick\\Downloads\\clips\\ttest"), new ClipOptions("public"));
 		
 	}
 	
