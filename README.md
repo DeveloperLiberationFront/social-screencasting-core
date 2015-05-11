@@ -34,3 +34,7 @@ If you will be interacting with the front end, you'll need to do a bit more setu
 
 ###Updating versions###
 If things seem buggy, try updating the javascript libraries with `bower update`
+
+###Setting up Mocks:###
+In the working directory, extract the mocks.zip (Found under downloads).  To activate "mock mode", append a `?mock=true` to the url
+![image](https://cloud.githubusercontent.com/assets/6819944/7575156/b7cb3b30-f800-11e4-91c9-b35ed9403b51.png)
