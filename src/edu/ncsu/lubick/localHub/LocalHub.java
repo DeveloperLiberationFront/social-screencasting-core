@@ -28,7 +28,7 @@ import edu.ncsu.lubick.util.ToolCountStruct;
 
 public class LocalHub implements  WebQueryInterface, WebToolReportingInterface {
 
-	public static final String VERSION = "v2.9.11";
+	public static final String VERSION = "v2.9.13";
 	public static final String LOGGING_FILE_PATH = "/etc/log4j.settings";
 	public static final int MAX_TOOL_USAGES = 5;
 	

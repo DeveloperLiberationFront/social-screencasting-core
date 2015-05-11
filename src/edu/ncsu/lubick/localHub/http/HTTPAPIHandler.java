@@ -7,6 +7,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +53,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
 	{
 		if(target.startsWith("/mock")) {
+			baseRequest.setHandled(true);
 			handleMocks(target, response);
 			return;
 		}
@@ -90,31 +93,93 @@ public class HTTPAPIHandler extends AbstractHandler {
 	}
 	
 	//Mocking API handler
-	private void handleMocks(String target, HttpServletResponse response) throws IOException {
-		String[] pieces = target.split("/");
-		if("mock".equals(pieces[1])) {
-			if(pieces.length == 4) {
-				if("clips".equals(pieces[2]))
-					replyWithJSONMock(response, "images.json");
+	private void handleMocks(String target, HttpServletResponse response) {
+		try
+		{
+			String[] pieces = target.split("/");
+			if ("mock".equals(pieces[1]))
+			{
+				if (pieces.length == 4 && "clips".equals(pieces[2]))
+				{
+					serveUpFakeImages(response);
+					return;
+				}
+				if ("clips".equals(pieces[2]))
+				{
+					replyWithJSONMock(response, "clips.json");
+				}
+				if ("user_tools".equals(pieces[2]))
+				{
+					replyWithJSONMock(response, "user_tools.json");
+				}
+				if ("users".equals(pieces[2]))
+				{
+					replyWithJSONMock(response, "users.json");
+				}
+				if ("user".equals(pieces[2]))
+				{
+					replyWithJSONMock(response, "user.json");
+				}
+				if ("applications".equals(pieces[2]))
+				{
+					replyWithJSONMock(response, "applications.json");
+				}
+				if ("notifications".equals(pieces[2]))
+				{
+					replyWithJSONMock(response, "notifications.json");
+				}
 			}
-			if("clips".equals(pieces[2])) {
-				replyWithJSONMock(response, "clips.json");
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			try
+			{
+				response.getWriter().println(e.getMessage());
 			}
-			if("user_tools".equals(pieces[2])) {
-				replyWithJSONMock(response, "user_tools.json");
+			catch (IOException e1)
+			{
+				e1.printStackTrace();
 			}
-			if("users".equals(pieces[2])) {
-				replyWithJSONMock(response, "users.json");
+		}
+	}
+
+	private void serveUpFakeImages(HttpServletResponse response) throws IOException
+	{
+		File mockImageDir = new File("mocks/images/");
+		if (mockImageDir.exists() && mockImageDir.isDirectory())
+		{
+			response.setContentType("application/json");
+			response.setStatus(200);
+			try (PrintWriter responseWriter = response.getWriter();)
+			{
+				JSONObject jobj = new JSONObject();
+				jobj.put("_items", getJSONArrayOfImages(mockImageDir));
+				jobj.write(responseWriter);
+
+				responseWriter.close();
 			}
-			if("user".equals(pieces[2])) {
-				replyWithJSONMock(response, "user.json");
+			catch (JSONException e)
+			{
+				throw new IOException(e);
 			}
-			if("applications".equals(pieces[2])) {
-				replyWithJSONMock(response, "applications.json");
-			}
-			if("notifications".equals(pieces[2])) {
-				replyWithJSONMock(response, "notifications.json");
-			}
+
+		}
+		else
+		{
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	//Get a mock file content. Mock files are stored in [project dir]/mocks folder. 
+	private void replyWithJSONMock(HttpServletResponse response, String filename) throws IOException {
+		response.setContentType("application/json");
+		response.setStatus(200);
+		File mock = new File("mocks/" + filename);
+		if (mock.exists()) {
+			response.getWriter().write(FileUtilities.readAllFromFile(mock));
+			response.getWriter().close();
+		} else {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -226,39 +291,7 @@ public class HTTPAPIHandler extends AbstractHandler {
 		File clipDir = new File("renderedVideos",clipId);
 		try
 		{
-			JSONArray returnArray = new JSONArray();
-			File[] images = nonNull(clipDir.listFiles());
-			
-			for(int i = 0;i< images.length; i++) {
-				File file = images[i];
-
-				logger.info(file.getAbsolutePath());
-				BufferedImage img = ImageIO.read(file);
-				
-				String name = file.getName();
-				if (!name.endsWith(PostProductionHandler.FULLSCREEN_IMAGE_FORMAT)) {
-					ImageIO.write(img, PostProductionHandler.ANIMATION_FORMAT, byteBufferForImage);
-					
-					//animation frames need to be reported without an ending
-					if (name.contains("."))
-						name = name.substring(0, name.indexOf('.'));
-				}
-				else {
-					ImageIO.write(img, PostProductionHandler.FULLSCREEN_IMAGE_FORMAT, byteBufferForImage);
-				}
-				
-
-				byte[] imageAsBytes = byteBufferForImage.toByteArray();
-				
-				
-				JSONObject jobj = new JSONObject();
-				jobj.put("name", name);
-				jobj.put("data", Base64.encodeBase64String(imageAsBytes));
-
-
-				returnArray.put(jobj);
-				byteBufferForImage.reset();
-			}
+			JSONArray returnArray = getJSONArrayOfImages(clipDir);
 			
 			returnArray.write(response.getWriter());
 		}
@@ -268,6 +301,44 @@ public class HTTPAPIHandler extends AbstractHandler {
 		finally {
 			byteBufferForImage.reset();
 		}
+	}
+
+	private JSONArray getJSONArrayOfImages(File clipDir) throws IOException, JSONException
+	{
+		JSONArray returnArray = new JSONArray();
+		File[] images = nonNull(clipDir.listFiles());
+		
+		for(int i = 0;i< images.length; i++) {
+			File file = images[i];
+
+			logger.info(file.getAbsolutePath());
+			BufferedImage img = ImageIO.read(file);
+			
+			String name = file.getName();
+			if (!name.endsWith(PostProductionHandler.FULLSCREEN_IMAGE_FORMAT)) {
+				ImageIO.write(img, PostProductionHandler.ANIMATION_FORMAT, byteBufferForImage);
+				
+				//animation frames need to be reported without an ending
+				if (name.contains("."))
+					name = name.substring(0, name.indexOf('.'));
+			}
+			else {
+				ImageIO.write(img, PostProductionHandler.FULLSCREEN_IMAGE_FORMAT, byteBufferForImage);
+			}
+			
+
+			byte[] imageAsBytes = byteBufferForImage.toByteArray();
+			
+			
+			JSONObject jobj = new JSONObject();
+			jobj.put("name", name);
+			jobj.put("data", Base64.encodeBase64String(imageAsBytes));
+
+
+			returnArray.put(jobj);
+			byteBufferForImage.reset();
+		}
+		return returnArray;
 	}
 
 	private void handleGetClipsForTool(HttpServletResponse response) throws IOException
@@ -394,15 +465,6 @@ public class HTTPAPIHandler extends AbstractHandler {
 			logger.error("Problem making a thumbnail " + clipId + " " + fileNamesArr);
 			return null;
 		}
-	}
-	
-	//Get a mock file content. Mock files are stored in [project dir]/mocks folder. 
-	private void replyWithJSONMock(HttpServletResponse response, String filename) throws IOException {
-		response.setContentType("application/json");
-		response.setStatus(200);
-		File mock = new File("mocks/" + filename);
-		response.getWriter().write(FileUtilities.readAllFromFile(mock));
-		response.getWriter().close();
 	}
 
 }
