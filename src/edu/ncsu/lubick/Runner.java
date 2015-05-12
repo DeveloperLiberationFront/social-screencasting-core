@@ -32,9 +32,9 @@ public class Runner
 
 	public static void main(String[] args) throws Exception
 	{
-		KeystoreProvider.loadAsResource("edu/ncsu/las/net/ssl/client.ks", "edu/ncsu/las/net/ssl/client.ts", "changeit");
-
 		TestingUtils.makeSureLoggingIsSetUp();
+		KeystoreProvider.loadAsResource("edu/ncsu/las/net/ssl/client.ks", "edu/ncsu/las/net/ssl/client.ts", "changeit");
+		
 		setUpTrayIcon();
 		localHub = LocalHub.startServerForUse("HF/Screencasting/", DEFAULT_DB_LOC);
 		Thread.sleep(1000);
