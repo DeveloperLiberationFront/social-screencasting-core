@@ -1,0 +1,18 @@
+#clipList {
+	max-width:15%;
+	min-width:10%;
+
+}
+
+.share-item {
+	cursor:pointer;
+}
+
+.shareGrid {
+	height:500px;
+}
+
+.shareClipButton, .btn-group {
+	margin:5px;
+	font-size:16px;
+}

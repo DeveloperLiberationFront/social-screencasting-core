@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+  <head>
+    <title>My First Unit Test With Jasmine And RequireJS</title>
+
+    <!-- Include the Jasmine assets for running in an HTML page. -->
+    <link rel="stylesheet" type="text/css" href="../lib/bower/jasmine/lib/jasmine-core/jasmine.css"></link>
+  <!-- <script type="text/javascript" src="../lib/bower/jasmine/lib/jasmine-core/jasmine.js"></script>
+  <script type="text/javascript" src="../lib/bower/jasmine/lib/jasmine-core/jasmine-html.js"></script>
+  <script type="text/javascript" src="../lib/bower/jasmine/lib/jasmine-core/boot/boot.js"></script> -->
+
+  <script type="text/javascript" data-main="main" src="../lib/bower/requirejs/require.js"></script>
+  <script type="text/javascript">
+    requirejs.config({
+      paths: {
+        'angular-mocks': '../lib/bower/angular-mocks/angular-mocks',
+        'test' : '../test',
+        'jasmine' : '../lib/bower/jasmine/lib/jasmine-core'
+      },
+      shim: {
+        'angular-mocks' : {
+          'deps':['angular'],
+          'exports':'angular.mock'
+        },
+        'jasmine/jasmine-html' : ['jasmine/jasmine'],
+        'jasmine/boot/boot' : ['jasmine/jasmine-html']
+      }
+    })
+    requirejs([
+      'main',
+      'jasmine/jasmine',
+      'jasmine/jasmine-html',
+      'jasmine/boot/boot'
+    ], function() {
+      requirejs([
+        'angular',
+        'app',
+        'deferredBootstrapper',
+        'jquery',
+        'ng-route',
+        'ng-bootstrap',
+        'ng-grid',
+        'bootstrap',
+        'controllers',
+        'services',
+        'LocalStorageModule',
+        'yammer',
+        'test/spec/test'
+      ], function() {
+        	window.onload();
+      });
+    })
+  </script>
+  </head>
+<body>
+  <!-- Left intentionally blank. -->
+</body>
+</html>

@@ -1,0 +1,36 @@
+
+
+<!--min width to prevent the size from changing when the widest element is selected/deselected -->
+<div class="btn-group sort-button-group pointer unselectable">
+
+    Sort by 
+  
+  <div class="sort-button" dropdown>
+    <button type="button" class="btn btn-default dropdown-toggle" style="min-width:145px" >
+      {{getName(ordering.field)}}       
+    </button>
+    <ul class="dropdown-menu" id="sort-button-dropdown" role="menu">
+      <li ng-repeat='option in ordering.options' class='list-grou-item' 
+      ng-class='{"list-group-item-success" : (ordering.field == option.field) }' 
+      ng-click='orderingFunc(option.field, weights)'>
+      {{option.name}}        
+    </li>
+  </ul>
+</div>
+
+<div class="sort-button">   
+  <button class="btn btn-default no-outline" ng-click="sortOrder(0)">  
+    <span class="caret" ng-class='{reverse: !sortOrder()}'
+    ></span> 
+  </button>
+</div>
+
+</div> 
+
+
+
+
+
+
+
+

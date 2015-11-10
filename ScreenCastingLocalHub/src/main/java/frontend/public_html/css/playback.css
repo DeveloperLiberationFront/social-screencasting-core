@@ -1,0 +1,204 @@
+.modal-lg {
+    width: 800px;
+}
+
+.modal-multiclip-player .modal-lg {
+    width: 1000px;
+}
+
+#modal-player {
+    width: 780px;
+    display: -webkit-flex; /*safari*/
+    display: flex;
+    -webkit-flex-flow: column nowrap; /*safari*/
+    flex-flow: column nowrap;
+    -webkit-align-items: center; /*safari*/
+    align-items: center;
+    padding: 10px;
+}
+
+#player {
+    width: inherit;
+    display: -webkit-flex; /*safari*/
+    display: flex;
+    -webkit-flex-flow: column nowrap; /*safari*/
+    flex-flow: column nowrap;
+    -webkit-align-items: stretch; /*safari*/
+    align-items: stretch;
+}
+
+#player.isInFullScreen {
+    width:100%
+}
+
+#panel {
+    position:relative;
+}
+
+#panel .img-container {
+    width: 780px;
+    -webkit-align-items: center; /*safari*/
+    align-items: center;
+    -webkit-justify-content: center; /*safari*/
+    justify-content: center;
+}
+
+#player.isInFullScreen .img-container {
+    width: 100%;
+}
+
+#share-player .img-container {
+    width: inherit;
+}
+
+#overlay{
+	position: absolute;
+	top: 0;
+	left: 0;
+	width:100%;
+	height:100%;
+	background-color:#F0F0F0;
+	z-index:2;
+	opacity:0.0;
+	text-align:center;
+	vertical-align:middle;
+	line-height:5.0em;
+	font-size:2.5em;
+}
+
+#overlay:hover{
+	opacity:0.5;
+}
+
+#keyboardOverlay {    
+	position:absolute;
+	bottom:4px;
+	right:2px;
+	width:35%;
+	opacity: .8;
+}
+
+#rating {
+    -webkit-align-self: flex-end; /*safari*/
+    align-self: flex-end;
+}
+
+#rating span {
+    outline: 0;
+}
+
+#controlPanel {
+    display: -webkit-flex; /*safari*/
+    display: flex;
+    -webkit-flex-direction: row; /*safari*/
+    flex-direction: row;
+    position: relative;
+    -webkit-align-items: center; /*safari*/
+    align-items: center;
+    margin: 5px;
+}
+
+#controlPanel.fullscreen {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 40%;
+    background-color:rgba(255,255,255,0.5);
+    border: 1px solid rgba(0,0,0,.3);
+    border-radius: 1px;
+    -webkit-border-radius: 1px;
+}
+
+#controlPanel > div {
+    -webkit-flex: 0 1 auto;  /*safari*/
+    flex: 0 1 auto;
+}
+
+#controlPanel > #sliders {
+    -webkit-flex: 1 1 auto;  /*safari*/
+    flex: 1 1 auto;
+    display: -webkit-flex; /*safari*/
+    display: flex;
+    -webkit-flex-direction: column; /*safari*/
+    flex-direction: column;
+    position: relative;
+    margin-right: 10px;
+    -webkit-justify-content: center; /*safari*/
+    justify-content: center;
+}
+
+#sliders > div {
+    -webkit-flex: 0 1 auto;  /*safari*/
+    flex: 0 1 auto;
+}
+
+#overlayMode {
+    width: 50px;
+}
+
+#playBtn {
+    -webkit-flex: 0 1 auto;  /*safari*/
+    flex: 0 1 auto;
+    width:65px;
+    height:50px;
+    font-size: 35px;
+}
+
+slider {
+    margin: 16px 5px 10px 5px;
+}
+
+slider span.bar {
+    width: auto;
+}
+
+.modal-content {
+    display: -webkit-flex;  /*safari*/
+    display: flex;
+    -webkit-flex-flow: row nowrap; /*safari*/
+    flex-flow: row nowrap;
+    -webkit-align-self: flex-start; /*safari*/
+    align-items: flex-start;
+    -webkit-justify-content: space-between; /*safari*/
+    justify-content: space-between;
+    padding: 10px;
+}
+
+/* close button */
+.modal-content > button.close {
+    /* margin: 10px; */
+    position: absolute;
+    top: 6px;
+    right: 7px;
+}
+
+#modal-player h3 {
+    -webkit-align-self: flex-start; /*safari*/
+    align-self: flex-start;
+    margin-top: 0px;
+}
+
+#cropBtn {
+    width: 35px;
+    height: 35px;
+}
+
+#clip-list .thumbnail {
+    width: 150px;
+    cursor: pointer;
+}
+
+#clip-list {
+    max-height: 545px;
+    overflow-y: auto;
+    margin: 20px 10px 10px 10px;
+    -webkit-flex: 1 1 auto;  /*safari*/
+    flex: 1 1 auto;
+}
+
+.thumbnail.selected {
+    border: 1px solid #aaa;
+    -webkit-box-shadow: 0 0 15px rgba(0,0,0,.2);
+       -moz-box-shadow: 0 0 15px rgba(0,0,0,.2);
+            box-shadow: 0 0 15px rgba(0,0,0,.2);
+}
