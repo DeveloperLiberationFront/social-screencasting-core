@@ -3,10 +3,10 @@ log4j.rootLogger=info, stdout, filebased
 
 #custom logging levels can go here
 #Format them like log4j.logger.[package].[class name]
-log4j.logger.edu.ncsu.lubick.localHub.ToolStream = info
+log4j.logger.edu.ncsu.dlf.localHub.ToolStream = info
 log4j.logger.org.apache = info
-#log4j.logger.edu.ncsu.lubick.unitTests.TestImageCompressionAndDecompression = trace
-#log4j.logger.edu.ncsu.lubick.localHub.videoPostProduction.ImagesToVideoOutput = trace
+#log4j.logger.edu.ncsu.dlf.unitTests.TestImageCompressionAndDecompression = trace
+#log4j.logger.edu.ncsu.dlf.localHub.videoPostProduction.ImagesToVideoOutput = trace
 
 # stdout is set to be a ConsoleAppender.
 log4j.appender.stdout=org.apache.log4j.ConsoleAppender
