@@ -1,0 +1,5 @@
+<a>
+  <span bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
+  <span bind-html-unsafe="'('+match.model.email+')' | typeaheadHighlight:query"
+        class='text-muted'></span>
+</a>

@@ -1,0 +1,19 @@
+<div class="recommendation-sliders">
+<h2>Recommendation Settings</h2>
+Many different recommendation algorithms can be used to provide recommendations on the home page.
+You can tweak them here.
+<h4>Algorithms</h4>
+
+	<div ng-repeat="algo in algorithms" class="algo-row">
+		<div class="algo-desc label label-primary" tooltip-append-to-body="false" tooltip-placement="right" tooltip-html-unsafe="{{algo.description}}">{{algo.name}}</div>
+		<div class="algo-slider">
+		<!--https://github.com/Venturocket/angular-slider -->
+		<slider ng-model="algo.value" floor="0" ceiling="100", step="1"></slider>
+		</div>
+	</div>
+</div>
+
+<div ng-controller='TrustCtrl'>
+
+<span id="yammer-login"></span>
+</div>

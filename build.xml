@@ -66,7 +66,7 @@
 			<zipfileset dir="src/testAssets" prefix="testAssets"/>
 			<zipfileset dir="src/frontend/public_html" prefix="public_html"/>
 			<manifest>
-				<attribute name="Main-Class" value="edu.ncsu.lubick.RunnerNoScreencasting" />
+				<attribute name="Main-Class" value="edu.ncsu.dlf.RunnerNoScreencasting" />
 				<attribute name="Class-Path" value="${lib.list}" />
 			</manifest>
 		</jar>

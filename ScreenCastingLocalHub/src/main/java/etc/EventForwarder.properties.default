@@ -1,0 +1,9 @@
+sleepTimeSeconds = 30
+
+destJDBCDriver   = org.postgresql.Driver
+destJDBCURL      = jdbc:postgresql://recommender.oscar.ncsu.edu:7878/recommend?user=rs_user&password=kl2014sc
+
+skylrDestAddURL     = https://las-skylr-token.oscar.ncsu.edu/api/data/document/add
+skylrDestQueryURL   = https://las-skylr-token.oscar.ncsu.edu/api/data/document/query
+
+skylrDestAuthenticationToken = 1046dc27cce9066bda57600727a330c37903b350583dbe403e3b96e94d43ba88

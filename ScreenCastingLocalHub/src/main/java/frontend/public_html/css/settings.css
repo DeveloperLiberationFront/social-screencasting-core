@@ -1,0 +1,21 @@
+.recommendation-sliders {
+	width:620px;
+	
+}
+
+.algo-desc {
+	display: inline-block;
+	margin-bottom: 10px;
+}
+
+.algo-row {
+	width:48%;
+	display: inline-block;
+	padding: 3px 8px;
+	font-size:20px;
+}
+
+.algo-slider {
+	font-size:16px;
+	width:95%;
+}
